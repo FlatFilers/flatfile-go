@@ -47,35 +47,6 @@ type ListSheetsRequest struct {
 	WorkbookId WorkbookId `json:"-"`
 }
 
-type ListCommitsResponse struct {
-	Data []*Commit `json:"data,omitempty"`
-
-	_rawJSON json.RawMessage
-}
-
-func (l *ListCommitsResponse) UnmarshalJSON(data []byte) error {
-	type unmarshaler ListCommitsResponse
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*l = ListCommitsResponse(value)
-	l._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (l *ListCommitsResponse) String() string {
-	if len(l._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(l._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(l); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", l)
-}
-
 type Property struct {
 	Type      string
 	String    *StringProperty
@@ -246,35 +217,6 @@ func (p *Property) Accept(visitor PropertyVisitor) error {
 	case "reference":
 		return visitor.VisitReference(p.Reference)
 	}
-}
-
-type FieldConfigResponse struct {
-	Data *Property `json:"data,omitempty"`
-
-	_rawJSON json.RawMessage
-}
-
-func (f *FieldConfigResponse) UnmarshalJSON(data []byte) error {
-	type unmarshaler FieldConfigResponse
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*f = FieldConfigResponse(value)
-	f._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (f *FieldConfigResponse) String() string {
-	if len(f._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(f._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(f); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", f)
 }
 
 type RecordCountsResponse struct {

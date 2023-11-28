@@ -33,7 +33,6 @@ type Environment struct {
 	TranslationsPath    *string                   `json:"translationsPath,omitempty"`
 	Namespaces          []string                  `json:"namespaces,omitempty"`
 	LanguageOverride    *string                   `json:"languageOverride,omitempty"`
-	DataRetentionPolicy *DataRetentionPolicyEnum  `json:"dataRetentionPolicy,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -72,7 +71,6 @@ type EnvironmentConfigCreate struct {
 	TranslationsPath    *string                   `json:"translationsPath,omitempty"`
 	Namespaces          []string                  `json:"namespaces,omitempty"`
 	LanguageOverride    *string                   `json:"languageOverride,omitempty"`
-	DataRetentionPolicy *DataRetentionPolicyEnum  `json:"dataRetentionPolicy,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -111,7 +109,6 @@ type EnvironmentConfigUpdate struct {
 	TranslationsPath    *string                   `json:"translationsPath,omitempty"`
 	Namespaces          []string                  `json:"namespaces,omitempty"`
 	LanguageOverride    *string                   `json:"languageOverride,omitempty"`
-	DataRetentionPolicy *DataRetentionPolicyEnum  `json:"dataRetentionPolicy,omitempty"`
 
 	_rawJSON json.RawMessage
 }

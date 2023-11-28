@@ -146,6 +146,8 @@ type JobConfig struct {
 	Info *string `json:"info,omitempty"`
 	// Indicates if Flatfile is managing the control flow of this job or if it is being manually tracked.
 	Managed *bool `json:"managed,omitempty"`
+	// The id of the environment this job belongs to
+	EnvironmentId *EnvironmentId `json:"environmentId,omitempty"`
 	// The part number of this job
 	Part *int `json:"part,omitempty"`
 	// The data for this part of the job

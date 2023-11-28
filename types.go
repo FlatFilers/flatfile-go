@@ -515,6 +515,35 @@ func (c *Commit) String() string {
 	return fmt.Sprintf("%#v", c)
 }
 
+type ListCommitsResponse struct {
+	Data []*Commit `json:"data,omitempty"`
+
+	_rawJSON json.RawMessage
+}
+
+func (l *ListCommitsResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler ListCommitsResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*l = ListCommitsResponse(value)
+	l._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (l *ListCommitsResponse) String() string {
+	if len(l._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(l._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(l); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", l)
+}
+
 // Properties used to allow users to request our private services
 type AccessToken struct {
 	AccessToken string     `json:"accessToken"`
@@ -1113,6 +1142,66 @@ type VersionId = string
 // Workbook ID
 type WorkbookId = string
 
+// A data retention policy belonging to an environment
+type DataRetentionPolicy struct {
+	Type          DataRetentionPolicyEnum `json:"type,omitempty"`
+	Period        int                     `json:"period"`
+	Id            DataRetentionPolicyId   `json:"id"`
+	EnvironmentId EnvironmentId           `json:"environmentId"`
+	// Date the policy was created
+	CreatedAt time.Time `json:"createdAt"`
+	// Date the policy was last updated
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	_rawJSON json.RawMessage
+}
+
+func (d *DataRetentionPolicy) UnmarshalJSON(data []byte) error {
+	type unmarshaler DataRetentionPolicy
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*d = DataRetentionPolicy(value)
+	d._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (d *DataRetentionPolicy) String() string {
+	if len(d._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(d._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(d); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", d)
+}
+
+// The type of data retention policy on an environment
+type DataRetentionPolicyEnum string
+
+const (
+	DataRetentionPolicyEnumLastActivity DataRetentionPolicyEnum = "last_activity"
+	DataRetentionPolicyEnumSinceCreated DataRetentionPolicyEnum = "since_created"
+)
+
+func NewDataRetentionPolicyEnumFromString(s string) (DataRetentionPolicyEnum, error) {
+	switch s {
+	case "last_activity":
+		return DataRetentionPolicyEnumLastActivity, nil
+	case "since_created":
+		return DataRetentionPolicyEnumSinceCreated, nil
+	}
+	var t DataRetentionPolicyEnum
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (d DataRetentionPolicyEnum) Ptr() *DataRetentionPolicyEnum {
+	return &d
+}
+
 // A document (markdown components) belong to a space
 type Document struct {
 	Title         string         `json:"title"`
@@ -1151,29 +1240,6 @@ func (d *Document) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", d)
-}
-
-// The type of data retention policy on an environment
-type DataRetentionPolicyEnum string
-
-const (
-	DataRetentionPolicyEnumLastActivity DataRetentionPolicyEnum = "last_activity"
-	DataRetentionPolicyEnumSinceCreated DataRetentionPolicyEnum = "since_created"
-)
-
-func NewDataRetentionPolicyEnumFromString(s string) (DataRetentionPolicyEnum, error) {
-	switch s {
-	case "last_activity":
-		return DataRetentionPolicyEnumLastActivity, nil
-	case "since_created":
-		return DataRetentionPolicyEnumSinceCreated, nil
-	}
-	var t DataRetentionPolicyEnum
-	return "", fmt.Errorf("%s is not a valid %T", s, t)
-}
-
-func (d DataRetentionPolicyEnum) Ptr() *DataRetentionPolicyEnum {
-	return &d
 }
 
 // The type of authentication to use for guests
@@ -2656,6 +2722,37 @@ func (g *GuestSpace) String() string {
 	return fmt.Sprintf("%#v", g)
 }
 
+type GuestToken struct {
+	// The token used to authenticate the guest
+	Token string `json:"token"`
+	Valid bool   `json:"valid"`
+
+	_rawJSON json.RawMessage
+}
+
+func (g *GuestToken) UnmarshalJSON(data []byte) error {
+	type unmarshaler GuestToken
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GuestToken(value)
+	g._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GuestToken) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
+
 type GuestWorkbook struct {
 	Id WorkbookId `json:"id"`
 
@@ -3196,6 +3293,8 @@ type Job struct {
 	Info *string `json:"info,omitempty"`
 	// Indicates if Flatfile is managing the control flow of this job or if it is being manually tracked.
 	Managed *bool `json:"managed,omitempty"`
+	// The id of the environment this job belongs to
+	EnvironmentId *EnvironmentId `json:"environmentId,omitempty"`
 	// The part number of this job
 	Part *int `json:"part,omitempty"`
 	// The data for this part of the job
@@ -3790,17 +3889,24 @@ type JobSource = string
 type JobStatus string
 
 const (
+	JobStatusCreated   JobStatus = "created"
 	JobStatusPlanning  JobStatus = "planning"
+	JobStatusScheduled JobStatus = "scheduled"
 	JobStatusReady     JobStatus = "ready"
 	JobStatusExecuting JobStatus = "executing"
 	JobStatusComplete  JobStatus = "complete"
 	JobStatusFailed    JobStatus = "failed"
+	JobStatusCanceled  JobStatus = "canceled"
 )
 
 func NewJobStatusFromString(s string) (JobStatus, error) {
 	switch s {
+	case "created":
+		return JobStatusCreated, nil
 	case "planning":
 		return JobStatusPlanning, nil
+	case "scheduled":
+		return JobStatusScheduled, nil
 	case "ready":
 		return JobStatusReady, nil
 	case "executing":
@@ -3809,6 +3915,8 @@ func NewJobStatusFromString(s string) (JobStatus, error) {
 		return JobStatusComplete, nil
 	case "failed":
 		return JobStatusFailed, nil
+	case "canceled":
+		return JobStatusCanceled, nil
 	}
 	var t JobStatus
 	return "", fmt.Errorf("%s is not a valid %T", s, t)
@@ -3906,6 +4014,8 @@ const (
 	JobTypeFile     JobType = "file"
 	JobTypeWorkbook JobType = "workbook"
 	JobTypeSheet    JobType = "sheet"
+	JobTypeSpace    JobType = "space"
+	JobTypeDocument JobType = "document"
 )
 
 func NewJobTypeFromString(s string) (JobType, error) {
@@ -3916,6 +4026,10 @@ func NewJobTypeFromString(s string) (JobType, error) {
 		return JobTypeWorkbook, nil
 	case "sheet":
 		return JobTypeSheet, nil
+	case "space":
+		return JobTypeSpace, nil
+	case "document":
+		return JobTypeDocument, nil
 	}
 	var t JobType
 	return "", fmt.Errorf("%s is not a valid %T", s, t)
@@ -4580,12 +4694,12 @@ func (b *BooleanPropertyConfig) String() string {
 
 type Constraint struct {
 	Type     string
-	Required any
+	Required interface{}
 	Unique   *UniqueConstraint
-	Computed any
+	Computed interface{}
 }
 
-func NewConstraintFromRequired(value any) *Constraint {
+func NewConstraintFromRequired(value interface{}) *Constraint {
 	return &Constraint{Type: "required", Required: value}
 }
 
@@ -4593,7 +4707,7 @@ func NewConstraintFromUnique(value *UniqueConstraint) *Constraint {
 	return &Constraint{Type: "unique", Unique: value}
 }
 
-func NewConstraintFromComputed(value any) *Constraint {
+func NewConstraintFromComputed(value interface{}) *Constraint {
 	return &Constraint{Type: "computed", Computed: value}
 }
 
@@ -4607,7 +4721,7 @@ func (c *Constraint) UnmarshalJSON(data []byte) error {
 	c.Type = unmarshaler.Type
 	switch unmarshaler.Type {
 	case "required":
-		value := make(map[string]any)
+		value := make(map[string]interface{})
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
@@ -4619,7 +4733,7 @@ func (c *Constraint) UnmarshalJSON(data []byte) error {
 		}
 		c.Unique = value
 	case "computed":
-		value := make(map[string]any)
+		value := make(map[string]interface{})
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
@@ -4634,8 +4748,8 @@ func (c Constraint) MarshalJSON() ([]byte, error) {
 		return nil, fmt.Errorf("invalid type %s in %T", c.Type, c)
 	case "required":
 		var marshaler = struct {
-			Type     string `json:"type"`
-			Required any    `json:"required,omitempty"`
+			Type     string      `json:"type"`
+			Required interface{} `json:"required,omitempty"`
 		}{
 			Type:     c.Type,
 			Required: c.Required,
@@ -4652,8 +4766,8 @@ func (c Constraint) MarshalJSON() ([]byte, error) {
 		return json.Marshal(marshaler)
 	case "computed":
 		var marshaler = struct {
-			Type     string `json:"type"`
-			Computed any    `json:"computed,omitempty"`
+			Type     string      `json:"type"`
+			Computed interface{} `json:"computed,omitempty"`
 		}{
 			Type:     c.Type,
 			Computed: c.Computed,
@@ -4663,9 +4777,9 @@ func (c Constraint) MarshalJSON() ([]byte, error) {
 }
 
 type ConstraintVisitor interface {
-	VisitRequired(any) error
+	VisitRequired(interface{}) error
 	VisitUnique(*UniqueConstraint) error
-	VisitComputed(any) error
+	VisitComputed(interface{}) error
 }
 
 func (c *Constraint) Accept(visitor ConstraintVisitor) error {

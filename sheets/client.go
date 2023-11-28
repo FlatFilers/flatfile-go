@@ -302,59 +302,6 @@ func (c *Client) GetRecordCounts(ctx context.Context, sheetId flatfilego.SheetId
 	return response, nil
 }
 
-// Adds a new field to a sheet
-//
-// ID of sheet
-func (c *Client) AddField(ctx context.Context, sheetId flatfilego.SheetId, request *flatfilego.Property) (*flatfilego.FieldConfigResponse, error) {
-	baseURL := "https://api.x.flatfile.com/v1"
-	if c.baseURL != "" {
-		baseURL = c.baseURL
-	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"sheets/%v/fields", sheetId)
-
-	errorDecoder := func(statusCode int, body io.Reader) error {
-		raw, err := io.ReadAll(body)
-		if err != nil {
-			return err
-		}
-		apiError := core.NewAPIError(statusCode, errors.New(string(raw)))
-		decoder := json.NewDecoder(bytes.NewReader(raw))
-		switch statusCode {
-		case 400:
-			value := new(flatfilego.BadRequestError)
-			value.APIError = apiError
-			if err := decoder.Decode(value); err != nil {
-				return apiError
-			}
-			return value
-		case 404:
-			value := new(flatfilego.NotFoundError)
-			value.APIError = apiError
-			if err := decoder.Decode(value); err != nil {
-				return apiError
-			}
-			return value
-		}
-		return apiError
-	}
-
-	var response *flatfilego.FieldConfigResponse
-	if err := c.caller.Call(
-		ctx,
-		&core.CallParams{
-			URL:          endpointURL,
-			Method:       http.MethodPost,
-			Headers:      c.header,
-			Request:      request,
-			Response:     &response,
-			ErrorDecoder: errorDecoder,
-		},
-	); err != nil {
-		return nil, err
-	}
-	return response, nil
-}
-
 // Returns the commit versions for a sheet
 //
 // ID of sheet

@@ -191,11 +191,11 @@ func (c *Client) GetEventToken(ctx context.Context, request *flatfilego.GetEvent
 	endpointURL := baseURL + "/" + "subscription"
 
 	queryParams := make(url.Values)
-	if request.SpaceId != nil {
-		queryParams.Add("spaceId", fmt.Sprintf("%v", request.SpaceId))
-	}
 	if request.Scope != nil {
 		queryParams.Add("scope", fmt.Sprintf("%v", *request.Scope))
+	}
+	if request.SpaceId != nil {
+		queryParams.Add("spaceId", fmt.Sprintf("%v", request.SpaceId))
 	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()

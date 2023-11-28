@@ -10,10 +10,10 @@ import (
 )
 
 type GetEventTokenRequest struct {
-	// The space id
-	SpaceId *SpaceId `json:"-"`
 	// The resource ID of the event stream (space or environment id)
 	Scope *string `json:"-"`
+	// The space ID of the event stream
+	SpaceId *SpaceId `json:"-"`
 }
 
 type ListEventsRequest struct {

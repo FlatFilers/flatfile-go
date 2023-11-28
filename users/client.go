@@ -60,30 +60,6 @@ func (c *Client) List(ctx context.Context, request *flatfilego.ListUsersRequest)
 	return response, nil
 }
 
-// A user is a privileged user that logs in with a username and password.
-func (c *Client) Create(ctx context.Context, request *flatfilego.UserConfig) (*flatfilego.UserResponse, error) {
-	baseURL := "https://api.x.flatfile.com/v1"
-	if c.baseURL != "" {
-		baseURL = c.baseURL
-	}
-	endpointURL := baseURL + "/" + "users"
-
-	var response *flatfilego.UserResponse
-	if err := c.caller.Call(
-		ctx,
-		&core.CallParams{
-			URL:      endpointURL,
-			Method:   http.MethodPost,
-			Headers:  c.header,
-			Request:  request,
-			Response: &response,
-		},
-	); err != nil {
-		return nil, err
-	}
-	return response, nil
-}
-
 // Gets a user
 //
 // The user id

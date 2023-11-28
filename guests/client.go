@@ -161,6 +161,39 @@ func (c *Client) Update(ctx context.Context, guestId flatfilego.GuestId, request
 	return response, nil
 }
 
+// Returns a single guest token
+//
+// ID of guest to return
+func (c *Client) GetGuestToken(ctx context.Context, guestId flatfilego.GuestId, request *flatfilego.GetGuestTokenRequest) (*flatfilego.GuestTokenResponse, error) {
+	baseURL := "https://api.x.flatfile.com/v1"
+	if c.baseURL != "" {
+		baseURL = c.baseURL
+	}
+	endpointURL := fmt.Sprintf(baseURL+"/"+"guests/%v/token", guestId)
+
+	queryParams := make(url.Values)
+	if request.SpaceId != nil {
+		queryParams.Add("spaceId", fmt.Sprintf("%v", request.SpaceId))
+	}
+	if len(queryParams) > 0 {
+		endpointURL += "?" + queryParams.Encode()
+	}
+
+	var response *flatfilego.GuestTokenResponse
+	if err := c.caller.Call(
+		ctx,
+		&core.CallParams{
+			URL:      endpointURL,
+			Method:   http.MethodGet,
+			Headers:  c.header,
+			Response: &response,
+		},
+	); err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
 // Guests can be created as a named guest on the Space or there’s a global link that will let anonymous guests into the space.
 func (c *Client) Invite(ctx context.Context, request []*flatfilego.Invite) (*flatfilego.Success, error) {
 	baseURL := "https://api.x.flatfile.com/v1"

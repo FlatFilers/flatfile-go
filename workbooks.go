@@ -8,31 +8,9 @@ import (
 	core "github.com/FlatFilers/flatfile-go/core"
 )
 
-type DeleteRecordsRequestDeprecated struct {
-	// The Record Ids param (ids) is a list of record ids that can be passed to several record endpoints allowing the user to identify specific records to INCLUDE in the query, or specific records to EXCLUDE, depending on whether or not filters are being applied. When passing a query param that filters the record dataset, such as 'searchValue', or a 'filter' of 'valid' | 'error' | 'all', the 'ids' param will EXCLUDE those records from the filtered results. For basic queries that do not filter the dataset, passing record ids in the 'ids' param will limit the dataset to INCLUDE just those specific records
-	Ids []*RecordId `json:"-"`
-}
-
-type ListRecordsRequest struct {
-	VersionId      *VersionId     `json:"-"`
-	UntilVersionId *VersionId     `json:"-"`
-	SinceVersionId *VersionId     `json:"-"`
-	SortField      *SortField     `json:"-"`
-	SortDirection  *SortDirection `json:"-"`
-	Filter         *Filter        `json:"-"`
-	FilterField    *FilterField   `json:"-"`
-	SearchValue    *SearchValue   `json:"-"`
-	SearchField    *SearchField   `json:"-"`
-	// Number of records to return in a page (default 1000 if pageNumber included)
-	PageSize *int `json:"-"`
-	// Based on pageSize, which page of records to return
-	PageNumber *int `json:"-"`
-	// Include counts for the total records, valid records and records with errors
-	IncludeCounts *bool `json:"-"`
-	// If true, linked records will be included in the results. Defaults to false
-	IncludeLinks *bool `json:"-"`
-	// Include error messages, defaults to false
-	IncludeMessages *bool `json:"-"`
+type ListWorkbookCommitsRequest struct {
+	// If true, only return commits that have been completed. If false, only return commits that have not been completed. If not provided, return all commits.
+	Completed *bool `json:"-"`
 }
 
 type ListWorkbooksRequest struct {

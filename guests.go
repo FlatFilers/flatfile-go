@@ -8,6 +8,11 @@ import (
 	core "github.com/FlatFilers/flatfile-go/core"
 )
 
+type GetGuestTokenRequest struct {
+	// ID of space to return
+	SpaceId *SpaceId `json:"-"`
+}
+
 type ListGuestsRequest struct {
 	// ID of space to return
 	SpaceId SpaceId `json:"-"`
@@ -131,6 +136,35 @@ func (g *GuestResponse) UnmarshalJSON(data []byte) error {
 }
 
 func (g *GuestResponse) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
+
+type GuestTokenResponse struct {
+	Data *GuestToken `json:"data,omitempty"`
+
+	_rawJSON json.RawMessage
+}
+
+func (g *GuestTokenResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler GuestTokenResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GuestTokenResponse(value)
+	g._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GuestTokenResponse) String() string {
 	if len(g._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
 			return value
