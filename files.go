@@ -19,21 +19,36 @@ type ListFilesRequest struct {
 }
 
 type Action struct {
-	Slug             *string             `json:"slug,omitempty"`
-	Operation        *string             `json:"operation,omitempty"`
-	Mode             *ActionMode         `json:"mode,omitempty"`
-	Label            string              `json:"label"`
-	Tooltip          *string             `json:"tooltip,omitempty"`
-	Type             *string             `json:"type,omitempty"`
-	Description      *string             `json:"description,omitempty"`
-	Schedule         *ActionSchedule     `json:"schedule,omitempty"`
-	Primary          *bool               `json:"primary,omitempty"`
-	Confirm          *bool               `json:"confirm,omitempty"`
-	Icon             *string             `json:"icon,omitempty"`
-	RequireAllValid  *bool               `json:"requireAllValid,omitempty"`
-	RequireSelection *bool               `json:"requireSelection,omitempty"`
-	InputForm        *InputForm          `json:"inputForm,omitempty"`
-	Constraints      []*ActionConstraint `json:"constraints,omitempty"`
+	// **This is deprecated. Use `operation` instead.**
+	Slug *string `json:"slug,omitempty"`
+	// This will become the job operation that is triggered
+	Operation *string `json:"operation,omitempty"`
+	// Foreground and toolbarBlocking action mode will prevent interacting with the resource until complete
+	Mode *ActionMode `json:"mode,omitempty"`
+	// The text on the button itself.
+	Label string `json:"label"`
+	// A tooltip that appears when hovering the action button
+	Tooltip *string `json:"tooltip,omitempty"`
+	// **This is deprecated.**
+	Type *string `json:"type,omitempty"`
+	// The text that appears in the dialog after the action is clicked.
+	Description *string `json:"description,omitempty"`
+	// Determines if the action should happen on a regular cadence.
+	Schedule *ActionSchedule `json:"schedule,omitempty"`
+	// A primary action will be more visibly present, whether in Sheet or Workbook.
+	Primary *bool `json:"primary,omitempty"`
+	// Whether to show a modal to confirm the action
+	Confirm *bool `json:"confirm,omitempty"`
+	// Icon will work on primary actions. It will only accept an already existing Flatfile design system icon.
+	Icon *string `json:"icon,omitempty"`
+	// **This is deprecated. Use `constraints` instead.**
+	RequireAllValid *bool `json:"requireAllValid,omitempty"`
+	// **This is deprecated. Use `constraints` instead.**
+	RequireSelection *bool `json:"requireSelection,omitempty"`
+	// Adds an input form for this action after it is clicked.
+	InputForm *InputForm `json:"inputForm,omitempty"`
+	// A limitation or restriction on the action.
+	Constraints []*ActionConstraint `json:"constraints,omitempty"`
 
 	_rawJSON json.RawMessage
 }

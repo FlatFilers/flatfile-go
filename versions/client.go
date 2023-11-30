@@ -27,7 +27,6 @@ func NewClient(opts ...core.ClientOption) *Client {
 	}
 }
 
-// Creates a new version id that can be used to group record updates
 func (c *Client) CreateId(ctx context.Context, request *flatfilego.VersionsPostRequestBody) (*flatfilego.VersionResponse, error) {
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {

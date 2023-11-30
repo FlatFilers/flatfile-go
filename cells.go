@@ -8,41 +8,41 @@ import (
 	core "github.com/FlatFilers/flatfile-go/core"
 )
 
-type GetFieldValuesRequest struct {
-	FieldKey      *FieldKey      `json:"-"`
-	SortField     *SortField     `json:"-"`
-	SortDirection *SortDirection `json:"-"`
-	Filter        *Filter        `json:"-"`
+type GetFieldValuesRequestDeprecated struct {
+	FieldKey      *FieldKeyDeprecated `json:"-"`
+	SortField     *SortField          `json:"-"`
+	SortDirection *SortDirection      `json:"-"`
+	Filter        *Filter             `json:"-"`
 	// Name of field by which to filter records
 	FilterField *FilterField `json:"-"`
 	// Number of records to return in a page (default 1000 if pageNumber included)
 	PageSize *PageSize `json:"-"`
 	// Based on pageSize, which page of records to return
-	PageNumber    *PageNumber    `json:"-"`
-	Distinct      *Distinct      `json:"-"`
-	IncludeCounts *IncludeCounts `json:"-"`
+	PageNumber    *PageNumber              `json:"-"`
+	Distinct      *DistinctDeprecated      `json:"-"`
+	IncludeCounts *IncludeCountsDeprecated `json:"-"`
 	// A value to find for a given field in a sheet. Wrap the value in "" for exact match
 	SearchValue *SearchValue `json:"-"`
 }
 
-type CellsResponse struct {
-	Data CellsResponseData `json:"data,omitempty"`
+type CellsResponseDeprecated struct {
+	Data CellsResponseDataDeprecated `json:"data,omitempty"`
 
 	_rawJSON json.RawMessage
 }
 
-func (c *CellsResponse) UnmarshalJSON(data []byte) error {
-	type unmarshaler CellsResponse
+func (c *CellsResponseDeprecated) UnmarshalJSON(data []byte) error {
+	type unmarshaler CellsResponseDeprecated
 	var value unmarshaler
 	if err := json.Unmarshal(data, &value); err != nil {
 		return err
 	}
-	*c = CellsResponse(value)
+	*c = CellsResponseDeprecated(value)
 	c._rawJSON = json.RawMessage(data)
 	return nil
 }
 
-func (c *CellsResponse) String() string {
+func (c *CellsResponseDeprecated) String() string {
 	if len(c._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
 			return value
@@ -55,10 +55,10 @@ func (c *CellsResponse) String() string {
 }
 
 // When true, excludes duplicate values
-type Distinct = bool
+type DistinctDeprecated = bool
 
 // Returns results from the given field only. Otherwise all field cells are returned
-type FieldKey = string
+type FieldKeyDeprecated = string
 
-// When both distinct and includeCounts are true, the count of distinct field values will be returned
-type IncludeCounts = bool
+// When both distinct and includeCounts are true, the count of distinctdeprecated field values will be returned
+type IncludeCountsDeprecated = bool

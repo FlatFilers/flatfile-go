@@ -9,8 +9,10 @@ import (
 )
 
 type ListSecrets struct {
+	// The Environment of the secret.
 	EnvironmentId EnvironmentId `json:"-"`
-	SpaceId       *SpaceId      `json:"-"`
+	// The Space of the secret.
+	SpaceId *SpaceId `json:"-"`
 }
 
 // Secret ID
@@ -47,10 +49,14 @@ func (s *SecretsResponse) String() string {
 
 // The properties required to write to a secret. Value is the only mutable property. Name, environmentId, spaceId (optional) are used for finding the secret.
 type WriteSecret struct {
-	Name          SecretName    `json:"name"`
-	Value         SecretValue   `json:"value"`
+	// The reference name for a secret.
+	Name SecretName `json:"name"`
+	// The secret value. This is hidden in the UI.
+	Value SecretValue `json:"value"`
+	// The Environment of the secret.
 	EnvironmentId EnvironmentId `json:"environmentId"`
-	SpaceId       *SpaceId      `json:"spaceId,omitempty"`
+	// The Space of the secret.
+	SpaceId *SpaceId `json:"spaceId,omitempty"`
 
 	_rawJSON json.RawMessage
 }

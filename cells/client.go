@@ -32,7 +32,7 @@ func NewClient(opts ...core.ClientOption) *Client {
 // Returns record cell values grouped by all fields in the sheet
 //
 // ID of sheet
-func (c *Client) GetValues(ctx context.Context, sheetId flatfilego.SheetId, request *flatfilego.GetFieldValuesRequest) (*flatfilego.CellsResponse, error) {
+func (c *Client) GetValues(ctx context.Context, sheetId flatfilego.SheetId, request *flatfilego.GetFieldValuesRequestDeprecated) (*flatfilego.CellsResponseDeprecated, error) {
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
@@ -74,7 +74,7 @@ func (c *Client) GetValues(ctx context.Context, sheetId flatfilego.SheetId, requ
 		endpointURL += "?" + queryParams.Encode()
 	}
 
-	var response *flatfilego.CellsResponse
+	var response *flatfilego.CellsResponseDeprecated
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{

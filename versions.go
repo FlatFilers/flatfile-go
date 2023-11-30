@@ -3,6 +3,8 @@
 package api
 
 type VersionsPostRequestBody struct {
-	SheetId         *SheetId   `json:"sheetId,omitempty"`
+	// The ID of the Sheet.
+	SheetId *SheetId `json:"sheetId,omitempty"`
+	// Deprecated, creating or updating a group of records together will automatically generate a commitId to group those record changes together.
 	ParentVersionId *VersionId `json:"parentVersionId,omitempty"`
 }

@@ -14,6 +14,7 @@ type ListWorkbookCommitsRequest struct {
 }
 
 type ListWorkbooksRequest struct {
+	// The associated Space ID of the Workbook.
 	SpaceId *SpaceId `json:"-"`
 	// Include counts for the workbook
 	IncludeCounts *bool `json:"-"`
@@ -21,14 +22,22 @@ type ListWorkbooksRequest struct {
 
 // Properties used to create a new Workbook
 type CreateWorkbookConfig struct {
-	Name          string                  `json:"name"`
-	Labels        []string                `json:"labels,omitempty"`
-	SpaceId       *SpaceId                `json:"spaceId,omitempty"`
-	EnvironmentId *EnvironmentId          `json:"environmentId,omitempty"`
-	Namespace     *string                 `json:"namespace,omitempty"`
-	Sheets        []*SheetConfig          `json:"sheets,omitempty"`
-	Actions       []*Action               `json:"actions,omitempty"`
-	Settings      *WorkbookConfigSettings `json:"settings,omitempty"`
+	// The name of the Workbook.
+	Name string `json:"name"`
+	// An optional list of labels for the Workbook.
+	Labels []string `json:"labels,omitempty"`
+	// Space to associate with the Workbook.
+	SpaceId *SpaceId `json:"spaceId,omitempty"`
+	// Environment to associate with the Workbook
+	EnvironmentId *EnvironmentId `json:"environmentId,omitempty"`
+	// Optional namespace to apply to the Workbook.
+	Namespace *string `json:"namespace,omitempty"`
+	// Sheets to create on the Workbook.
+	Sheets []*SheetConfig `json:"sheets,omitempty"`
+	// Actions to create on the Workbook.
+	Actions []*Action `json:"actions,omitempty"`
+	// The Workbook settings.
+	Settings *WorkbookConfigSettings `json:"settings,omitempty"`
 	// Metadata for the workbook
 	Metadata interface{} `json:"metadata,omitempty"`
 
@@ -118,13 +127,19 @@ func (w *WorkbookResponse) String() string {
 
 // The updates to be made to an existing workbook
 type WorkbookUpdate struct {
-	Name          *string                `json:"name,omitempty"`
-	Labels        []string               `json:"labels,omitempty"`
-	SpaceId       *SpaceId               `json:"spaceId,omitempty"`
-	EnvironmentId *EnvironmentId         `json:"environmentId,omitempty"`
-	Namespace     *string                `json:"namespace,omitempty"`
-	Sheets        []*SheetConfigOrUpdate `json:"sheets,omitempty"`
-	Actions       []*Action              `json:"actions,omitempty"`
+	// The name of the Workbook.
+	Name *string `json:"name,omitempty"`
+	// An optional list of labels for the Workbook.
+	Labels []string `json:"labels,omitempty"`
+	// The Space Id associated with the Workbook.
+	SpaceId *SpaceId `json:"spaceId,omitempty"`
+	// The Environment Id associated with the Workbook.
+	EnvironmentId *EnvironmentId `json:"environmentId,omitempty"`
+	// The namespace of the Workbook.
+	Namespace *string `json:"namespace,omitempty"`
+	// Describes shape of data as well as behavior
+	Sheets  []*SheetConfigOrUpdate `json:"sheets,omitempty"`
+	Actions []*Action              `json:"actions,omitempty"`
 	// Metadata for the workbook
 	Metadata interface{} `json:"metadata,omitempty"`
 

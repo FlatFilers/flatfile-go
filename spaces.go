@@ -15,16 +15,22 @@ type DeleteSpacesRequest struct {
 }
 
 type ListSpacesRequest struct {
+	// The ID of the environment.
 	EnvironmentId *EnvironmentId `json:"-"`
 	// Number of spaces to return in a page (default 10)
 	PageSize *int `json:"-"`
 	// Based on pageSize, which page of records to return
-	PageNumber      *int                `json:"-"`
-	Search          *string             `json:"-"`
-	Archived        *bool               `json:"-"`
-	SortField       *GetSpacesSortField `json:"-"`
-	SortDirection   *SortDirection      `json:"-"`
-	IsCollaborative *bool               `json:"-"`
+	PageNumber *int `json:"-"`
+	// Search query for spaces
+	Search *string `json:"-"`
+	// Flag to include archived spaces
+	Archived *bool `json:"-"`
+	// Field to sort spaces by
+	SortField *GetSpacesSortField `json:"-"`
+	// Direction of sorting
+	SortDirection *SortDirection `json:"-"`
+	// Flag for collaborative (project) spaces
+	IsCollaborative *bool `json:"-"`
 }
 
 type GetSpacesSortField string

@@ -26,27 +26,17 @@ type FindAndReplaceRecordRequest struct {
 	Find *CellValueUnion `json:"find,omitempty"`
 	// The value to replace found values with
 	Replace *CellValueUnion `json:"replace,omitempty"`
-	// The value to replace found values with
+	// A unique key used to identify a field in a sheet
 	FieldKey string `json:"fieldKey"`
 }
 
-type FindAndReplaceRecordRequestDeprecated struct {
-	// A unique key used to identify a field in a sheet
-	FieldKey string `json:"-"`
-	// A value to find for a given field in a sheet. Wrap the value in "" for exact match
-	SearchValue string  `json:"-"`
-	Filter      *Filter `json:"-"`
-	// Number of records to return in a page (default 1000 if pageNumber included)
-	PageSize *int `json:"-"`
-	// Based on pageSize, which page of records to return
-	PageNumber *int `json:"-"`
-	// The value to replace found values with
-	Replace interface{} `json:"replace,omitempty"`
-}
-
 type GetRecordsRequest struct {
-	VersionId      *string        `json:"-"`
+	// Deprecated, use `commitId` instead.
+	VersionId *VersionId `json:"-"`
+	CommitId  *CommitId  `json:"-"`
+	// Deprecated, use `sinceCommitId` instead.
 	SinceVersionId *VersionId     `json:"-"`
+	SinceCommitId  *CommitId      `json:"-"`
 	SortField      *SortField     `json:"-"`
 	SortDirection  *SortDirection `json:"-"`
 	Filter         *Filter        `json:"-"`

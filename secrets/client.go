@@ -144,6 +144,8 @@ func (c *Client) Upsert(ctx context.Context, request *flatfilego.WriteSecret) (*
 }
 
 // Deletes a specific Secret from the Environment or Space as is the case
+//
+// The ID of the secret.
 func (c *Client) Delete(ctx context.Context, secretId flatfilego.SecretId) (*flatfilego.SecretsResponse, error) {
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {

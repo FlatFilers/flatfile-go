@@ -103,6 +103,7 @@ func (c *Client) Create(ctx context.Context, request *flatfilego.JobConfig) (*fl
 	return response, nil
 }
 
+// The id of the job to return
 func (c *Client) Get(ctx context.Context, jobId flatfilego.JobId) (*flatfilego.JobResponse, error) {
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
@@ -125,6 +126,7 @@ func (c *Client) Get(ctx context.Context, jobId flatfilego.JobId) (*flatfilego.J
 	return response, nil
 }
 
+// The id of the job to patch
 func (c *Client) Update(ctx context.Context, jobId flatfilego.JobId, request *flatfilego.JobUpdate) (*flatfilego.JobResponse, error) {
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
@@ -148,6 +150,7 @@ func (c *Client) Update(ctx context.Context, jobId flatfilego.JobId, request *fl
 	return response, nil
 }
 
+// The id of the job to delete
 func (c *Client) Delete(ctx context.Context, jobId flatfilego.JobId) (*flatfilego.Success, error) {
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {

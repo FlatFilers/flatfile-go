@@ -8,13 +8,39 @@ import (
 	core "github.com/FlatFilers/flatfile-go/core"
 )
 
-type GetRecordCountsRequest struct {
-	VersionId      *string    `json:"-"`
-	SinceVersionId *VersionId `json:"-"`
-	// Options to filter records
-	Filter      *Filter      `json:"-"`
+type GetFieldValuesRequest struct {
+	FieldKey      *FieldKey      `json:"-"`
+	SortField     *SortField     `json:"-"`
+	SortDirection *SortDirection `json:"-"`
+	Filter        *Filter        `json:"-"`
+	// Name of field by which to filter records
 	FilterField *FilterField `json:"-"`
+	// Number of records to return in a page (default 1000 if pageNumber included)
+	PageSize *PageSize `json:"-"`
+	// Based on pageSize, which page of records to return
+	PageNumber    *PageNumber    `json:"-"`
+	Distinct      *Distinct      `json:"-"`
+	IncludeCounts *IncludeCounts `json:"-"`
+	// A value to find for a given field in a sheet. Wrap the value in "" for exact match
 	SearchValue *SearchValue `json:"-"`
+}
+
+type GetRecordCountsRequest struct {
+	// Returns records that were changed in that version and only those records.
+	VersionId *string `json:"-"`
+	// Deprecated, use `sinceCommitId` instead.
+	SinceVersionId *VersionId `json:"-"`
+	// Returns records that were changed in that version in addition to any records from versions after that version.
+	CommitId *CommitId `json:"-"`
+	// Listing a commit ID here will return all records since the specified commit.
+	SinceCommitId *CommitId `json:"-"`
+	// Options to filter records
+	Filter *Filter `json:"-"`
+	// The field to filter the data on.
+	FilterField *FilterField `json:"-"`
+	// The value to search for data on.
+	SearchValue *SearchValue `json:"-"`
+	// The field to search for data on.
 	SearchField *SearchField `json:"-"`
 	// If true, the error counts for each field will also be returned
 	ByField *bool `json:"-"`
@@ -23,15 +49,25 @@ type GetRecordCountsRequest struct {
 }
 
 type GetRecordsCsvRequest struct {
-	VersionId      *string    `json:"-"`
+	// Deprecated, use `sinceCommitId` instead.
+	VersionId *string `json:"-"`
+	// Returns records that were changed in that version  in that version and only those records.
+	CommitId *CommitId `json:"-"`
+	// Deprecated, use `sinceCommitId` instead.
 	SinceVersionId *VersionId `json:"-"`
-	SortField      *SortField `json:"-"`
+	// Returns records that were changed in that version in addition to any records from versions after that version.
+	SinceCommitId *CommitId `json:"-"`
+	// The field to sort the data on.
+	SortField *SortField `json:"-"`
 	// Sort direction - asc (ascending) or desc (descending)
 	SortDirection *SortDirection `json:"-"`
 	// Options to filter records
-	Filter      *Filter      `json:"-"`
+	Filter *Filter `json:"-"`
+	// The field to filter the data on.
 	FilterField *FilterField `json:"-"`
+	// The value to search for data on.
 	SearchValue *SearchValue `json:"-"`
+	// The field to search for data on.
 	SearchField *SearchField `json:"-"`
 	// The Record Ids param (ids) is a list of record ids that can be passed to several record endpoints allowing the user to identify specific records to INCLUDE in the query, or specific records to EXCLUDE, depending on whether or not filters are being applied. When passing a query param that filters the record dataset, such as 'searchValue', or a 'filter' of 'valid' | 'error' | 'all', the 'ids' param will EXCLUDE those records from the filtered results. For basic queries that do not filter the dataset, passing record ids in the 'ids' param will limit the dataset to INCLUDE just those specific records
 	Ids []*RecordId `json:"-"`
@@ -218,6 +254,44 @@ func (p *Property) Accept(visitor PropertyVisitor) error {
 		return visitor.VisitReference(p.Reference)
 	}
 }
+
+type CellsResponse struct {
+	Data CellsResponseData `json:"data,omitempty"`
+
+	_rawJSON json.RawMessage
+}
+
+func (c *CellsResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler CellsResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CellsResponse(value)
+	c._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CellsResponse) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+// When true, excludes duplicate values
+type Distinct = bool
+
+// Returns results from the given field only. Otherwise all field cells are returned
+type FieldKey = string
+
+// When both distinct and includeCounts are true, the count of distinct field values will be returned
+type IncludeCounts = bool
 
 type RecordCountsResponse struct {
 	Data *RecordCountsResponseData `json:"data,omitempty"`

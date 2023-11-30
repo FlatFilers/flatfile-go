@@ -45,10 +45,16 @@ func (c *Client) Get(ctx context.Context, sheetId flatfilego.SheetId, request *f
 
 	queryParams := make(url.Values)
 	if request.VersionId != nil {
-		queryParams.Add("versionId", fmt.Sprintf("%v", *request.VersionId))
+		queryParams.Add("versionId", fmt.Sprintf("%v", request.VersionId))
+	}
+	if request.CommitId != nil {
+		queryParams.Add("commitId", fmt.Sprintf("%v", request.CommitId))
 	}
 	if request.SinceVersionId != nil {
 		queryParams.Add("sinceVersionId", fmt.Sprintf("%v", request.SinceVersionId))
+	}
+	if request.SinceCommitId != nil {
+		queryParams.Add("sinceCommitId", fmt.Sprintf("%v", request.SinceCommitId))
 	}
 	if request.SortField != nil {
 		queryParams.Add("sortField", fmt.Sprintf("%v", request.SortField))
@@ -307,49 +313,7 @@ func (c *Client) Delete(ctx context.Context, sheetId flatfilego.SheetId, request
 	return response, nil
 }
 
-// Searches for the given searchValue in a field and replaces all instances of that value with replaceValue
-//
-// ID of sheet
-func (c *Client) FindAndReplaceDeprecated(ctx context.Context, sheetId flatfilego.SheetId, request *flatfilego.FindAndReplaceRecordRequestDeprecated) (*flatfilego.RecordsResponse, error) {
-	baseURL := "https://api.x.flatfile.com/v1"
-	if c.baseURL != "" {
-		baseURL = c.baseURL
-	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"sheets/%v/replace", sheetId)
-
-	queryParams := make(url.Values)
-	queryParams.Add("fieldKey", fmt.Sprintf("%v", request.FieldKey))
-	queryParams.Add("searchValue", fmt.Sprintf("%v", request.SearchValue))
-	if request.Filter != nil {
-		queryParams.Add("filter", fmt.Sprintf("%v", request.Filter))
-	}
-	if request.PageSize != nil {
-		queryParams.Add("pageSize", fmt.Sprintf("%v", *request.PageSize))
-	}
-	if request.PageNumber != nil {
-		queryParams.Add("pageNumber", fmt.Sprintf("%v", *request.PageNumber))
-	}
-	if len(queryParams) > 0 {
-		endpointURL += "?" + queryParams.Encode()
-	}
-
-	var response *flatfilego.RecordsResponse
-	if err := c.caller.Call(
-		ctx,
-		&core.CallParams{
-			URL:      endpointURL,
-			Method:   http.MethodPut,
-			Headers:  c.header,
-			Request:  request,
-			Response: &response,
-		},
-	); err != nil {
-		return nil, err
-	}
-	return response, nil
-}
-
-// Searches for all values that match the 'find' value (globally or for a specific field via 'fieldKey') and replaces them with the 'replace' value. Wrap 'find' value in double quotes for exact match (""). Returns a versionId for the updated records
+// Searches for all values that match the 'find' value (globally or for a specific field via 'fieldKey') and replaces them with the 'replace' value. Wrap 'find' value in double quotes for exact match (""). Returns a commitId for the updated records
 //
 // ID of sheet
 func (c *Client) FindAndReplace(ctx context.Context, sheetId flatfilego.SheetId, request *flatfilego.FindAndReplaceRecordRequest) (*flatfilego.VersionResponse, error) {

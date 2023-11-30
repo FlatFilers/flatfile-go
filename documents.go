@@ -12,8 +12,9 @@ import (
 type DocumentId = string
 
 type DocumentConfig struct {
-	Title      string    `json:"title"`
-	Body       string    `json:"body"`
+	Title string `json:"title"`
+	Body  string `json:"body"`
+	// Certain treatments will cause your Document to look or behave differently.
 	Treatments []string  `json:"treatments,omitempty"`
 	Actions    []*Action `json:"actions,omitempty"`
 

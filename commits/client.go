@@ -35,7 +35,7 @@ func NewClient(opts ...core.ClientOption) *Client {
 // Returns the details of a commit version
 //
 // ID of the commit version to return
-func (c *Client) Get(ctx context.Context, commitId flatfilego.VersionId) (*flatfilego.CommitResponse, error) {
+func (c *Client) Get(ctx context.Context, commitId flatfilego.CommitId) (*flatfilego.CommitResponse, error) {
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
@@ -87,7 +87,7 @@ func (c *Client) Get(ctx context.Context, commitId flatfilego.VersionId) (*flatf
 // Completes a commit version. This marks the commit as complete and acknowledges that the changes have been applied to the sheet.
 //
 // ID of the commit version to complete
-func (c *Client) Complete(ctx context.Context, commitId flatfilego.VersionId) (*flatfilego.Success, error) {
+func (c *Client) Complete(ctx context.Context, commitId flatfilego.CommitId) (*flatfilego.Success, error) {
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
@@ -139,7 +139,7 @@ func (c *Client) Complete(ctx context.Context, commitId flatfilego.VersionId) (*
 // Replays a commit:created event.
 //
 // ID of the commit version to re-emit a commit:created event for
-func (c *Client) Replay(ctx context.Context, commitId flatfilego.VersionId) (*flatfilego.Success, error) {
+func (c *Client) Replay(ctx context.Context, commitId flatfilego.CommitId) (*flatfilego.Success, error) {
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL

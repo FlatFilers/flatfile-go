@@ -4,18 +4,15 @@ package client
 
 import (
 	agents "github.com/FlatFilers/flatfile-go/agents"
-	auth "github.com/FlatFilers/flatfile-go/auth"
 	cells "github.com/FlatFilers/flatfile-go/cells"
 	commits "github.com/FlatFilers/flatfile-go/commits"
 	core "github.com/FlatFilers/flatfile-go/core"
-	dataretentionpolicies "github.com/FlatFilers/flatfile-go/dataretentionpolicies"
 	documents "github.com/FlatFilers/flatfile-go/documents"
 	environments "github.com/FlatFilers/flatfile-go/environments"
 	events "github.com/FlatFilers/flatfile-go/events"
 	files "github.com/FlatFilers/flatfile-go/files"
 	guests "github.com/FlatFilers/flatfile-go/guests"
 	jobs "github.com/FlatFilers/flatfile-go/jobs"
-	mapping "github.com/FlatFilers/flatfile-go/mapping"
 	records "github.com/FlatFilers/flatfile-go/records"
 	roles "github.com/FlatFilers/flatfile-go/roles"
 	secrets "github.com/FlatFilers/flatfile-go/secrets"
@@ -33,27 +30,24 @@ type Client struct {
 	caller  *core.Caller
 	header  http.Header
 
-	Agents                *agents.Client
-	Auth                  *auth.Client
-	Cells                 *cells.Client
-	Commits               *commits.Client
-	DataRetentionPolicies *dataretentionpolicies.Client
-	Documents             *documents.Client
-	Environments          *environments.Client
-	Events                *events.Client
-	Files                 *files.Client
-	Guests                *guests.Client
-	Jobs                  *jobs.Client
-	Mapping               *mapping.Client
-	Records               *records.Client
-	Roles                 *roles.Client
-	Secrets               *secrets.Client
-	Sheets                *sheets.Client
-	Snapshots             *snapshots.Client
-	Spaces                *spaces.Client
-	Users                 *users.Client
-	Versions              *versions.Client
-	Workbooks             *workbooks.Client
+	Agents       *agents.Client
+	Cells        *cells.Client
+	Commits      *commits.Client
+	Documents    *documents.Client
+	Environments *environments.Client
+	Events       *events.Client
+	Files        *files.Client
+	Guests       *guests.Client
+	Jobs         *jobs.Client
+	Records      *records.Client
+	Roles        *roles.Client
+	Secrets      *secrets.Client
+	Sheets       *sheets.Client
+	Snapshots    *snapshots.Client
+	Spaces       *spaces.Client
+	Users        *users.Client
+	Versions     *versions.Client
+	Workbooks    *workbooks.Client
 }
 
 func NewClient(opts ...core.ClientOption) *Client {
@@ -62,29 +56,26 @@ func NewClient(opts ...core.ClientOption) *Client {
 		opt(options)
 	}
 	return &Client{
-		baseURL:               options.BaseURL,
-		caller:                core.NewCaller(options.HTTPClient),
-		header:                options.ToHeader(),
-		Agents:                agents.NewClient(opts...),
-		Auth:                  auth.NewClient(opts...),
-		Cells:                 cells.NewClient(opts...),
-		Commits:               commits.NewClient(opts...),
-		DataRetentionPolicies: dataretentionpolicies.NewClient(opts...),
-		Documents:             documents.NewClient(opts...),
-		Environments:          environments.NewClient(opts...),
-		Events:                events.NewClient(opts...),
-		Files:                 files.NewClient(opts...),
-		Guests:                guests.NewClient(opts...),
-		Jobs:                  jobs.NewClient(opts...),
-		Mapping:               mapping.NewClient(opts...),
-		Records:               records.NewClient(opts...),
-		Roles:                 roles.NewClient(opts...),
-		Secrets:               secrets.NewClient(opts...),
-		Sheets:                sheets.NewClient(opts...),
-		Snapshots:             snapshots.NewClient(opts...),
-		Spaces:                spaces.NewClient(opts...),
-		Users:                 users.NewClient(opts...),
-		Versions:              versions.NewClient(opts...),
-		Workbooks:             workbooks.NewClient(opts...),
+		baseURL:      options.BaseURL,
+		caller:       core.NewCaller(options.HTTPClient),
+		header:       options.ToHeader(),
+		Agents:       agents.NewClient(opts...),
+		Cells:        cells.NewClient(opts...),
+		Commits:      commits.NewClient(opts...),
+		Documents:    documents.NewClient(opts...),
+		Environments: environments.NewClient(opts...),
+		Events:       events.NewClient(opts...),
+		Files:        files.NewClient(opts...),
+		Guests:       guests.NewClient(opts...),
+		Jobs:         jobs.NewClient(opts...),
+		Records:      records.NewClient(opts...),
+		Roles:        roles.NewClient(opts...),
+		Secrets:      secrets.NewClient(opts...),
+		Sheets:       sheets.NewClient(opts...),
+		Snapshots:    snapshots.NewClient(opts...),
+		Spaces:       spaces.NewClient(opts...),
+		Users:        users.NewClient(opts...),
+		Versions:     versions.NewClient(opts...),
+		Workbooks:    workbooks.NewClient(opts...),
 	}
 }

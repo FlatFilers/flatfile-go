@@ -303,143 +303,7 @@ func (l *ListAgentsResponse) String() string {
 	return fmt.Sprintf("%#v", l)
 }
 
-// Client ID and secret used to retrieve an access token
-type ApiCredentials struct {
-	ClientId string `json:"clientId"`
-	Secret   string `json:"secret"`
-
-	_rawJSON json.RawMessage
-}
-
-func (a *ApiCredentials) UnmarshalJSON(data []byte) error {
-	type unmarshaler ApiCredentials
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*a = ApiCredentials(value)
-	a._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (a *ApiCredentials) String() string {
-	if len(a._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(a); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", a)
-}
-
-// API Key used for authenticating against our APIs
-type ApiKey struct {
-	Id            ApiKeyId           `json:"id"`
-	RawKey        *RawKey            `json:"rawKey,omitempty"`
-	Type          ApiKeyType         `json:"type,omitempty"`
-	EnvironmentId *EnvironmentId     `json:"environmentId,omitempty"`
-	AccountId     *AccountId         `json:"accountId,omitempty"`
-	Operations    []*ApiKeyOperation `json:"operations,omitempty"`
-	CreatedAt     time.Time          `json:"createdAt"`
-	UpdatedAt     *time.Time         `json:"updatedAt,omitempty"`
-	DeletedAt     *time.Time         `json:"deletedAt,omitempty"`
-	Secret        *string            `json:"secret,omitempty"`
-
-	_rawJSON json.RawMessage
-}
-
-func (a *ApiKey) UnmarshalJSON(data []byte) error {
-	type unmarshaler ApiKey
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*a = ApiKey(value)
-	a._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (a *ApiKey) String() string {
-	if len(a._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(a); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", a)
-}
-
-type ApiKeyOperation struct {
-	Path   string `json:"path"`
-	Method string `json:"method"`
-
-	_rawJSON json.RawMessage
-}
-
-func (a *ApiKeyOperation) UnmarshalJSON(data []byte) error {
-	type unmarshaler ApiKeyOperation
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*a = ApiKeyOperation(value)
-	a._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (a *ApiKeyOperation) String() string {
-	if len(a._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(a); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", a)
-}
-
-// Raw Api Key
-type RawKey = string
-
-// Email and password used to retrieve an access token
-type UserCredentials struct {
-	// Email
-	Email string `json:"email"`
-	// Password
-	Password string `json:"password"`
-
-	_rawJSON json.RawMessage
-}
-
-func (u *UserCredentials) UnmarshalJSON(data []byte) error {
-	type unmarshaler UserCredentials
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*u = UserCredentials(value)
-	u._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (u *UserCredentials) String() string {
-	if len(u._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(u._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(u); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", u)
-}
-
-type CellValueWithCounts struct {
+type CellValueWithCountsDeprecated struct {
 	Valid     *bool                `json:"valid,omitempty"`
 	Messages  []*ValidationMessage `json:"messages,omitempty"`
 	Value     *CellValueUnion      `json:"value,omitempty"`
@@ -450,18 +314,18 @@ type CellValueWithCounts struct {
 	_rawJSON json.RawMessage
 }
 
-func (c *CellValueWithCounts) UnmarshalJSON(data []byte) error {
-	type unmarshaler CellValueWithCounts
+func (c *CellValueWithCountsDeprecated) UnmarshalJSON(data []byte) error {
+	type unmarshaler CellValueWithCountsDeprecated
 	var value unmarshaler
 	if err := json.Unmarshal(data, &value); err != nil {
 		return err
 	}
-	*c = CellValueWithCounts(value)
+	*c = CellValueWithCountsDeprecated(value)
 	c._rawJSON = json.RawMessage(data)
 	return nil
 }
 
-func (c *CellValueWithCounts) String() string {
+func (c *CellValueWithCountsDeprecated) String() string {
 	if len(c._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
 			return value
@@ -474,12 +338,12 @@ func (c *CellValueWithCounts) String() string {
 }
 
 // Cell values grouped by field key
-type CellsResponseData = map[string][]*CellValueWithCounts
+type CellsResponseDataDeprecated = map[string][]*CellValueWithCountsDeprecated
 
 // A commit version
 type Commit struct {
-	Id      VersionId `json:"id"`
-	SheetId SheetId   `json:"sheetId"`
+	Id      CommitId `json:"id"`
+	SheetId SheetId  `json:"sheetId"`
 	// The actor (user or system) who created the commit
 	CreatedBy string `json:"createdBy"`
 	// The actor (user or system) who completed the commit
@@ -544,41 +408,6 @@ func (l *ListCommitsResponse) String() string {
 	return fmt.Sprintf("%#v", l)
 }
 
-// Properties used to allow users to request our private services
-type AccessToken struct {
-	AccessToken string     `json:"accessToken"`
-	ExpiresIn   string     `json:"expiresIn"`
-	Expires     string     `json:"expires"`
-	Email       *string    `json:"email,omitempty"`
-	UserId      *UserId    `json:"userId,omitempty"`
-	AccountId   *AccountId `json:"accountId,omitempty"`
-
-	_rawJSON json.RawMessage
-}
-
-func (a *AccessToken) UnmarshalJSON(data []byte) error {
-	type unmarshaler AccessToken
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*a = AccessToken(value)
-	a._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (a *AccessToken) String() string {
-	if len(a._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(a); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", a)
-}
-
 // Account ID
 type AccountId = string
 
@@ -633,6 +462,7 @@ func (a ActionConstraintType) Ptr() *ActionConstraintType {
 	return &a
 }
 
+// Foreground actions will prevent interacting with the resource until complete
 type ActionMode string
 
 const (
@@ -685,6 +515,9 @@ func (a ActionSchedule) Ptr() *ActionSchedule {
 
 // Agent ID
 type AgentId = string
+
+// Commit ID
+type CommitId = string
 
 // Environment ID
 type EnvironmentId = string
@@ -874,7 +707,7 @@ type InputEnumPropertyOption struct {
 	Icon *string `json:"icon,omitempty"`
 	// An arbitrary JSON object to be associated with this option and made available to hooks
 	Meta map[string]interface{} `json:"meta,omitempty"`
-	// The value or ID of this option. This value will be sent in egress.  The type is a string | integer | boolean.
+	// The value or ID of this option. This value will be sent in egress. The type is a string | integer | boolean.
 	Value interface{} `json:"value,omitempty"`
 
 	_rawJSON json.RawMessage
@@ -904,11 +737,17 @@ func (i *InputEnumPropertyOption) String() string {
 }
 
 type InputField struct {
-	Key         string             `json:"key"`
-	Label       string             `json:"label"`
-	Description *string            `json:"description,omitempty"`
-	Type        string             `json:"type"`
-	Config      *InputConfig       `json:"config,omitempty"`
+	// Unique key for a Field.
+	Key string `json:"key"`
+	// Visible name of a Field.
+	Label string `json:"label"`
+	// Brief description below the name of the Field.
+	Description *string `json:"description,omitempty"`
+	// Field Types inform the user interface how to sort and display data.
+	Type string `json:"type"`
+	// Additional configuration for enum Fields.
+	Config *InputConfig `json:"config,omitempty"`
+	// Indicate additional validations that will be applied to the Field.
 	Constraints []*InputConstraint `json:"constraints,omitempty"`
 
 	_rawJSON json.RawMessage
@@ -1142,70 +981,11 @@ type VersionId = string
 // Workbook ID
 type WorkbookId = string
 
-// A data retention policy belonging to an environment
-type DataRetentionPolicy struct {
-	Type          DataRetentionPolicyEnum `json:"type,omitempty"`
-	Period        int                     `json:"period"`
-	Id            DataRetentionPolicyId   `json:"id"`
-	EnvironmentId EnvironmentId           `json:"environmentId"`
-	// Date the policy was created
-	CreatedAt time.Time `json:"createdAt"`
-	// Date the policy was last updated
-	UpdatedAt time.Time `json:"updatedAt"`
-
-	_rawJSON json.RawMessage
-}
-
-func (d *DataRetentionPolicy) UnmarshalJSON(data []byte) error {
-	type unmarshaler DataRetentionPolicy
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*d = DataRetentionPolicy(value)
-	d._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (d *DataRetentionPolicy) String() string {
-	if len(d._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(d._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(d); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", d)
-}
-
-// The type of data retention policy on an environment
-type DataRetentionPolicyEnum string
-
-const (
-	DataRetentionPolicyEnumLastActivity DataRetentionPolicyEnum = "last_activity"
-	DataRetentionPolicyEnumSinceCreated DataRetentionPolicyEnum = "since_created"
-)
-
-func NewDataRetentionPolicyEnumFromString(s string) (DataRetentionPolicyEnum, error) {
-	switch s {
-	case "last_activity":
-		return DataRetentionPolicyEnumLastActivity, nil
-	case "since_created":
-		return DataRetentionPolicyEnumSinceCreated, nil
-	}
-	var t DataRetentionPolicyEnum
-	return "", fmt.Errorf("%s is not a valid %T", s, t)
-}
-
-func (d DataRetentionPolicyEnum) Ptr() *DataRetentionPolicyEnum {
-	return &d
-}
-
 // A document (markdown components) belong to a space
 type Document struct {
-	Title         string         `json:"title"`
-	Body          string         `json:"body"`
+	Title string `json:"title"`
+	Body  string `json:"body"`
+	// Certain treatments will cause your Document to look or behave differently.
 	Treatments    []string       `json:"treatments,omitempty"`
 	Actions       []*Action      `json:"actions,omitempty"`
 	Id            DocumentId     `json:"id"`
@@ -1314,21 +1094,22 @@ type Context struct {
 	// The namespaces of the event
 	Namespaces []string `json:"namespaces,omitempty"`
 	// The slugs of related resources
-	Slugs            *EventContextSlugs `json:"slugs,omitempty"`
-	ActionName       *ActionName        `json:"actionName,omitempty"`
-	AccountId        AccountId          `json:"accountId"`
-	EnvironmentId    EnvironmentId      `json:"environmentId"`
-	SpaceId          *SpaceId           `json:"spaceId,omitempty"`
-	WorkbookId       *WorkbookId        `json:"workbookId,omitempty"`
-	SheetId          *SheetId           `json:"sheetId,omitempty"`
-	SheetSlug        *SheetSlug         `json:"sheetSlug,omitempty"`
-	SnapshotId       *SnapshotId        `json:"snapshotId,omitempty"`
-	VersionId        *VersionId         `json:"versionId,omitempty"`
-	CommitId         *VersionId         `json:"commitId,omitempty"`
-	JobId            *JobId             `json:"jobId,omitempty"`
-	FileId           *FileId            `json:"fileId,omitempty"`
-	DocumentId       *DocumentId        `json:"documentId,omitempty"`
-	PrecedingEventId *EventId           `json:"precedingEventId,omitempty"`
+	Slugs         *EventContextSlugs `json:"slugs,omitempty"`
+	ActionName    *ActionName        `json:"actionName,omitempty"`
+	AccountId     AccountId          `json:"accountId"`
+	EnvironmentId EnvironmentId      `json:"environmentId"`
+	SpaceId       *SpaceId           `json:"spaceId,omitempty"`
+	WorkbookId    *WorkbookId        `json:"workbookId,omitempty"`
+	SheetId       *SheetId           `json:"sheetId,omitempty"`
+	SheetSlug     *SheetSlug         `json:"sheetSlug,omitempty"`
+	SnapshotId    *SnapshotId        `json:"snapshotId,omitempty"`
+	// Deprecated, use `commitId` instead.
+	VersionId        *VersionId  `json:"versionId,omitempty"`
+	CommitId         *CommitId   `json:"commitId,omitempty"`
+	JobId            *JobId      `json:"jobId,omitempty"`
+	FileId           *FileId     `json:"fileId,omitempty"`
+	DocumentId       *DocumentId `json:"documentId,omitempty"`
+	PrecedingEventId *EventId    `json:"precedingEventId,omitempty"`
 	// Can be a UserId, GuestId, or AgentId
 	ActorId *string `json:"actorId,omitempty"`
 
@@ -2783,7 +2564,9 @@ func (g *GuestWorkbook) String() string {
 }
 
 type CategoryMapping struct {
-	SourceValue      *EnumValue `json:"sourceValue,omitempty"`
+	// The source value to map from
+	SourceValue *EnumValue `json:"sourceValue,omitempty"`
+	// The destination value to map to
 	DestinationValue *EnumValue `json:"destinationValue,omitempty"`
 
 	_rawJSON json.RawMessage
@@ -2910,8 +2693,10 @@ func (d *DeleteRecordsJobConfig) String() string {
 }
 
 type DestinationField struct {
+	// The description of the destination field
 	DestinationField *Property `json:"destinationField,omitempty"`
-	Preview          []string  `json:"preview,omitempty"`
+	// A list of preview values of the data in the destination field
+	Preview []string `json:"preview,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -2960,12 +2745,16 @@ func (d Driver) Ptr() *Driver {
 }
 
 type Edge struct {
-	SourceField      *Property `json:"sourceField,omitempty"`
+	// The description of the source field
+	SourceField *Property `json:"sourceField,omitempty"`
+	// The description of the destination field
 	DestinationField *Property `json:"destinationField,omitempty"`
-	Preview          []string  `json:"preview,omitempty"`
+	// A list of preview values of the data in the destination field
+	Preview []string `json:"preview,omitempty"`
 	// Only available if one or more of the destination fields is of type enum. Provides category mapping.
 	EnumDetails *EnumDetails `json:"enumDetails,omitempty"`
-	Metadata    *Metadata    `json:"metadata,omitempty"`
+	// Metadata about the edge
+	Metadata *Metadata `json:"metadata,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -3022,9 +2811,12 @@ func (e *EmptyObject) String() string {
 
 // Only available if one or more of the destination fields is of type enum. Provides category mapping.
 type EnumDetails struct {
-	Mapping                 []*CategoryMapping `json:"mapping,omitempty"`
-	UnusedSourceValues      []*EnumValue       `json:"unusedSourceValues,omitempty"`
-	UnusedDestinationValues []*EnumValue       `json:"unusedDestinationValues,omitempty"`
+	// The mapping of source values to destination values
+	Mapping []*CategoryMapping `json:"mapping,omitempty"`
+	// A list of source values that are not mapped from
+	UnusedSourceValues []*EnumValue `json:"unusedSourceValues,omitempty"`
+	// A list of destination values that are not mapped to
+	UnusedDestinationValues []*EnumValue `json:"unusedDestinationValues,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -3155,14 +2947,24 @@ func (e *ExportJobConfig) String() string {
 }
 
 type ExportOptions struct {
-	VersionId     *VersionId     `json:"versionId,omitempty"`
-	SortField     *SortField     `json:"sortField,omitempty"`
+	// Deprecated, use `commitId` instead
+	VersionId *VersionId `json:"versionId,omitempty"`
+	// If provided, the snapshot version of the workbook will be used for the export
+	CommitId *CommitId `json:"commitId,omitempty"`
+	// The field to sort the records on
+	SortField *SortField `json:"sortField,omitempty"`
+	// The direction to sort the records
 	SortDirection *SortDirection `json:"sortDirection,omitempty"`
-	Filter        *Filter        `json:"filter,omitempty"`
-	FilterField   *FilterField   `json:"filterField,omitempty"`
-	SearchValue   *SearchValue   `json:"searchValue,omitempty"`
-	SearchField   *SearchField   `json:"searchField,omitempty"`
-	Q             *string        `json:"q,omitempty"`
+	// The filter to apply to the records
+	Filter *Filter `json:"filter,omitempty"`
+	// The field to filter on
+	FilterField *FilterField `json:"filterField,omitempty"`
+	// The value to search for
+	SearchValue *SearchValue `json:"searchValue,omitempty"`
+	// The field to search for the search value in
+	SearchField *SearchField `json:"searchField,omitempty"`
+	// The FFQL query to filter records
+	Q *string `json:"q,omitempty"`
 	// The Record Ids param (ids) is a list of record ids that can be passed to several record endpoints allowing the user to identify specific records to INCLUDE in the query, or specific records to EXCLUDE, depending on whether or not filters are being applied. When passing a query param that filters the record dataset, such as 'searchValue', or a 'filter' of 'valid' | 'error' | 'all', the 'ids' param will EXCLUDE those records from the filtered results. For basic queries that do not filter the dataset, passing record ids in the 'ids' param will limit the dataset to INCLUDE just those specific records
 	Ids []RecordId `json:"ids,omitempty"`
 
@@ -3225,11 +3027,16 @@ func (f *FileJobConfig) String() string {
 }
 
 type FindAndReplaceJobConfig struct {
-	Filter      *Filter      `json:"filter,omitempty"`
+	// The filter to apply to the records
+	Filter *Filter `json:"filter,omitempty"`
+	// The field to filter on
 	FilterField *FilterField `json:"filterField,omitempty"`
+	// The value to search for
 	SearchValue *SearchValue `json:"searchValue,omitempty"`
+	// The field to search for the search value in
 	SearchField *SearchField `json:"searchField,omitempty"`
-	Q           *string      `json:"q,omitempty"`
+	// The FFQL query to filter records
+	Q *string `json:"q,omitempty"`
 	// The Record Ids param (ids) is a list of record ids that can be passed to several record endpoints allowing the user to identify specific records to INCLUDE in the query, or specific records to EXCLUDE, depending on whether or not filters are being applied. When passing a query param that filters the record dataset, such as 'searchValue', or a 'filter' of 'valid' | 'error' | 'all', the 'ids' param will EXCLUDE those records from the filtered results. For basic queries that do not filter the dataset, passing record ids in the 'ids' param will limit the dataset to INCLUDE just those specific records
 	Ids []RecordId `json:"ids,omitempty"`
 	// A value to find for a given field in a sheet. Wrap the value in "" for exact match
@@ -3278,9 +3085,9 @@ type Job struct {
 	Trigger *Trigger `json:"trigger,omitempty"`
 	// the status of the job
 	Status *JobStatus `json:"status,omitempty"`
-	// the progress of the job
-	Progress *float64 `json:"progress,omitempty"`
-	FileId   *FileId  `json:"fileId,omitempty"`
+	// the progress of the job. Whole number between 0 and 100
+	Progress *int    `json:"progress,omitempty"`
+	FileId   *FileId `json:"fileId,omitempty"`
 	// the mode of the job
 	Mode *JobMode `json:"mode,omitempty"`
 	// Input parameters for this job type.
@@ -4354,8 +4161,10 @@ func (r *ResourceJobSubject) String() string {
 }
 
 type SourceField struct {
+	// The description of the source field
 	SourceField *Property `json:"sourceField,omitempty"`
-	Preview     []string  `json:"preview,omitempty"`
+	// A list of preview values of the data in the source field
+	Preview []string `json:"preview,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -4383,7 +4192,7 @@ func (s *SourceField) String() string {
 	return fmt.Sprintf("%#v", s)
 }
 
-// the type of trigger to use for this job
+// The type of trigger to use for this job
 type Trigger string
 
 const (
@@ -4404,154 +4213,6 @@ func NewTriggerFromString(s string) (Trigger, error) {
 
 func (t Trigger) Ptr() *Trigger {
 	return &t
-}
-
-type MappingRule struct {
-	typeName            string
-	MappingRuleOneToOne *MappingRuleOneToOne
-}
-
-func NewMappingRuleFromMappingRuleOneToOne(value *MappingRuleOneToOne) *MappingRule {
-	return &MappingRule{typeName: "mappingRuleOneToOne", MappingRuleOneToOne: value}
-}
-
-func (m *MappingRule) UnmarshalJSON(data []byte) error {
-	valueMappingRuleOneToOne := new(MappingRuleOneToOne)
-	if err := json.Unmarshal(data, &valueMappingRuleOneToOne); err == nil {
-		m.typeName = "mappingRuleOneToOne"
-		m.MappingRuleOneToOne = valueMappingRuleOneToOne
-		return nil
-	}
-	return fmt.Errorf("%s cannot be deserialized as a %T", data, m)
-}
-
-func (m MappingRule) MarshalJSON() ([]byte, error) {
-	switch m.typeName {
-	default:
-		return nil, fmt.Errorf("invalid type %s in %T", m.typeName, m)
-	case "mappingRuleOneToOne":
-		return json.Marshal(m.MappingRuleOneToOne)
-	}
-}
-
-type MappingRuleVisitor interface {
-	VisitMappingRuleOneToOne(*MappingRuleOneToOne) error
-}
-
-func (m *MappingRule) Accept(visitor MappingRuleVisitor) error {
-	switch m.typeName {
-	default:
-		return fmt.Errorf("invalid type %s in %T", m.typeName, m)
-	case "mappingRuleOneToOne":
-		return visitor.VisitMappingRuleOneToOne(m.MappingRuleOneToOne)
-	}
-}
-
-type MappingRuleBase struct {
-	// Name of the mapping rule
-	Name   string          `json:"name"`
-	Type   MappingRuleType `json:"type,omitempty"`
-	Config interface{}     `json:"config,omitempty"`
-	// ID of the mapping rule
-	Id MappingId `json:"id"`
-	// Confidence of the mapping rule
-	Confidence *float64 `json:"confidence,omitempty"`
-	// User ID of the creator of the mapping rule
-	CreatedBy *UserId `json:"createdBy,omitempty"`
-	// Creation time of the mapping rule
-	CreatedAt time.Time `json:"createdAt"`
-	// Last update time of the mapping rule
-	UpdatedAt time.Time `json:"updatedAt"`
-
-	_rawJSON json.RawMessage
-}
-
-func (m *MappingRuleBase) UnmarshalJSON(data []byte) error {
-	type unmarshaler MappingRuleBase
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*m = MappingRuleBase(value)
-	m._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (m *MappingRuleBase) String() string {
-	if len(m._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(m._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(m); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", m)
-}
-
-type MappingRuleOneToOne struct {
-	// Name of the mapping rule
-	Name   string          `json:"name"`
-	Type   MappingRuleType `json:"type,omitempty"`
-	Config interface{}     `json:"config,omitempty"`
-	// ID of the mapping rule
-	Id MappingId `json:"id"`
-	// Confidence of the mapping rule
-	Confidence *float64 `json:"confidence,omitempty"`
-	// User ID of the creator of the mapping rule
-	CreatedBy *UserId `json:"createdBy,omitempty"`
-	// Creation time of the mapping rule
-	CreatedAt time.Time `json:"createdAt"`
-	// Last update time of the mapping rule
-	UpdatedAt time.Time `json:"updatedAt"`
-	// Source field key
-	SourceField string `json:"sourceField"`
-	// Destination field key
-	DestinationField string `json:"destinationField"`
-
-	_rawJSON json.RawMessage
-}
-
-func (m *MappingRuleOneToOne) UnmarshalJSON(data []byte) error {
-	type unmarshaler MappingRuleOneToOne
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*m = MappingRuleOneToOne(value)
-	m._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (m *MappingRuleOneToOne) String() string {
-	if len(m._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(m._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(m); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", m)
-}
-
-type MappingRuleType string
-
-const (
-	MappingRuleTypeAssign MappingRuleType = "assign"
-)
-
-func NewMappingRuleTypeFromString(s string) (MappingRuleType, error) {
-	switch s {
-	case "assign":
-		return MappingRuleTypeAssign, nil
-	}
-	var t MappingRuleType
-	return "", fmt.Errorf("%s is not a valid %T", s, t)
-}
-
-func (m MappingRuleType) Ptr() *MappingRuleType {
-	return &m
 }
 
 type ArrayableProperty struct {
@@ -4592,9 +4253,10 @@ type BaseProperty struct {
 	Constraints []*Constraint `json:"constraints,omitempty"`
 	Readonly    *bool         `json:"readonly,omitempty"`
 	// Useful for any contextual metadata regarding the schema. Store any valid json here.
-	Metadata         interface{} `json:"metadata,omitempty"`
-	Treatments       []string    `json:"treatments,omitempty"`
-	AlternativeNames []string    `json:"alternativeNames,omitempty"`
+	Metadata interface{} `json:"metadata,omitempty"`
+	// A unique presentation for a field in the UI.
+	Treatments       []string `json:"treatments,omitempty"`
+	AlternativeNames []string `json:"alternativeNames,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -4631,7 +4293,8 @@ type BooleanProperty struct {
 	Constraints []*Constraint `json:"constraints,omitempty"`
 	Readonly    *bool         `json:"readonly,omitempty"`
 	// Useful for any contextual metadata regarding the schema. Store any valid json here.
-	Metadata         interface{}            `json:"metadata,omitempty"`
+	Metadata interface{} `json:"metadata,omitempty"`
+	// A unique presentation for a field in the UI.
 	Treatments       []string               `json:"treatments,omitempty"`
 	AlternativeNames []string               `json:"alternativeNames,omitempty"`
 	Config           *BooleanPropertyConfig `json:"config,omitempty"`
@@ -4804,9 +4467,10 @@ type DateProperty struct {
 	Constraints []*Constraint `json:"constraints,omitempty"`
 	Readonly    *bool         `json:"readonly,omitempty"`
 	// Useful for any contextual metadata regarding the schema. Store any valid json here.
-	Metadata         interface{} `json:"metadata,omitempty"`
-	Treatments       []string    `json:"treatments,omitempty"`
-	AlternativeNames []string    `json:"alternativeNames,omitempty"`
+	Metadata interface{} `json:"metadata,omitempty"`
+	// A unique presentation for a field in the UI.
+	Treatments       []string `json:"treatments,omitempty"`
+	AlternativeNames []string `json:"alternativeNames,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -4843,9 +4507,10 @@ type EnumProperty struct {
 	Constraints []*Constraint `json:"constraints,omitempty"`
 	Readonly    *bool         `json:"readonly,omitempty"`
 	// Useful for any contextual metadata regarding the schema. Store any valid json here.
-	Metadata         interface{} `json:"metadata,omitempty"`
-	Treatments       []string    `json:"treatments,omitempty"`
-	AlternativeNames []string    `json:"alternativeNames,omitempty"`
+	Metadata interface{} `json:"metadata,omitempty"`
+	// A unique presentation for a field in the UI.
+	Treatments       []string `json:"treatments,omitempty"`
+	AlternativeNames []string `json:"alternativeNames,omitempty"`
 	// Will allow multiple values and store as an array
 	IsArray *bool `json:"isArray,omitempty"`
 	// Will allow multiple values and store / provide the values in an array if set. Not all field types support arrays.
@@ -4990,9 +4655,10 @@ type NumberProperty struct {
 	Constraints []*Constraint `json:"constraints,omitempty"`
 	Readonly    *bool         `json:"readonly,omitempty"`
 	// Useful for any contextual metadata regarding the schema. Store any valid json here.
-	Metadata         interface{} `json:"metadata,omitempty"`
-	Treatments       []string    `json:"treatments,omitempty"`
-	AlternativeNames []string    `json:"alternativeNames,omitempty"`
+	Metadata interface{} `json:"metadata,omitempty"`
+	// A unique presentation for a field in the UI.
+	Treatments       []string `json:"treatments,omitempty"`
+	AlternativeNames []string `json:"alternativeNames,omitempty"`
 	// Will allow multiple values and store as an array
 	IsArray *bool         `json:"isArray,omitempty"`
 	Config  *NumberConfig `json:"config,omitempty"`
@@ -5032,9 +4698,10 @@ type ReferenceProperty struct {
 	Constraints []*Constraint `json:"constraints,omitempty"`
 	Readonly    *bool         `json:"readonly,omitempty"`
 	// Useful for any contextual metadata regarding the schema. Store any valid json here.
-	Metadata         interface{} `json:"metadata,omitempty"`
-	Treatments       []string    `json:"treatments,omitempty"`
-	AlternativeNames []string    `json:"alternativeNames,omitempty"`
+	Metadata interface{} `json:"metadata,omitempty"`
+	// A unique presentation for a field in the UI.
+	Treatments       []string `json:"treatments,omitempty"`
+	AlternativeNames []string `json:"alternativeNames,omitempty"`
 	// Will allow multiple values and store as an array
 	IsArray *bool                    `json:"isArray,omitempty"`
 	Config  *ReferencePropertyConfig `json:"config,omitempty"`
@@ -5192,7 +4859,8 @@ type StringProperty struct {
 	Constraints []*Constraint `json:"constraints,omitempty"`
 	Readonly    *bool         `json:"readonly,omitempty"`
 	// Useful for any contextual metadata regarding the schema. Store any valid json here.
-	Metadata         interface{}   `json:"metadata,omitempty"`
+	Metadata interface{} `json:"metadata,omitempty"`
+	// A unique presentation for a field in the UI.
 	Treatments       []string      `json:"treatments,omitempty"`
 	AlternativeNames []string      `json:"alternativeNames,omitempty"`
 	Config           *StringConfig `json:"config,omitempty"`
@@ -5354,8 +5022,10 @@ func (c *CellValueWithLinks) String() string {
 type DiffData = map[string]*DiffValue
 
 type DiffRecord struct {
-	Id        RecordId               `json:"id"`
+	Id RecordId `json:"id"`
+	// Deprecated, use `commitId` instead.
 	VersionId *VersionId             `json:"versionId,omitempty"`
+	CommitId  *CommitId              `json:"commitId,omitempty"`
 	Valid     *bool                  `json:"valid,omitempty"`
 	Messages  []*ValidationMessage   `json:"messages,omitempty"`
 	Metadata  map[string]interface{} `json:"metadata,omitempty"`
@@ -5426,10 +5096,12 @@ func (d *DiffValue) String() string {
 
 // A list of records with optional record counts
 type GetRecordsResponseData struct {
-	Success   bool             `json:"success"`
-	Records   RecordsWithLinks `json:"records,omitempty"`
-	Counts    *RecordCounts    `json:"counts,omitempty"`
-	VersionId *VersionId       `json:"versionId,omitempty"`
+	Success bool             `json:"success"`
+	Records RecordsWithLinks `json:"records,omitempty"`
+	Counts  *RecordCounts    `json:"counts,omitempty"`
+	// Deprecated, use `commitId` instead.
+	VersionId *VersionId `json:"versionId,omitempty"`
+	CommitId  *CommitId  `json:"commitId,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -5459,8 +5131,10 @@ func (g *GetRecordsResponseData) String() string {
 
 // A single row of data in a Sheet
 type Record struct {
-	Id        RecordId               `json:"id"`
+	Id RecordId `json:"id"`
+	// Deprecated, use `commitId` instead.
 	VersionId *VersionId             `json:"versionId,omitempty"`
+	CommitId  *CommitId              `json:"commitId,omitempty"`
 	Valid     *bool                  `json:"valid,omitempty"`
 	Messages  []*ValidationMessage   `json:"messages,omitempty"`
 	Metadata  map[string]interface{} `json:"metadata,omitempty"`
@@ -5493,8 +5167,10 @@ func (r *Record) String() string {
 }
 
 type RecordBase struct {
-	Id        RecordId               `json:"id"`
+	Id RecordId `json:"id"`
+	// Deprecated, use `commitId` instead.
 	VersionId *VersionId             `json:"versionId,omitempty"`
+	CommitId  *CommitId              `json:"commitId,omitempty"`
 	Valid     *bool                  `json:"valid,omitempty"`
 	Messages  []*ValidationMessage   `json:"messages,omitempty"`
 	Metadata  map[string]interface{} `json:"metadata,omitempty"`
@@ -5630,10 +5306,12 @@ func (r *RecordsResponse) String() string {
 }
 
 type RecordsResponseData struct {
-	Success   bool              `json:"success"`
-	Records   *RecordsWithLinks `json:"records,omitempty"`
-	Counts    *RecordCounts     `json:"counts,omitempty"`
-	VersionId *VersionId        `json:"versionId,omitempty"`
+	Success bool              `json:"success"`
+	Records *RecordsWithLinks `json:"records,omitempty"`
+	Counts  *RecordCounts     `json:"counts,omitempty"`
+	// Deprecated, use `commitId` instead.
+	VersionId *VersionId `json:"versionId,omitempty"`
+	CommitId  *CommitId  `json:"commitId,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -5789,11 +5467,16 @@ func (a *AssignRoleResponseData) String() string {
 
 // The value of a secret
 type Secret struct {
-	Name          SecretName    `json:"name"`
-	Value         SecretValue   `json:"value"`
+	// The reference name for a secret.
+	Name SecretName `json:"name"`
+	// The secret value. This is hidden in the UI.
+	Value SecretValue `json:"value"`
+	// The Environment of the secret.
 	EnvironmentId EnvironmentId `json:"environmentId"`
-	SpaceId       *SpaceId      `json:"spaceId,omitempty"`
-	Id            SecretId      `json:"id"`
+	// The Space of the secret.
+	SpaceId *SpaceId `json:"spaceId,omitempty"`
+	// The ID of the secret.
+	Id SecretId `json:"id"`
 
 	_rawJSON json.RawMessage
 }
@@ -5827,6 +5510,43 @@ type SecretName = string
 // The value of a secret. Minimum 1 character, maximum 1024
 type SecretValue = string
 
+type CellValueWithCounts struct {
+	Valid     *bool                `json:"valid,omitempty"`
+	Messages  []*ValidationMessage `json:"messages,omitempty"`
+	Value     *CellValueUnion      `json:"value,omitempty"`
+	Layer     *string              `json:"layer,omitempty"`
+	UpdatedAt *time.Time           `json:"updatedAt,omitempty"`
+	Counts    *RecordCounts        `json:"counts,omitempty"`
+
+	_rawJSON json.RawMessage
+}
+
+func (c *CellValueWithCounts) UnmarshalJSON(data []byte) error {
+	type unmarshaler CellValueWithCounts
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CellValueWithCounts(value)
+	c._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CellValueWithCounts) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+// Cell values grouped by field key
+type CellsResponseData = map[string][]*CellValueWithCounts
+
 type ListSheetsResponse struct {
 	Data []*Sheet `json:"data,omitempty"`
 
@@ -5857,8 +5577,8 @@ func (l *ListSheetsResponse) String() string {
 }
 
 type RecordCountsResponseData struct {
-	Data   *SuccessData  `json:"data,omitempty"`
-	Counts *RecordCounts `json:"counts,omitempty"`
+	Counts  *RecordCounts `json:"counts,omitempty"`
+	Success bool          `json:"success"`
 
 	_rawJSON json.RawMessage
 }
@@ -5888,18 +5608,26 @@ func (r *RecordCountsResponseData) String() string {
 
 // A place to store tabular data
 type Sheet struct {
-	Id           SheetId       `json:"id"`
-	WorkbookId   WorkbookId    `json:"workbookId"`
-	Name         string        `json:"name"`
-	Config       *SheetConfig  `json:"config,omitempty"`
+	// The ID of the Sheet.
+	Id SheetId `json:"id"`
+	// The ID of the Workbook.
+	WorkbookId WorkbookId `json:"workbookId"`
+	// The name of the Sheet.
+	Name string `json:"name"`
+	// Describes shape of data as well as behavior
+	Config *SheetConfig `json:"config,omitempty"`
+	// The amount of records in the Sheet.
 	CountRecords *RecordCounts `json:"countRecords,omitempty"`
-	Namespace    *string       `json:"namespace,omitempty"`
-	LockedBy     *string       `json:"lockedBy,omitempty"`
+	// The scoped namespace of the Sheet.
+	Namespace *string `json:"namespace,omitempty"`
+	// The actor who locked the Sheet.
+	LockedBy *string `json:"lockedBy,omitempty"`
 	// Date the sheet was last updated
 	UpdatedAt time.Time `json:"updatedAt"`
 	// Date the sheet was created
-	CreatedAt time.Time  `json:"createdAt"`
-	LockedAt  *time.Time `json:"lockedAt,omitempty"`
+	CreatedAt time.Time `json:"createdAt"`
+	// The time the Sheet was locked.
+	LockedAt *time.Time `json:"lockedAt,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -5960,15 +5688,24 @@ func (s SheetAccess) Ptr() *SheetAccess {
 
 // Describes shape of data as well as behavior
 type SheetConfig struct {
-	Name                       string        `json:"name"`
-	Description                *string       `json:"description,omitempty"`
-	Slug                       *string       `json:"slug,omitempty"`
-	Readonly                   *bool         `json:"readonly,omitempty"`
-	AllowAdditionalFields      *bool         `json:"allowAdditionalFields,omitempty"`
-	MappingConfidenceThreshold *float64      `json:"mappingConfidenceThreshold,omitempty"`
-	Access                     []SheetAccess `json:"access,omitempty"`
-	Fields                     []*Property   `json:"fields,omitempty"`
-	Actions                    []*Action     `json:"actions,omitempty"`
+	// The name of your Sheet as it will appear to your end users.
+	Name string `json:"name"`
+	// A sentence or two describing the purpose of your Sheet.
+	Description *string `json:"description,omitempty"`
+	// A unique identifier for your Sheet.
+	Slug *string `json:"slug,omitempty"`
+	// A boolean specifying whether or not this sheet is read only. Read only sheets are not editable by end users.
+	Readonly *bool `json:"readonly,omitempty"`
+	// Allow end users to add fields during mapping.
+	AllowAdditionalFields *bool `json:"allowAdditionalFields,omitempty"`
+	// The minimum confidence required to automatically map a field
+	MappingConfidenceThreshold *float64 `json:"mappingConfidenceThreshold,omitempty"`
+	// Control Sheet-level access for all users.
+	Access []SheetAccess `json:"access,omitempty"`
+	// Where you define your Sheet’s data schema.
+	Fields []*Property `json:"fields,omitempty"`
+	// An array of actions that end users can perform on this Sheet.
+	Actions []*Action `json:"actions,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -5997,20 +5734,34 @@ func (s *SheetConfig) String() string {
 }
 
 type SheetConfigOrUpdate struct {
-	Name                       *string       `json:"name,omitempty"`
-	Description                *string       `json:"description,omitempty"`
-	Slug                       *string       `json:"slug,omitempty"`
-	Readonly                   *bool         `json:"readonly,omitempty"`
-	AllowAdditionalFields      *bool         `json:"allowAdditionalFields,omitempty"`
-	MappingConfidenceThreshold *float64      `json:"mappingConfidenceThreshold,omitempty"`
-	Access                     []SheetAccess `json:"access,omitempty"`
-	Fields                     []*Property   `json:"fields,omitempty"`
-	Actions                    []*Action     `json:"actions,omitempty"`
-	Id                         *SheetId      `json:"id,omitempty"`
-	WorkbookId                 *WorkbookId   `json:"workbookId,omitempty"`
-	Config                     *SheetConfig  `json:"config,omitempty"`
-	CountRecords               *RecordCounts `json:"countRecords,omitempty"`
-	Namespace                  *string       `json:"namespace,omitempty"`
+	// The name of your Sheet as it will appear to your end users.
+	Name *string `json:"name,omitempty"`
+	// A sentence or two describing the purpose of your Sheet.
+	Description *string `json:"description,omitempty"`
+	// A unique identifier for your Sheet.
+	Slug *string `json:"slug,omitempty"`
+	// A boolean specifying whether or not this sheet is read only. Read only sheets are not editable by end users.
+	Readonly *bool `json:"readonly,omitempty"`
+	// Allow end users to add fields during mapping.
+	AllowAdditionalFields *bool `json:"allowAdditionalFields,omitempty"`
+	// The minimum confidence required to automatically map a field
+	MappingConfidenceThreshold *float64 `json:"mappingConfidenceThreshold,omitempty"`
+	// Control Sheet-level access for all users.
+	Access []SheetAccess `json:"access,omitempty"`
+	// Where you define your Sheet’s data schema.
+	Fields []*Property `json:"fields,omitempty"`
+	// An array of actions that end users can perform on this Sheet.
+	Actions []*Action `json:"actions,omitempty"`
+	// The ID of the Sheet.
+	Id *SheetId `json:"id,omitempty"`
+	// The ID of the Workbook.
+	WorkbookId *WorkbookId `json:"workbookId,omitempty"`
+	// Describes shape of data as well as behavior.
+	Config *SheetConfig `json:"config,omitempty"`
+	// The amount of records in the Sheet.
+	CountRecords *RecordCounts `json:"countRecords,omitempty"`
+	// The scoped namespace of the Sheet.
+	Namespace *string `json:"namespace,omitempty"`
 	// Date the sheet was last updated
 	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
 	// Date the sheet was created
@@ -6044,15 +5795,24 @@ func (s *SheetConfigOrUpdate) String() string {
 
 // Changes to make to an existing sheet config
 type SheetConfigUpdate struct {
-	Name                       *string       `json:"name,omitempty"`
-	Description                *string       `json:"description,omitempty"`
-	Slug                       *string       `json:"slug,omitempty"`
-	Readonly                   *bool         `json:"readonly,omitempty"`
-	AllowAdditionalFields      *bool         `json:"allowAdditionalFields,omitempty"`
-	MappingConfidenceThreshold *float64      `json:"mappingConfidenceThreshold,omitempty"`
-	Access                     []SheetAccess `json:"access,omitempty"`
-	Fields                     []*Property   `json:"fields,omitempty"`
-	Actions                    []*Action     `json:"actions,omitempty"`
+	// The name of your Sheet as it will appear to your end users.
+	Name *string `json:"name,omitempty"`
+	// A sentence or two describing the purpose of your Sheet.
+	Description *string `json:"description,omitempty"`
+	// A unique identifier for your Sheet.
+	Slug *string `json:"slug,omitempty"`
+	// A boolean specifying whether or not this sheet is read only. Read only sheets are not editable by end users.
+	Readonly *bool `json:"readonly,omitempty"`
+	// Allow end users to add fields during mapping.
+	AllowAdditionalFields *bool `json:"allowAdditionalFields,omitempty"`
+	// The minimum confidence required to automatically map a field
+	MappingConfidenceThreshold *float64 `json:"mappingConfidenceThreshold,omitempty"`
+	// Control Sheet-level access for all users.
+	Access []SheetAccess `json:"access,omitempty"`
+	// Where you define your Sheet’s data schema.
+	Fields []*Property `json:"fields,omitempty"`
+	// An array of actions that end users can perform on this Sheet.
+	Actions []*Action `json:"actions,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -6082,11 +5842,16 @@ func (s *SheetConfigUpdate) String() string {
 
 // Changes to make to an existing sheet
 type SheetUpdate struct {
-	Id           *SheetId      `json:"id,omitempty"`
-	WorkbookId   *WorkbookId   `json:"workbookId,omitempty"`
-	Config       *SheetConfig  `json:"config,omitempty"`
+	// The ID of the Sheet.
+	Id *SheetId `json:"id,omitempty"`
+	// The ID of the Workbook.
+	WorkbookId *WorkbookId `json:"workbookId,omitempty"`
+	// Describes shape of data as well as behavior.
+	Config *SheetConfig `json:"config,omitempty"`
+	// The amount of records in the Sheet.
 	CountRecords *RecordCounts `json:"countRecords,omitempty"`
-	Namespace    *string       `json:"namespace,omitempty"`
+	// The scoped namespace of the Sheet.
+	Namespace *string `json:"namespace,omitempty"`
 	// Date the sheet was last updated
 	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
 	// Date the sheet was created
@@ -6119,12 +5884,18 @@ func (s *SheetUpdate) String() string {
 }
 
 type Snapshot struct {
-	Id        SnapshotId       `json:"id"`
-	SheetId   SheetId          `json:"sheetId"`
-	Label     *string          `json:"label,omitempty"`
-	Summary   *SnapshotSummary `json:"summary,omitempty"`
-	CreatedAt time.Time        `json:"createdAt"`
-	CreatedBy UserId           `json:"createdBy"`
+	// The ID of the Snapshot.
+	Id SnapshotId `json:"id"`
+	// The ID of the Sheet.
+	SheetId SheetId `json:"sheetId"`
+	// The title of the Snapshot.
+	Label *string `json:"label,omitempty"`
+	// A summary of the Snapshot.
+	Summary *SnapshotSummary `json:"summary,omitempty"`
+	// The time the Snapshot was created.
+	CreatedAt time.Time `json:"createdAt"`
+	// The actor who created the Snapshot.
+	CreatedBy UserId `json:"createdBy"`
 
 	_rawJSON json.RawMessage
 }
@@ -6215,11 +5986,13 @@ func (s *SummarySection) String() string {
 
 // Properties used to allow users to connect to the event bus
 type EventToken struct {
+	// The ID of the Account.
 	AccountId *AccountId `json:"accountId,omitempty"`
 	// The id of the event bus to subscribe to
 	SubscribeKey *string `json:"subscribeKey,omitempty"`
 	// Time to live in minutes
-	Ttl   *int    `json:"ttl,omitempty"`
+	Ttl *int `json:"ttl,omitempty"`
+	// This should be your API key.
 	Token *string `json:"token,omitempty"`
 
 	_rawJSON json.RawMessage
@@ -6352,11 +6125,16 @@ type Space struct {
 	// The name of the space
 	Name string `json:"name"`
 	// The display order
-	DisplayOrder        *int                      `json:"displayOrder,omitempty"`
-	AccessToken         *string                   `json:"accessToken,omitempty"`
-	IsCollaborative     *bool                     `json:"isCollaborative,omitempty"`
-	Size                *SpaceSize                `json:"size,omitempty"`
-	UpgradedAt          *time.Time                `json:"upgradedAt,omitempty"`
+	DisplayOrder *int `json:"displayOrder,omitempty"`
+	// Access token for the space
+	AccessToken *string `json:"accessToken,omitempty"`
+	// Flag for collaborative (project) spaces
+	IsCollaborative *bool `json:"isCollaborative,omitempty"`
+	// Size information for the space
+	Size *SpaceSize `json:"size,omitempty"`
+	// Date when the space was upgraded
+	UpgradedAt *time.Time `json:"upgradedAt,omitempty"`
+	// Type of guest authentication
 	GuestAuthentication []GuestAuthenticationEnum `json:"guestAuthentication,omitempty"`
 
 	_rawJSON json.RawMessage
@@ -6631,14 +6409,22 @@ func (v *VersionResponse) String() string {
 
 // A collection of one or more sheets
 type Workbook struct {
-	Id            WorkbookId              `json:"id"`
-	Name          *string                 `json:"name,omitempty"`
-	SpaceId       SpaceId                 `json:"spaceId"`
-	EnvironmentId EnvironmentId           `json:"environmentId"`
-	Sheets        []*Sheet                `json:"sheets,omitempty"`
-	Labels        []string                `json:"labels,omitempty"`
-	Actions       []*Action               `json:"actions,omitempty"`
-	Settings      *WorkbookConfigSettings `json:"settings,omitempty"`
+	// ID of the Workbook.
+	Id WorkbookId `json:"id"`
+	// Name of the Workbook.
+	Name *string `json:"name,omitempty"`
+	// Associated Space ID of the Workbook.
+	SpaceId SpaceId `json:"spaceId"`
+	// Associated Environment ID of the Workbook.
+	EnvironmentId EnvironmentId `json:"environmentId"`
+	// A list of Sheets associated with the Workbook.
+	Sheets []*Sheet `json:"sheets,omitempty"`
+	// A list of labels for the Workbook.
+	Labels []string `json:"labels,omitempty"`
+	// A list of Actions associated with the Workbook.
+	Actions []*Action `json:"actions,omitempty"`
+	// The Workbook settings.
+	Settings *WorkbookConfigSettings `json:"settings,omitempty"`
 	// Metadata for the workbook
 	Metadata  interface{} `json:"metadata,omitempty"`
 	Namespace *string     `json:"namespace,omitempty"`

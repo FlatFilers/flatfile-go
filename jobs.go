@@ -10,15 +10,21 @@ import (
 )
 
 type ListJobsRequest struct {
+	// When provided, only jobs for the given environment will be returned
 	EnvironmentId *EnvironmentId `json:"-"`
-	SpaceId       *SpaceId       `json:"-"`
-	WorkbookId    *WorkbookId    `json:"-"`
-	FileId        *FileId        `json:"-"`
-	ParentId      *JobId         `json:"-"`
+	// When provided, only jobs for the given space will be returned
+	SpaceId *SpaceId `json:"-"`
+	// When provided, only jobs for the given workbook will be returned
+	WorkbookId *WorkbookId `json:"-"`
+	// When provided, only jobs for the given file will be returned
+	FileId *FileId `json:"-"`
+	// When provided, only jobs that are parts of the given job will be returned
+	ParentId *JobId `json:"-"`
 	// Number of jobs to return in a page (default 20)
 	PageSize *int `json:"-"`
 	// Based on pageSize, which page of jobs to return
-	PageNumber    *int           `json:"-"`
+	PageNumber *int `json:"-"`
+	// Sort direction - asc (ascending) or desc (descending)
 	SortDirection *SortDirection `json:"-"`
 }
 
@@ -27,7 +33,8 @@ type JobId = string
 
 // Details about the user who acknowledged the job
 type JobAckDetails struct {
-	Info                  *string    `json:"info,omitempty"`
+	Info *string `json:"info,omitempty"`
+	// the progress of the job. Whole number between 0 and 100
 	Progress              *int       `json:"progress,omitempty"`
 	EstimatedCompletionAt *time.Time `json:"estimatedCompletionAt,omitempty"`
 
@@ -131,9 +138,9 @@ type JobConfig struct {
 	Trigger *Trigger `json:"trigger,omitempty"`
 	// the status of the job
 	Status *JobStatus `json:"status,omitempty"`
-	// the progress of the job
-	Progress *float64 `json:"progress,omitempty"`
-	FileId   *FileId  `json:"fileId,omitempty"`
+	// the progress of the job. Whole number between 0 and 100
+	Progress *int    `json:"progress,omitempty"`
+	FileId   *FileId `json:"fileId,omitempty"`
 	// the mode of the job
 	Mode *JobMode `json:"mode,omitempty"`
 	// Input parameters for this job type.
@@ -343,8 +350,8 @@ type JobUpdate struct {
 	Config *JobUpdateConfig `json:"config,omitempty"`
 	// the status of the job
 	Status *JobStatus `json:"status,omitempty"`
-	// the progress of the job
-	Progress *float64 `json:"progress,omitempty"`
+	// the progress of the job. Whole number between 0 and 100
+	Progress *int `json:"progress,omitempty"`
 	// the time that the job's outcome has been acknowledged by a user
 	OutcomeAcknowledgedAt *time.Time `json:"outcomeAcknowledgedAt,omitempty"`
 
