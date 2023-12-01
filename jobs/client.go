@@ -404,6 +404,31 @@ func (c *Client) Cancel(ctx context.Context, jobId flatfilego.JobId, request *fl
 	return response, nil
 }
 
+// Retry a failt job and return the job
+//
+// ID of job to return
+func (c *Client) Retry(ctx context.Context, jobId flatfilego.JobId) (*flatfilego.JobResponse, error) {
+	baseURL := "https://api.x.flatfile.com/v1"
+	if c.baseURL != "" {
+		baseURL = c.baseURL
+	}
+	endpointURL := fmt.Sprintf(baseURL+"/"+"jobs/%v/retry", jobId)
+
+	var response *flatfilego.JobResponse
+	if err := c.caller.Call(
+		ctx,
+		&core.CallParams{
+			URL:      endpointURL,
+			Method:   http.MethodPost,
+			Headers:  c.header,
+			Response: &response,
+		},
+	); err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
 // Split a job and return the job
 //
 // ID of job to return

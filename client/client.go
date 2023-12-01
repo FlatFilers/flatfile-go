@@ -4,7 +4,6 @@ package client
 
 import (
 	agents "github.com/FlatFilers/flatfile-go/agents"
-	cells "github.com/FlatFilers/flatfile-go/cells"
 	commits "github.com/FlatFilers/flatfile-go/commits"
 	core "github.com/FlatFilers/flatfile-go/core"
 	documents "github.com/FlatFilers/flatfile-go/documents"
@@ -31,7 +30,6 @@ type Client struct {
 	header  http.Header
 
 	Agents       *agents.Client
-	Cells        *cells.Client
 	Commits      *commits.Client
 	Documents    *documents.Client
 	Environments *environments.Client
@@ -60,7 +58,6 @@ func NewClient(opts ...core.ClientOption) *Client {
 		caller:       core.NewCaller(options.HTTPClient),
 		header:       options.ToHeader(),
 		Agents:       agents.NewClient(opts...),
-		Cells:        cells.NewClient(opts...),
 		Commits:      commits.NewClient(opts...),
 		Documents:    documents.NewClient(opts...),
 		Environments: environments.NewClient(opts...),

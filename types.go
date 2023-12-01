@@ -303,43 +303,6 @@ func (l *ListAgentsResponse) String() string {
 	return fmt.Sprintf("%#v", l)
 }
 
-type CellValueWithCountsDeprecated struct {
-	Valid     *bool                `json:"valid,omitempty"`
-	Messages  []*ValidationMessage `json:"messages,omitempty"`
-	Value     *CellValueUnion      `json:"value,omitempty"`
-	Layer     *string              `json:"layer,omitempty"`
-	UpdatedAt *time.Time           `json:"updatedAt,omitempty"`
-	Counts    *RecordCounts        `json:"counts,omitempty"`
-
-	_rawJSON json.RawMessage
-}
-
-func (c *CellValueWithCountsDeprecated) UnmarshalJSON(data []byte) error {
-	type unmarshaler CellValueWithCountsDeprecated
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*c = CellValueWithCountsDeprecated(value)
-	c._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (c *CellValueWithCountsDeprecated) String() string {
-	if len(c._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(c); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", c)
-}
-
-// Cell values grouped by field key
-type CellsResponseDataDeprecated = map[string][]*CellValueWithCountsDeprecated
-
 // A commit version
 type Commit struct {
 	Id      CommitId `json:"id"`
@@ -3282,6 +3245,7 @@ type JobOutcomeNext struct {
 	Download *JobOutcomeNextDownload
 	Wait     *JobOutcomeNextWait
 	Snapshot *JobOutcomeNextSnapshot
+	Retry    *JobOutcomeNextRetry
 }
 
 func NewJobOutcomeNextFromId(value *JobOutcomeNextId) *JobOutcomeNext {
@@ -3302,6 +3266,10 @@ func NewJobOutcomeNextFromWait(value *JobOutcomeNextWait) *JobOutcomeNext {
 
 func NewJobOutcomeNextFromSnapshot(value *JobOutcomeNextSnapshot) *JobOutcomeNext {
 	return &JobOutcomeNext{Type: "snapshot", Snapshot: value}
+}
+
+func NewJobOutcomeNextFromRetry(value *JobOutcomeNextRetry) *JobOutcomeNext {
+	return &JobOutcomeNext{Type: "retry", Retry: value}
 }
 
 func (j *JobOutcomeNext) UnmarshalJSON(data []byte) error {
@@ -3343,6 +3311,12 @@ func (j *JobOutcomeNext) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		j.Snapshot = value
+	case "retry":
+		value := new(JobOutcomeNextRetry)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		j.Retry = value
 	}
 	return nil
 }
@@ -3396,6 +3370,15 @@ func (j JobOutcomeNext) MarshalJSON() ([]byte, error) {
 			JobOutcomeNextSnapshot: j.Snapshot,
 		}
 		return json.Marshal(marshaler)
+	case "retry":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*JobOutcomeNextRetry
+		}{
+			Type:                j.Type,
+			JobOutcomeNextRetry: j.Retry,
+		}
+		return json.Marshal(marshaler)
 	}
 }
 
@@ -3405,6 +3388,7 @@ type JobOutcomeNextVisitor interface {
 	VisitDownload(*JobOutcomeNextDownload) error
 	VisitWait(*JobOutcomeNextWait) error
 	VisitSnapshot(*JobOutcomeNextSnapshot) error
+	VisitRetry(*JobOutcomeNextRetry) error
 }
 
 func (j *JobOutcomeNext) Accept(visitor JobOutcomeNextVisitor) error {
@@ -3421,6 +3405,8 @@ func (j *JobOutcomeNext) Accept(visitor JobOutcomeNextVisitor) error {
 		return visitor.VisitWait(j.Wait)
 	case "snapshot":
 		return visitor.VisitSnapshot(j.Snapshot)
+	case "retry":
+		return visitor.VisitRetry(j.Retry)
 	}
 }
 
@@ -3474,6 +3460,35 @@ func (j *JobOutcomeNextId) UnmarshalJSON(data []byte) error {
 }
 
 func (j *JobOutcomeNextId) String() string {
+	if len(j._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(j); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", j)
+}
+
+type JobOutcomeNextRetry struct {
+	Label *string `json:"label,omitempty"`
+
+	_rawJSON json.RawMessage
+}
+
+func (j *JobOutcomeNextRetry) UnmarshalJSON(data []byte) error {
+	type unmarshaler JobOutcomeNextRetry
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*j = JobOutcomeNextRetry(value)
+	j._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (j *JobOutcomeNextRetry) String() string {
 	if len(j._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
 			return value
@@ -6217,74 +6232,6 @@ func (s *SpaceSize) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", s)
-}
-
-// Client id and secret used for authenticating against our APIs
-type ApiToken struct {
-	ClientId    string                 `json:"clientId"`
-	Description string                 `json:"description"`
-	Metadata    map[string]interface{} `json:"metadata,omitempty"`
-	CreatedAt   string                 `json:"createdAt"`
-	Secret      *string                `json:"secret,omitempty"`
-
-	_rawJSON json.RawMessage
-}
-
-func (a *ApiToken) UnmarshalJSON(data []byte) error {
-	type unmarshaler ApiToken
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*a = ApiToken(value)
-	a._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (a *ApiToken) String() string {
-	if len(a._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(a); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", a)
-}
-
-type ExchangeTokenData struct {
-	// Whether the provided token was valid
-	Valid bool `json:"valid"`
-	// The refreshed token, if the provided token was valid
-	Token *string `json:"token,omitempty"`
-	// The email address the recovery email was sent to, if the provided token was not valid
-	SentTo *string `json:"sentTo,omitempty"`
-
-	_rawJSON json.RawMessage
-}
-
-func (e *ExchangeTokenData) UnmarshalJSON(data []byte) error {
-	type unmarshaler ExchangeTokenData
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*e = ExchangeTokenData(value)
-	e._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (e *ExchangeTokenData) String() string {
-	if len(e._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(e); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", e)
 }
 
 // Configurations for the user

@@ -8,124 +8,13 @@ import (
 	core "github.com/FlatFilers/flatfile-go/core"
 )
 
-type CreateApiTokenRequest struct {
-	TenantId string `json:"-"`
-}
-
-type ExchangeTokenRequest struct {
-	// The token to use for the request
-	Token *string `json:"token,omitempty"`
-	// The invited guest's email, required if no token
-	Email *string `json:"email,omitempty"`
-	// The spaceId, required if no token
-	SpaceId *string `json:"spaceId,omitempty"`
-}
-
 type ListUsersRequest struct {
 	// Email of guest to return
 	Email *string `json:"-"`
 }
 
-type ListApiTokensRequest struct {
-	TenantId string `json:"-"`
-	// Number of tokens to return in a page (default 10)
-	PageSize *int `json:"-"`
-	// Based on pageSize, which page of records to return
-	PageNumber *int `json:"-"`
-}
-
 // User ID
 type UserId = string
-
-// Api token without secret
-type ApiTokenResponse struct {
-	Data *ApiToken `json:"data,omitempty"`
-
-	_rawJSON json.RawMessage
-}
-
-func (a *ApiTokenResponse) UnmarshalJSON(data []byte) error {
-	type unmarshaler ApiTokenResponse
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*a = ApiTokenResponse(value)
-	a._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (a *ApiTokenResponse) String() string {
-	if len(a._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(a); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", a)
-}
-
-type ExchangeTokenResponse struct {
-	Data *ExchangeTokenData `json:"data,omitempty"`
-
-	_rawJSON json.RawMessage
-}
-
-func (e *ExchangeTokenResponse) UnmarshalJSON(data []byte) error {
-	type unmarshaler ExchangeTokenResponse
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*e = ExchangeTokenResponse(value)
-	e._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (e *ExchangeTokenResponse) String() string {
-	if len(e._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(e); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", e)
-}
-
-// List of api tokens without secrets
-type ListApiTokensResponse struct {
-	Pagination *Pagination `json:"pagination,omitempty"`
-	Data       []*ApiToken `json:"data,omitempty"`
-
-	_rawJSON json.RawMessage
-}
-
-func (l *ListApiTokensResponse) UnmarshalJSON(data []byte) error {
-	type unmarshaler ListApiTokensResponse
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*l = ListApiTokensResponse(value)
-	l._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (l *ListApiTokensResponse) String() string {
-	if len(l._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(l._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(l); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", l)
-}
 
 type ListUsersResponse struct {
 	Data []*User `json:"data,omitempty"`
