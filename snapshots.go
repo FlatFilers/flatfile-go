@@ -37,35 +37,6 @@ type ListSnapshotRequest struct {
 // Snapshot ID
 type SnapshotId = string
 
-type DiffRecordsResponse struct {
-	Data DiffRecords `json:"data,omitempty"`
-
-	_rawJSON json.RawMessage
-}
-
-func (d *DiffRecordsResponse) UnmarshalJSON(data []byte) error {
-	type unmarshaler DiffRecordsResponse
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*d = DiffRecordsResponse(value)
-	d._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (d *DiffRecordsResponse) String() string {
-	if len(d._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(d._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(d); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", d)
-}
-
 // Options to filter records in a snapshot
 type ChangeType string
 

@@ -410,3 +410,43 @@ func (l *ListJobsResponse) String() string {
 	}
 	return fmt.Sprintf("%#v", l)
 }
+
+type MutateJobConfig struct {
+	SheetId SheetId `json:"sheetId"`
+	// A JavaScript function that will be run on each record in the sheet, it should return a mutated record.
+	MutateRecord string `json:"mutateRecord"`
+	// If the mutation was generated through some sort of id-ed process, this links this job and that process.
+	MutationId  *string      `json:"mutationId,omitempty"`
+	Filter      *Filter      `json:"filter,omitempty"`
+	FilterField *FilterField `json:"filterField,omitempty"`
+	SearchValue *SearchValue `json:"searchValue,omitempty"`
+	SearchField *SearchField `json:"searchField,omitempty"`
+	Q           *string      `json:"q,omitempty"`
+	// The Record Ids param (ids) is a list of record ids that can be passed to several record endpoints allowing the user to identify specific records to INCLUDE in the query, or specific records to EXCLUDE, depending on whether or not filters are being applied. When passing a query param that filters the record dataset, such as 'searchValue', or a 'filter' of 'valid' | 'error' | 'all', the 'ids' param will EXCLUDE those records from the filtered results. For basic queries that do not filter the dataset, passing record ids in the 'ids' param will limit the dataset to INCLUDE just those specific records
+	Ids []RecordId `json:"ids,omitempty"`
+
+	_rawJSON json.RawMessage
+}
+
+func (m *MutateJobConfig) UnmarshalJSON(data []byte) error {
+	type unmarshaler MutateJobConfig
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*m = MutateJobConfig(value)
+	m._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (m *MutateJobConfig) String() string {
+	if len(m._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(m._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(m); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", m)
+}

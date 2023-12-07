@@ -1146,12 +1146,14 @@ type Event struct {
 	SpaceCreated           *GenericEvent
 	SpaceUpdated           *GenericEvent
 	SpaceDeleted           *GenericEvent
+	SpaceExpired           *GenericEvent
 	DocumentCreated        *GenericEvent
 	DocumentUpdated        *GenericEvent
 	DocumentDeleted        *GenericEvent
 	WorkbookCreated        *GenericEvent
 	WorkbookUpdated        *GenericEvent
 	WorkbookDeleted        *GenericEvent
+	WorkbookExpired        *GenericEvent
 	SheetCreated           *GenericEvent
 	SheetUpdated           *GenericEvent
 	SheetDeleted           *GenericEvent
@@ -1162,6 +1164,7 @@ type Event struct {
 	FileCreated            *GenericEvent
 	FileUpdated            *GenericEvent
 	FileDeleted            *GenericEvent
+	FileExpired            *GenericEvent
 	JobCreated             *GenericEvent
 	JobUpdated             *GenericEvent
 	JobDeleted             *GenericEvent
@@ -1201,6 +1204,10 @@ func NewEventFromSpaceDeleted(value *GenericEvent) *Event {
 	return &Event{Topic: "spaceDeleted", SpaceDeleted: value}
 }
 
+func NewEventFromSpaceExpired(value *GenericEvent) *Event {
+	return &Event{Topic: "spaceExpired", SpaceExpired: value}
+}
+
 func NewEventFromDocumentCreated(value *GenericEvent) *Event {
 	return &Event{Topic: "documentCreated", DocumentCreated: value}
 }
@@ -1223,6 +1230,10 @@ func NewEventFromWorkbookUpdated(value *GenericEvent) *Event {
 
 func NewEventFromWorkbookDeleted(value *GenericEvent) *Event {
 	return &Event{Topic: "workbookDeleted", WorkbookDeleted: value}
+}
+
+func NewEventFromWorkbookExpired(value *GenericEvent) *Event {
+	return &Event{Topic: "workbookExpired", WorkbookExpired: value}
 }
 
 func NewEventFromSheetCreated(value *GenericEvent) *Event {
@@ -1263,6 +1274,10 @@ func NewEventFromFileUpdated(value *GenericEvent) *Event {
 
 func NewEventFromFileDeleted(value *GenericEvent) *Event {
 	return &Event{Topic: "fileDeleted", FileDeleted: value}
+}
+
+func NewEventFromFileExpired(value *GenericEvent) *Event {
+	return &Event{Topic: "fileExpired", FileExpired: value}
 }
 
 func NewEventFromJobCreated(value *GenericEvent) *Event {
@@ -1362,6 +1377,12 @@ func (e *Event) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		e.SpaceDeleted = value
+	case "spaceExpired":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.SpaceExpired = value
 	case "documentCreated":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -1398,6 +1419,12 @@ func (e *Event) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		e.WorkbookDeleted = value
+	case "workbookExpired":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.WorkbookExpired = value
 	case "sheetCreated":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -1458,6 +1485,12 @@ func (e *Event) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		e.FileDeleted = value
+	case "fileExpired":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.FileExpired = value
 	case "jobCreated":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -1598,6 +1631,15 @@ func (e Event) MarshalJSON() ([]byte, error) {
 			GenericEvent: e.SpaceDeleted,
 		}
 		return json.Marshal(marshaler)
+	case "spaceExpired":
+		var marshaler = struct {
+			Topic string `json:"topic"`
+			*GenericEvent
+		}{
+			Topic:        e.Topic,
+			GenericEvent: e.SpaceExpired,
+		}
+		return json.Marshal(marshaler)
 	case "documentCreated":
 		var marshaler = struct {
 			Topic string `json:"topic"`
@@ -1650,6 +1692,15 @@ func (e Event) MarshalJSON() ([]byte, error) {
 		}{
 			Topic:        e.Topic,
 			GenericEvent: e.WorkbookDeleted,
+		}
+		return json.Marshal(marshaler)
+	case "workbookExpired":
+		var marshaler = struct {
+			Topic string `json:"topic"`
+			*GenericEvent
+		}{
+			Topic:        e.Topic,
+			GenericEvent: e.WorkbookExpired,
 		}
 		return json.Marshal(marshaler)
 	case "sheetCreated":
@@ -1740,6 +1791,15 @@ func (e Event) MarshalJSON() ([]byte, error) {
 		}{
 			Topic:        e.Topic,
 			GenericEvent: e.FileDeleted,
+		}
+		return json.Marshal(marshaler)
+	case "fileExpired":
+		var marshaler = struct {
+			Topic string `json:"topic"`
+			*GenericEvent
+		}{
+			Topic:        e.Topic,
+			GenericEvent: e.FileExpired,
 		}
 		return json.Marshal(marshaler)
 	case "jobCreated":
@@ -1869,12 +1929,14 @@ type EventVisitor interface {
 	VisitSpaceCreated(*GenericEvent) error
 	VisitSpaceUpdated(*GenericEvent) error
 	VisitSpaceDeleted(*GenericEvent) error
+	VisitSpaceExpired(*GenericEvent) error
 	VisitDocumentCreated(*GenericEvent) error
 	VisitDocumentUpdated(*GenericEvent) error
 	VisitDocumentDeleted(*GenericEvent) error
 	VisitWorkbookCreated(*GenericEvent) error
 	VisitWorkbookUpdated(*GenericEvent) error
 	VisitWorkbookDeleted(*GenericEvent) error
+	VisitWorkbookExpired(*GenericEvent) error
 	VisitSheetCreated(*GenericEvent) error
 	VisitSheetUpdated(*GenericEvent) error
 	VisitSheetDeleted(*GenericEvent) error
@@ -1885,6 +1947,7 @@ type EventVisitor interface {
 	VisitFileCreated(*GenericEvent) error
 	VisitFileUpdated(*GenericEvent) error
 	VisitFileDeleted(*GenericEvent) error
+	VisitFileExpired(*GenericEvent) error
 	VisitJobCreated(*GenericEvent) error
 	VisitJobUpdated(*GenericEvent) error
 	VisitJobDeleted(*GenericEvent) error
@@ -1916,6 +1979,8 @@ func (e *Event) Accept(visitor EventVisitor) error {
 		return visitor.VisitSpaceUpdated(e.SpaceUpdated)
 	case "spaceDeleted":
 		return visitor.VisitSpaceDeleted(e.SpaceDeleted)
+	case "spaceExpired":
+		return visitor.VisitSpaceExpired(e.SpaceExpired)
 	case "documentCreated":
 		return visitor.VisitDocumentCreated(e.DocumentCreated)
 	case "documentUpdated":
@@ -1928,6 +1993,8 @@ func (e *Event) Accept(visitor EventVisitor) error {
 		return visitor.VisitWorkbookUpdated(e.WorkbookUpdated)
 	case "workbookDeleted":
 		return visitor.VisitWorkbookDeleted(e.WorkbookDeleted)
+	case "workbookExpired":
+		return visitor.VisitWorkbookExpired(e.WorkbookExpired)
 	case "sheetCreated":
 		return visitor.VisitSheetCreated(e.SheetCreated)
 	case "sheetUpdated":
@@ -1948,6 +2015,8 @@ func (e *Event) Accept(visitor EventVisitor) error {
 		return visitor.VisitFileUpdated(e.FileUpdated)
 	case "fileDeleted":
 		return visitor.VisitFileDeleted(e.FileDeleted)
+	case "fileExpired":
+		return visitor.VisitFileExpired(e.FileExpired)
 	case "jobCreated":
 		return visitor.VisitJobCreated(e.JobCreated)
 	case "jobUpdated":
@@ -2083,12 +2152,14 @@ const (
 	EventTopicSpaceCreated           EventTopic = "space:created"
 	EventTopicSpaceUpdated           EventTopic = "space:updated"
 	EventTopicSpaceDeleted           EventTopic = "space:deleted"
+	EventTopicSpaceExpired           EventTopic = "space:expired"
 	EventTopicDocumentCreated        EventTopic = "document:created"
 	EventTopicDocumentUpdated        EventTopic = "document:updated"
 	EventTopicDocumentDeleted        EventTopic = "document:deleted"
 	EventTopicWorkbookCreated        EventTopic = "workbook:created"
 	EventTopicWorkbookUpdated        EventTopic = "workbook:updated"
 	EventTopicWorkbookDeleted        EventTopic = "workbook:deleted"
+	EventTopicWorkbookExpired        EventTopic = "workbook:expired"
 	EventTopicSheetCreated           EventTopic = "sheet:created"
 	EventTopicSheetUpdated           EventTopic = "sheet:updated"
 	EventTopicSheetDeleted           EventTopic = "sheet:deleted"
@@ -2099,6 +2170,7 @@ const (
 	EventTopicFileCreated            EventTopic = "file:created"
 	EventTopicFileUpdated            EventTopic = "file:updated"
 	EventTopicFileDeleted            EventTopic = "file:deleted"
+	EventTopicFileExpired            EventTopic = "file:expired"
 	EventTopicJobCreated             EventTopic = "job:created"
 	EventTopicJobUpdated             EventTopic = "job:updated"
 	EventTopicJobDeleted             EventTopic = "job:deleted"
@@ -2128,6 +2200,8 @@ func NewEventTopicFromString(s string) (EventTopic, error) {
 		return EventTopicSpaceUpdated, nil
 	case "space:deleted":
 		return EventTopicSpaceDeleted, nil
+	case "space:expired":
+		return EventTopicSpaceExpired, nil
 	case "document:created":
 		return EventTopicDocumentCreated, nil
 	case "document:updated":
@@ -2140,6 +2214,8 @@ func NewEventTopicFromString(s string) (EventTopic, error) {
 		return EventTopicWorkbookUpdated, nil
 	case "workbook:deleted":
 		return EventTopicWorkbookDeleted, nil
+	case "workbook:expired":
+		return EventTopicWorkbookExpired, nil
 	case "sheet:created":
 		return EventTopicSheetCreated, nil
 	case "sheet:updated":
@@ -2160,6 +2236,8 @@ func NewEventTopicFromString(s string) (EventTopic, error) {
 		return EventTopicFileUpdated, nil
 	case "file:deleted":
 		return EventTopicFileDeleted, nil
+	case "file:expired":
+		return EventTopicFileExpired, nil
 	case "job:created":
 		return EventTopicJobCreated, nil
 	case "job:updated":
@@ -2366,7 +2444,9 @@ type File struct {
 	// Date the file was created
 	CreatedAt time.Time `json:"createdAt"`
 	// Date the file was last updated
-	UpdatedAt  time.Time   `json:"updatedAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
+	// Date the file was expired
+	ExpiredAt  *time.Time  `json:"expiredAt,omitempty"`
 	SpaceId    SpaceId     `json:"spaceId"`
 	WorkbookId *WorkbookId `json:"workbookId,omitempty"`
 	SheetId    *SheetId    `json:"sheetId,omitempty"`
@@ -3444,6 +3524,8 @@ func (j *JobOutcomeNextDownload) String() string {
 type JobOutcomeNextId struct {
 	Id    string  `json:"id"`
 	Label *string `json:"label,omitempty"`
+	Path  *string `json:"path,omitempty"`
+	Query *string `json:"query,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -4065,46 +4147,6 @@ func (m *Metadata) UnmarshalJSON(data []byte) error {
 }
 
 func (m *Metadata) String() string {
-	if len(m._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(m._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(m); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", m)
-}
-
-type MutateJobConfig struct {
-	SheetId SheetId `json:"sheetId"`
-	// A JavaScript function that will be run on each record in the sheet, it should return a mutated record.
-	MutateRecord string `json:"mutateRecord"`
-	// If the mutation was generated through some sort of id-ed process, this links this job and that process.
-	MutationId  *string      `json:"mutationId,omitempty"`
-	Filter      *Filter      `json:"filter,omitempty"`
-	FilterField *FilterField `json:"filterField,omitempty"`
-	SearchValue *SearchValue `json:"searchValue,omitempty"`
-	SearchField *SearchField `json:"searchField,omitempty"`
-	Q           *string      `json:"q,omitempty"`
-	// The Record Ids param (ids) is a list of record ids that can be passed to several record endpoints allowing the user to identify specific records to INCLUDE in the query, or specific records to EXCLUDE, depending on whether or not filters are being applied. When passing a query param that filters the record dataset, such as 'searchValue', or a 'filter' of 'valid' | 'error' | 'all', the 'ids' param will EXCLUDE those records from the filtered results. For basic queries that do not filter the dataset, passing record ids in the 'ids' param will limit the dataset to INCLUDE just those specific records
-	Ids []RecordId `json:"ids,omitempty"`
-
-	_rawJSON json.RawMessage
-}
-
-func (m *MutateJobConfig) UnmarshalJSON(data []byte) error {
-	type unmarshaler MutateJobConfig
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*m = MutateJobConfig(value)
-	m._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (m *MutateJobConfig) String() string {
 	if len(m._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(m._rawJSON); err == nil {
 			return value
@@ -5074,6 +5116,35 @@ func (d *DiffRecord) String() string {
 
 // List of DiffRecord objects
 type DiffRecords = []*DiffRecord
+
+type DiffRecordsResponse struct {
+	Data DiffRecords `json:"data,omitempty"`
+
+	_rawJSON json.RawMessage
+}
+
+func (d *DiffRecordsResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler DiffRecordsResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*d = DiffRecordsResponse(value)
+	d._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (d *DiffRecordsResponse) String() string {
+	if len(d._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(d._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(d); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", d)
+}
 
 type DiffValue struct {
 	Valid         *bool                `json:"valid,omitempty"`
@@ -6135,6 +6206,8 @@ type Space struct {
 	CreatedAt time.Time `json:"createdAt"`
 	// Date when space was updated
 	UpdatedAt time.Time `json:"updatedAt"`
+	// Date when space was expired
+	ExpiredAt *time.Time `json:"expiredAt,omitempty"`
 	// Guest link to the space
 	GuestLink *string `json:"guestLink,omitempty"`
 	// The name of the space
@@ -6379,6 +6452,8 @@ type Workbook struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 	// Date the workbook was created
 	CreatedAt time.Time `json:"createdAt"`
+	// Date the workbook was created
+	ExpiredAt *time.Time `json:"expiredAt,omitempty"`
 
 	_rawJSON json.RawMessage
 }

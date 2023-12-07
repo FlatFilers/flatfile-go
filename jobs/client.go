@@ -429,6 +429,30 @@ func (c *Client) Retry(ctx context.Context, jobId flatfilego.JobId) (*flatfilego
 	return response, nil
 }
 
+// Preview the results of a mutation
+func (c *Client) PreviewMutation(ctx context.Context, request *flatfilego.MutateJobConfig) (*flatfilego.DiffRecordsResponse, error) {
+	baseURL := "https://api.x.flatfile.com/v1"
+	if c.baseURL != "" {
+		baseURL = c.baseURL
+	}
+	endpointURL := baseURL + "/" + "jobs/preview-mutation"
+
+	var response *flatfilego.DiffRecordsResponse
+	if err := c.caller.Call(
+		ctx,
+		&core.CallParams{
+			URL:      endpointURL,
+			Method:   http.MethodPost,
+			Headers:  c.header,
+			Request:  request,
+			Response: &response,
+		},
+	); err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
 // Split a job and return the job
 //
 // ID of job to return
