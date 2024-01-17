@@ -5,6 +5,9 @@
 
 The Flatfile Go library provides convenient access to the Flatfile API from Go.
 
+## Documentation
+API reference documentation is available [here](https://reference.flatfile.com).
+
 ## Requirements
 
 This module requires Go version >= 1.13.
