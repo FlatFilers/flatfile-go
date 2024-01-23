@@ -28,7 +28,8 @@ type Action struct {
 	// The text on the button itself.
 	Label string `json:"label"`
 	// A tooltip that appears when hovering the action button
-	Tooltip *string `json:"tooltip,omitempty"`
+	Tooltip  *string          `json:"tooltip,omitempty"`
+	Messages []*ActionMessage `json:"messages,omitempty"`
 	// **This is deprecated.**
 	Type *string `json:"type,omitempty"`
 	// The text that appears in the dialog after the action is clicked.

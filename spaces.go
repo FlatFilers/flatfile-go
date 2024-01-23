@@ -23,6 +23,8 @@ type ListSpacesRequest struct {
 	PageNumber *int `json:"-"`
 	// Search query for spaces
 	Search *string `json:"-"`
+	// Search by namespace
+	Namespace *string `json:"-"`
 	// Flag to include archived spaces
 	Archived *bool `json:"-"`
 	// Field to sort spaces by
@@ -31,6 +33,161 @@ type ListSpacesRequest struct {
 	SortDirection *SortDirection `json:"-"`
 	// Flag for collaborative (project) spaces
 	IsCollaborative *bool `json:"-"`
+}
+
+// The topic of the event
+type EventTopic string
+
+const (
+	EventTopicAgentCreated           EventTopic = "agent:created"
+	EventTopicAgentUpdated           EventTopic = "agent:updated"
+	EventTopicAgentDeleted           EventTopic = "agent:deleted"
+	EventTopicSpaceCreated           EventTopic = "space:created"
+	EventTopicSpaceUpdated           EventTopic = "space:updated"
+	EventTopicSpaceDeleted           EventTopic = "space:deleted"
+	EventTopicSpaceArchived          EventTopic = "space:archived"
+	EventTopicSpaceExpired           EventTopic = "space:expired"
+	EventTopicSpaceGuestAdded        EventTopic = "space:guestAdded"
+	EventTopicSpaceGuestRemoved      EventTopic = "space:guestRemoved"
+	EventTopicDocumentCreated        EventTopic = "document:created"
+	EventTopicDocumentUpdated        EventTopic = "document:updated"
+	EventTopicDocumentDeleted        EventTopic = "document:deleted"
+	EventTopicWorkbookCreated        EventTopic = "workbook:created"
+	EventTopicWorkbookUpdated        EventTopic = "workbook:updated"
+	EventTopicWorkbookDeleted        EventTopic = "workbook:deleted"
+	EventTopicWorkbookExpired        EventTopic = "workbook:expired"
+	EventTopicSheetCreated           EventTopic = "sheet:created"
+	EventTopicSheetUpdated           EventTopic = "sheet:updated"
+	EventTopicSheetDeleted           EventTopic = "sheet:deleted"
+	EventTopicSnapshotCreated        EventTopic = "snapshot:created"
+	EventTopicRecordsCreated         EventTopic = "records:created"
+	EventTopicRecordsUpdated         EventTopic = "records:updated"
+	EventTopicRecordsDeleted         EventTopic = "records:deleted"
+	EventTopicFileCreated            EventTopic = "file:created"
+	EventTopicFileUpdated            EventTopic = "file:updated"
+	EventTopicFileDeleted            EventTopic = "file:deleted"
+	EventTopicFileExpired            EventTopic = "file:expired"
+	EventTopicJobCreated             EventTopic = "job:created"
+	EventTopicJobUpdated             EventTopic = "job:updated"
+	EventTopicJobDeleted             EventTopic = "job:deleted"
+	EventTopicJobCompleted           EventTopic = "job:completed"
+	EventTopicJobReady               EventTopic = "job:ready"
+	EventTopicJobScheduled           EventTopic = "job:scheduled"
+	EventTopicJobOutcomeAcknowledged EventTopic = "job:outcome-acknowledged"
+	EventTopicJobPartsCompleted      EventTopic = "job:parts-completed"
+	EventTopicJobFailed              EventTopic = "job:failed"
+	EventTopicProgramCreated         EventTopic = "program:created"
+	EventTopicProgramUpdated         EventTopic = "program:updated"
+	EventTopicCommitCreated          EventTopic = "commit:created"
+	EventTopicCommitUpdated          EventTopic = "commit:updated"
+	EventTopicCommitCompleted        EventTopic = "commit:completed"
+	EventTopicLayerCreated           EventTopic = "layer:created"
+	EventTopicSecretCreated          EventTopic = "secret:created"
+	EventTopicSecretUpdated          EventTopic = "secret:updated"
+	EventTopicSecretDeleted          EventTopic = "secret:deleted"
+)
+
+func NewEventTopicFromString(s string) (EventTopic, error) {
+	switch s {
+	case "agent:created":
+		return EventTopicAgentCreated, nil
+	case "agent:updated":
+		return EventTopicAgentUpdated, nil
+	case "agent:deleted":
+		return EventTopicAgentDeleted, nil
+	case "space:created":
+		return EventTopicSpaceCreated, nil
+	case "space:updated":
+		return EventTopicSpaceUpdated, nil
+	case "space:deleted":
+		return EventTopicSpaceDeleted, nil
+	case "space:archived":
+		return EventTopicSpaceArchived, nil
+	case "space:expired":
+		return EventTopicSpaceExpired, nil
+	case "space:guestAdded":
+		return EventTopicSpaceGuestAdded, nil
+	case "space:guestRemoved":
+		return EventTopicSpaceGuestRemoved, nil
+	case "document:created":
+		return EventTopicDocumentCreated, nil
+	case "document:updated":
+		return EventTopicDocumentUpdated, nil
+	case "document:deleted":
+		return EventTopicDocumentDeleted, nil
+	case "workbook:created":
+		return EventTopicWorkbookCreated, nil
+	case "workbook:updated":
+		return EventTopicWorkbookUpdated, nil
+	case "workbook:deleted":
+		return EventTopicWorkbookDeleted, nil
+	case "workbook:expired":
+		return EventTopicWorkbookExpired, nil
+	case "sheet:created":
+		return EventTopicSheetCreated, nil
+	case "sheet:updated":
+		return EventTopicSheetUpdated, nil
+	case "sheet:deleted":
+		return EventTopicSheetDeleted, nil
+	case "snapshot:created":
+		return EventTopicSnapshotCreated, nil
+	case "records:created":
+		return EventTopicRecordsCreated, nil
+	case "records:updated":
+		return EventTopicRecordsUpdated, nil
+	case "records:deleted":
+		return EventTopicRecordsDeleted, nil
+	case "file:created":
+		return EventTopicFileCreated, nil
+	case "file:updated":
+		return EventTopicFileUpdated, nil
+	case "file:deleted":
+		return EventTopicFileDeleted, nil
+	case "file:expired":
+		return EventTopicFileExpired, nil
+	case "job:created":
+		return EventTopicJobCreated, nil
+	case "job:updated":
+		return EventTopicJobUpdated, nil
+	case "job:deleted":
+		return EventTopicJobDeleted, nil
+	case "job:completed":
+		return EventTopicJobCompleted, nil
+	case "job:ready":
+		return EventTopicJobReady, nil
+	case "job:scheduled":
+		return EventTopicJobScheduled, nil
+	case "job:outcome-acknowledged":
+		return EventTopicJobOutcomeAcknowledged, nil
+	case "job:parts-completed":
+		return EventTopicJobPartsCompleted, nil
+	case "job:failed":
+		return EventTopicJobFailed, nil
+	case "program:created":
+		return EventTopicProgramCreated, nil
+	case "program:updated":
+		return EventTopicProgramUpdated, nil
+	case "commit:created":
+		return EventTopicCommitCreated, nil
+	case "commit:updated":
+		return EventTopicCommitUpdated, nil
+	case "commit:completed":
+		return EventTopicCommitCompleted, nil
+	case "layer:created":
+		return EventTopicLayerCreated, nil
+	case "secret:created":
+		return EventTopicSecretCreated, nil
+	case "secret:updated":
+		return EventTopicSecretUpdated, nil
+	case "secret:deleted":
+		return EventTopicSecretDeleted, nil
+	}
+	var t EventTopic
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (e EventTopic) Ptr() *EventTopic {
+	return &e
 }
 
 type GetSpacesSortField string

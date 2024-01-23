@@ -303,6 +303,78 @@ func (l *ListAgentsResponse) String() string {
 	return fmt.Sprintf("%#v", l)
 }
 
+// An app
+type App struct {
+	Id           AppId       `json:"id"`
+	Name         string      `json:"name"`
+	Namespace    string      `json:"namespace"`
+	Type         AppType     `json:"type,omitempty"`
+	Entity       string      `json:"entity"`
+	EntityPlural string      `json:"entityPlural"`
+	Icon         *string     `json:"icon,omitempty"`
+	Metadata     interface{} `json:"metadata,omitempty"`
+	CreatedAt    time.Time   `json:"createdAt"`
+	UpdatedAt    time.Time   `json:"updatedAt"`
+	DeletedAt    *time.Time  `json:"deletedAt,omitempty"`
+	ActivatedAt  *time.Time  `json:"activatedAt,omitempty"`
+
+	_rawJSON json.RawMessage
+}
+
+func (a *App) UnmarshalJSON(data []byte) error {
+	type unmarshaler App
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = App(value)
+	a._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (a *App) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
+type AppType string
+
+const (
+	AppTypePortal    AppType = "PORTAL"
+	AppTypeProjects  AppType = "PROJECTS"
+	AppTypeMapping   AppType = "MAPPING"
+	AppTypeWorkbooks AppType = "WORKBOOKS"
+	AppTypeCustom    AppType = "CUSTOM"
+)
+
+func NewAppTypeFromString(s string) (AppType, error) {
+	switch s {
+	case "PORTAL":
+		return AppTypePortal, nil
+	case "PROJECTS":
+		return AppTypeProjects, nil
+	case "MAPPING":
+		return AppTypeMapping, nil
+	case "WORKBOOKS":
+		return AppTypeWorkbooks, nil
+	case "CUSTOM":
+		return AppTypeCustom, nil
+	}
+	var t AppType
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (a AppType) Ptr() *AppType {
+	return &a
+}
+
 // A commit version
 type Commit struct {
 	Id      CommitId `json:"id"`
@@ -408,6 +480,7 @@ type ActionConstraintType string
 const (
 	ActionConstraintTypeHasAllValid  ActionConstraintType = "hasAllValid"
 	ActionConstraintTypeHasSelection ActionConstraintType = "hasSelection"
+	ActionConstraintTypeHasData      ActionConstraintType = "hasData"
 )
 
 func NewActionConstraintTypeFromString(s string) (ActionConstraintType, error) {
@@ -416,12 +489,72 @@ func NewActionConstraintTypeFromString(s string) (ActionConstraintType, error) {
 		return ActionConstraintTypeHasAllValid, nil
 	case "hasSelection":
 		return ActionConstraintTypeHasSelection, nil
+	case "hasData":
+		return ActionConstraintTypeHasData, nil
 	}
 	var t ActionConstraintType
 	return "", fmt.Errorf("%s is not a valid %T", s, t)
 }
 
 func (a ActionConstraintType) Ptr() *ActionConstraintType {
+	return &a
+}
+
+type ActionMessage struct {
+	Type    ActionMessageType `json:"type,omitempty"`
+	Content string            `json:"content"`
+
+	_rawJSON json.RawMessage
+}
+
+func (a *ActionMessage) UnmarshalJSON(data []byte) error {
+	type unmarshaler ActionMessage
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = ActionMessage(value)
+	a._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (a *ActionMessage) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
+type ActionMessageType string
+
+const (
+	ActionMessageTypeSuccess ActionMessageType = "success"
+	ActionMessageTypeError   ActionMessageType = "error"
+	ActionMessageTypeWarning ActionMessageType = "warning"
+	ActionMessageTypeInfo    ActionMessageType = "info"
+)
+
+func NewActionMessageTypeFromString(s string) (ActionMessageType, error) {
+	switch s {
+	case "success":
+		return ActionMessageTypeSuccess, nil
+	case "error":
+		return ActionMessageTypeError, nil
+	case "warning":
+		return ActionMessageTypeWarning, nil
+	case "info":
+		return ActionMessageTypeInfo, nil
+	}
+	var t ActionMessageType
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (a ActionMessageType) Ptr() *ActionMessageType {
 	return &a
 }
 
@@ -478,6 +611,9 @@ func (a ActionSchedule) Ptr() *ActionSchedule {
 
 // Agent ID
 type AgentId = string
+
+// App ID
+type AppId = string
 
 // Commit ID
 type CommitId = string
@@ -708,6 +844,8 @@ type InputField struct {
 	Description *string `json:"description,omitempty"`
 	// Field Types inform the user interface how to sort and display data.
 	Type string `json:"type"`
+	// Default value for a Field.
+	DefaultValue interface{} `json:"defaultValue,omitempty"`
 	// Additional configuration for enum Fields.
 	Config *InputConfig `json:"config,omitempty"`
 	// Indicate additional validations that will be applied to the Field.
@@ -838,7 +976,7 @@ type RoleId = string
 // Use this to narrow the searchValue results to a specific field
 type SearchField = string
 
-// Search the entire sheet for the given value, returning matching rows
+// Search for the given value, returning matching rows. For exact matches, wrap the value in double quotes ("Bob"). To search for null values, send empty double quotes ("")
 type SearchValue = string
 
 // Sheet ID
@@ -938,11 +1076,74 @@ func (s *SuccessData) String() string {
 // Boolean
 type SuccessQueryParameter = bool
 
+// User ID
+type UserId = string
+
 // Version ID
 type VersionId = string
 
 // Workbook ID
 type WorkbookId = string
+
+// A data retention policy belonging to an environment
+type DataRetentionPolicy struct {
+	Type          DataRetentionPolicyEnum `json:"type,omitempty"`
+	Period        int                     `json:"period"`
+	EnvironmentId EnvironmentId           `json:"environmentId"`
+	Id            DataRetentionPolicyId   `json:"id"`
+	// Date the policy was created
+	CreatedAt time.Time `json:"createdAt"`
+	// Date the policy was last updated
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	_rawJSON json.RawMessage
+}
+
+func (d *DataRetentionPolicy) UnmarshalJSON(data []byte) error {
+	type unmarshaler DataRetentionPolicy
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*d = DataRetentionPolicy(value)
+	d._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (d *DataRetentionPolicy) String() string {
+	if len(d._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(d._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(d); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", d)
+}
+
+// The type of data retention policy on an environment
+type DataRetentionPolicyEnum string
+
+const (
+	DataRetentionPolicyEnumLastActivity DataRetentionPolicyEnum = "lastActivity"
+	DataRetentionPolicyEnumSinceCreated DataRetentionPolicyEnum = "sinceCreated"
+)
+
+func NewDataRetentionPolicyEnumFromString(s string) (DataRetentionPolicyEnum, error) {
+	switch s {
+	case "lastActivity":
+		return DataRetentionPolicyEnumLastActivity, nil
+	case "sinceCreated":
+		return DataRetentionPolicyEnumSinceCreated, nil
+	}
+	var t DataRetentionPolicyEnum
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (d DataRetentionPolicyEnum) Ptr() *DataRetentionPolicyEnum {
+	return &d
+}
 
 // A document (markdown components) belong to a space
 type Document struct {
@@ -1070,6 +1271,7 @@ type Context struct {
 	VersionId        *VersionId  `json:"versionId,omitempty"`
 	CommitId         *CommitId   `json:"commitId,omitempty"`
 	JobId            *JobId      `json:"jobId,omitempty"`
+	ProgramId        *ProgramId  `json:"programId,omitempty"`
 	FileId           *FileId     `json:"fileId,omitempty"`
 	DocumentId       *DocumentId `json:"documentId,omitempty"`
 	PrecedingEventId *EventId    `json:"precedingEventId,omitempty"`
@@ -1112,6 +1314,8 @@ const (
 	DomainJob      Domain = "job"
 	DomainDocument Domain = "document"
 	DomainSheet    Domain = "sheet"
+	DomainProgram  Domain = "program"
+	DomainSecret   Domain = "secret"
 )
 
 func NewDomainFromString(s string) (Domain, error) {
@@ -1128,6 +1332,10 @@ func NewDomainFromString(s string) (Domain, error) {
 		return DomainDocument, nil
 	case "sheet":
 		return DomainSheet, nil
+	case "program":
+		return DomainProgram, nil
+	case "secret":
+		return DomainSecret, nil
 	}
 	var t Domain
 	return "", fmt.Errorf("%s is not a valid %T", s, t)
@@ -1146,7 +1354,10 @@ type Event struct {
 	SpaceCreated           *GenericEvent
 	SpaceUpdated           *GenericEvent
 	SpaceDeleted           *GenericEvent
+	SpaceArchived          *GenericEvent
 	SpaceExpired           *GenericEvent
+	SpaceGuestAdded        *GenericEvent
+	SpaceGuestRemoved      *GenericEvent
 	DocumentCreated        *GenericEvent
 	DocumentUpdated        *GenericEvent
 	DocumentDeleted        *GenericEvent
@@ -1174,9 +1385,14 @@ type Event struct {
 	JobScheduled           *GenericEvent
 	JobOutcomeAcknowledged *GenericEvent
 	JobPartsCompleted      *GenericEvent
+	ProgramCreated         *GenericEvent
+	ProgramUpdated         *GenericEvent
 	CommitCreated          *GenericEvent
 	CommitUpdated          *GenericEvent
 	CommitCompleted        *GenericEvent
+	SecretCreated          *GenericEvent
+	SecretUpdated          *GenericEvent
+	SecretDeleted          *GenericEvent
 	LayerCreated           *GenericEvent
 }
 
@@ -1204,8 +1420,20 @@ func NewEventFromSpaceDeleted(value *GenericEvent) *Event {
 	return &Event{Topic: "spaceDeleted", SpaceDeleted: value}
 }
 
+func NewEventFromSpaceArchived(value *GenericEvent) *Event {
+	return &Event{Topic: "spaceArchived", SpaceArchived: value}
+}
+
 func NewEventFromSpaceExpired(value *GenericEvent) *Event {
 	return &Event{Topic: "spaceExpired", SpaceExpired: value}
+}
+
+func NewEventFromSpaceGuestAdded(value *GenericEvent) *Event {
+	return &Event{Topic: "spaceGuestAdded", SpaceGuestAdded: value}
+}
+
+func NewEventFromSpaceGuestRemoved(value *GenericEvent) *Event {
+	return &Event{Topic: "spaceGuestRemoved", SpaceGuestRemoved: value}
 }
 
 func NewEventFromDocumentCreated(value *GenericEvent) *Event {
@@ -1316,6 +1544,14 @@ func NewEventFromJobPartsCompleted(value *GenericEvent) *Event {
 	return &Event{Topic: "jobPartsCompleted", JobPartsCompleted: value}
 }
 
+func NewEventFromProgramCreated(value *GenericEvent) *Event {
+	return &Event{Topic: "programCreated", ProgramCreated: value}
+}
+
+func NewEventFromProgramUpdated(value *GenericEvent) *Event {
+	return &Event{Topic: "programUpdated", ProgramUpdated: value}
+}
+
 func NewEventFromCommitCreated(value *GenericEvent) *Event {
 	return &Event{Topic: "commitCreated", CommitCreated: value}
 }
@@ -1326,6 +1562,18 @@ func NewEventFromCommitUpdated(value *GenericEvent) *Event {
 
 func NewEventFromCommitCompleted(value *GenericEvent) *Event {
 	return &Event{Topic: "commitCompleted", CommitCompleted: value}
+}
+
+func NewEventFromSecretCreated(value *GenericEvent) *Event {
+	return &Event{Topic: "secretCreated", SecretCreated: value}
+}
+
+func NewEventFromSecretUpdated(value *GenericEvent) *Event {
+	return &Event{Topic: "secretUpdated", SecretUpdated: value}
+}
+
+func NewEventFromSecretDeleted(value *GenericEvent) *Event {
+	return &Event{Topic: "secretDeleted", SecretDeleted: value}
 }
 
 func NewEventFromLayerCreated(value *GenericEvent) *Event {
@@ -1377,12 +1625,30 @@ func (e *Event) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		e.SpaceDeleted = value
+	case "spaceArchived":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.SpaceArchived = value
 	case "spaceExpired":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.SpaceExpired = value
+	case "spaceGuestAdded":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.SpaceGuestAdded = value
+	case "spaceGuestRemoved":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.SpaceGuestRemoved = value
 	case "documentCreated":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -1545,6 +1811,18 @@ func (e *Event) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		e.JobPartsCompleted = value
+	case "programCreated":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.ProgramCreated = value
+	case "programUpdated":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.ProgramUpdated = value
 	case "commitCreated":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -1563,6 +1841,24 @@ func (e *Event) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		e.CommitCompleted = value
+	case "secretCreated":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.SecretCreated = value
+	case "secretUpdated":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.SecretUpdated = value
+	case "secretDeleted":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.SecretDeleted = value
 	case "layerCreated":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -1631,6 +1927,15 @@ func (e Event) MarshalJSON() ([]byte, error) {
 			GenericEvent: e.SpaceDeleted,
 		}
 		return json.Marshal(marshaler)
+	case "spaceArchived":
+		var marshaler = struct {
+			Topic string `json:"topic"`
+			*GenericEvent
+		}{
+			Topic:        e.Topic,
+			GenericEvent: e.SpaceArchived,
+		}
+		return json.Marshal(marshaler)
 	case "spaceExpired":
 		var marshaler = struct {
 			Topic string `json:"topic"`
@@ -1638,6 +1943,24 @@ func (e Event) MarshalJSON() ([]byte, error) {
 		}{
 			Topic:        e.Topic,
 			GenericEvent: e.SpaceExpired,
+		}
+		return json.Marshal(marshaler)
+	case "spaceGuestAdded":
+		var marshaler = struct {
+			Topic string `json:"topic"`
+			*GenericEvent
+		}{
+			Topic:        e.Topic,
+			GenericEvent: e.SpaceGuestAdded,
+		}
+		return json.Marshal(marshaler)
+	case "spaceGuestRemoved":
+		var marshaler = struct {
+			Topic string `json:"topic"`
+			*GenericEvent
+		}{
+			Topic:        e.Topic,
+			GenericEvent: e.SpaceGuestRemoved,
 		}
 		return json.Marshal(marshaler)
 	case "documentCreated":
@@ -1883,6 +2206,24 @@ func (e Event) MarshalJSON() ([]byte, error) {
 			GenericEvent: e.JobPartsCompleted,
 		}
 		return json.Marshal(marshaler)
+	case "programCreated":
+		var marshaler = struct {
+			Topic string `json:"topic"`
+			*GenericEvent
+		}{
+			Topic:        e.Topic,
+			GenericEvent: e.ProgramCreated,
+		}
+		return json.Marshal(marshaler)
+	case "programUpdated":
+		var marshaler = struct {
+			Topic string `json:"topic"`
+			*GenericEvent
+		}{
+			Topic:        e.Topic,
+			GenericEvent: e.ProgramUpdated,
+		}
+		return json.Marshal(marshaler)
 	case "commitCreated":
 		var marshaler = struct {
 			Topic string `json:"topic"`
@@ -1910,6 +2251,33 @@ func (e Event) MarshalJSON() ([]byte, error) {
 			GenericEvent: e.CommitCompleted,
 		}
 		return json.Marshal(marshaler)
+	case "secretCreated":
+		var marshaler = struct {
+			Topic string `json:"topic"`
+			*GenericEvent
+		}{
+			Topic:        e.Topic,
+			GenericEvent: e.SecretCreated,
+		}
+		return json.Marshal(marshaler)
+	case "secretUpdated":
+		var marshaler = struct {
+			Topic string `json:"topic"`
+			*GenericEvent
+		}{
+			Topic:        e.Topic,
+			GenericEvent: e.SecretUpdated,
+		}
+		return json.Marshal(marshaler)
+	case "secretDeleted":
+		var marshaler = struct {
+			Topic string `json:"topic"`
+			*GenericEvent
+		}{
+			Topic:        e.Topic,
+			GenericEvent: e.SecretDeleted,
+		}
+		return json.Marshal(marshaler)
 	case "layerCreated":
 		var marshaler = struct {
 			Topic string `json:"topic"`
@@ -1929,7 +2297,10 @@ type EventVisitor interface {
 	VisitSpaceCreated(*GenericEvent) error
 	VisitSpaceUpdated(*GenericEvent) error
 	VisitSpaceDeleted(*GenericEvent) error
+	VisitSpaceArchived(*GenericEvent) error
 	VisitSpaceExpired(*GenericEvent) error
+	VisitSpaceGuestAdded(*GenericEvent) error
+	VisitSpaceGuestRemoved(*GenericEvent) error
 	VisitDocumentCreated(*GenericEvent) error
 	VisitDocumentUpdated(*GenericEvent) error
 	VisitDocumentDeleted(*GenericEvent) error
@@ -1957,9 +2328,14 @@ type EventVisitor interface {
 	VisitJobScheduled(*GenericEvent) error
 	VisitJobOutcomeAcknowledged(*GenericEvent) error
 	VisitJobPartsCompleted(*GenericEvent) error
+	VisitProgramCreated(*GenericEvent) error
+	VisitProgramUpdated(*GenericEvent) error
 	VisitCommitCreated(*GenericEvent) error
 	VisitCommitUpdated(*GenericEvent) error
 	VisitCommitCompleted(*GenericEvent) error
+	VisitSecretCreated(*GenericEvent) error
+	VisitSecretUpdated(*GenericEvent) error
+	VisitSecretDeleted(*GenericEvent) error
 	VisitLayerCreated(*GenericEvent) error
 }
 
@@ -1979,8 +2355,14 @@ func (e *Event) Accept(visitor EventVisitor) error {
 		return visitor.VisitSpaceUpdated(e.SpaceUpdated)
 	case "spaceDeleted":
 		return visitor.VisitSpaceDeleted(e.SpaceDeleted)
+	case "spaceArchived":
+		return visitor.VisitSpaceArchived(e.SpaceArchived)
 	case "spaceExpired":
 		return visitor.VisitSpaceExpired(e.SpaceExpired)
+	case "spaceGuestAdded":
+		return visitor.VisitSpaceGuestAdded(e.SpaceGuestAdded)
+	case "spaceGuestRemoved":
+		return visitor.VisitSpaceGuestRemoved(e.SpaceGuestRemoved)
 	case "documentCreated":
 		return visitor.VisitDocumentCreated(e.DocumentCreated)
 	case "documentUpdated":
@@ -2035,12 +2417,22 @@ func (e *Event) Accept(visitor EventVisitor) error {
 		return visitor.VisitJobOutcomeAcknowledged(e.JobOutcomeAcknowledged)
 	case "jobPartsCompleted":
 		return visitor.VisitJobPartsCompleted(e.JobPartsCompleted)
+	case "programCreated":
+		return visitor.VisitProgramCreated(e.ProgramCreated)
+	case "programUpdated":
+		return visitor.VisitProgramUpdated(e.ProgramUpdated)
 	case "commitCreated":
 		return visitor.VisitCommitCreated(e.CommitCreated)
 	case "commitUpdated":
 		return visitor.VisitCommitUpdated(e.CommitUpdated)
 	case "commitCompleted":
 		return visitor.VisitCommitCompleted(e.CommitCompleted)
+	case "secretCreated":
+		return visitor.VisitSecretCreated(e.SecretCreated)
+	case "secretUpdated":
+		return visitor.VisitSecretUpdated(e.SecretUpdated)
+	case "secretDeleted":
+		return visitor.VisitSecretDeleted(e.SecretDeleted)
 	case "layerCreated":
 		return visitor.VisitLayerCreated(e.LayerCreated)
 	}
@@ -2140,137 +2532,6 @@ func (e *EventResponse) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", e)
-}
-
-// The topic of the event
-type EventTopic string
-
-const (
-	EventTopicAgentCreated           EventTopic = "agent:created"
-	EventTopicAgentUpdated           EventTopic = "agent:updated"
-	EventTopicAgentDeleted           EventTopic = "agent:deleted"
-	EventTopicSpaceCreated           EventTopic = "space:created"
-	EventTopicSpaceUpdated           EventTopic = "space:updated"
-	EventTopicSpaceDeleted           EventTopic = "space:deleted"
-	EventTopicSpaceExpired           EventTopic = "space:expired"
-	EventTopicDocumentCreated        EventTopic = "document:created"
-	EventTopicDocumentUpdated        EventTopic = "document:updated"
-	EventTopicDocumentDeleted        EventTopic = "document:deleted"
-	EventTopicWorkbookCreated        EventTopic = "workbook:created"
-	EventTopicWorkbookUpdated        EventTopic = "workbook:updated"
-	EventTopicWorkbookDeleted        EventTopic = "workbook:deleted"
-	EventTopicWorkbookExpired        EventTopic = "workbook:expired"
-	EventTopicSheetCreated           EventTopic = "sheet:created"
-	EventTopicSheetUpdated           EventTopic = "sheet:updated"
-	EventTopicSheetDeleted           EventTopic = "sheet:deleted"
-	EventTopicSnapshotCreated        EventTopic = "snapshot:created"
-	EventTopicRecordsCreated         EventTopic = "records:created"
-	EventTopicRecordsUpdated         EventTopic = "records:updated"
-	EventTopicRecordsDeleted         EventTopic = "records:deleted"
-	EventTopicFileCreated            EventTopic = "file:created"
-	EventTopicFileUpdated            EventTopic = "file:updated"
-	EventTopicFileDeleted            EventTopic = "file:deleted"
-	EventTopicFileExpired            EventTopic = "file:expired"
-	EventTopicJobCreated             EventTopic = "job:created"
-	EventTopicJobUpdated             EventTopic = "job:updated"
-	EventTopicJobDeleted             EventTopic = "job:deleted"
-	EventTopicJobCompleted           EventTopic = "job:completed"
-	EventTopicJobReady               EventTopic = "job:ready"
-	EventTopicJobScheduled           EventTopic = "job:scheduled"
-	EventTopicJobOutcomeAcknowledged EventTopic = "job:outcome-acknowledged"
-	EventTopicJobPartsCompleted      EventTopic = "job:parts-completed"
-	EventTopicJobFailed              EventTopic = "job:failed"
-	EventTopicCommitCreated          EventTopic = "commit:created"
-	EventTopicCommitUpdated          EventTopic = "commit:updated"
-	EventTopicCommitCompleted        EventTopic = "commit:completed"
-	EventTopicLayerCreated           EventTopic = "layer:created"
-)
-
-func NewEventTopicFromString(s string) (EventTopic, error) {
-	switch s {
-	case "agent:created":
-		return EventTopicAgentCreated, nil
-	case "agent:updated":
-		return EventTopicAgentUpdated, nil
-	case "agent:deleted":
-		return EventTopicAgentDeleted, nil
-	case "space:created":
-		return EventTopicSpaceCreated, nil
-	case "space:updated":
-		return EventTopicSpaceUpdated, nil
-	case "space:deleted":
-		return EventTopicSpaceDeleted, nil
-	case "space:expired":
-		return EventTopicSpaceExpired, nil
-	case "document:created":
-		return EventTopicDocumentCreated, nil
-	case "document:updated":
-		return EventTopicDocumentUpdated, nil
-	case "document:deleted":
-		return EventTopicDocumentDeleted, nil
-	case "workbook:created":
-		return EventTopicWorkbookCreated, nil
-	case "workbook:updated":
-		return EventTopicWorkbookUpdated, nil
-	case "workbook:deleted":
-		return EventTopicWorkbookDeleted, nil
-	case "workbook:expired":
-		return EventTopicWorkbookExpired, nil
-	case "sheet:created":
-		return EventTopicSheetCreated, nil
-	case "sheet:updated":
-		return EventTopicSheetUpdated, nil
-	case "sheet:deleted":
-		return EventTopicSheetDeleted, nil
-	case "snapshot:created":
-		return EventTopicSnapshotCreated, nil
-	case "records:created":
-		return EventTopicRecordsCreated, nil
-	case "records:updated":
-		return EventTopicRecordsUpdated, nil
-	case "records:deleted":
-		return EventTopicRecordsDeleted, nil
-	case "file:created":
-		return EventTopicFileCreated, nil
-	case "file:updated":
-		return EventTopicFileUpdated, nil
-	case "file:deleted":
-		return EventTopicFileDeleted, nil
-	case "file:expired":
-		return EventTopicFileExpired, nil
-	case "job:created":
-		return EventTopicJobCreated, nil
-	case "job:updated":
-		return EventTopicJobUpdated, nil
-	case "job:deleted":
-		return EventTopicJobDeleted, nil
-	case "job:completed":
-		return EventTopicJobCompleted, nil
-	case "job:ready":
-		return EventTopicJobReady, nil
-	case "job:scheduled":
-		return EventTopicJobScheduled, nil
-	case "job:outcome-acknowledged":
-		return EventTopicJobOutcomeAcknowledged, nil
-	case "job:parts-completed":
-		return EventTopicJobPartsCompleted, nil
-	case "job:failed":
-		return EventTopicJobFailed, nil
-	case "commit:created":
-		return EventTopicCommitCreated, nil
-	case "commit:updated":
-		return EventTopicCommitUpdated, nil
-	case "commit:completed":
-		return EventTopicCommitCompleted, nil
-	case "layer:created":
-		return EventTopicLayerCreated, nil
-	}
-	var t EventTopic
-	return "", fmt.Errorf("%s is not a valid %T", s, t)
-}
-
-func (e EventTopic) Ptr() *EventTopic {
-	return &e
 }
 
 type GenericEvent struct {
@@ -3199,6 +3460,7 @@ type JobExecutionPlan struct {
 	FieldMapping              []*Edge             `json:"fieldMapping,omitempty"`
 	UnmappedSourceFields      []*SourceField      `json:"unmappedSourceFields,omitempty"`
 	UnmappedDestinationFields []*DestinationField `json:"unmappedDestinationFields,omitempty"`
+	ProgramId                 *string             `json:"programId,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -3231,6 +3493,7 @@ type JobExecutionPlanConfig struct {
 	FieldMapping              []*Edge             `json:"fieldMapping,omitempty"`
 	UnmappedSourceFields      []*SourceField      `json:"unmappedSourceFields,omitempty"`
 	UnmappedDestinationFields []*DestinationField `json:"unmappedDestinationFields,omitempty"`
+	ProgramId                 *string             `json:"programId,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -4272,6 +4535,180 @@ func (t Trigger) Ptr() *Trigger {
 	return &t
 }
 
+type MappingRule struct {
+	// Name of the mapping rule
+	Name   string      `json:"name"`
+	Type   string      `json:"type"`
+	Config interface{} `json:"config,omitempty"`
+	// Confidence of the mapping rule
+	Confidence *int `json:"confidence,omitempty"`
+	// User ID of the contributor of the mapping rule
+	Contributor *UserId `json:"contributor,omitempty"`
+	// ID of the mapping rule
+	Id MappingId `json:"id"`
+	// User ID of the creator of the mapping rule
+	CreatedBy *UserId `json:"createdBy,omitempty"`
+	// Time the mapping rule was created
+	CreatedAt time.Time `json:"createdAt"`
+	// Time the mapping rule was last updated
+	UpdatedAt time.Time `json:"updatedAt"`
+	// Time the mapping rule was deleted
+	DeletedAt *time.Time `json:"deletedAt,omitempty"`
+
+	_rawJSON json.RawMessage
+}
+
+func (m *MappingRule) UnmarshalJSON(data []byte) error {
+	type unmarshaler MappingRule
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*m = MappingRule(value)
+	m._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (m *MappingRule) String() string {
+	if len(m._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(m._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(m); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", m)
+}
+
+type MappingRuleOrConfig struct {
+	// Name of the mapping rule
+	Name   string      `json:"name"`
+	Type   string      `json:"type"`
+	Config interface{} `json:"config,omitempty"`
+	// Confidence of the mapping rule
+	Confidence *int `json:"confidence,omitempty"`
+	// User ID of the contributor of the mapping rule
+	Contributor *UserId `json:"contributor,omitempty"`
+	// ID of the mapping rule
+	Id *MappingId `json:"id,omitempty"`
+	// User ID of the creator of the mapping rule
+	CreatedBy *UserId `json:"createdBy,omitempty"`
+	// Time the mapping rule was created
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
+	// Time the mapping rule was last updated
+	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
+	// Time the mapping rule was deleted
+	DeletedAt *time.Time `json:"deletedAt,omitempty"`
+
+	_rawJSON json.RawMessage
+}
+
+func (m *MappingRuleOrConfig) UnmarshalJSON(data []byte) error {
+	type unmarshaler MappingRuleOrConfig
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*m = MappingRuleOrConfig(value)
+	m._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (m *MappingRuleOrConfig) String() string {
+	if len(m._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(m._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(m); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", m)
+}
+
+type Program struct {
+	// Mapping rules
+	Rules []*MappingRuleOrConfig `json:"rules,omitempty"`
+	// If this program was saved, this is the ID of the program
+	Id *string `json:"id,omitempty"`
+	// Namespace of the program
+	Namespace *string `json:"namespace,omitempty"`
+	// Family ID of the program, if it belongs to a family
+	FamilyId *FamilyId `json:"familyId,omitempty"`
+	// If this program was saved, this is the time it was created
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
+	// If this program was saved, this is the user ID of the creator
+	CreatedBy *UserId `json:"createdBy,omitempty"`
+	// Source keys
+	SourceKeys []string `json:"sourceKeys,omitempty"`
+	// Destination keys
+	DestinationKeys []string `json:"destinationKeys,omitempty"`
+	// Summary of the mapping rules
+	Summary *ProgramSummary `json:"summary,omitempty"`
+	// If this program was saved, this token allows you to modify the program
+	AccessToken *string `json:"accessToken,omitempty"`
+
+	_rawJSON json.RawMessage
+}
+
+func (p *Program) UnmarshalJSON(data []byte) error {
+	type unmarshaler Program
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = Program(value)
+	p._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (p *Program) String() string {
+	if len(p._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
+}
+
+type ProgramSummary struct {
+	// Total number of mapping rules
+	TotalRuleCount int `json:"totalRuleCount"`
+	// Number of mapping rules added
+	AddedRuleCount int `json:"addedRuleCount"`
+	// Number of mapping rules deleted
+	DeletedRuleCount int `json:"deletedRuleCount"`
+
+	_rawJSON json.RawMessage
+}
+
+func (p *ProgramSummary) UnmarshalJSON(data []byte) error {
+	type unmarshaler ProgramSummary
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = ProgramSummary(value)
+	p._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (p *ProgramSummary) String() string {
+	if len(p._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
+}
+
 type ArrayableProperty struct {
 	// Will allow multiple values and store as an array
 	IsArray *bool `json:"isArray,omitempty"`
@@ -4305,7 +4742,8 @@ func (a *ArrayableProperty) String() string {
 type BaseProperty struct {
 	Key string `json:"key"`
 	// User friendly field name
-	Label       *string       `json:"label,omitempty"`
+	Label *string `json:"label,omitempty"`
+	// A short description of the field. Markdown syntax is supported.
 	Description *string       `json:"description,omitempty"`
 	Constraints []*Constraint `json:"constraints,omitempty"`
 	Readonly    *bool         `json:"readonly,omitempty"`
@@ -4345,7 +4783,8 @@ func (b *BaseProperty) String() string {
 type BooleanProperty struct {
 	Key string `json:"key"`
 	// User friendly field name
-	Label       *string       `json:"label,omitempty"`
+	Label *string `json:"label,omitempty"`
+	// A short description of the field. Markdown syntax is supported.
 	Description *string       `json:"description,omitempty"`
 	Constraints []*Constraint `json:"constraints,omitempty"`
 	Readonly    *bool         `json:"readonly,omitempty"`
@@ -4519,7 +4958,8 @@ func (c *Constraint) Accept(visitor ConstraintVisitor) error {
 type DateProperty struct {
 	Key string `json:"key"`
 	// User friendly field name
-	Label       *string       `json:"label,omitempty"`
+	Label *string `json:"label,omitempty"`
+	// A short description of the field. Markdown syntax is supported.
 	Description *string       `json:"description,omitempty"`
 	Constraints []*Constraint `json:"constraints,omitempty"`
 	Readonly    *bool         `json:"readonly,omitempty"`
@@ -4559,7 +4999,8 @@ func (d *DateProperty) String() string {
 type EnumProperty struct {
 	Key string `json:"key"`
 	// User friendly field name
-	Label       *string       `json:"label,omitempty"`
+	Label *string `json:"label,omitempty"`
+	// A short description of the field. Markdown syntax is supported.
 	Description *string       `json:"description,omitempty"`
 	Constraints []*Constraint `json:"constraints,omitempty"`
 	Readonly    *bool         `json:"readonly,omitempty"`
@@ -4675,7 +5116,7 @@ func (e *EnumPropertyOption) String() string {
 
 type NumberConfig struct {
 	// Number of decimal places to round data to
-	DecimalPlaces int `json:"decimalPlaces"`
+	DecimalPlaces *int `json:"decimalPlaces,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -4707,7 +5148,8 @@ func (n *NumberConfig) String() string {
 type NumberProperty struct {
 	Key string `json:"key"`
 	// User friendly field name
-	Label       *string       `json:"label,omitempty"`
+	Label *string `json:"label,omitempty"`
+	// A short description of the field. Markdown syntax is supported.
 	Description *string       `json:"description,omitempty"`
 	Constraints []*Constraint `json:"constraints,omitempty"`
 	Readonly    *bool         `json:"readonly,omitempty"`
@@ -4750,7 +5192,8 @@ func (n *NumberProperty) String() string {
 type ReferenceProperty struct {
 	Key string `json:"key"`
 	// User friendly field name
-	Label       *string       `json:"label,omitempty"`
+	Label *string `json:"label,omitempty"`
+	// A short description of the field. Markdown syntax is supported.
 	Description *string       `json:"description,omitempty"`
 	Constraints []*Constraint `json:"constraints,omitempty"`
 	Readonly    *bool         `json:"readonly,omitempty"`
@@ -4911,7 +5354,8 @@ func (s StringConfigOptions) Ptr() *StringConfigOptions {
 type StringProperty struct {
 	Key string `json:"key"`
 	// User friendly field name
-	Label       *string       `json:"label,omitempty"`
+	Label *string `json:"label,omitempty"`
+	// A short description of the field. Markdown syntax is supported.
 	Description *string       `json:"description,omitempty"`
 	Constraints []*Constraint `json:"constraints,omitempty"`
 	Readonly    *bool         `json:"readonly,omitempty"`
@@ -5633,6 +6077,63 @@ func (c *CellValueWithCounts) String() string {
 // Cell values grouped by field key
 type CellsResponseData = map[string][]*CellValueWithCounts
 
+type CompositeUniqueConstraint struct {
+	// The name of the constraint
+	Name string `json:"name"`
+	// The fields that must be unique together
+	Fields   []string                          `json:"fields,omitempty"`
+	Strategy CompositeUniqueConstraintStrategy `json:"strategy,omitempty"`
+
+	_rawJSON json.RawMessage
+}
+
+func (c *CompositeUniqueConstraint) UnmarshalJSON(data []byte) error {
+	type unmarshaler CompositeUniqueConstraint
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CompositeUniqueConstraint(value)
+	c._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CompositeUniqueConstraint) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+type CompositeUniqueConstraintStrategy string
+
+const (
+	// A hash of the fields will be used to determine uniqueness
+	CompositeUniqueConstraintStrategyHash CompositeUniqueConstraintStrategy = "hash"
+	// The values of the fields will be concatenated to determine uniqueness
+	CompositeUniqueConstraintStrategyConcat CompositeUniqueConstraintStrategy = "concat"
+)
+
+func NewCompositeUniqueConstraintStrategyFromString(s string) (CompositeUniqueConstraintStrategy, error) {
+	switch s {
+	case "hash":
+		return CompositeUniqueConstraintStrategyHash, nil
+	case "concat":
+		return CompositeUniqueConstraintStrategyConcat, nil
+	}
+	var t CompositeUniqueConstraintStrategy
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (c CompositeUniqueConstraintStrategy) Ptr() *CompositeUniqueConstraintStrategy {
+	return &c
+}
+
 type ListSheetsResponse struct {
 	Data []*Sheet `json:"data,omitempty"`
 
@@ -5700,6 +6201,8 @@ type Sheet struct {
 	WorkbookId WorkbookId `json:"workbookId"`
 	// The name of the Sheet.
 	Name string `json:"name"`
+	// The slug of the Sheet.
+	Slug string `json:"slug"`
 	// Describes shape of data as well as behavior
 	Config *SheetConfig `json:"config,omitempty"`
 	// The amount of records in the Sheet.
@@ -5792,6 +6295,10 @@ type SheetConfig struct {
 	Fields []*Property `json:"fields,omitempty"`
 	// An array of actions that end users can perform on this Sheet.
 	Actions []*Action `json:"actions,omitempty"`
+	// Useful for any contextual metadata regarding the schema. Store any valid json
+	Metadata interface{} `json:"metadata,omitempty"`
+	// An array of constraints that end users can perform on this Sheet.
+	Constraints []*SheetConstraint `json:"constraints,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -5924,6 +6431,63 @@ func (s *SheetConfigUpdate) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", s)
+}
+
+type SheetConstraint struct {
+	Type   string
+	Unique *CompositeUniqueConstraint
+}
+
+func NewSheetConstraintFromUnique(value *CompositeUniqueConstraint) *SheetConstraint {
+	return &SheetConstraint{Type: "unique", Unique: value}
+}
+
+func (s *SheetConstraint) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	s.Type = unmarshaler.Type
+	switch unmarshaler.Type {
+	case "unique":
+		value := new(CompositeUniqueConstraint)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		s.Unique = value
+	}
+	return nil
+}
+
+func (s SheetConstraint) MarshalJSON() ([]byte, error) {
+	switch s.Type {
+	default:
+		return nil, fmt.Errorf("invalid type %s in %T", s.Type, s)
+	case "unique":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*CompositeUniqueConstraint
+		}{
+			Type:                      s.Type,
+			CompositeUniqueConstraint: s.Unique,
+		}
+		return json.Marshal(marshaler)
+	}
+}
+
+type SheetConstraintVisitor interface {
+	VisitUnique(*CompositeUniqueConstraint) error
+}
+
+func (s *SheetConstraint) Accept(visitor SheetConstraintVisitor) error {
+	switch s.Type {
+	default:
+		return fmt.Errorf("invalid type %s in %T", s.Type, s)
+	case "unique":
+		return visitor.VisitUnique(s.Unique)
+	}
 }
 
 // Changes to make to an existing sheet
@@ -6208,6 +6772,8 @@ type Space struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 	// Date when space was expired
 	ExpiredAt *time.Time `json:"expiredAt,omitempty"`
+	// Date that the last activity in the space occurred. This could include any create or update activity in the space like adding a record to a sheet, uploading a new file, or updating the configuration of a workbook. This date is only tracked to the precision of a day.
+	LastActivityAt *time.Time `json:"lastActivityAt,omitempty"`
 	// Guest link to the space
 	GuestLink *string `json:"guestLink,omitempty"`
 	// The name of the space
@@ -6309,10 +6875,15 @@ func (s *SpaceSize) String() string {
 
 // Configurations for the user
 type User struct {
-	Email     string    `json:"email"`
-	Name      string    `json:"name"`
-	AccountId AccountId `json:"accountId"`
-	Id        UserId    `json:"id"`
+	Email     string                 `json:"email"`
+	Name      string                 `json:"name"`
+	AccountId AccountId              `json:"accountId"`
+	Id        UserId                 `json:"id"`
+	Idp       string                 `json:"idp"`
+	IdpRef    *string                `json:"idpRef,omitempty"`
+	Metadata  map[string]interface{} `json:"metadata,omitempty"`
+	CreatedAt time.Time              `json:"createdAt"`
+	UpdatedAt time.Time              `json:"updatedAt"`
 
 	_rawJSON json.RawMessage
 }

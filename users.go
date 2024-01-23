@@ -13,9 +13,6 @@ type ListUsersRequest struct {
 	Email *string `json:"-"`
 }
 
-// User ID
-type UserId = string
-
 type ListUsersResponse struct {
 	Data []*User `json:"data,omitempty"`
 

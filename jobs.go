@@ -194,6 +194,7 @@ type JobExecutionPlanConfigRequest struct {
 	FieldMapping              []*Edge             `json:"fieldMapping,omitempty"`
 	UnmappedSourceFields      []*SourceField      `json:"unmappedSourceFields,omitempty"`
 	UnmappedDestinationFields []*DestinationField `json:"unmappedDestinationFields,omitempty"`
+	ProgramId                 *string             `json:"programId,omitempty"`
 	FileId                    FileId              `json:"fileId"`
 	JobId                     JobId               `json:"jobId"`
 
@@ -227,6 +228,7 @@ type JobExecutionPlanRequest struct {
 	FieldMapping              []*Edge             `json:"fieldMapping,omitempty"`
 	UnmappedSourceFields      []*SourceField      `json:"unmappedSourceFields,omitempty"`
 	UnmappedDestinationFields []*DestinationField `json:"unmappedDestinationFields,omitempty"`
+	ProgramId                 *string             `json:"programId,omitempty"`
 	FileId                    FileId              `json:"fileId"`
 	JobId                     JobId               `json:"jobId"`
 
