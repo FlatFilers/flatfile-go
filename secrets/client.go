@@ -10,9 +10,9 @@ import (
 	fmt "fmt"
 	flatfilego "github.com/FlatFilers/flatfile-go"
 	core "github.com/FlatFilers/flatfile-go/core"
+	option "github.com/FlatFilers/flatfile-go/option"
 	io "io"
 	http "net/http"
-	url "net/url"
 )
 
 type Client struct {
@@ -21,34 +21,46 @@ type Client struct {
 	header  http.Header
 }
 
-func NewClient(opts ...core.ClientOption) *Client {
-	options := core.NewClientOptions()
-	for _, opt := range opts {
-		opt(options)
-	}
+func NewClient(opts ...option.RequestOption) *Client {
+	options := core.NewRequestOptions(opts...)
 	return &Client{
 		baseURL: options.BaseURL,
-		caller:  core.NewCaller(options.HTTPClient),
-		header:  options.ToHeader(),
+		caller: core.NewCaller(
+			&core.CallerParams{
+				Client:      options.HTTPClient,
+				MaxAttempts: options.MaxAttempts,
+			},
+		),
+		header: options.ToHeader(),
 	}
 }
 
 // Fetch all secrets for a given environmentId and optionally apply space overrides
-func (c *Client) List(ctx context.Context, request *flatfilego.ListSecrets) (*flatfilego.SecretsResponse, error) {
+func (c *Client) List(
+	ctx context.Context,
+	request *flatfilego.ListSecrets,
+	opts ...option.RequestOption,
+) (*flatfilego.SecretsResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := baseURL + "/" + "secrets"
 
-	queryParams := make(url.Values)
-	queryParams.Add("environmentId", fmt.Sprintf("%v", request.EnvironmentId))
-	if request.SpaceId != nil {
-		queryParams.Add("spaceId", fmt.Sprintf("%v", request.SpaceId))
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
 	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -82,7 +94,9 @@ func (c *Client) List(ctx context.Context, request *flatfilego.ListSecrets) (*fl
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodGet,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
 		},
@@ -93,12 +107,23 @@ func (c *Client) List(ctx context.Context, request *flatfilego.ListSecrets) (*fl
 }
 
 // Insert or Update a Secret by name for environment or space
-func (c *Client) Upsert(ctx context.Context, request *flatfilego.WriteSecret) (*flatfilego.SecretsResponse, error) {
+func (c *Client) Upsert(
+	ctx context.Context,
+	request *flatfilego.WriteSecret,
+	opts ...option.RequestOption,
+) (*flatfilego.SecretsResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := baseURL + "/" + "secrets"
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -132,7 +157,9 @@ func (c *Client) Upsert(ctx context.Context, request *flatfilego.WriteSecret) (*
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodPost,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Request:      request,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
@@ -144,14 +171,24 @@ func (c *Client) Upsert(ctx context.Context, request *flatfilego.WriteSecret) (*
 }
 
 // Deletes a specific Secret from the Environment or Space as is the case
-//
-// The ID of the secret.
-func (c *Client) Delete(ctx context.Context, secretId flatfilego.SecretId) (*flatfilego.SecretsResponse, error) {
+func (c *Client) Delete(
+	ctx context.Context,
+	// The ID of the secret.
+	secretId flatfilego.SecretId,
+	opts ...option.RequestOption,
+) (*flatfilego.SecretsResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"secrets/%v", secretId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -185,7 +222,9 @@ func (c *Client) Delete(ctx context.Context, secretId flatfilego.SecretId) (*fla
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodDelete,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
 		},

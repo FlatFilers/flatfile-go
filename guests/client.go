@@ -3,12 +3,16 @@
 package guests
 
 import (
+	bytes "bytes"
 	context "context"
+	json "encoding/json"
+	errors "errors"
 	fmt "fmt"
 	flatfilego "github.com/FlatFilers/flatfile-go"
 	core "github.com/FlatFilers/flatfile-go/core"
+	option "github.com/FlatFilers/flatfile-go/option"
+	io "io"
 	http "net/http"
-	url "net/url"
 )
 
 type Client struct {
@@ -17,43 +21,57 @@ type Client struct {
 	header  http.Header
 }
 
-func NewClient(opts ...core.ClientOption) *Client {
-	options := core.NewClientOptions()
-	for _, opt := range opts {
-		opt(options)
-	}
+func NewClient(opts ...option.RequestOption) *Client {
+	options := core.NewRequestOptions(opts...)
 	return &Client{
 		baseURL: options.BaseURL,
-		caller:  core.NewCaller(options.HTTPClient),
-		header:  options.ToHeader(),
+		caller: core.NewCaller(
+			&core.CallerParams{
+				Client:      options.HTTPClient,
+				MaxAttempts: options.MaxAttempts,
+			},
+		),
+		header: options.ToHeader(),
 	}
 }
 
 // Returns all guests
-func (c *Client) List(ctx context.Context, request *flatfilego.ListGuestsRequest) (*flatfilego.ListGuestsResponse, error) {
+func (c *Client) List(
+	ctx context.Context,
+	request *flatfilego.ListGuestsRequest,
+	opts ...option.RequestOption,
+) (*flatfilego.ListGuestsResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := baseURL + "/" + "guests"
 
-	queryParams := make(url.Values)
-	queryParams.Add("spaceId", fmt.Sprintf("%v", request.SpaceId))
-	if request.Email != nil {
-		queryParams.Add("email", fmt.Sprintf("%v", *request.Email))
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
 	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
 
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
+
 	var response *flatfilego.ListGuestsResponse
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
-			URL:      endpointURL,
-			Method:   http.MethodGet,
-			Headers:  c.header,
-			Response: &response,
+			URL:         endpointURL,
+			Method:      http.MethodGet,
+			MaxAttempts: options.MaxAttempts,
+			Headers:     headers,
+			Client:      options.HTTPClient,
+			Response:    &response,
 		},
 	); err != nil {
 		return nil, err
@@ -62,22 +80,35 @@ func (c *Client) List(ctx context.Context, request *flatfilego.ListGuestsRequest
 }
 
 // Guests are only there to upload, edit, and download files and perform their tasks in a specific Space.
-func (c *Client) Create(ctx context.Context, request []*flatfilego.GuestConfig) (*flatfilego.CreateGuestResponse, error) {
+func (c *Client) Create(
+	ctx context.Context,
+	request []*flatfilego.GuestConfig,
+	opts ...option.RequestOption,
+) (*flatfilego.CreateGuestResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := baseURL + "/" + "guests"
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	var response *flatfilego.CreateGuestResponse
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
-			URL:      endpointURL,
-			Method:   http.MethodPost,
-			Headers:  c.header,
-			Request:  request,
-			Response: &response,
+			URL:         endpointURL,
+			Method:      http.MethodPost,
+			MaxAttempts: options.MaxAttempts,
+			Headers:     headers,
+			Client:      options.HTTPClient,
+			Request:     request,
+			Response:    &response,
 		},
 	); err != nil {
 		return nil, err
@@ -86,23 +117,35 @@ func (c *Client) Create(ctx context.Context, request []*flatfilego.GuestConfig) 
 }
 
 // Returns a single guest
-//
-// ID of guest to return
-func (c *Client) Get(ctx context.Context, guestId flatfilego.GuestId) (*flatfilego.GuestResponse, error) {
+func (c *Client) Get(
+	ctx context.Context,
+	// ID of guest to return
+	guestId flatfilego.GuestId,
+	opts ...option.RequestOption,
+) (*flatfilego.GuestResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"guests/%v", guestId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	var response *flatfilego.GuestResponse
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
-			URL:      endpointURL,
-			Method:   http.MethodGet,
-			Headers:  c.header,
-			Response: &response,
+			URL:         endpointURL,
+			Method:      http.MethodGet,
+			MaxAttempts: options.MaxAttempts,
+			Headers:     headers,
+			Client:      options.HTTPClient,
+			Response:    &response,
 		},
 	); err != nil {
 		return nil, err
@@ -111,23 +154,35 @@ func (c *Client) Get(ctx context.Context, guestId flatfilego.GuestId) (*flatfile
 }
 
 // Deletes a single guest
-//
-// ID of guest to return
-func (c *Client) Delete(ctx context.Context, guestId flatfilego.GuestId) (*flatfilego.Success, error) {
+func (c *Client) Delete(
+	ctx context.Context,
+	// ID of guest to return
+	guestId flatfilego.GuestId,
+	opts ...option.RequestOption,
+) (*flatfilego.Success, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"guests/%v", guestId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	var response *flatfilego.Success
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
-			URL:      endpointURL,
-			Method:   http.MethodDelete,
-			Headers:  c.header,
-			Response: &response,
+			URL:         endpointURL,
+			Method:      http.MethodDelete,
+			MaxAttempts: options.MaxAttempts,
+			Headers:     headers,
+			Client:      options.HTTPClient,
+			Response:    &response,
 		},
 	); err != nil {
 		return nil, err
@@ -136,24 +191,37 @@ func (c *Client) Delete(ctx context.Context, guestId flatfilego.GuestId) (*flatf
 }
 
 // Updates a single guest, for example to change name or email
-//
-// ID of guest to return
-func (c *Client) Update(ctx context.Context, guestId flatfilego.GuestId, request *flatfilego.GuestConfigUpdate) (*flatfilego.GuestResponse, error) {
+func (c *Client) Update(
+	ctx context.Context,
+	// ID of guest to return
+	guestId flatfilego.GuestId,
+	request *flatfilego.GuestConfigUpdate,
+	opts ...option.RequestOption,
+) (*flatfilego.GuestResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"guests/%v", guestId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	var response *flatfilego.GuestResponse
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
-			URL:      endpointURL,
-			Method:   http.MethodPatch,
-			Headers:  c.header,
-			Request:  request,
-			Response: &response,
+			URL:         endpointURL,
+			Method:      http.MethodPatch,
+			MaxAttempts: options.MaxAttempts,
+			Headers:     headers,
+			Client:      options.HTTPClient,
+			Request:     request,
+			Response:    &response,
 		},
 	); err != nil {
 		return nil, err
@@ -162,31 +230,261 @@ func (c *Client) Update(ctx context.Context, guestId flatfilego.GuestId, request
 }
 
 // Returns a single guest token
-//
-// ID of guest to return
-func (c *Client) GetGuestToken(ctx context.Context, guestId flatfilego.GuestId, request *flatfilego.GetGuestTokenRequest) (*flatfilego.GuestTokenResponse, error) {
+func (c *Client) GetGuestToken(
+	ctx context.Context,
+	// ID of guest to return
+	guestId flatfilego.GuestId,
+	request *flatfilego.GetGuestTokenRequest,
+	opts ...option.RequestOption,
+) (*flatfilego.GuestTokenResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"guests/%v/token", guestId)
 
-	queryParams := make(url.Values)
-	if request.SpaceId != nil {
-		queryParams.Add("spaceId", fmt.Sprintf("%v", request.SpaceId))
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
 	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
 
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
+
 	var response *flatfilego.GuestTokenResponse
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
-			URL:      endpointURL,
-			Method:   http.MethodGet,
-			Headers:  c.header,
-			Response: &response,
+			URL:         endpointURL,
+			Method:      http.MethodGet,
+			MaxAttempts: options.MaxAttempts,
+			Headers:     headers,
+			Client:      options.HTTPClient,
+			Response:    &response,
+		},
+	); err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
+// Lists roles assigned to a guest.
+func (c *Client) ListGuestRoles(
+	ctx context.Context,
+	// The guest id
+	guestId flatfilego.GuestId,
+	opts ...option.RequestOption,
+) (*flatfilego.ListActorRolesResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
+	baseURL := "https://api.x.flatfile.com/v1"
+	if c.baseURL != "" {
+		baseURL = c.baseURL
+	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := fmt.Sprintf(baseURL+"/"+"guests/%v/roles", guestId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
+
+	errorDecoder := func(statusCode int, body io.Reader) error {
+		raw, err := io.ReadAll(body)
+		if err != nil {
+			return err
+		}
+		apiError := core.NewAPIError(statusCode, errors.New(string(raw)))
+		decoder := json.NewDecoder(bytes.NewReader(raw))
+		switch statusCode {
+		case 400:
+			value := new(flatfilego.BadRequestError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 404:
+			value := new(flatfilego.NotFoundError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 403:
+			value := new(flatfilego.ForbiddenError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		}
+		return apiError
+	}
+
+	var response *flatfilego.ListActorRolesResponse
+	if err := c.caller.Call(
+		ctx,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodGet,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
+	); err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
+// Assigns a role to a guest.
+func (c *Client) AssignGuestRole(
+	ctx context.Context,
+	// The guest id
+	guestId flatfilego.GuestId,
+	request *flatfilego.AssignActorRoleRequest,
+	opts ...option.RequestOption,
+) (*flatfilego.AssignRoleResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
+	baseURL := "https://api.x.flatfile.com/v1"
+	if c.baseURL != "" {
+		baseURL = c.baseURL
+	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := fmt.Sprintf(baseURL+"/"+"guests/%v/roles", guestId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
+
+	errorDecoder := func(statusCode int, body io.Reader) error {
+		raw, err := io.ReadAll(body)
+		if err != nil {
+			return err
+		}
+		apiError := core.NewAPIError(statusCode, errors.New(string(raw)))
+		decoder := json.NewDecoder(bytes.NewReader(raw))
+		switch statusCode {
+		case 400:
+			value := new(flatfilego.BadRequestError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 404:
+			value := new(flatfilego.NotFoundError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 403:
+			value := new(flatfilego.ForbiddenError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		}
+		return apiError
+	}
+
+	var response *flatfilego.AssignRoleResponse
+	if err := c.caller.Call(
+		ctx,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodPost,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Request:      request,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
+	); err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
+// Removes a role from a guest.
+func (c *Client) DeleteGuestRole(
+	ctx context.Context,
+	// The guest id
+	guestId flatfilego.GuestId,
+	// The actor role id
+	actorRoleId flatfilego.ActorRoleId,
+	opts ...option.RequestOption,
+) (*flatfilego.Success, error) {
+	options := core.NewRequestOptions(opts...)
+
+	baseURL := "https://api.x.flatfile.com/v1"
+	if c.baseURL != "" {
+		baseURL = c.baseURL
+	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := fmt.Sprintf(baseURL+"/"+"guests/%v/roles/%v", guestId, actorRoleId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
+
+	errorDecoder := func(statusCode int, body io.Reader) error {
+		raw, err := io.ReadAll(body)
+		if err != nil {
+			return err
+		}
+		apiError := core.NewAPIError(statusCode, errors.New(string(raw)))
+		decoder := json.NewDecoder(bytes.NewReader(raw))
+		switch statusCode {
+		case 400:
+			value := new(flatfilego.BadRequestError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 404:
+			value := new(flatfilego.NotFoundError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 403:
+			value := new(flatfilego.ForbiddenError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		}
+		return apiError
+	}
+
+	var response *flatfilego.Success
+	if err := c.caller.Call(
+		ctx,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodDelete,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
 		},
 	); err != nil {
 		return nil, err
@@ -195,22 +493,35 @@ func (c *Client) GetGuestToken(ctx context.Context, guestId flatfilego.GuestId, 
 }
 
 // Guests can be created as a named guest on the Space or there’s a global link that will let anonymous guests into the space.
-func (c *Client) Invite(ctx context.Context, request []*flatfilego.Invite) (*flatfilego.Success, error) {
+func (c *Client) Invite(
+	ctx context.Context,
+	request []*flatfilego.Invite,
+	opts ...option.RequestOption,
+) (*flatfilego.Success, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := baseURL + "/" + "invitations"
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	var response *flatfilego.Success
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
-			URL:      endpointURL,
-			Method:   http.MethodPost,
-			Headers:  c.header,
-			Request:  request,
-			Response: &response,
+			URL:         endpointURL,
+			Method:      http.MethodPost,
+			MaxAttempts: options.MaxAttempts,
+			Headers:     headers,
+			Client:      options.HTTPClient,
+			Request:     request,
+			Response:    &response,
 		},
 	); err != nil {
 		return nil, err

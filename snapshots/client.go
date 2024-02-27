@@ -10,9 +10,9 @@ import (
 	fmt "fmt"
 	flatfilego "github.com/FlatFilers/flatfile-go"
 	core "github.com/FlatFilers/flatfile-go/core"
+	option "github.com/FlatFilers/flatfile-go/option"
 	io "io"
 	http "net/http"
-	url "net/url"
 )
 
 type Client struct {
@@ -21,25 +21,38 @@ type Client struct {
 	header  http.Header
 }
 
-func NewClient(opts ...core.ClientOption) *Client {
-	options := core.NewClientOptions()
-	for _, opt := range opts {
-		opt(options)
-	}
+func NewClient(opts ...option.RequestOption) *Client {
+	options := core.NewRequestOptions(opts...)
 	return &Client{
 		baseURL: options.BaseURL,
-		caller:  core.NewCaller(options.HTTPClient),
-		header:  options.ToHeader(),
+		caller: core.NewCaller(
+			&core.CallerParams{
+				Client:      options.HTTPClient,
+				MaxAttempts: options.MaxAttempts,
+			},
+		),
+		header: options.ToHeader(),
 	}
 }
 
 // Creates a snapshot of a sheet
-func (c *Client) CreateSnapshot(ctx context.Context, request *flatfilego.CreateSnapshotRequest) (*flatfilego.SnapshotResponse, error) {
+func (c *Client) CreateSnapshot(
+	ctx context.Context,
+	request *flatfilego.CreateSnapshotRequest,
+	opts ...option.RequestOption,
+) (*flatfilego.SnapshotResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := baseURL + "/" + "snapshots"
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -73,7 +86,9 @@ func (c *Client) CreateSnapshot(ctx context.Context, request *flatfilego.CreateS
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodPost,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Request:      request,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
@@ -85,18 +100,31 @@ func (c *Client) CreateSnapshot(ctx context.Context, request *flatfilego.CreateS
 }
 
 // List all snapshots of a sheet
-func (c *Client) ListSnapshots(ctx context.Context, request *flatfilego.ListSnapshotRequest) (*flatfilego.SnapshotsResponse, error) {
+func (c *Client) ListSnapshots(
+	ctx context.Context,
+	request *flatfilego.ListSnapshotRequest,
+	opts ...option.RequestOption,
+) (*flatfilego.SnapshotsResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := baseURL + "/" + "snapshots"
 
-	queryParams := make(url.Values)
-	queryParams.Add("sheetId", fmt.Sprintf("%v", request.SheetId))
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
+	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -130,7 +158,9 @@ func (c *Client) ListSnapshots(ctx context.Context, request *flatfilego.ListSnap
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodGet,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
 		},
@@ -141,20 +171,33 @@ func (c *Client) ListSnapshots(ctx context.Context, request *flatfilego.ListSnap
 }
 
 // Gets a snapshot of a sheet
-//
-// ID of snapshot
-func (c *Client) GetSnapshot(ctx context.Context, snapshotId flatfilego.SnapshotId, request *flatfilego.GetSnapshotRequest) (*flatfilego.SnapshotResponse, error) {
+func (c *Client) GetSnapshot(
+	ctx context.Context,
+	// ID of snapshot
+	snapshotId flatfilego.SnapshotId,
+	request *flatfilego.GetSnapshotRequest,
+	opts ...option.RequestOption,
+) (*flatfilego.SnapshotResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"snapshots/%v", snapshotId)
 
-	queryParams := make(url.Values)
-	queryParams.Add("includeSummary", fmt.Sprintf("%v", request.IncludeSummary))
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
+	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -188,7 +231,9 @@ func (c *Client) GetSnapshot(ctx context.Context, snapshotId flatfilego.Snapshot
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodGet,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
 		},
@@ -199,14 +244,24 @@ func (c *Client) GetSnapshot(ctx context.Context, snapshotId flatfilego.Snapshot
 }
 
 // Deletes a snapshot of a sheet
-//
-// ID of snapshot
-func (c *Client) DeleteSnapshot(ctx context.Context, snapshotId flatfilego.SnapshotId) (*flatfilego.Success, error) {
+func (c *Client) DeleteSnapshot(
+	ctx context.Context,
+	// ID of snapshot
+	snapshotId flatfilego.SnapshotId,
+	opts ...option.RequestOption,
+) (*flatfilego.Success, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"snapshots/%v", snapshotId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -240,7 +295,9 @@ func (c *Client) DeleteSnapshot(ctx context.Context, snapshotId flatfilego.Snaps
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodDelete,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
 		},
@@ -251,14 +308,25 @@ func (c *Client) DeleteSnapshot(ctx context.Context, snapshotId flatfilego.Snaps
 }
 
 // Restores a snapshot of a sheet
-//
-// ID of snapshot
-func (c *Client) RestoreSnapshot(ctx context.Context, snapshotId flatfilego.SnapshotId, request *flatfilego.RestoreOptions) (*flatfilego.SnapshotResponse, error) {
+func (c *Client) RestoreSnapshot(
+	ctx context.Context,
+	// ID of snapshot
+	snapshotId flatfilego.SnapshotId,
+	request *flatfilego.RestoreOptions,
+	opts ...option.RequestOption,
+) (*flatfilego.SnapshotResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"snapshots/%v/restore", snapshotId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -292,7 +360,9 @@ func (c *Client) RestoreSnapshot(ctx context.Context, snapshotId flatfilego.Snap
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodPost,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Request:      request,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
@@ -304,28 +374,33 @@ func (c *Client) RestoreSnapshot(ctx context.Context, snapshotId flatfilego.Snap
 }
 
 // Gets records from a snapshot of a sheet
-//
-// ID of snapshot
-func (c *Client) GetSnapshotRecords(ctx context.Context, snapshotId flatfilego.SnapshotId, request *flatfilego.GetSnapshotRecordsRequest) (*flatfilego.DiffRecordsResponse, error) {
+func (c *Client) GetSnapshotRecords(
+	ctx context.Context,
+	// ID of snapshot
+	snapshotId flatfilego.SnapshotId,
+	request *flatfilego.GetSnapshotRecordsRequest,
+	opts ...option.RequestOption,
+) (*flatfilego.DiffRecordsResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"snapshots/%v/records", snapshotId)
 
-	queryParams := make(url.Values)
-	if request.PageSize != nil {
-		queryParams.Add("pageSize", fmt.Sprintf("%v", *request.PageSize))
-	}
-	if request.PageNumber != nil {
-		queryParams.Add("pageNumber", fmt.Sprintf("%v", *request.PageNumber))
-	}
-	if request.ChangeType != nil {
-		queryParams.Add("changeType", fmt.Sprintf("%v", request.ChangeType))
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
 	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -359,7 +434,9 @@ func (c *Client) GetSnapshotRecords(ctx context.Context, snapshotId flatfilego.S
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodGet,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
 		},

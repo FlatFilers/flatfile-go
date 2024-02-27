@@ -10,9 +10,9 @@ import (
 	fmt "fmt"
 	flatfilego "github.com/FlatFilers/flatfile-go"
 	core "github.com/FlatFilers/flatfile-go/core"
+	option "github.com/FlatFilers/flatfile-go/option"
 	io "io"
 	http "net/http"
-	url "net/url"
 )
 
 type Client struct {
@@ -21,40 +21,57 @@ type Client struct {
 	header  http.Header
 }
 
-func NewClient(opts ...core.ClientOption) *Client {
-	options := core.NewClientOptions()
-	for _, opt := range opts {
-		opt(options)
-	}
+func NewClient(opts ...option.RequestOption) *Client {
+	options := core.NewRequestOptions(opts...)
 	return &Client{
 		baseURL: options.BaseURL,
-		caller:  core.NewCaller(options.HTTPClient),
-		header:  options.ToHeader(),
+		caller: core.NewCaller(
+			&core.CallerParams{
+				Client:      options.HTTPClient,
+				MaxAttempts: options.MaxAttempts,
+			},
+		),
+		header: options.ToHeader(),
 	}
 }
 
 // Returns sheets in a workbook
-func (c *Client) List(ctx context.Context, request *flatfilego.ListSheetsRequest) (*flatfilego.ListSheetsResponse, error) {
+func (c *Client) List(
+	ctx context.Context,
+	request *flatfilego.ListSheetsRequest,
+	opts ...option.RequestOption,
+) (*flatfilego.ListSheetsResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := baseURL + "/" + "sheets"
 
-	queryParams := make(url.Values)
-	queryParams.Add("workbookId", fmt.Sprintf("%v", request.WorkbookId))
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
+	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	var response *flatfilego.ListSheetsResponse
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
-			URL:      endpointURL,
-			Method:   http.MethodGet,
-			Headers:  c.header,
-			Response: &response,
+			URL:         endpointURL,
+			Method:      http.MethodGet,
+			MaxAttempts: options.MaxAttempts,
+			Headers:     headers,
+			Client:      options.HTTPClient,
+			Response:    &response,
 		},
 	); err != nil {
 		return nil, err
@@ -63,23 +80,35 @@ func (c *Client) List(ctx context.Context, request *flatfilego.ListSheetsRequest
 }
 
 // Returns a sheet in a workbook
-//
-// ID of sheet
-func (c *Client) Get(ctx context.Context, sheetId flatfilego.SheetId) (*flatfilego.SheetResponse, error) {
+func (c *Client) Get(
+	ctx context.Context,
+	// ID of sheet
+	sheetId flatfilego.SheetId,
+	opts ...option.RequestOption,
+) (*flatfilego.SheetResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"sheets/%v", sheetId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	var response *flatfilego.SheetResponse
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
-			URL:      endpointURL,
-			Method:   http.MethodGet,
-			Headers:  c.header,
-			Response: &response,
+			URL:         endpointURL,
+			Method:      http.MethodGet,
+			MaxAttempts: options.MaxAttempts,
+			Headers:     headers,
+			Client:      options.HTTPClient,
+			Response:    &response,
 		},
 	); err != nil {
 		return nil, err
@@ -88,14 +117,24 @@ func (c *Client) Get(ctx context.Context, sheetId flatfilego.SheetId) (*flatfile
 }
 
 // Deletes a specific sheet from a workbook
-//
-// ID of sheet
-func (c *Client) Delete(ctx context.Context, sheetId flatfilego.SheetId) (*flatfilego.Success, error) {
+func (c *Client) Delete(
+	ctx context.Context,
+	// ID of sheet
+	sheetId flatfilego.SheetId,
+	opts ...option.RequestOption,
+) (*flatfilego.Success, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"sheets/%v", sheetId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -129,7 +168,9 @@ func (c *Client) Delete(ctx context.Context, sheetId flatfilego.SheetId) (*flatf
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodDelete,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
 		},
@@ -140,14 +181,24 @@ func (c *Client) Delete(ctx context.Context, sheetId flatfilego.SheetId) (*flatf
 }
 
 // Trigger data hooks and validation to run on a sheet
-//
-// ID of sheet
-func (c *Client) Validate(ctx context.Context, sheetId flatfilego.SheetId) (*flatfilego.Success, error) {
+func (c *Client) Validate(
+	ctx context.Context,
+	// ID of sheet
+	sheetId flatfilego.SheetId,
+	opts ...option.RequestOption,
+) (*flatfilego.Success, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"sheets/%v/validate", sheetId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -181,7 +232,9 @@ func (c *Client) Validate(ctx context.Context, sheetId flatfilego.SheetId) (*fla
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodPost,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
 		},
@@ -192,61 +245,44 @@ func (c *Client) Validate(ctx context.Context, sheetId flatfilego.SheetId) (*fla
 }
 
 // Returns records from a sheet in a workbook as a csv file
-//
-// ID of sheet
-func (c *Client) GetRecordsAsCsv(ctx context.Context, sheetId flatfilego.SheetId, request *flatfilego.GetRecordsCsvRequest) (io.Reader, error) {
+func (c *Client) GetRecordsAsCsv(
+	ctx context.Context,
+	// ID of sheet
+	sheetId flatfilego.SheetId,
+	request *flatfilego.GetRecordsCsvRequest,
+	opts ...option.RequestOption,
+) (io.Reader, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"sheets/%v/download", sheetId)
 
-	queryParams := make(url.Values)
-	if request.VersionId != nil {
-		queryParams.Add("versionId", fmt.Sprintf("%v", *request.VersionId))
-	}
-	if request.CommitId != nil {
-		queryParams.Add("commitId", fmt.Sprintf("%v", request.CommitId))
-	}
-	if request.SinceVersionId != nil {
-		queryParams.Add("sinceVersionId", fmt.Sprintf("%v", request.SinceVersionId))
-	}
-	if request.SinceCommitId != nil {
-		queryParams.Add("sinceCommitId", fmt.Sprintf("%v", request.SinceCommitId))
-	}
-	if request.SortField != nil {
-		queryParams.Add("sortField", fmt.Sprintf("%v", request.SortField))
-	}
-	if request.SortDirection != nil {
-		queryParams.Add("sortDirection", fmt.Sprintf("%v", request.SortDirection))
-	}
-	if request.Filter != nil {
-		queryParams.Add("filter", fmt.Sprintf("%v", request.Filter))
-	}
-	if request.FilterField != nil {
-		queryParams.Add("filterField", fmt.Sprintf("%v", request.FilterField))
-	}
-	if request.SearchValue != nil {
-		queryParams.Add("searchValue", fmt.Sprintf("%v", request.SearchValue))
-	}
-	if request.SearchField != nil {
-		queryParams.Add("searchField", fmt.Sprintf("%v", request.SearchField))
-	}
-	for _, value := range request.Ids {
-		queryParams.Add("ids", fmt.Sprintf("%v", value))
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
 	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
 
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
+
 	response := bytes.NewBuffer(nil)
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
-			URL:      endpointURL,
-			Method:   http.MethodGet,
-			Headers:  c.header,
-			Response: response,
+			URL:         endpointURL,
+			Method:      http.MethodGet,
+			MaxAttempts: options.MaxAttempts,
+			Headers:     headers,
+			Client:      options.HTTPClient,
+			Response:    response,
 		},
 	); err != nil {
 		return nil, err
@@ -255,58 +291,44 @@ func (c *Client) GetRecordsAsCsv(ctx context.Context, sheetId flatfilego.SheetId
 }
 
 // Returns counts of records from a sheet
-//
-// ID of sheet
-func (c *Client) GetRecordCounts(ctx context.Context, sheetId flatfilego.SheetId, request *flatfilego.GetRecordCountsRequest) (*flatfilego.RecordCountsResponse, error) {
+func (c *Client) GetRecordCounts(
+	ctx context.Context,
+	// ID of sheet
+	sheetId flatfilego.SheetId,
+	request *flatfilego.GetRecordCountsRequest,
+	opts ...option.RequestOption,
+) (*flatfilego.RecordCountsResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"sheets/%v/counts", sheetId)
 
-	queryParams := make(url.Values)
-	if request.VersionId != nil {
-		queryParams.Add("versionId", fmt.Sprintf("%v", *request.VersionId))
-	}
-	if request.SinceVersionId != nil {
-		queryParams.Add("sinceVersionId", fmt.Sprintf("%v", request.SinceVersionId))
-	}
-	if request.CommitId != nil {
-		queryParams.Add("commitId", fmt.Sprintf("%v", request.CommitId))
-	}
-	if request.SinceCommitId != nil {
-		queryParams.Add("sinceCommitId", fmt.Sprintf("%v", request.SinceCommitId))
-	}
-	if request.Filter != nil {
-		queryParams.Add("filter", fmt.Sprintf("%v", request.Filter))
-	}
-	if request.FilterField != nil {
-		queryParams.Add("filterField", fmt.Sprintf("%v", request.FilterField))
-	}
-	if request.SearchValue != nil {
-		queryParams.Add("searchValue", fmt.Sprintf("%v", request.SearchValue))
-	}
-	if request.SearchField != nil {
-		queryParams.Add("searchField", fmt.Sprintf("%v", request.SearchField))
-	}
-	if request.ByField != nil {
-		queryParams.Add("byField", fmt.Sprintf("%v", *request.ByField))
-	}
-	if request.Q != nil {
-		queryParams.Add("q", fmt.Sprintf("%v", *request.Q))
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
 	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
 
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
+
 	var response *flatfilego.RecordCountsResponse
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
-			URL:      endpointURL,
-			Method:   http.MethodGet,
-			Headers:  c.header,
-			Response: &response,
+			URL:         endpointURL,
+			Method:      http.MethodGet,
+			MaxAttempts: options.MaxAttempts,
+			Headers:     headers,
+			Client:      options.HTTPClient,
+			Response:    &response,
 		},
 	); err != nil {
 		return nil, err
@@ -315,31 +337,44 @@ func (c *Client) GetRecordCounts(ctx context.Context, sheetId flatfilego.SheetId
 }
 
 // Returns the commit versions for a sheet
-//
-// ID of sheet
-func (c *Client) GetSheetCommits(ctx context.Context, sheetId flatfilego.SheetId, request *flatfilego.ListSheetCommitsRequest) (*flatfilego.ListCommitsResponse, error) {
+func (c *Client) GetSheetCommits(
+	ctx context.Context,
+	// ID of sheet
+	sheetId flatfilego.SheetId,
+	request *flatfilego.ListSheetCommitsRequest,
+	opts ...option.RequestOption,
+) (*flatfilego.ListCommitsResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"sheets/%v/commits", sheetId)
 
-	queryParams := make(url.Values)
-	if request.Completed != nil {
-		queryParams.Add("completed", fmt.Sprintf("%v", *request.Completed))
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
 	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
 
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
+
 	var response *flatfilego.ListCommitsResponse
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
-			URL:      endpointURL,
-			Method:   http.MethodGet,
-			Headers:  c.header,
-			Response: &response,
+			URL:         endpointURL,
+			Method:      http.MethodGet,
+			MaxAttempts: options.MaxAttempts,
+			Headers:     headers,
+			Client:      options.HTTPClient,
+			Response:    &response,
 		},
 	); err != nil {
 		return nil, err
@@ -348,14 +383,24 @@ func (c *Client) GetSheetCommits(ctx context.Context, sheetId flatfilego.SheetId
 }
 
 // Locks a sheet
-//
-// ID of sheet
-func (c *Client) LockSheet(ctx context.Context, sheetId flatfilego.SheetId) (*flatfilego.Success, error) {
+func (c *Client) LockSheet(
+	ctx context.Context,
+	// ID of sheet
+	sheetId flatfilego.SheetId,
+	opts ...option.RequestOption,
+) (*flatfilego.Success, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"sheets/%v/lock", sheetId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -389,7 +434,9 @@ func (c *Client) LockSheet(ctx context.Context, sheetId flatfilego.SheetId) (*fl
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodPost,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
 		},
@@ -400,14 +447,24 @@ func (c *Client) LockSheet(ctx context.Context, sheetId flatfilego.SheetId) (*fl
 }
 
 // Removes a lock from a sheet
-//
-// ID of sheet
-func (c *Client) UnlockSheet(ctx context.Context, sheetId flatfilego.SheetId) (*flatfilego.Success, error) {
+func (c *Client) UnlockSheet(
+	ctx context.Context,
+	// ID of sheet
+	sheetId flatfilego.SheetId,
+	opts ...option.RequestOption,
+) (*flatfilego.Success, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"sheets/%v/unlock", sheetId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -441,7 +498,9 @@ func (c *Client) UnlockSheet(ctx context.Context, sheetId flatfilego.SheetId) (*
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodPost,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
 		},
@@ -452,58 +511,44 @@ func (c *Client) UnlockSheet(ctx context.Context, sheetId flatfilego.SheetId) (*
 }
 
 // Returns record cell values grouped by all fields in the sheet
-//
-// ID of sheet
-func (c *Client) GetCellValues(ctx context.Context, sheetId flatfilego.SheetId, request *flatfilego.GetFieldValuesRequest) (*flatfilego.CellsResponse, error) {
+func (c *Client) GetCellValues(
+	ctx context.Context,
+	// ID of sheet
+	sheetId flatfilego.SheetId,
+	request *flatfilego.GetFieldValuesRequest,
+	opts ...option.RequestOption,
+) (*flatfilego.CellsResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"sheets/%v/cells", sheetId)
 
-	queryParams := make(url.Values)
-	if request.FieldKey != nil {
-		queryParams.Add("fieldKey", fmt.Sprintf("%v", request.FieldKey))
-	}
-	if request.SortField != nil {
-		queryParams.Add("sortField", fmt.Sprintf("%v", request.SortField))
-	}
-	if request.SortDirection != nil {
-		queryParams.Add("sortDirection", fmt.Sprintf("%v", request.SortDirection))
-	}
-	if request.Filter != nil {
-		queryParams.Add("filter", fmt.Sprintf("%v", request.Filter))
-	}
-	if request.FilterField != nil {
-		queryParams.Add("filterField", fmt.Sprintf("%v", request.FilterField))
-	}
-	if request.PageSize != nil {
-		queryParams.Add("pageSize", fmt.Sprintf("%v", request.PageSize))
-	}
-	if request.PageNumber != nil {
-		queryParams.Add("pageNumber", fmt.Sprintf("%v", request.PageNumber))
-	}
-	if request.Distinct != nil {
-		queryParams.Add("distinct", fmt.Sprintf("%v", request.Distinct))
-	}
-	if request.IncludeCounts != nil {
-		queryParams.Add("includeCounts", fmt.Sprintf("%v", request.IncludeCounts))
-	}
-	if request.SearchValue != nil {
-		queryParams.Add("searchValue", fmt.Sprintf("%v", request.SearchValue))
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
 	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
 
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
+
 	var response *flatfilego.CellsResponse
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
-			URL:      endpointURL,
-			Method:   http.MethodGet,
-			Headers:  c.header,
-			Response: &response,
+			URL:         endpointURL,
+			Method:      http.MethodGet,
+			MaxAttempts: options.MaxAttempts,
+			Headers:     headers,
+			Client:      options.HTTPClient,
+			Response:    &response,
 		},
 	); err != nil {
 		return nil, err

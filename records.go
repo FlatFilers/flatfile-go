@@ -10,58 +10,60 @@ import (
 )
 
 type DeleteRecordsRequest struct {
-	// The Record Ids param (ids) is a list of record ids that can be passed to several record endpoints allowing the user to identify specific records to INCLUDE in the query, or specific records to EXCLUDE, depending on whether or not filters are being applied. When passing a query param that filters the record dataset, such as 'searchValue', or a 'filter' of 'valid' | 'error' | 'all', the 'ids' param will EXCLUDE those records from the filtered results. For basic queries that do not filter the dataset, passing record ids in the 'ids' param will limit the dataset to INCLUDE just those specific records
-	Ids []*RecordId `json:"-"`
+	// A list of record IDs to delete. Maximum of 100 allowed.
+	Ids []RecordId `json:"-" url:"ids"`
 }
 
 type FindAndReplaceRecordRequest struct {
-	Filter *Filter `json:"-"`
+	Filter *Filter `json:"-" url:"filter,omitempty"`
 	// Name of field by which to filter records
-	FilterField *FilterField `json:"-"`
-	SearchValue *SearchValue `json:"-"`
-	SearchField *SearchField `json:"-"`
+	FilterField *FilterField `json:"-" url:"filterField,omitempty"`
+	SearchValue *SearchValue `json:"-" url:"searchValue,omitempty"`
+	SearchField *SearchField `json:"-" url:"searchField,omitempty"`
 	// The Record Ids param (ids) is a list of record ids that can be passed to several record endpoints allowing the user to identify specific records to INCLUDE in the query, or specific records to EXCLUDE, depending on whether or not filters are being applied. When passing a query param that filters the record dataset, such as 'searchValue', or a 'filter' of 'valid' | 'error' | 'all', the 'ids' param will EXCLUDE those records from the filtered results. For basic queries that do not filter the dataset, passing record ids in the 'ids' param will limit the dataset to INCLUDE just those specific records
-	Ids []*RecordId `json:"-"`
+	Ids []*RecordId `json:"-" url:"ids,omitempty"`
+	// An FFQL query used to filter the result set
+	Q *string `json:"-" url:"q,omitempty"`
 	// A value to find for a given field in a sheet. For exact matches, wrap the value in double quotes ("Bob")
-	Find *CellValueUnion `json:"find,omitempty"`
+	Find *CellValueUnion `json:"find,omitempty" url:"find,omitempty"`
 	// The value to replace found values with
-	Replace *CellValueUnion `json:"replace,omitempty"`
+	Replace *CellValueUnion `json:"replace,omitempty" url:"replace,omitempty"`
 	// A unique key used to identify a field in a sheet
-	FieldKey string `json:"fieldKey"`
+	FieldKey string `json:"fieldKey" url:"fieldKey"`
 }
 
 type GetRecordsRequest struct {
 	// Deprecated, use `commitId` instead.
-	VersionId *VersionId `json:"-"`
-	CommitId  *CommitId  `json:"-"`
+	VersionId *VersionId `json:"-" url:"versionId,omitempty"`
+	CommitId  *CommitId  `json:"-" url:"commitId,omitempty"`
 	// Deprecated, use `sinceCommitId` instead.
-	SinceVersionId *VersionId     `json:"-"`
-	SinceCommitId  *CommitId      `json:"-"`
-	SortField      *SortField     `json:"-"`
-	SortDirection  *SortDirection `json:"-"`
-	Filter         *Filter        `json:"-"`
+	SinceVersionId *VersionId     `json:"-" url:"sinceVersionId,omitempty"`
+	SinceCommitId  *CommitId      `json:"-" url:"sinceCommitId,omitempty"`
+	SortField      *SortField     `json:"-" url:"sortField,omitempty"`
+	SortDirection  *SortDirection `json:"-" url:"sortDirection,omitempty"`
+	Filter         *Filter        `json:"-" url:"filter,omitempty"`
 	// Name of field by which to filter records
-	FilterField *FilterField `json:"-"`
-	SearchValue *SearchValue `json:"-"`
-	SearchField *SearchField `json:"-"`
+	FilterField *FilterField `json:"-" url:"filterField,omitempty"`
+	SearchValue *SearchValue `json:"-" url:"searchValue,omitempty"`
+	SearchField *SearchField `json:"-" url:"searchField,omitempty"`
 	// The Record Ids param (ids) is a list of record ids that can be passed to several record endpoints allowing the user to identify specific records to INCLUDE in the query, or specific records to EXCLUDE, depending on whether or not filters are being applied. When passing a query param that filters the record dataset, such as 'searchValue', or a 'filter' of 'valid' | 'error' | 'all', the 'ids' param will EXCLUDE those records from the filtered results. For basic queries that do not filter the dataset, passing record ids in the 'ids' param will limit the dataset to INCLUDE just those specific records. Maximum of 100 allowed.
-	Ids []*RecordId `json:"-"`
+	Ids []*RecordId `json:"-" url:"ids,omitempty"`
 	// Number of records to return in a page (default 1000 if pageNumber included)
-	PageSize *int `json:"-"`
+	PageSize *int `json:"-" url:"pageSize,omitempty"`
 	// Based on pageSize, which page of records to return
-	PageNumber *int `json:"-"`
+	PageNumber *int `json:"-" url:"pageNumber,omitempty"`
 	// **DEPRECATED** Use GET /sheets/:sheetId/counts
-	IncludeCounts *bool `json:"-"`
+	IncludeCounts *bool `json:"-" url:"includeCounts,omitempty"`
 	// The length of the record result set, returned as counts.total
-	IncludeLength *bool `json:"-"`
+	IncludeLength *bool `json:"-" url:"includeLength,omitempty"`
 	// If true, linked records will be included in the results. Defaults to false.
-	IncludeLinks *bool `json:"-"`
+	IncludeLinks *bool `json:"-" url:"includeLinks,omitempty"`
 	// Include error messages, defaults to false.
-	IncludeMessages *bool `json:"-"`
+	IncludeMessages *bool `json:"-" url:"includeMessages,omitempty"`
 	// if "for" is provided, the query parameters will be pulled from the event payload
-	For *EventId `json:"-"`
+	For *EventId `json:"-" url:"for,omitempty"`
 	// An FFQL query used to filter the result set
-	Q *string `json:"-"`
+	Q *string `json:"-" url:"q,omitempty"`
 }
 
 type CellValueUnion struct {
@@ -134,16 +136,16 @@ func (c *CellValueUnion) UnmarshalJSON(data []byte) error {
 		c.Boolean = valueBoolean
 		return nil
 	}
-	var valueDate time.Time
+	var valueDate *core.Date
 	if err := json.Unmarshal(data, &valueDate); err == nil {
 		c.typeName = "date"
-		c.Date = valueDate
+		c.Date = valueDate.Time()
 		return nil
 	}
-	var valueDateTime time.Time
+	var valueDateTime *core.DateTime
 	if err := json.Unmarshal(data, &valueDateTime); err == nil {
 		c.typeName = "dateTime"
-		c.DateTime = valueDateTime
+		c.DateTime = valueDateTime.Time()
 		return nil
 	}
 	return fmt.Errorf("%s cannot be deserialized as a %T", data, c)
@@ -164,9 +166,9 @@ func (c CellValueUnion) MarshalJSON() ([]byte, error) {
 	case "boolean":
 		return json.Marshal(c.Boolean)
 	case "date":
-		return json.Marshal(c.Date)
+		return json.Marshal(core.NewDate(c.Date))
 	case "dateTime":
-		return json.Marshal(c.DateTime)
+		return json.Marshal(core.NewDateTime(c.DateTime))
 	}
 }
 
@@ -202,7 +204,7 @@ func (c *CellValueUnion) Accept(visitor CellValueUnionVisitor) error {
 }
 
 type GetRecordsResponse struct {
-	Data *GetRecordsResponseData `json:"data,omitempty"`
+	Data *GetRecordsResponseData `json:"data,omitempty" url:"data,omitempty"`
 
 	_rawJSON json.RawMessage
 }

@@ -12,11 +12,11 @@ import (
 type DocumentId = string
 
 type DocumentConfig struct {
-	Title string `json:"title"`
-	Body  string `json:"body"`
+	Title string `json:"title" url:"title"`
+	Body  string `json:"body" url:"body"`
 	// Certain treatments will cause your Document to look or behave differently.
-	Treatments []string  `json:"treatments,omitempty"`
-	Actions    []*Action `json:"actions,omitempty"`
+	Treatments []string  `json:"treatments,omitempty" url:"treatments,omitempty"`
+	Actions    []*Action `json:"actions,omitempty" url:"actions,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -45,7 +45,7 @@ func (d *DocumentConfig) String() string {
 }
 
 type DocumentResponse struct {
-	Data *Document `json:"data,omitempty"`
+	Data *Document `json:"data,omitempty" url:"data,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -74,7 +74,7 @@ func (d *DocumentResponse) String() string {
 }
 
 type ListDocumentsResponse struct {
-	Data []*DocumentResponse `json:"data,omitempty"`
+	Data []*DocumentResponse `json:"data,omitempty" url:"data,omitempty"`
 
 	_rawJSON json.RawMessage
 }

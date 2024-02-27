@@ -10,6 +10,7 @@ import (
 	fmt "fmt"
 	flatfilego "github.com/FlatFilers/flatfile-go"
 	core "github.com/FlatFilers/flatfile-go/core"
+	option "github.com/FlatFilers/flatfile-go/option"
 	io "io"
 	http "net/http"
 )
@@ -20,27 +21,39 @@ type Client struct {
 	header  http.Header
 }
 
-func NewClient(opts ...core.ClientOption) *Client {
-	options := core.NewClientOptions()
-	for _, opt := range opts {
-		opt(options)
-	}
+func NewClient(opts ...option.RequestOption) *Client {
+	options := core.NewRequestOptions(opts...)
 	return &Client{
 		baseURL: options.BaseURL,
-		caller:  core.NewCaller(options.HTTPClient),
-		header:  options.ToHeader(),
+		caller: core.NewCaller(
+			&core.CallerParams{
+				Client:      options.HTTPClient,
+				MaxAttempts: options.MaxAttempts,
+			},
+		),
+		header: options.ToHeader(),
 	}
 }
 
 // Returns the details of a commit version
-//
-// ID of the commit version to return
-func (c *Client) Get(ctx context.Context, commitId flatfilego.CommitId) (*flatfilego.CommitResponse, error) {
+func (c *Client) Get(
+	ctx context.Context,
+	// ID of the commit version to return
+	commitId flatfilego.CommitId,
+	opts ...option.RequestOption,
+) (*flatfilego.CommitResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"commits/%v", commitId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -74,7 +87,9 @@ func (c *Client) Get(ctx context.Context, commitId flatfilego.CommitId) (*flatfi
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodGet,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
 		},
@@ -85,14 +100,24 @@ func (c *Client) Get(ctx context.Context, commitId flatfilego.CommitId) (*flatfi
 }
 
 // Completes a commit version. This marks the commit as complete and acknowledges that the changes have been applied to the sheet.
-//
-// ID of the commit version to complete
-func (c *Client) Complete(ctx context.Context, commitId flatfilego.CommitId) (*flatfilego.Success, error) {
+func (c *Client) Complete(
+	ctx context.Context,
+	// ID of the commit version to complete
+	commitId flatfilego.CommitId,
+	opts ...option.RequestOption,
+) (*flatfilego.Success, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"commits/%v/complete", commitId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -126,7 +151,9 @@ func (c *Client) Complete(ctx context.Context, commitId flatfilego.CommitId) (*f
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodPost,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
 		},
@@ -137,14 +164,24 @@ func (c *Client) Complete(ctx context.Context, commitId flatfilego.CommitId) (*f
 }
 
 // Replays a commit:created event.
-//
-// ID of the commit version to re-emit a commit:created event for
-func (c *Client) Replay(ctx context.Context, commitId flatfilego.CommitId) (*flatfilego.Success, error) {
+func (c *Client) Replay(
+	ctx context.Context,
+	// ID of the commit version to re-emit a commit:created event for
+	commitId flatfilego.CommitId,
+	opts ...option.RequestOption,
+) (*flatfilego.Success, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"commits/%v/replay", commitId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -178,7 +215,9 @@ func (c *Client) Replay(ctx context.Context, commitId flatfilego.CommitId) (*fla
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodPost,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
 		},

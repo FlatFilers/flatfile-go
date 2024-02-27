@@ -10,9 +10,9 @@ import (
 	fmt "fmt"
 	flatfilego "github.com/FlatFilers/flatfile-go"
 	core "github.com/FlatFilers/flatfile-go/core"
+	option "github.com/FlatFilers/flatfile-go/option"
 	io "io"
 	http "net/http"
-	url "net/url"
 )
 
 type Client struct {
@@ -21,39 +21,56 @@ type Client struct {
 	header  http.Header
 }
 
-func NewClient(opts ...core.ClientOption) *Client {
-	options := core.NewClientOptions()
-	for _, opt := range opts {
-		opt(options)
-	}
+func NewClient(opts ...option.RequestOption) *Client {
+	options := core.NewRequestOptions(opts...)
 	return &Client{
 		baseURL: options.BaseURL,
-		caller:  core.NewCaller(options.HTTPClient),
-		header:  options.ToHeader(),
+		caller: core.NewCaller(
+			&core.CallerParams{
+				Client:      options.HTTPClient,
+				MaxAttempts: options.MaxAttempts,
+			},
+		),
+		header: options.ToHeader(),
 	}
 }
 
-func (c *Client) List(ctx context.Context, request *flatfilego.ListAgentsRequest) (*flatfilego.ListAgentsResponse, error) {
+func (c *Client) List(
+	ctx context.Context,
+	request *flatfilego.ListAgentsRequest,
+	opts ...option.RequestOption,
+) (*flatfilego.ListAgentsResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := baseURL + "/" + "agents"
 
-	queryParams := make(url.Values)
-	queryParams.Add("environmentId", fmt.Sprintf("%v", request.EnvironmentId))
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
+	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	var response *flatfilego.ListAgentsResponse
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
-			URL:      endpointURL,
-			Method:   http.MethodGet,
-			Headers:  c.header,
-			Response: &response,
+			URL:         endpointURL,
+			Method:      http.MethodGet,
+			MaxAttempts: options.MaxAttempts,
+			Headers:     headers,
+			Client:      options.HTTPClient,
+			Response:    &response,
 		},
 	); err != nil {
 		return nil, err
@@ -61,18 +78,31 @@ func (c *Client) List(ctx context.Context, request *flatfilego.ListAgentsRequest
 	return response, nil
 }
 
-func (c *Client) Create(ctx context.Context, request *flatfilego.CreateAgentsRequest) (*flatfilego.AgentResponse, error) {
+func (c *Client) Create(
+	ctx context.Context,
+	request *flatfilego.CreateAgentsRequest,
+	opts ...option.RequestOption,
+) (*flatfilego.AgentResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := baseURL + "/" + "agents"
 
-	queryParams := make(url.Values)
-	queryParams.Add("environmentId", fmt.Sprintf("%v", request.EnvironmentId))
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
+	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -99,7 +129,9 @@ func (c *Client) Create(ctx context.Context, request *flatfilego.CreateAgentsReq
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodPost,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Request:      request,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
@@ -110,18 +142,32 @@ func (c *Client) Create(ctx context.Context, request *flatfilego.CreateAgentsReq
 	return response, nil
 }
 
-func (c *Client) Get(ctx context.Context, agentId flatfilego.AgentId, request *flatfilego.GetAgentRequest) (*flatfilego.AgentResponse, error) {
+func (c *Client) Get(
+	ctx context.Context,
+	agentId flatfilego.AgentId,
+	request *flatfilego.GetAgentRequest,
+	opts ...option.RequestOption,
+) (*flatfilego.AgentResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"agents/%v", agentId)
 
-	queryParams := make(url.Values)
-	queryParams.Add("environmentId", fmt.Sprintf("%v", request.EnvironmentId))
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
+	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -155,7 +201,9 @@ func (c *Client) Get(ctx context.Context, agentId flatfilego.AgentId, request *f
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodGet,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
 		},
@@ -165,18 +213,249 @@ func (c *Client) Get(ctx context.Context, agentId flatfilego.AgentId, request *f
 	return response, nil
 }
 
-func (c *Client) GetAgentLogs(ctx context.Context, agentId flatfilego.AgentId, request *flatfilego.GetAgentLogsRequest) (*flatfilego.GetAgentLogsResponse, error) {
+// Lists roles assigned to an agent.
+func (c *Client) ListAgentRoles(
+	ctx context.Context,
+	// The agent id
+	agentId flatfilego.AgentId,
+	opts ...option.RequestOption,
+) (*flatfilego.ListActorRolesResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := fmt.Sprintf(baseURL+"/"+"agents/%v/roles", agentId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
+
+	errorDecoder := func(statusCode int, body io.Reader) error {
+		raw, err := io.ReadAll(body)
+		if err != nil {
+			return err
+		}
+		apiError := core.NewAPIError(statusCode, errors.New(string(raw)))
+		decoder := json.NewDecoder(bytes.NewReader(raw))
+		switch statusCode {
+		case 400:
+			value := new(flatfilego.BadRequestError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 404:
+			value := new(flatfilego.NotFoundError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 403:
+			value := new(flatfilego.ForbiddenError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		}
+		return apiError
+	}
+
+	var response *flatfilego.ListActorRolesResponse
+	if err := c.caller.Call(
+		ctx,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodGet,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
+	); err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
+// Assigns a role to a agent.
+func (c *Client) AssignAgentRole(
+	ctx context.Context,
+	// The agent id
+	agentId flatfilego.AgentId,
+	request *flatfilego.AssignActorRoleRequest,
+	opts ...option.RequestOption,
+) (*flatfilego.AssignRoleResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
+	baseURL := "https://api.x.flatfile.com/v1"
+	if c.baseURL != "" {
+		baseURL = c.baseURL
+	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := fmt.Sprintf(baseURL+"/"+"agents/%v/roles", agentId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
+
+	errorDecoder := func(statusCode int, body io.Reader) error {
+		raw, err := io.ReadAll(body)
+		if err != nil {
+			return err
+		}
+		apiError := core.NewAPIError(statusCode, errors.New(string(raw)))
+		decoder := json.NewDecoder(bytes.NewReader(raw))
+		switch statusCode {
+		case 400:
+			value := new(flatfilego.BadRequestError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 404:
+			value := new(flatfilego.NotFoundError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 403:
+			value := new(flatfilego.ForbiddenError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		}
+		return apiError
+	}
+
+	var response *flatfilego.AssignRoleResponse
+	if err := c.caller.Call(
+		ctx,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodPost,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Request:      request,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
+	); err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
+// Removes a role from an agent.
+func (c *Client) DeleteAgentRole(
+	ctx context.Context,
+	// The agent id
+	agentId flatfilego.AgentId,
+	// The actor role id
+	actorRoleId flatfilego.ActorRoleId,
+	opts ...option.RequestOption,
+) (*flatfilego.Success, error) {
+	options := core.NewRequestOptions(opts...)
+
+	baseURL := "https://api.x.flatfile.com/v1"
+	if c.baseURL != "" {
+		baseURL = c.baseURL
+	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := fmt.Sprintf(baseURL+"/"+"agents/%v/roles/%v", agentId, actorRoleId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
+
+	errorDecoder := func(statusCode int, body io.Reader) error {
+		raw, err := io.ReadAll(body)
+		if err != nil {
+			return err
+		}
+		apiError := core.NewAPIError(statusCode, errors.New(string(raw)))
+		decoder := json.NewDecoder(bytes.NewReader(raw))
+		switch statusCode {
+		case 400:
+			value := new(flatfilego.BadRequestError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 404:
+			value := new(flatfilego.NotFoundError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 403:
+			value := new(flatfilego.ForbiddenError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		}
+		return apiError
+	}
+
+	var response *flatfilego.Success
+	if err := c.caller.Call(
+		ctx,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodDelete,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
+	); err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
+func (c *Client) GetAgentLogs(
+	ctx context.Context,
+	agentId flatfilego.AgentId,
+	request *flatfilego.GetAgentLogsRequest,
+	opts ...option.RequestOption,
+) (*flatfilego.GetAgentLogsResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
+	baseURL := "https://api.x.flatfile.com/v1"
+	if c.baseURL != "" {
+		baseURL = c.baseURL
+	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"agents/%v/logs", agentId)
 
-	queryParams := make(url.Values)
-	queryParams.Add("environmentId", fmt.Sprintf("%v", request.EnvironmentId))
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
+	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -210,7 +489,9 @@ func (c *Client) GetAgentLogs(ctx context.Context, agentId flatfilego.AgentId, r
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodGet,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
 		},
@@ -220,18 +501,32 @@ func (c *Client) GetAgentLogs(ctx context.Context, agentId flatfilego.AgentId, r
 	return response, nil
 }
 
-func (c *Client) GetAgentLog(ctx context.Context, eventId flatfilego.EventId, request *flatfilego.GetAgentLogRequest) (*flatfilego.GetDetailedAgentLogResponse, error) {
+func (c *Client) GetAgentLog(
+	ctx context.Context,
+	eventId flatfilego.EventId,
+	request *flatfilego.GetAgentLogRequest,
+	opts ...option.RequestOption,
+) (*flatfilego.GetDetailedAgentLogResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"agents/log/%v", eventId)
 
-	queryParams := make(url.Values)
-	queryParams.Add("environmentId", fmt.Sprintf("%v", request.EnvironmentId))
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
+	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -265,7 +560,9 @@ func (c *Client) GetAgentLog(ctx context.Context, eventId flatfilego.EventId, re
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodGet,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
 		},
@@ -275,30 +572,31 @@ func (c *Client) GetAgentLog(ctx context.Context, eventId flatfilego.EventId, re
 	return response, nil
 }
 
-func (c *Client) GetEnvironmentAgentLogs(ctx context.Context, request *flatfilego.GetEnvironmentAgentLogsRequest) (*flatfilego.GetDetailedAgentLogsResponse, error) {
+func (c *Client) GetEnvironmentAgentLogs(
+	ctx context.Context,
+	request *flatfilego.GetEnvironmentAgentLogsRequest,
+	opts ...option.RequestOption,
+) (*flatfilego.GetDetailedAgentLogsResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := baseURL + "/" + "agents/logs"
 
-	queryParams := make(url.Values)
-	queryParams.Add("environmentId", fmt.Sprintf("%v", request.EnvironmentId))
-	if request.SpaceId != nil {
-		queryParams.Add("spaceId", fmt.Sprintf("%v", request.SpaceId))
-	}
-	if request.Success != nil {
-		queryParams.Add("success", fmt.Sprintf("%v", request.Success))
-	}
-	if request.PageSize != nil {
-		queryParams.Add("pageSize", fmt.Sprintf("%v", request.PageSize))
-	}
-	if request.PageNumber != nil {
-		queryParams.Add("pageNumber", fmt.Sprintf("%v", request.PageNumber))
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
 	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -332,7 +630,9 @@ func (c *Client) GetEnvironmentAgentLogs(ctx context.Context, request *flatfileg
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodGet,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
 		},
@@ -342,30 +642,31 @@ func (c *Client) GetEnvironmentAgentLogs(ctx context.Context, request *flatfileg
 	return response, nil
 }
 
-func (c *Client) GetEnvironmentAgentExecutions(ctx context.Context, request *flatfilego.GetEnvironmentAgentExecutionsRequest) (*flatfilego.GetExecutionsResponse, error) {
+func (c *Client) GetEnvironmentAgentExecutions(
+	ctx context.Context,
+	request *flatfilego.GetEnvironmentAgentExecutionsRequest,
+	opts ...option.RequestOption,
+) (*flatfilego.GetExecutionsResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := baseURL + "/" + "agents/executions"
 
-	queryParams := make(url.Values)
-	queryParams.Add("environmentId", fmt.Sprintf("%v", request.EnvironmentId))
-	if request.SpaceId != nil {
-		queryParams.Add("spaceId", fmt.Sprintf("%v", request.SpaceId))
-	}
-	if request.Success != nil {
-		queryParams.Add("success", fmt.Sprintf("%v", request.Success))
-	}
-	if request.PageSize != nil {
-		queryParams.Add("pageSize", fmt.Sprintf("%v", request.PageSize))
-	}
-	if request.PageNumber != nil {
-		queryParams.Add("pageNumber", fmt.Sprintf("%v", request.PageNumber))
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
 	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -399,7 +700,9 @@ func (c *Client) GetEnvironmentAgentExecutions(ctx context.Context, request *fla
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodGet,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
 		},
@@ -410,18 +713,32 @@ func (c *Client) GetEnvironmentAgentExecutions(ctx context.Context, request *fla
 }
 
 // Deletes a single agent
-func (c *Client) Delete(ctx context.Context, agentId flatfilego.AgentId, request *flatfilego.DeleteAgentRequest) (*flatfilego.Success, error) {
+func (c *Client) Delete(
+	ctx context.Context,
+	agentId flatfilego.AgentId,
+	request *flatfilego.DeleteAgentRequest,
+	opts ...option.RequestOption,
+) (*flatfilego.Success, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"agents/%v", agentId)
 
-	queryParams := make(url.Values)
-	queryParams.Add("environmentId", fmt.Sprintf("%v", request.EnvironmentId))
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
+	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -455,7 +772,9 @@ func (c *Client) Delete(ctx context.Context, agentId flatfilego.AgentId, request
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodDelete,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
 		},

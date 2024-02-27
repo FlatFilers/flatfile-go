@@ -9,78 +9,78 @@ import (
 )
 
 type GetFieldValuesRequest struct {
-	FieldKey      *FieldKey      `json:"-"`
-	SortField     *SortField     `json:"-"`
-	SortDirection *SortDirection `json:"-"`
-	Filter        *Filter        `json:"-"`
+	FieldKey      *FieldKey      `json:"-" url:"fieldKey,omitempty"`
+	SortField     *SortField     `json:"-" url:"sortField,omitempty"`
+	SortDirection *SortDirection `json:"-" url:"sortDirection,omitempty"`
+	Filter        *Filter        `json:"-" url:"filter,omitempty"`
 	// Name of field by which to filter records
-	FilterField *FilterField `json:"-"`
+	FilterField *FilterField `json:"-" url:"filterField,omitempty"`
 	// Number of records to return in a page (default 1000 if pageNumber included)
-	PageSize *PageSize `json:"-"`
+	PageSize *PageSize `json:"-" url:"pageSize,omitempty"`
 	// Based on pageSize, which page of records to return
-	PageNumber    *PageNumber    `json:"-"`
-	Distinct      *Distinct      `json:"-"`
-	IncludeCounts *IncludeCounts `json:"-"`
+	PageNumber    *PageNumber    `json:"-" url:"pageNumber,omitempty"`
+	Distinct      *Distinct      `json:"-" url:"distinct,omitempty"`
+	IncludeCounts *IncludeCounts `json:"-" url:"includeCounts,omitempty"`
 	// A value to find for a given field in a sheet. Wrap the value in "" for exact match
-	SearchValue *SearchValue `json:"-"`
+	SearchValue *SearchValue `json:"-" url:"searchValue,omitempty"`
 }
 
 type GetRecordCountsRequest struct {
 	// Returns records that were changed in that version and only those records.
-	VersionId *string `json:"-"`
+	VersionId *string `json:"-" url:"versionId,omitempty"`
 	// Deprecated, use `sinceCommitId` instead.
-	SinceVersionId *VersionId `json:"-"`
+	SinceVersionId *VersionId `json:"-" url:"sinceVersionId,omitempty"`
 	// Returns records that were changed in that version in addition to any records from versions after that version.
-	CommitId *CommitId `json:"-"`
+	CommitId *CommitId `json:"-" url:"commitId,omitempty"`
 	// Listing a commit ID here will return all records since the specified commit.
-	SinceCommitId *CommitId `json:"-"`
+	SinceCommitId *CommitId `json:"-" url:"sinceCommitId,omitempty"`
 	// Options to filter records
-	Filter *Filter `json:"-"`
+	Filter *Filter `json:"-" url:"filter,omitempty"`
 	// The field to filter the data on.
-	FilterField *FilterField `json:"-"`
+	FilterField *FilterField `json:"-" url:"filterField,omitempty"`
 	// The value to search for data on.
-	SearchValue *SearchValue `json:"-"`
+	SearchValue *SearchValue `json:"-" url:"searchValue,omitempty"`
 	// The field to search for data on.
-	SearchField *SearchField `json:"-"`
-	// If true, the error counts for each field will also be returned
-	ByField *bool `json:"-"`
+	SearchField *SearchField `json:"-" url:"searchField,omitempty"`
+	// If true, the counts for each field will also be returned
+	ByField *bool `json:"-" url:"byField,omitempty"`
 	// An FFQL query used to filter the result set to be counted
-	Q *string `json:"-"`
+	Q *string `json:"-" url:"q,omitempty"`
 }
 
 type GetRecordsCsvRequest struct {
 	// Deprecated, use `sinceCommitId` instead.
-	VersionId *string `json:"-"`
-	// Returns records that were changed in that version  in that version and only those records.
-	CommitId *CommitId `json:"-"`
+	VersionId *string `json:"-" url:"versionId,omitempty"`
+	// Returns records that were changed in that version in that version and only those records.
+	CommitId *CommitId `json:"-" url:"commitId,omitempty"`
 	// Deprecated, use `sinceCommitId` instead.
-	SinceVersionId *VersionId `json:"-"`
+	SinceVersionId *VersionId `json:"-" url:"sinceVersionId,omitempty"`
 	// Returns records that were changed in that version in addition to any records from versions after that version.
-	SinceCommitId *CommitId `json:"-"`
+	SinceCommitId *CommitId `json:"-" url:"sinceCommitId,omitempty"`
 	// The field to sort the data on.
-	SortField *SortField `json:"-"`
+	SortField *SortField `json:"-" url:"sortField,omitempty"`
 	// Sort direction - asc (ascending) or desc (descending)
-	SortDirection *SortDirection `json:"-"`
+	SortDirection *SortDirection `json:"-" url:"sortDirection,omitempty"`
 	// Options to filter records
-	Filter *Filter `json:"-"`
+	Filter *Filter `json:"-" url:"filter,omitempty"`
 	// The field to filter the data on.
-	FilterField *FilterField `json:"-"`
+	FilterField *FilterField `json:"-" url:"filterField,omitempty"`
 	// The value to search for data on.
-	SearchValue *SearchValue `json:"-"`
+	SearchValue *SearchValue `json:"-" url:"searchValue,omitempty"`
 	// The field to search for data on.
-	SearchField *SearchField `json:"-"`
+	SearchField *SearchField `json:"-" url:"searchField,omitempty"`
 	// The Record Ids param (ids) is a list of record ids that can be passed to several record endpoints allowing the user to identify specific records to INCLUDE in the query, or specific records to EXCLUDE, depending on whether or not filters are being applied. When passing a query param that filters the record dataset, such as 'searchValue', or a 'filter' of 'valid' | 'error' | 'all', the 'ids' param will EXCLUDE those records from the filtered results. For basic queries that do not filter the dataset, passing record ids in the 'ids' param will limit the dataset to INCLUDE just those specific records
-	Ids []*RecordId `json:"-"`
+	Ids []*RecordId `json:"-" url:"ids,omitempty"`
 }
 
 type ListSheetCommitsRequest struct {
 	// If true, only return commits that have been completed. If false, only return commits that have not been completed. If not provided, return all commits.
-	Completed *bool `json:"-"`
+	Completed *bool `json:"-" url:"completed,omitempty"`
 }
 
 type ListSheetsRequest struct {
 	// ID of workbook
-	WorkbookId WorkbookId `json:"-"`
+	WorkbookId WorkbookId `json:"-" url:"workbookId"`
 }
 
 type Property struct {
@@ -256,7 +256,7 @@ func (p *Property) Accept(visitor PropertyVisitor) error {
 }
 
 type CellsResponse struct {
-	Data CellsResponseData `json:"data,omitempty"`
+	Data CellsResponseData `json:"data,omitempty" url:"data,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -294,7 +294,7 @@ type FieldKey = string
 type IncludeCounts = bool
 
 type RecordCountsResponse struct {
-	Data *RecordCountsResponseData `json:"data,omitempty"`
+	Data *RecordCountsResponseData `json:"data,omitempty" url:"data,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -323,7 +323,7 @@ func (r *RecordCountsResponse) String() string {
 }
 
 type SheetResponse struct {
-	Data *Sheet `json:"data,omitempty"`
+	Data *Sheet `json:"data,omitempty" url:"data,omitempty"`
 
 	_rawJSON json.RawMessage
 }

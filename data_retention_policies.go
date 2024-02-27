@@ -10,16 +10,16 @@ import (
 
 type ListDataRetentionPoliciesRequest struct {
 	// The associated Environment ID of the policy.
-	EnvironmentId *EnvironmentId `json:"-"`
+	EnvironmentId *EnvironmentId `json:"-" url:"environmentId,omitempty"`
 }
 
 // Data Retention Policy ID
 type DataRetentionPolicyId = string
 
 type DataRetentionPolicyConfig struct {
-	Type          DataRetentionPolicyEnum `json:"type,omitempty"`
-	Period        int                     `json:"period"`
-	EnvironmentId EnvironmentId           `json:"environmentId"`
+	Type          DataRetentionPolicyEnum `json:"type,omitempty" url:"type,omitempty"`
+	Period        int                     `json:"period" url:"period"`
+	EnvironmentId EnvironmentId           `json:"environmentId" url:"environmentId"`
 
 	_rawJSON json.RawMessage
 }
@@ -48,7 +48,7 @@ func (d *DataRetentionPolicyConfig) String() string {
 }
 
 type DataRetentionPolicyResponse struct {
-	Data *DataRetentionPolicy `json:"data,omitempty"`
+	Data *DataRetentionPolicy `json:"data,omitempty" url:"data,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -77,7 +77,7 @@ func (d *DataRetentionPolicyResponse) String() string {
 }
 
 type ListDataRetentionPoliciesResponse struct {
-	Data []*DataRetentionPolicy `json:"data,omitempty"`
+	Data []*DataRetentionPolicy `json:"data,omitempty" url:"data,omitempty"`
 
 	_rawJSON json.RawMessage
 }

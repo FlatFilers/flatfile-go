@@ -10,36 +10,36 @@ import (
 
 type ListWorkbookCommitsRequest struct {
 	// If true, only return commits that have been completed. If false, only return commits that have not been completed. If not provided, return all commits.
-	Completed *bool `json:"-"`
+	Completed *bool `json:"-" url:"completed,omitempty"`
 }
 
 type ListWorkbooksRequest struct {
 	// The associated Space ID of the Workbook.
-	SpaceId *SpaceId `json:"-"`
+	SpaceId *SpaceId `json:"-" url:"spaceId,omitempty"`
 	// Include counts for the workbook
-	IncludeCounts *bool `json:"-"`
+	IncludeCounts *bool `json:"-" url:"includeCounts,omitempty"`
 }
 
 // Properties used to create a new Workbook
 type CreateWorkbookConfig struct {
 	// The name of the Workbook.
-	Name string `json:"name"`
+	Name string `json:"name" url:"name"`
 	// An optional list of labels for the Workbook.
-	Labels []string `json:"labels,omitempty"`
+	Labels []string `json:"labels,omitempty" url:"labels,omitempty"`
 	// Space to associate with the Workbook.
-	SpaceId *SpaceId `json:"spaceId,omitempty"`
+	SpaceId *SpaceId `json:"spaceId,omitempty" url:"spaceId,omitempty"`
 	// Environment to associate with the Workbook
-	EnvironmentId *EnvironmentId `json:"environmentId,omitempty"`
+	EnvironmentId *EnvironmentId `json:"environmentId,omitempty" url:"environmentId,omitempty"`
 	// Optional namespace to apply to the Workbook.
-	Namespace *string `json:"namespace,omitempty"`
+	Namespace *string `json:"namespace,omitempty" url:"namespace,omitempty"`
 	// Sheets to create on the Workbook.
-	Sheets []*SheetConfig `json:"sheets,omitempty"`
+	Sheets []*SheetConfig `json:"sheets,omitempty" url:"sheets,omitempty"`
 	// Actions to create on the Workbook.
-	Actions []*Action `json:"actions,omitempty"`
+	Actions []*Action `json:"actions,omitempty" url:"actions,omitempty"`
 	// The Workbook settings.
-	Settings *WorkbookConfigSettings `json:"settings,omitempty"`
+	Settings *WorkbookConfigSettings `json:"settings,omitempty" url:"settings,omitempty"`
 	// Metadata for the workbook
-	Metadata interface{} `json:"metadata,omitempty"`
+	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -68,7 +68,7 @@ func (c *CreateWorkbookConfig) String() string {
 }
 
 type ListWorkbooksResponse struct {
-	Data []*Workbook `json:"data,omitempty"`
+	Data []*Workbook `json:"data,omitempty" url:"data,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -97,7 +97,7 @@ func (l *ListWorkbooksResponse) String() string {
 }
 
 type WorkbookResponse struct {
-	Data *Workbook `json:"data,omitempty"`
+	Data *Workbook `json:"data,omitempty" url:"data,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -128,20 +128,20 @@ func (w *WorkbookResponse) String() string {
 // The updates to be made to an existing workbook
 type WorkbookUpdate struct {
 	// The name of the Workbook.
-	Name *string `json:"name,omitempty"`
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
 	// An optional list of labels for the Workbook.
-	Labels []string `json:"labels,omitempty"`
+	Labels []string `json:"labels,omitempty" url:"labels,omitempty"`
 	// The Space Id associated with the Workbook.
-	SpaceId *SpaceId `json:"spaceId,omitempty"`
+	SpaceId *SpaceId `json:"spaceId,omitempty" url:"spaceId,omitempty"`
 	// The Environment Id associated with the Workbook.
-	EnvironmentId *EnvironmentId `json:"environmentId,omitempty"`
+	EnvironmentId *EnvironmentId `json:"environmentId,omitempty" url:"environmentId,omitempty"`
 	// The namespace of the Workbook.
-	Namespace *string `json:"namespace,omitempty"`
+	Namespace *string `json:"namespace,omitempty" url:"namespace,omitempty"`
 	// Describes shape of data as well as behavior
-	Sheets  []*SheetConfigOrUpdate `json:"sheets,omitempty"`
-	Actions []*Action              `json:"actions,omitempty"`
+	Sheets  []*SheetConfigOrUpdate `json:"sheets,omitempty" url:"sheets,omitempty"`
+	Actions []*Action              `json:"actions,omitempty" url:"actions,omitempty"`
 	// Metadata for the workbook
-	Metadata interface{} `json:"metadata,omitempty"`
+	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
 
 	_rawJSON json.RawMessage
 }

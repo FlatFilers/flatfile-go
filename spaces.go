@@ -11,28 +11,28 @@ import (
 
 type DeleteSpacesRequest struct {
 	// List of ids for the spaces to be deleted
-	Ids []SpaceId `json:"-"`
+	Ids []SpaceId `json:"-" url:"ids"`
 }
 
 type ListSpacesRequest struct {
 	// The ID of the environment.
-	EnvironmentId *EnvironmentId `json:"-"`
+	EnvironmentId *EnvironmentId `json:"-" url:"environmentId,omitempty"`
 	// Number of spaces to return in a page (default 10)
-	PageSize *int `json:"-"`
+	PageSize *int `json:"-" url:"pageSize,omitempty"`
 	// Based on pageSize, which page of records to return
-	PageNumber *int `json:"-"`
+	PageNumber *int `json:"-" url:"pageNumber,omitempty"`
 	// Search query for spaces
-	Search *string `json:"-"`
+	Search *string `json:"-" url:"search,omitempty"`
 	// Search by namespace
-	Namespace *string `json:"-"`
+	Namespace *string `json:"-" url:"namespace,omitempty"`
 	// Flag to include archived spaces
-	Archived *bool `json:"-"`
+	Archived *bool `json:"-" url:"archived,omitempty"`
 	// Field to sort spaces by
-	SortField *GetSpacesSortField `json:"-"`
+	SortField *GetSpacesSortField `json:"-" url:"sortField,omitempty"`
 	// Direction of sorting
-	SortDirection *SortDirection `json:"-"`
+	SortDirection *SortDirection `json:"-" url:"sortDirection,omitempty"`
 	// Flag for collaborative (project) spaces
-	IsCollaborative *bool `json:"-"`
+	IsCollaborative *bool `json:"-" url:"isCollaborative,omitempty"`
 }
 
 // The topic of the event
@@ -85,6 +85,10 @@ const (
 	EventTopicSecretCreated          EventTopic = "secret:created"
 	EventTopicSecretUpdated          EventTopic = "secret:updated"
 	EventTopicSecretDeleted          EventTopic = "secret:deleted"
+	EventTopicCron5Minutes           EventTopic = "cron:5-minutes"
+	EventTopicCronHourly             EventTopic = "cron:hourly"
+	EventTopicCronDaily              EventTopic = "cron:daily"
+	EventTopicCronWeekly             EventTopic = "cron:weekly"
 )
 
 func NewEventTopicFromString(s string) (EventTopic, error) {
@@ -181,6 +185,14 @@ func NewEventTopicFromString(s string) (EventTopic, error) {
 		return EventTopicSecretUpdated, nil
 	case "secret:deleted":
 		return EventTopicSecretDeleted, nil
+	case "cron:5-minutes":
+		return EventTopicCron5Minutes, nil
+	case "cron:hourly":
+		return EventTopicCronHourly, nil
+	case "cron:daily":
+		return EventTopicCronDaily, nil
+	case "cron:weekly":
+		return EventTopicCronWeekly, nil
 	}
 	var t EventTopic
 	return "", fmt.Errorf("%s is not a valid %T", s, t)
@@ -226,8 +238,8 @@ func (g GetSpacesSortField) Ptr() *GetSpacesSortField {
 
 // List of Space objects
 type ListSpacesResponse struct {
-	Pagination *Pagination `json:"pagination,omitempty"`
-	Data       []*Space    `json:"data,omitempty"`
+	Pagination *Pagination `json:"pagination,omitempty" url:"pagination,omitempty"`
+	Data       []*Space    `json:"data,omitempty" url:"data,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -257,38 +269,56 @@ func (l *ListSpacesResponse) String() string {
 
 // Properties used to create a new Space
 type SpaceConfig struct {
-	SpaceConfigId     *SpaceConfigId `json:"spaceConfigId,omitempty"`
-	EnvironmentId     *EnvironmentId `json:"environmentId,omitempty"`
-	PrimaryWorkbookId *WorkbookId    `json:"primaryWorkbookId,omitempty"`
+	SpaceConfigId     *SpaceConfigId `json:"spaceConfigId,omitempty" url:"spaceConfigId,omitempty"`
+	EnvironmentId     *EnvironmentId `json:"environmentId,omitempty" url:"environmentId,omitempty"`
+	PrimaryWorkbookId *WorkbookId    `json:"primaryWorkbookId,omitempty" url:"primaryWorkbookId,omitempty"`
 	// Metadata for the space
-	Metadata         interface{}   `json:"metadata,omitempty"`
-	Actions          []*Action     `json:"actions,omitempty"`
-	Access           []SpaceAccess `json:"access,omitempty"`
-	AutoConfigure    *bool         `json:"autoConfigure,omitempty"`
-	Namespace        *string       `json:"namespace,omitempty"`
-	Labels           []string      `json:"labels,omitempty"`
-	TranslationsPath *string       `json:"translationsPath,omitempty"`
-	LanguageOverride *string       `json:"languageOverride,omitempty"`
+	Metadata         interface{}   `json:"metadata,omitempty" url:"metadata,omitempty"`
+	Actions          []*Action     `json:"actions,omitempty" url:"actions,omitempty"`
+	Access           []SpaceAccess `json:"access,omitempty" url:"access,omitempty"`
+	AutoConfigure    *bool         `json:"autoConfigure,omitempty" url:"autoConfigure,omitempty"`
+	Namespace        *string       `json:"namespace,omitempty" url:"namespace,omitempty"`
+	Labels           []string      `json:"labels,omitempty" url:"labels,omitempty"`
+	TranslationsPath *string       `json:"translationsPath,omitempty" url:"translationsPath,omitempty"`
+	LanguageOverride *string       `json:"languageOverride,omitempty" url:"languageOverride,omitempty"`
 	// Date when space was archived
-	ArchivedAt *time.Time `json:"archivedAt,omitempty"`
+	ArchivedAt *time.Time `json:"archivedAt,omitempty" url:"archivedAt,omitempty"`
 	// The name of the space
-	Name *string `json:"name,omitempty"`
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
 	// The display order
-	DisplayOrder        *int                      `json:"displayOrder,omitempty"`
-	GuestAuthentication []GuestAuthenticationEnum `json:"guestAuthentication,omitempty"`
+	DisplayOrder        *int                      `json:"displayOrder,omitempty" url:"displayOrder,omitempty"`
+	GuestAuthentication []GuestAuthenticationEnum `json:"guestAuthentication,omitempty" url:"guestAuthentication,omitempty"`
 
 	_rawJSON json.RawMessage
 }
 
 func (s *SpaceConfig) UnmarshalJSON(data []byte) error {
-	type unmarshaler SpaceConfig
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
+	type embed SpaceConfig
+	var unmarshaler = struct {
+		embed
+		ArchivedAt *core.DateTime `json:"archivedAt,omitempty"`
+	}{
+		embed: embed(*s),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
 		return err
 	}
-	*s = SpaceConfig(value)
+	*s = SpaceConfig(unmarshaler.embed)
+	s.ArchivedAt = unmarshaler.ArchivedAt.TimePtr()
 	s._rawJSON = json.RawMessage(data)
 	return nil
+}
+
+func (s *SpaceConfig) MarshalJSON() ([]byte, error) {
+	type embed SpaceConfig
+	var marshaler = struct {
+		embed
+		ArchivedAt *core.DateTime `json:"archivedAt,omitempty"`
+	}{
+		embed:      embed(*s),
+		ArchivedAt: core.NewOptionalDateTime(s.ArchivedAt),
+	}
+	return json.Marshal(marshaler)
 }
 
 func (s *SpaceConfig) String() string {
@@ -304,7 +334,7 @@ func (s *SpaceConfig) String() string {
 }
 
 type SpaceResponse struct {
-	Data *Space `json:"data,omitempty"`
+	Data *Space `json:"data,omitempty" url:"data,omitempty"`
 
 	_rawJSON json.RawMessage
 }

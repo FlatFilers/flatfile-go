@@ -10,9 +10,9 @@ import (
 	fmt "fmt"
 	flatfilego "github.com/FlatFilers/flatfile-go"
 	core "github.com/FlatFilers/flatfile-go/core"
+	option "github.com/FlatFilers/flatfile-go/option"
 	io "io"
 	http "net/http"
-	url "net/url"
 )
 
 type Client struct {
@@ -21,33 +21,46 @@ type Client struct {
 	header  http.Header
 }
 
-func NewClient(opts ...core.ClientOption) *Client {
-	options := core.NewClientOptions()
-	for _, opt := range opts {
-		opt(options)
-	}
+func NewClient(opts ...option.RequestOption) *Client {
+	options := core.NewRequestOptions(opts...)
 	return &Client{
 		baseURL: options.BaseURL,
-		caller:  core.NewCaller(options.HTTPClient),
-		header:  options.ToHeader(),
+		caller: core.NewCaller(
+			&core.CallerParams{
+				Client:      options.HTTPClient,
+				MaxAttempts: options.MaxAttempts,
+			},
+		),
+		header: options.ToHeader(),
 	}
 }
 
 // Returns all data retention policies on an account matching a filter for environmentId
-func (c *Client) List(ctx context.Context, request *flatfilego.ListDataRetentionPoliciesRequest) (*flatfilego.ListDataRetentionPoliciesResponse, error) {
+func (c *Client) List(
+	ctx context.Context,
+	request *flatfilego.ListDataRetentionPoliciesRequest,
+	opts ...option.RequestOption,
+) (*flatfilego.ListDataRetentionPoliciesResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := baseURL + "/" + "data-retention-policies"
 
-	queryParams := make(url.Values)
-	if request.EnvironmentId != nil {
-		queryParams.Add("environmentId", fmt.Sprintf("%v", request.EnvironmentId))
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
 	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -81,7 +94,9 @@ func (c *Client) List(ctx context.Context, request *flatfilego.ListDataRetention
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodGet,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
 		},
@@ -92,12 +107,23 @@ func (c *Client) List(ctx context.Context, request *flatfilego.ListDataRetention
 }
 
 // Add a new data retention policy to the space
-func (c *Client) Create(ctx context.Context, request *flatfilego.DataRetentionPolicyConfig) (*flatfilego.DataRetentionPolicyResponse, error) {
+func (c *Client) Create(
+	ctx context.Context,
+	request *flatfilego.DataRetentionPolicyConfig,
+	opts ...option.RequestOption,
+) (*flatfilego.DataRetentionPolicyResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := baseURL + "/" + "data-retention-policies"
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -131,7 +157,9 @@ func (c *Client) Create(ctx context.Context, request *flatfilego.DataRetentionPo
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodPost,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Request:      request,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
@@ -143,14 +171,24 @@ func (c *Client) Create(ctx context.Context, request *flatfilego.DataRetentionPo
 }
 
 // Returns a single data retention policy
-//
-// ID of data retention policy to return
-func (c *Client) Get(ctx context.Context, id flatfilego.DataRetentionPolicyId) (*flatfilego.DataRetentionPolicyResponse, error) {
+func (c *Client) Get(
+	ctx context.Context,
+	// ID of data retention policy to return
+	id flatfilego.DataRetentionPolicyId,
+	opts ...option.RequestOption,
+) (*flatfilego.DataRetentionPolicyResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"data-retention-policies/%v", id)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -184,7 +222,9 @@ func (c *Client) Get(ctx context.Context, id flatfilego.DataRetentionPolicyId) (
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodGet,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
 		},
@@ -195,14 +235,25 @@ func (c *Client) Get(ctx context.Context, id flatfilego.DataRetentionPolicyId) (
 }
 
 // Updates a single data retention policy
-//
-// ID of data retention policy to update
-func (c *Client) Update(ctx context.Context, id flatfilego.DataRetentionPolicyId, request *flatfilego.DataRetentionPolicyConfig) (*flatfilego.DataRetentionPolicyResponse, error) {
+func (c *Client) Update(
+	ctx context.Context,
+	// ID of data retention policy to update
+	id flatfilego.DataRetentionPolicyId,
+	request *flatfilego.DataRetentionPolicyConfig,
+	opts ...option.RequestOption,
+) (*flatfilego.DataRetentionPolicyResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"data-retention-policies/%v", id)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -236,7 +287,9 @@ func (c *Client) Update(ctx context.Context, id flatfilego.DataRetentionPolicyId
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodPatch,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Request:      request,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
@@ -248,14 +301,24 @@ func (c *Client) Update(ctx context.Context, id flatfilego.DataRetentionPolicyId
 }
 
 // Deletes a single data retention policy
-//
-// ID of data retention policy to delete
-func (c *Client) Delete(ctx context.Context, id flatfilego.DataRetentionPolicyId) (*flatfilego.Success, error) {
+func (c *Client) Delete(
+	ctx context.Context,
+	// ID of data retention policy to delete
+	id flatfilego.DataRetentionPolicyId,
+	opts ...option.RequestOption,
+) (*flatfilego.Success, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"data-retention-policies/%v", id)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -289,7 +352,9 @@ func (c *Client) Delete(ctx context.Context, id flatfilego.DataRetentionPolicyId
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodDelete,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
 		},

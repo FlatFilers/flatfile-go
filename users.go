@@ -10,11 +10,11 @@ import (
 
 type ListUsersRequest struct {
 	// Email of guest to return
-	Email *string `json:"-"`
+	Email *string `json:"-" url:"email,omitempty"`
 }
 
 type ListUsersResponse struct {
-	Data []*User `json:"data,omitempty"`
+	Data []*User `json:"data,omitempty" url:"data,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -44,9 +44,9 @@ func (l *ListUsersResponse) String() string {
 
 // Properties used to create a new user
 type UserConfig struct {
-	Email     string    `json:"email"`
-	Name      string    `json:"name"`
-	AccountId AccountId `json:"accountId"`
+	Email     string    `json:"email" url:"email"`
+	Name      string    `json:"name" url:"name"`
+	AccountId AccountId `json:"accountId" url:"accountId"`
 
 	_rawJSON json.RawMessage
 }
@@ -72,4 +72,8 @@ func (u *UserConfig) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", u)
+}
+
+type UpdateUserRequest struct {
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
 }

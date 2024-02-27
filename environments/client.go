@@ -10,9 +10,9 @@ import (
 	fmt "fmt"
 	flatfilego "github.com/FlatFilers/flatfile-go"
 	core "github.com/FlatFilers/flatfile-go/core"
+	option "github.com/FlatFilers/flatfile-go/option"
 	io "io"
 	http "net/http"
-	url "net/url"
 )
 
 type Client struct {
@@ -21,45 +21,57 @@ type Client struct {
 	header  http.Header
 }
 
-func NewClient(opts ...core.ClientOption) *Client {
-	options := core.NewClientOptions()
-	for _, opt := range opts {
-		opt(options)
-	}
+func NewClient(opts ...option.RequestOption) *Client {
+	options := core.NewRequestOptions(opts...)
 	return &Client{
 		baseURL: options.BaseURL,
-		caller:  core.NewCaller(options.HTTPClient),
-		header:  options.ToHeader(),
+		caller: core.NewCaller(
+			&core.CallerParams{
+				Client:      options.HTTPClient,
+				MaxAttempts: options.MaxAttempts,
+			},
+		),
+		header: options.ToHeader(),
 	}
 }
 
 // Get all environments
-func (c *Client) List(ctx context.Context, request *flatfilego.ListEnvironmentsRequest) (*flatfilego.ListEnvironmentsResponse, error) {
+func (c *Client) List(
+	ctx context.Context,
+	request *flatfilego.ListEnvironmentsRequest,
+	opts ...option.RequestOption,
+) (*flatfilego.ListEnvironmentsResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := baseURL + "/" + "environments"
 
-	queryParams := make(url.Values)
-	if request.PageSize != nil {
-		queryParams.Add("pageSize", fmt.Sprintf("%v", *request.PageSize))
-	}
-	if request.PageNumber != nil {
-		queryParams.Add("pageNumber", fmt.Sprintf("%v", *request.PageNumber))
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
 	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
 
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
+
 	var response *flatfilego.ListEnvironmentsResponse
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
-			URL:      endpointURL,
-			Method:   http.MethodGet,
-			Headers:  c.header,
-			Response: &response,
+			URL:         endpointURL,
+			Method:      http.MethodGet,
+			MaxAttempts: options.MaxAttempts,
+			Headers:     headers,
+			Client:      options.HTTPClient,
+			Response:    &response,
 		},
 	); err != nil {
 		return nil, err
@@ -68,22 +80,35 @@ func (c *Client) List(ctx context.Context, request *flatfilego.ListEnvironmentsR
 }
 
 // Create a new environment
-func (c *Client) Create(ctx context.Context, request *flatfilego.EnvironmentConfigCreate) (*flatfilego.EnvironmentResponse, error) {
+func (c *Client) Create(
+	ctx context.Context,
+	request *flatfilego.EnvironmentConfigCreate,
+	opts ...option.RequestOption,
+) (*flatfilego.EnvironmentResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := baseURL + "/" + "environments"
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	var response *flatfilego.EnvironmentResponse
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
-			URL:      endpointURL,
-			Method:   http.MethodPost,
-			Headers:  c.header,
-			Request:  request,
-			Response: &response,
+			URL:         endpointURL,
+			Method:      http.MethodPost,
+			MaxAttempts: options.MaxAttempts,
+			Headers:     headers,
+			Client:      options.HTTPClient,
+			Request:     request,
+			Response:    &response,
 		},
 	); err != nil {
 		return nil, err
@@ -92,18 +117,31 @@ func (c *Client) Create(ctx context.Context, request *flatfilego.EnvironmentConf
 }
 
 // Get a token which can be used to subscribe to events for this environment
-func (c *Client) GetEnvironmentEventToken(ctx context.Context, request *flatfilego.GetEnvironmentEventTokenRequest) (*flatfilego.EventTokenResponse, error) {
+func (c *Client) GetEnvironmentEventToken(
+	ctx context.Context,
+	request *flatfilego.GetEnvironmentEventTokenRequest,
+	opts ...option.RequestOption,
+) (*flatfilego.EventTokenResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := baseURL + "/" + "environments/subscription-token"
 
-	queryParams := make(url.Values)
-	queryParams.Add("environmentId", fmt.Sprintf("%v", request.EnvironmentId))
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
+	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -137,7 +175,9 @@ func (c *Client) GetEnvironmentEventToken(ctx context.Context, request *flatfile
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodGet,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
 		},
@@ -148,14 +188,24 @@ func (c *Client) GetEnvironmentEventToken(ctx context.Context, request *flatfile
 }
 
 // Returns a single environment
-//
-// ID of the environment to return. To fetch the current environment, pass `current`
-func (c *Client) Get(ctx context.Context, environmentId string) (*flatfilego.EnvironmentResponse, error) {
+func (c *Client) Get(
+	ctx context.Context,
+	// ID of the environment to return. To fetch the current environment, pass `current`
+	environmentId string,
+	opts ...option.RequestOption,
+) (*flatfilego.EnvironmentResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"environments/%v", environmentId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -189,7 +239,9 @@ func (c *Client) Get(ctx context.Context, environmentId string) (*flatfilego.Env
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodGet,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
 		},
@@ -200,24 +252,37 @@ func (c *Client) Get(ctx context.Context, environmentId string) (*flatfilego.Env
 }
 
 // Updates a single environment, to change the name for example
-//
-// ID of the environment to update
-func (c *Client) Update(ctx context.Context, environmentId string, request *flatfilego.EnvironmentConfigUpdate) (*flatfilego.Environment, error) {
+func (c *Client) Update(
+	ctx context.Context,
+	// ID of the environment to update
+	environmentId string,
+	request *flatfilego.EnvironmentConfigUpdate,
+	opts ...option.RequestOption,
+) (*flatfilego.Environment, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"environments/%v", environmentId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	var response *flatfilego.Environment
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
-			URL:      endpointURL,
-			Method:   http.MethodPatch,
-			Headers:  c.header,
-			Request:  request,
-			Response: &response,
+			URL:         endpointURL,
+			Method:      http.MethodPatch,
+			MaxAttempts: options.MaxAttempts,
+			Headers:     headers,
+			Client:      options.HTTPClient,
+			Request:     request,
+			Response:    &response,
 		},
 	); err != nil {
 		return nil, err
@@ -226,14 +291,24 @@ func (c *Client) Update(ctx context.Context, environmentId string, request *flat
 }
 
 // Deletes a single environment
-//
-// ID of the environment to delete
-func (c *Client) Delete(ctx context.Context, environmentId string) (*flatfilego.Success, error) {
+func (c *Client) Delete(
+	ctx context.Context,
+	// ID of the environment to delete
+	environmentId string,
+	opts ...option.RequestOption,
+) (*flatfilego.Success, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"environments/%v", environmentId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -267,7 +342,9 @@ func (c *Client) Delete(ctx context.Context, environmentId string) (*flatfilego.
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodDelete,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
 		},

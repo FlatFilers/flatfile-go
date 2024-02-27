@@ -9,8 +9,8 @@ import (
 )
 
 type CreateAgentsRequest struct {
-	EnvironmentId EnvironmentId `json:"-"`
-	Body          *AgentConfig  `json:"-"`
+	EnvironmentId EnvironmentId `json:"-" url:"environmentId"`
+	Body          *AgentConfig  `json:"-" url:"-"`
 }
 
 func (c *CreateAgentsRequest) UnmarshalJSON(data []byte) error {
@@ -27,43 +27,43 @@ func (c *CreateAgentsRequest) MarshalJSON() ([]byte, error) {
 }
 
 type DeleteAgentRequest struct {
-	EnvironmentId EnvironmentId `json:"-"`
+	EnvironmentId EnvironmentId `json:"-" url:"environmentId"`
 }
 
 type GetAgentRequest struct {
-	EnvironmentId EnvironmentId `json:"-"`
+	EnvironmentId EnvironmentId `json:"-" url:"environmentId"`
 }
 
 type GetAgentLogRequest struct {
-	EnvironmentId EnvironmentId `json:"-"`
+	EnvironmentId EnvironmentId `json:"-" url:"environmentId"`
 }
 
 type GetAgentLogsRequest struct {
-	EnvironmentId EnvironmentId `json:"-"`
+	EnvironmentId EnvironmentId `json:"-" url:"environmentId"`
 }
 
 type GetEnvironmentAgentExecutionsRequest struct {
-	EnvironmentId EnvironmentId          `json:"-"`
-	SpaceId       *SpaceId               `json:"-"`
-	Success       *SuccessQueryParameter `json:"-"`
-	PageSize      *PageSize              `json:"-"`
-	PageNumber    *PageNumber            `json:"-"`
+	EnvironmentId EnvironmentId          `json:"-" url:"environmentId"`
+	SpaceId       *SpaceId               `json:"-" url:"spaceId,omitempty"`
+	Success       *SuccessQueryParameter `json:"-" url:"success,omitempty"`
+	PageSize      *PageSize              `json:"-" url:"pageSize,omitempty"`
+	PageNumber    *PageNumber            `json:"-" url:"pageNumber,omitempty"`
 }
 
 type GetEnvironmentAgentLogsRequest struct {
-	EnvironmentId EnvironmentId          `json:"-"`
-	SpaceId       *SpaceId               `json:"-"`
-	Success       *SuccessQueryParameter `json:"-"`
-	PageSize      *PageSize              `json:"-"`
-	PageNumber    *PageNumber            `json:"-"`
+	EnvironmentId EnvironmentId          `json:"-" url:"environmentId"`
+	SpaceId       *SpaceId               `json:"-" url:"spaceId,omitempty"`
+	Success       *SuccessQueryParameter `json:"-" url:"success,omitempty"`
+	PageSize      *PageSize              `json:"-" url:"pageSize,omitempty"`
+	PageNumber    *PageNumber            `json:"-" url:"pageNumber,omitempty"`
 }
 
 type ListAgentsRequest struct {
-	EnvironmentId EnvironmentId `json:"-"`
+	EnvironmentId EnvironmentId `json:"-" url:"environmentId"`
 }
 
 type GetDetailedAgentLogResponse struct {
-	Data *DetailedAgentLog `json:"data,omitempty"`
+	Data *DetailedAgentLog `json:"data,omitempty" url:"data,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -92,8 +92,8 @@ func (g *GetDetailedAgentLogResponse) String() string {
 }
 
 type GetDetailedAgentLogsResponse struct {
-	Pagination *Pagination         `json:"pagination,omitempty"`
-	Data       []*DetailedAgentLog `json:"data,omitempty"`
+	Pagination *Pagination         `json:"pagination,omitempty" url:"pagination,omitempty"`
+	Data       []*DetailedAgentLog `json:"data,omitempty" url:"data,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -122,8 +122,8 @@ func (g *GetDetailedAgentLogsResponse) String() string {
 }
 
 type GetExecutionsResponse struct {
-	Pagination *Pagination  `json:"pagination,omitempty"`
-	Data       []*Execution `json:"data,omitempty"`
+	Pagination *Pagination  `json:"pagination,omitempty" url:"pagination,omitempty"`
+	Data       []*Execution `json:"data,omitempty" url:"data,omitempty"`
 
 	_rawJSON json.RawMessage
 }

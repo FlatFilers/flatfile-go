@@ -10,9 +10,9 @@ import (
 	fmt "fmt"
 	flatfilego "github.com/FlatFilers/flatfile-go"
 	core "github.com/FlatFilers/flatfile-go/core"
+	option "github.com/FlatFilers/flatfile-go/option"
 	io "io"
 	http "net/http"
-	url "net/url"
 )
 
 type Client struct {
@@ -21,36 +21,46 @@ type Client struct {
 	header  http.Header
 }
 
-func NewClient(opts ...core.ClientOption) *Client {
-	options := core.NewClientOptions()
-	for _, opt := range opts {
-		opt(options)
-	}
+func NewClient(opts ...option.RequestOption) *Client {
+	options := core.NewRequestOptions(opts...)
 	return &Client{
 		baseURL: options.BaseURL,
-		caller:  core.NewCaller(options.HTTPClient),
-		header:  options.ToHeader(),
+		caller: core.NewCaller(
+			&core.CallerParams{
+				Client:      options.HTTPClient,
+				MaxAttempts: options.MaxAttempts,
+			},
+		),
+		header: options.ToHeader(),
 	}
 }
 
 // Returns all workbooks matching a filter for an account or space
-func (c *Client) List(ctx context.Context, request *flatfilego.ListWorkbooksRequest) (*flatfilego.ListWorkbooksResponse, error) {
+func (c *Client) List(
+	ctx context.Context,
+	request *flatfilego.ListWorkbooksRequest,
+	opts ...option.RequestOption,
+) (*flatfilego.ListWorkbooksResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := baseURL + "/" + "workbooks"
 
-	queryParams := make(url.Values)
-	if request.SpaceId != nil {
-		queryParams.Add("spaceId", fmt.Sprintf("%v", request.SpaceId))
-	}
-	if request.IncludeCounts != nil {
-		queryParams.Add("includeCounts", fmt.Sprintf("%v", *request.IncludeCounts))
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
 	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -77,7 +87,9 @@ func (c *Client) List(ctx context.Context, request *flatfilego.ListWorkbooksRequ
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodGet,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
 		},
@@ -88,12 +100,23 @@ func (c *Client) List(ctx context.Context, request *flatfilego.ListWorkbooksRequ
 }
 
 // Creates a workbook and adds it to a space
-func (c *Client) Create(ctx context.Context, request *flatfilego.CreateWorkbookConfig) (*flatfilego.WorkbookResponse, error) {
+func (c *Client) Create(
+	ctx context.Context,
+	request *flatfilego.CreateWorkbookConfig,
+	opts ...option.RequestOption,
+) (*flatfilego.WorkbookResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := baseURL + "/" + "workbooks"
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -120,7 +143,9 @@ func (c *Client) Create(ctx context.Context, request *flatfilego.CreateWorkbookC
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodPost,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Request:      request,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
@@ -132,14 +157,24 @@ func (c *Client) Create(ctx context.Context, request *flatfilego.CreateWorkbookC
 }
 
 // Returns a single workbook
-//
-// ID of workbook to return
-func (c *Client) Get(ctx context.Context, workbookId flatfilego.WorkbookId) (*flatfilego.WorkbookResponse, error) {
+func (c *Client) Get(
+	ctx context.Context,
+	// ID of workbook to return
+	workbookId flatfilego.WorkbookId,
+	opts ...option.RequestOption,
+) (*flatfilego.WorkbookResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"workbooks/%v", workbookId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -173,7 +208,9 @@ func (c *Client) Get(ctx context.Context, workbookId flatfilego.WorkbookId) (*fl
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodGet,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
 		},
@@ -184,14 +221,24 @@ func (c *Client) Get(ctx context.Context, workbookId flatfilego.WorkbookId) (*fl
 }
 
 // Deletes a workbook and all of its record data permanently
-//
-// ID of workbook to delete
-func (c *Client) Delete(ctx context.Context, workbookId flatfilego.WorkbookId) (*flatfilego.Success, error) {
+func (c *Client) Delete(
+	ctx context.Context,
+	// ID of workbook to delete
+	workbookId flatfilego.WorkbookId,
+	opts ...option.RequestOption,
+) (*flatfilego.Success, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"workbooks/%v", workbookId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -225,7 +272,9 @@ func (c *Client) Delete(ctx context.Context, workbookId flatfilego.WorkbookId) (
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodDelete,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
 		},
@@ -236,14 +285,25 @@ func (c *Client) Delete(ctx context.Context, workbookId flatfilego.WorkbookId) (
 }
 
 // Updates a workbook
-//
-// ID of workbook to update
-func (c *Client) Update(ctx context.Context, workbookId flatfilego.WorkbookId, request *flatfilego.WorkbookUpdate) (*flatfilego.WorkbookResponse, error) {
+func (c *Client) Update(
+	ctx context.Context,
+	// ID of workbook to update
+	workbookId flatfilego.WorkbookId,
+	request *flatfilego.WorkbookUpdate,
+	opts ...option.RequestOption,
+) (*flatfilego.WorkbookResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"workbooks/%v", workbookId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -277,7 +337,9 @@ func (c *Client) Update(ctx context.Context, workbookId flatfilego.WorkbookId, r
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodPatch,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Request:      request,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
@@ -289,31 +351,44 @@ func (c *Client) Update(ctx context.Context, workbookId flatfilego.WorkbookId, r
 }
 
 // Returns the commits for a workbook
-//
-// ID of workbook
-func (c *Client) GetWorkbookCommits(ctx context.Context, workbookId flatfilego.WorkbookId, request *flatfilego.ListWorkbookCommitsRequest) (*flatfilego.ListCommitsResponse, error) {
+func (c *Client) GetWorkbookCommits(
+	ctx context.Context,
+	// ID of workbook
+	workbookId flatfilego.WorkbookId,
+	request *flatfilego.ListWorkbookCommitsRequest,
+	opts ...option.RequestOption,
+) (*flatfilego.ListCommitsResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"workbooks/%v/commits", workbookId)
 
-	queryParams := make(url.Values)
-	if request.Completed != nil {
-		queryParams.Add("completed", fmt.Sprintf("%v", *request.Completed))
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
 	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
 
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
+
 	var response *flatfilego.ListCommitsResponse
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
-			URL:      endpointURL,
-			Method:   http.MethodGet,
-			Headers:  c.header,
-			Response: &response,
+			URL:         endpointURL,
+			Method:      http.MethodGet,
+			MaxAttempts: options.MaxAttempts,
+			Headers:     headers,
+			Client:      options.HTTPClient,
+			Response:    &response,
 		},
 	); err != nil {
 		return nil, err

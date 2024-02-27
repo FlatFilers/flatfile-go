@@ -10,10 +10,9 @@ import (
 	fmt "fmt"
 	flatfilego "github.com/FlatFilers/flatfile-go"
 	core "github.com/FlatFilers/flatfile-go/core"
+	option "github.com/FlatFilers/flatfile-go/option"
 	io "io"
 	http "net/http"
-	url "net/url"
-	time "time"
 )
 
 type Client struct {
@@ -22,63 +21,57 @@ type Client struct {
 	header  http.Header
 }
 
-func NewClient(opts ...core.ClientOption) *Client {
-	options := core.NewClientOptions()
-	for _, opt := range opts {
-		opt(options)
-	}
+func NewClient(opts ...option.RequestOption) *Client {
+	options := core.NewRequestOptions(opts...)
 	return &Client{
 		baseURL: options.BaseURL,
-		caller:  core.NewCaller(options.HTTPClient),
-		header:  options.ToHeader(),
+		caller: core.NewCaller(
+			&core.CallerParams{
+				Client:      options.HTTPClient,
+				MaxAttempts: options.MaxAttempts,
+			},
+		),
+		header: options.ToHeader(),
 	}
 }
 
 // Event topics that the Flatfile Platform emits.
-func (c *Client) List(ctx context.Context, request *flatfilego.ListEventsRequest) (*flatfilego.ListAllEventsResponse, error) {
+func (c *Client) List(
+	ctx context.Context,
+	request *flatfilego.ListEventsRequest,
+	opts ...option.RequestOption,
+) (*flatfilego.ListAllEventsResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := baseURL + "/" + "events"
 
-	queryParams := make(url.Values)
-	if request.EnvironmentId != nil {
-		queryParams.Add("environmentId", fmt.Sprintf("%v", request.EnvironmentId))
-	}
-	if request.SpaceId != nil {
-		queryParams.Add("spaceId", fmt.Sprintf("%v", request.SpaceId))
-	}
-	if request.Domain != nil {
-		queryParams.Add("domain", fmt.Sprintf("%v", *request.Domain))
-	}
-	if request.Topic != nil {
-		queryParams.Add("topic", fmt.Sprintf("%v", *request.Topic))
-	}
-	if request.Since != nil {
-		queryParams.Add("since", fmt.Sprintf("%v", request.Since.Format(time.RFC3339)))
-	}
-	if request.PageSize != nil {
-		queryParams.Add("pageSize", fmt.Sprintf("%v", *request.PageSize))
-	}
-	if request.PageNumber != nil {
-		queryParams.Add("pageNumber", fmt.Sprintf("%v", *request.PageNumber))
-	}
-	if request.IncludeAcknowledged != nil {
-		queryParams.Add("includeAcknowledged", fmt.Sprintf("%v", *request.IncludeAcknowledged))
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
 	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
 
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
+
 	var response *flatfilego.ListAllEventsResponse
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
-			URL:      endpointURL,
-			Method:   http.MethodGet,
-			Headers:  c.header,
-			Response: &response,
+			URL:         endpointURL,
+			Method:      http.MethodGet,
+			MaxAttempts: options.MaxAttempts,
+			Headers:     headers,
+			Client:      options.HTTPClient,
+			Response:    &response,
 		},
 	); err != nil {
 		return nil, err
@@ -86,12 +79,23 @@ func (c *Client) List(ctx context.Context, request *flatfilego.ListEventsRequest
 	return response, nil
 }
 
-func (c *Client) Create(ctx context.Context, request *flatfilego.CreateEventConfig) (*flatfilego.EventResponse, error) {
+func (c *Client) Create(
+	ctx context.Context,
+	request *flatfilego.CreateEventConfig,
+	opts ...option.RequestOption,
+) (*flatfilego.EventResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := baseURL + "/" + "events"
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -125,7 +129,9 @@ func (c *Client) Create(ctx context.Context, request *flatfilego.CreateEventConf
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodPost,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Request:      request,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
@@ -136,22 +142,35 @@ func (c *Client) Create(ctx context.Context, request *flatfilego.CreateEventConf
 	return response, nil
 }
 
-// The event id
-func (c *Client) Get(ctx context.Context, eventId flatfilego.EventId) (*flatfilego.EventResponse, error) {
+func (c *Client) Get(
+	ctx context.Context,
+	// The event id
+	eventId flatfilego.EventId,
+	opts ...option.RequestOption,
+) (*flatfilego.EventResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"events/%v", eventId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	var response *flatfilego.EventResponse
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
-			URL:      endpointURL,
-			Method:   http.MethodGet,
-			Headers:  c.header,
-			Response: &response,
+			URL:         endpointURL,
+			Method:      http.MethodGet,
+			MaxAttempts: options.MaxAttempts,
+			Headers:     headers,
+			Client:      options.HTTPClient,
+			Response:    &response,
 		},
 	); err != nil {
 		return nil, err
@@ -159,22 +178,35 @@ func (c *Client) Get(ctx context.Context, eventId flatfilego.EventId) (*flatfile
 	return response, nil
 }
 
-// The event id
-func (c *Client) Ack(ctx context.Context, eventId flatfilego.EventId) (*flatfilego.Success, error) {
+func (c *Client) Ack(
+	ctx context.Context,
+	// The event id
+	eventId flatfilego.EventId,
+	opts ...option.RequestOption,
+) (*flatfilego.Success, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"events/%v/ack", eventId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	var response *flatfilego.Success
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
-			URL:      endpointURL,
-			Method:   http.MethodPost,
-			Headers:  c.header,
-			Response: &response,
+			URL:         endpointURL,
+			Method:      http.MethodPost,
+			MaxAttempts: options.MaxAttempts,
+			Headers:     headers,
+			Client:      options.HTTPClient,
+			Response:    &response,
 		},
 	); err != nil {
 		return nil, err
@@ -183,23 +215,31 @@ func (c *Client) Ack(ctx context.Context, eventId flatfilego.EventId) (*flatfile
 }
 
 // Get a token which can be used to subscribe to events for this space
-func (c *Client) GetEventToken(ctx context.Context, request *flatfilego.GetEventTokenRequest) (*flatfilego.EventTokenResponse, error) {
+func (c *Client) GetEventToken(
+	ctx context.Context,
+	request *flatfilego.GetEventTokenRequest,
+	opts ...option.RequestOption,
+) (*flatfilego.EventTokenResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := baseURL + "/" + "subscription"
 
-	queryParams := make(url.Values)
-	if request.Scope != nil {
-		queryParams.Add("scope", fmt.Sprintf("%v", *request.Scope))
-	}
-	if request.SpaceId != nil {
-		queryParams.Add("spaceId", fmt.Sprintf("%v", request.SpaceId))
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
 	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -233,7 +273,9 @@ func (c *Client) GetEventToken(ctx context.Context, request *flatfilego.GetEvent
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodGet,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
 		},

@@ -30,6 +30,29 @@ func (b *BadRequestError) Unwrap() error {
 	return b.APIError
 }
 
+type ForbiddenError struct {
+	*core.APIError
+	Body *Errors
+}
+
+func (f *ForbiddenError) UnmarshalJSON(data []byte) error {
+	var body *Errors
+	if err := json.Unmarshal(data, &body); err != nil {
+		return err
+	}
+	f.StatusCode = 403
+	f.Body = body
+	return nil
+}
+
+func (f *ForbiddenError) MarshalJSON() ([]byte, error) {
+	return json.Marshal(f.Body)
+}
+
+func (f *ForbiddenError) Unwrap() error {
+	return f.APIError
+}
+
 type NotFoundError struct {
 	*core.APIError
 	Body *Errors

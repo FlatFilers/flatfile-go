@@ -9,12 +9,14 @@ import (
 	core "github.com/FlatFilers/flatfile-go/core"
 	dataretentionpolicies "github.com/FlatFilers/flatfile-go/dataretentionpolicies"
 	documents "github.com/FlatFilers/flatfile-go/documents"
+	entitlements "github.com/FlatFilers/flatfile-go/entitlements"
 	environments "github.com/FlatFilers/flatfile-go/environments"
 	events "github.com/FlatFilers/flatfile-go/events"
 	files "github.com/FlatFilers/flatfile-go/files"
 	guests "github.com/FlatFilers/flatfile-go/guests"
 	jobs "github.com/FlatFilers/flatfile-go/jobs"
 	mapping "github.com/FlatFilers/flatfile-go/mapping"
+	option "github.com/FlatFilers/flatfile-go/option"
 	records "github.com/FlatFilers/flatfile-go/records"
 	roles "github.com/FlatFilers/flatfile-go/roles"
 	secrets "github.com/FlatFilers/flatfile-go/secrets"
@@ -37,6 +39,7 @@ type Client struct {
 	Commits               *commits.Client
 	DataRetentionPolicies *dataretentionpolicies.Client
 	Documents             *documents.Client
+	Entitlements          *entitlements.Client
 	Environments          *environments.Client
 	Events                *events.Client
 	Files                 *files.Client
@@ -54,20 +57,23 @@ type Client struct {
 	Workbooks             *workbooks.Client
 }
 
-func NewClient(opts ...core.ClientOption) *Client {
-	options := core.NewClientOptions()
-	for _, opt := range opts {
-		opt(options)
-	}
+func NewClient(opts ...option.RequestOption) *Client {
+	options := core.NewRequestOptions(opts...)
 	return &Client{
-		baseURL:               options.BaseURL,
-		caller:                core.NewCaller(options.HTTPClient),
+		baseURL: options.BaseURL,
+		caller: core.NewCaller(
+			&core.CallerParams{
+				Client:      options.HTTPClient,
+				MaxAttempts: options.MaxAttempts,
+			},
+		),
 		header:                options.ToHeader(),
 		Agents:                agents.NewClient(opts...),
 		Apps:                  apps.NewClient(opts...),
 		Commits:               commits.NewClient(opts...),
 		DataRetentionPolicies: dataretentionpolicies.NewClient(opts...),
 		Documents:             documents.NewClient(opts...),
+		Entitlements:          entitlements.NewClient(opts...),
 		Environments:          environments.NewClient(opts...),
 		Events:                events.NewClient(opts...),
 		Files:                 files.NewClient(opts...),

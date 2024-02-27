@@ -7,8 +7,8 @@ import (
 	fmt "fmt"
 	flatfilego "github.com/FlatFilers/flatfile-go"
 	core "github.com/FlatFilers/flatfile-go/core"
+	option "github.com/FlatFilers/flatfile-go/option"
 	http "net/http"
-	url "net/url"
 )
 
 type Client struct {
@@ -17,62 +17,56 @@ type Client struct {
 	header  http.Header
 }
 
-func NewClient(opts ...core.ClientOption) *Client {
-	options := core.NewClientOptions()
-	for _, opt := range opts {
-		opt(options)
-	}
+func NewClient(opts ...option.RequestOption) *Client {
+	options := core.NewRequestOptions(opts...)
 	return &Client{
 		baseURL: options.BaseURL,
-		caller:  core.NewCaller(options.HTTPClient),
-		header:  options.ToHeader(),
+		caller: core.NewCaller(
+			&core.CallerParams{
+				Client:      options.HTTPClient,
+				MaxAttempts: options.MaxAttempts,
+			},
+		),
+		header: options.ToHeader(),
 	}
 }
 
-func (c *Client) List(ctx context.Context, request *flatfilego.ListJobsRequest) (*flatfilego.ListJobsResponse, error) {
+func (c *Client) List(
+	ctx context.Context,
+	request *flatfilego.ListJobsRequest,
+	opts ...option.RequestOption,
+) (*flatfilego.ListJobsResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := baseURL + "/" + "jobs"
 
-	queryParams := make(url.Values)
-	if request.EnvironmentId != nil {
-		queryParams.Add("environmentId", fmt.Sprintf("%v", request.EnvironmentId))
-	}
-	if request.SpaceId != nil {
-		queryParams.Add("spaceId", fmt.Sprintf("%v", request.SpaceId))
-	}
-	if request.WorkbookId != nil {
-		queryParams.Add("workbookId", fmt.Sprintf("%v", request.WorkbookId))
-	}
-	if request.FileId != nil {
-		queryParams.Add("fileId", fmt.Sprintf("%v", request.FileId))
-	}
-	if request.ParentId != nil {
-		queryParams.Add("parentId", fmt.Sprintf("%v", request.ParentId))
-	}
-	if request.PageSize != nil {
-		queryParams.Add("pageSize", fmt.Sprintf("%v", *request.PageSize))
-	}
-	if request.PageNumber != nil {
-		queryParams.Add("pageNumber", fmt.Sprintf("%v", *request.PageNumber))
-	}
-	if request.SortDirection != nil {
-		queryParams.Add("sortDirection", fmt.Sprintf("%v", request.SortDirection))
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
 	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
 
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
+
 	var response *flatfilego.ListJobsResponse
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
-			URL:      endpointURL,
-			Method:   http.MethodGet,
-			Headers:  c.header,
-			Response: &response,
+			URL:         endpointURL,
+			Method:      http.MethodGet,
+			MaxAttempts: options.MaxAttempts,
+			Headers:     headers,
+			Client:      options.HTTPClient,
+			Response:    &response,
 		},
 	); err != nil {
 		return nil, err
@@ -80,22 +74,35 @@ func (c *Client) List(ctx context.Context, request *flatfilego.ListJobsRequest) 
 	return response, nil
 }
 
-func (c *Client) Create(ctx context.Context, request *flatfilego.JobConfig) (*flatfilego.JobResponse, error) {
+func (c *Client) Create(
+	ctx context.Context,
+	request *flatfilego.JobConfig,
+	opts ...option.RequestOption,
+) (*flatfilego.JobResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
+	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
 	}
 	endpointURL := baseURL + "/" + "jobs"
 
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
+
 	var response *flatfilego.JobResponse
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
-			URL:      endpointURL,
-			Method:   http.MethodPost,
-			Headers:  c.header,
-			Request:  request,
-			Response: &response,
+			URL:         endpointURL,
+			Method:      http.MethodPost,
+			MaxAttempts: options.MaxAttempts,
+			Headers:     headers,
+			Client:      options.HTTPClient,
+			Request:     request,
+			Response:    &response,
 		},
 	); err != nil {
 		return nil, err
@@ -103,22 +110,35 @@ func (c *Client) Create(ctx context.Context, request *flatfilego.JobConfig) (*fl
 	return response, nil
 }
 
-// The id of the job to return
-func (c *Client) Get(ctx context.Context, jobId flatfilego.JobId) (*flatfilego.JobResponse, error) {
+func (c *Client) Get(
+	ctx context.Context,
+	// The id of the job to return
+	jobId flatfilego.JobId,
+	opts ...option.RequestOption,
+) (*flatfilego.JobResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"jobs/%v", jobId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	var response *flatfilego.JobResponse
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
-			URL:      endpointURL,
-			Method:   http.MethodGet,
-			Headers:  c.header,
-			Response: &response,
+			URL:         endpointURL,
+			Method:      http.MethodGet,
+			MaxAttempts: options.MaxAttempts,
+			Headers:     headers,
+			Client:      options.HTTPClient,
+			Response:    &response,
 		},
 	); err != nil {
 		return nil, err
@@ -126,23 +146,37 @@ func (c *Client) Get(ctx context.Context, jobId flatfilego.JobId) (*flatfilego.J
 	return response, nil
 }
 
-// The id of the job to patch
-func (c *Client) Update(ctx context.Context, jobId flatfilego.JobId, request *flatfilego.JobUpdate) (*flatfilego.JobResponse, error) {
+func (c *Client) Update(
+	ctx context.Context,
+	// The id of the job to patch
+	jobId flatfilego.JobId,
+	request *flatfilego.JobUpdate,
+	opts ...option.RequestOption,
+) (*flatfilego.JobResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"jobs/%v", jobId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	var response *flatfilego.JobResponse
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
-			URL:      endpointURL,
-			Method:   http.MethodPatch,
-			Headers:  c.header,
-			Request:  request,
-			Response: &response,
+			URL:         endpointURL,
+			Method:      http.MethodPatch,
+			MaxAttempts: options.MaxAttempts,
+			Headers:     headers,
+			Client:      options.HTTPClient,
+			Request:     request,
+			Response:    &response,
 		},
 	); err != nil {
 		return nil, err
@@ -150,22 +184,35 @@ func (c *Client) Update(ctx context.Context, jobId flatfilego.JobId, request *fl
 	return response, nil
 }
 
-// The id of the job to delete
-func (c *Client) Delete(ctx context.Context, jobId flatfilego.JobId) (*flatfilego.Success, error) {
+func (c *Client) Delete(
+	ctx context.Context,
+	// The id of the job to delete
+	jobId flatfilego.JobId,
+	opts ...option.RequestOption,
+) (*flatfilego.Success, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"jobs/%v", jobId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	var response *flatfilego.Success
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
-			URL:      endpointURL,
-			Method:   http.MethodDelete,
-			Headers:  c.header,
-			Response: &response,
+			URL:         endpointURL,
+			Method:      http.MethodDelete,
+			MaxAttempts: options.MaxAttempts,
+			Headers:     headers,
+			Client:      options.HTTPClient,
+			Response:    &response,
 		},
 	); err != nil {
 		return nil, err
@@ -174,23 +221,35 @@ func (c *Client) Delete(ctx context.Context, jobId flatfilego.JobId) (*flatfileg
 }
 
 // Execute a job and return the job
-//
-// ID of job to return
-func (c *Client) Execute(ctx context.Context, jobId string) (*flatfilego.Success, error) {
+func (c *Client) Execute(
+	ctx context.Context,
+	// ID of job to return
+	jobId string,
+	opts ...option.RequestOption,
+) (*flatfilego.Success, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"jobs/%v/execute", jobId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	var response *flatfilego.Success
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
-			URL:      endpointURL,
-			Method:   http.MethodPost,
-			Headers:  c.header,
-			Response: &response,
+			URL:         endpointURL,
+			Method:      http.MethodPost,
+			MaxAttempts: options.MaxAttempts,
+			Headers:     headers,
+			Client:      options.HTTPClient,
+			Response:    &response,
 		},
 	); err != nil {
 		return nil, err
@@ -199,23 +258,35 @@ func (c *Client) Execute(ctx context.Context, jobId string) (*flatfilego.Success
 }
 
 // Returns a single job's execution plan
-//
-// ID of job to return
-func (c *Client) GetExecutionPlan(ctx context.Context, jobId flatfilego.JobId) (*flatfilego.JobPlanResponse, error) {
+func (c *Client) GetExecutionPlan(
+	ctx context.Context,
+	// ID of job to return
+	jobId flatfilego.JobId,
+	opts ...option.RequestOption,
+) (*flatfilego.JobPlanResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"jobs/%v/plan", jobId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	var response *flatfilego.JobPlanResponse
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
-			URL:      endpointURL,
-			Method:   http.MethodGet,
-			Headers:  c.header,
-			Response: &response,
+			URL:         endpointURL,
+			Method:      http.MethodGet,
+			MaxAttempts: options.MaxAttempts,
+			Headers:     headers,
+			Client:      options.HTTPClient,
+			Response:    &response,
 		},
 	); err != nil {
 		return nil, err
@@ -224,24 +295,37 @@ func (c *Client) GetExecutionPlan(ctx context.Context, jobId flatfilego.JobId) (
 }
 
 // Update a job's entire execution plan
-//
-// ID of job to return
-func (c *Client) UpdateExecutionPlan(ctx context.Context, jobId flatfilego.JobId, request *flatfilego.JobExecutionPlanRequest) (*flatfilego.JobPlanResponse, error) {
+func (c *Client) UpdateExecutionPlan(
+	ctx context.Context,
+	// ID of job to return
+	jobId flatfilego.JobId,
+	request *flatfilego.JobExecutionPlanRequest,
+	opts ...option.RequestOption,
+) (*flatfilego.JobPlanResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"jobs/%v/plan", jobId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	var response *flatfilego.JobPlanResponse
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
-			URL:      endpointURL,
-			Method:   http.MethodPut,
-			Headers:  c.header,
-			Request:  request,
-			Response: &response,
+			URL:         endpointURL,
+			Method:      http.MethodPut,
+			MaxAttempts: options.MaxAttempts,
+			Headers:     headers,
+			Client:      options.HTTPClient,
+			Request:     request,
+			Response:    &response,
 		},
 	); err != nil {
 		return nil, err
@@ -250,24 +334,37 @@ func (c *Client) UpdateExecutionPlan(ctx context.Context, jobId flatfilego.JobId
 }
 
 // Update one or more individual fields on a job's execution plan
-//
-// ID of job to return
-func (c *Client) UpdateExecutionPlanFields(ctx context.Context, jobId string, request *flatfilego.JobExecutionPlanConfigRequest) (*flatfilego.JobPlanResponse, error) {
+func (c *Client) UpdateExecutionPlanFields(
+	ctx context.Context,
+	// ID of job to return
+	jobId string,
+	request *flatfilego.JobExecutionPlanConfigRequest,
+	opts ...option.RequestOption,
+) (*flatfilego.JobPlanResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"jobs/%v/plan", jobId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	var response *flatfilego.JobPlanResponse
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
-			URL:      endpointURL,
-			Method:   http.MethodPatch,
-			Headers:  c.header,
-			Request:  request,
-			Response: &response,
+			URL:         endpointURL,
+			Method:      http.MethodPatch,
+			MaxAttempts: options.MaxAttempts,
+			Headers:     headers,
+			Client:      options.HTTPClient,
+			Request:     request,
+			Response:    &response,
 		},
 	); err != nil {
 		return nil, err
@@ -276,24 +373,37 @@ func (c *Client) UpdateExecutionPlanFields(ctx context.Context, jobId string, re
 }
 
 // Acknowledge a job and return the job
-//
-// ID of job to return
-func (c *Client) Ack(ctx context.Context, jobId flatfilego.JobId, request *flatfilego.JobAckDetails) (*flatfilego.JobResponse, error) {
+func (c *Client) Ack(
+	ctx context.Context,
+	// ID of job to return
+	jobId flatfilego.JobId,
+	request *flatfilego.JobAckDetails,
+	opts ...option.RequestOption,
+) (*flatfilego.JobResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"jobs/%v/ack", jobId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	var response *flatfilego.JobResponse
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
-			URL:      endpointURL,
-			Method:   http.MethodPost,
-			Headers:  c.header,
-			Request:  request,
-			Response: &response,
+			URL:         endpointURL,
+			Method:      http.MethodPost,
+			MaxAttempts: options.MaxAttempts,
+			Headers:     headers,
+			Client:      options.HTTPClient,
+			Request:     request,
+			Response:    &response,
 		},
 	); err != nil {
 		return nil, err
@@ -302,23 +412,35 @@ func (c *Client) Ack(ctx context.Context, jobId flatfilego.JobId, request *flatf
 }
 
 // Acknowledge a job outcome and return the job
-//
-// ID of job to return
-func (c *Client) AckOutcome(ctx context.Context, jobId flatfilego.JobId) (*flatfilego.JobResponse, error) {
+func (c *Client) AckOutcome(
+	ctx context.Context,
+	// ID of job to return
+	jobId flatfilego.JobId,
+	opts ...option.RequestOption,
+) (*flatfilego.JobResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"jobs/%v/outcome/ack", jobId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	var response *flatfilego.JobResponse
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
-			URL:      endpointURL,
-			Method:   http.MethodPost,
-			Headers:  c.header,
-			Response: &response,
+			URL:         endpointURL,
+			Method:      http.MethodPost,
+			MaxAttempts: options.MaxAttempts,
+			Headers:     headers,
+			Client:      options.HTTPClient,
+			Response:    &response,
 		},
 	); err != nil {
 		return nil, err
@@ -327,24 +449,37 @@ func (c *Client) AckOutcome(ctx context.Context, jobId flatfilego.JobId) (*flatf
 }
 
 // Complete a job and return the job
-//
-// ID of job to return
-func (c *Client) Complete(ctx context.Context, jobId flatfilego.JobId, request *flatfilego.JobCompleteDetails) (*flatfilego.JobResponse, error) {
+func (c *Client) Complete(
+	ctx context.Context,
+	// ID of job to return
+	jobId flatfilego.JobId,
+	request *flatfilego.JobCompleteDetails,
+	opts ...option.RequestOption,
+) (*flatfilego.JobResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"jobs/%v/complete", jobId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	var response *flatfilego.JobResponse
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
-			URL:      endpointURL,
-			Method:   http.MethodPost,
-			Headers:  c.header,
-			Request:  request,
-			Response: &response,
+			URL:         endpointURL,
+			Method:      http.MethodPost,
+			MaxAttempts: options.MaxAttempts,
+			Headers:     headers,
+			Client:      options.HTTPClient,
+			Request:     request,
+			Response:    &response,
 		},
 	); err != nil {
 		return nil, err
@@ -353,24 +488,37 @@ func (c *Client) Complete(ctx context.Context, jobId flatfilego.JobId, request *
 }
 
 // Fail a job and return the job
-//
-// ID of job to return
-func (c *Client) Fail(ctx context.Context, jobId flatfilego.JobId, request *flatfilego.JobCompleteDetails) (*flatfilego.JobResponse, error) {
+func (c *Client) Fail(
+	ctx context.Context,
+	// ID of job to return
+	jobId flatfilego.JobId,
+	request *flatfilego.JobCompleteDetails,
+	opts ...option.RequestOption,
+) (*flatfilego.JobResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"jobs/%v/fail", jobId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	var response *flatfilego.JobResponse
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
-			URL:      endpointURL,
-			Method:   http.MethodPost,
-			Headers:  c.header,
-			Request:  request,
-			Response: &response,
+			URL:         endpointURL,
+			Method:      http.MethodPost,
+			MaxAttempts: options.MaxAttempts,
+			Headers:     headers,
+			Client:      options.HTTPClient,
+			Request:     request,
+			Response:    &response,
 		},
 	); err != nil {
 		return nil, err
@@ -379,24 +527,37 @@ func (c *Client) Fail(ctx context.Context, jobId flatfilego.JobId, request *flat
 }
 
 // Cancel a job and return the job
-//
-// ID of job to return
-func (c *Client) Cancel(ctx context.Context, jobId flatfilego.JobId, request *flatfilego.JobCancelDetails) (*flatfilego.JobResponse, error) {
+func (c *Client) Cancel(
+	ctx context.Context,
+	// ID of job to return
+	jobId flatfilego.JobId,
+	request *flatfilego.JobCancelDetails,
+	opts ...option.RequestOption,
+) (*flatfilego.JobResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"jobs/%v/cancel", jobId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	var response *flatfilego.JobResponse
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
-			URL:      endpointURL,
-			Method:   http.MethodPost,
-			Headers:  c.header,
-			Request:  request,
-			Response: &response,
+			URL:         endpointURL,
+			Method:      http.MethodPost,
+			MaxAttempts: options.MaxAttempts,
+			Headers:     headers,
+			Client:      options.HTTPClient,
+			Request:     request,
+			Response:    &response,
 		},
 	); err != nil {
 		return nil, err
@@ -405,23 +566,35 @@ func (c *Client) Cancel(ctx context.Context, jobId flatfilego.JobId, request *fl
 }
 
 // Retry a failt job and return the job
-//
-// ID of job to return
-func (c *Client) Retry(ctx context.Context, jobId flatfilego.JobId) (*flatfilego.JobResponse, error) {
+func (c *Client) Retry(
+	ctx context.Context,
+	// ID of job to return
+	jobId flatfilego.JobId,
+	opts ...option.RequestOption,
+) (*flatfilego.JobResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"jobs/%v/retry", jobId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	var response *flatfilego.JobResponse
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
-			URL:      endpointURL,
-			Method:   http.MethodPost,
-			Headers:  c.header,
-			Response: &response,
+			URL:         endpointURL,
+			Method:      http.MethodPost,
+			MaxAttempts: options.MaxAttempts,
+			Headers:     headers,
+			Client:      options.HTTPClient,
+			Response:    &response,
 		},
 	); err != nil {
 		return nil, err
@@ -430,22 +603,35 @@ func (c *Client) Retry(ctx context.Context, jobId flatfilego.JobId) (*flatfilego
 }
 
 // Preview the results of a mutation
-func (c *Client) PreviewMutation(ctx context.Context, request *flatfilego.MutateJobConfig) (*flatfilego.DiffRecordsResponse, error) {
+func (c *Client) PreviewMutation(
+	ctx context.Context,
+	request *flatfilego.MutateJobConfig,
+	opts ...option.RequestOption,
+) (*flatfilego.DiffRecordsResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := baseURL + "/" + "jobs/preview-mutation"
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	var response *flatfilego.DiffRecordsResponse
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
-			URL:      endpointURL,
-			Method:   http.MethodPost,
-			Headers:  c.header,
-			Request:  request,
-			Response: &response,
+			URL:         endpointURL,
+			Method:      http.MethodPost,
+			MaxAttempts: options.MaxAttempts,
+			Headers:     headers,
+			Client:      options.HTTPClient,
+			Request:     request,
+			Response:    &response,
 		},
 	); err != nil {
 		return nil, err
@@ -454,24 +640,37 @@ func (c *Client) PreviewMutation(ctx context.Context, request *flatfilego.Mutate
 }
 
 // Split a job and return the job
-//
-// ID of job to return
-func (c *Client) Split(ctx context.Context, jobId flatfilego.JobId, request *flatfilego.JobSplitDetails) (*flatfilego.JobResponse, error) {
+func (c *Client) Split(
+	ctx context.Context,
+	// ID of job to return
+	jobId flatfilego.JobId,
+	request *flatfilego.JobSplitDetails,
+	opts ...option.RequestOption,
+) (*flatfilego.JobResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"jobs/%v/split", jobId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	var response *flatfilego.JobResponse
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
-			URL:      endpointURL,
-			Method:   http.MethodPost,
-			Headers:  c.header,
-			Request:  request,
-			Response: &response,
+			URL:         endpointURL,
+			Method:      http.MethodPost,
+			MaxAttempts: options.MaxAttempts,
+			Headers:     headers,
+			Client:      options.HTTPClient,
+			Request:     request,
+			Response:    &response,
 		},
 	); err != nil {
 		return nil, err

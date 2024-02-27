@@ -11,13 +11,13 @@ import (
 
 // Create an app
 type AppCreate struct {
-	Name         string      `json:"name"`
-	Namespace    string      `json:"namespace"`
-	Type         AppType     `json:"type,omitempty"`
-	Entity       *string     `json:"entity,omitempty"`
-	EntityPlural *string     `json:"entityPlural,omitempty"`
-	Icon         *string     `json:"icon,omitempty"`
-	Metadata     interface{} `json:"metadata,omitempty"`
+	Name         string      `json:"name" url:"name"`
+	Namespace    string      `json:"namespace" url:"namespace"`
+	Type         AppType     `json:"type,omitempty" url:"type,omitempty"`
+	Entity       *string     `json:"entity,omitempty" url:"entity,omitempty"`
+	EntityPlural *string     `json:"entityPlural,omitempty" url:"entityPlural,omitempty"`
+	Icon         *string     `json:"icon,omitempty" url:"icon,omitempty"`
+	Metadata     interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -47,26 +47,44 @@ func (a *AppCreate) String() string {
 
 // Update an app
 type AppPatch struct {
-	Name         *string     `json:"name,omitempty"`
-	Namespace    *string     `json:"namespace,omitempty"`
-	Entity       *string     `json:"entity,omitempty"`
-	EntityPlural *string     `json:"entityPlural,omitempty"`
-	Icon         *string     `json:"icon,omitempty"`
-	Metadata     interface{} `json:"metadata,omitempty"`
-	ActivatedAt  *time.Time  `json:"activatedAt,omitempty"`
+	Name         *string     `json:"name,omitempty" url:"name,omitempty"`
+	Namespace    *string     `json:"namespace,omitempty" url:"namespace,omitempty"`
+	Entity       *string     `json:"entity,omitempty" url:"entity,omitempty"`
+	EntityPlural *string     `json:"entityPlural,omitempty" url:"entityPlural,omitempty"`
+	Icon         *string     `json:"icon,omitempty" url:"icon,omitempty"`
+	Metadata     interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
+	ActivatedAt  *time.Time  `json:"activatedAt,omitempty" url:"activatedAt,omitempty"`
 
 	_rawJSON json.RawMessage
 }
 
 func (a *AppPatch) UnmarshalJSON(data []byte) error {
-	type unmarshaler AppPatch
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
+	type embed AppPatch
+	var unmarshaler = struct {
+		embed
+		ActivatedAt *core.DateTime `json:"activatedAt,omitempty"`
+	}{
+		embed: embed(*a),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
 		return err
 	}
-	*a = AppPatch(value)
+	*a = AppPatch(unmarshaler.embed)
+	a.ActivatedAt = unmarshaler.ActivatedAt.TimePtr()
 	a._rawJSON = json.RawMessage(data)
 	return nil
+}
+
+func (a *AppPatch) MarshalJSON() ([]byte, error) {
+	type embed AppPatch
+	var marshaler = struct {
+		embed
+		ActivatedAt *core.DateTime `json:"activatedAt,omitempty"`
+	}{
+		embed:       embed(*a),
+		ActivatedAt: core.NewOptionalDateTime(a.ActivatedAt),
+	}
+	return json.Marshal(marshaler)
 }
 
 func (a *AppPatch) String() string {
@@ -82,7 +100,7 @@ func (a *AppPatch) String() string {
 }
 
 type AppResponse struct {
-	Data *App `json:"data,omitempty"`
+	Data *App `json:"data,omitempty" url:"data,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -111,7 +129,7 @@ func (a *AppResponse) String() string {
 }
 
 type AppsResponse struct {
-	Data []*App `json:"data,omitempty"`
+	Data []*App `json:"data,omitempty" url:"data,omitempty"`
 
 	_rawJSON json.RawMessage
 }

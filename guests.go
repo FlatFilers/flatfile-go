@@ -10,21 +10,21 @@ import (
 
 type GetGuestTokenRequest struct {
 	// ID of space to return
-	SpaceId *SpaceId `json:"-"`
+	SpaceId *SpaceId `json:"-" url:"spaceId,omitempty"`
 }
 
 type ListGuestsRequest struct {
 	// ID of space to return
-	SpaceId SpaceId `json:"-"`
+	SpaceId SpaceId `json:"-" url:"spaceId"`
 	// Email of guest to return
-	Email *string `json:"-"`
+	Email *string `json:"-" url:"email,omitempty"`
 }
 
 // Guest ID
 type GuestId = string
 
 type CreateGuestResponse struct {
-	Data []*Guest `json:"data,omitempty"`
+	Data []*Guest `json:"data,omitempty" url:"data,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -54,10 +54,10 @@ func (c *CreateGuestResponse) String() string {
 
 // Configurations for the guests
 type GuestConfig struct {
-	EnvironmentId EnvironmentId `json:"environmentId"`
-	Email         string        `json:"email"`
-	Name          string        `json:"name"`
-	Spaces        []*GuestSpace `json:"spaces,omitempty"`
+	EnvironmentId EnvironmentId `json:"environmentId" url:"environmentId"`
+	Email         string        `json:"email" url:"email"`
+	Name          string        `json:"name" url:"name"`
+	Spaces        []*GuestSpace `json:"spaces,omitempty" url:"spaces,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -87,10 +87,10 @@ func (g *GuestConfig) String() string {
 
 // Properties used to update an existing guest
 type GuestConfigUpdate struct {
-	EnvironmentId *EnvironmentId `json:"environmentId,omitempty"`
-	Email         *string        `json:"email,omitempty"`
-	Name          *string        `json:"name,omitempty"`
-	Spaces        []*GuestSpace  `json:"spaces,omitempty"`
+	EnvironmentId *EnvironmentId `json:"environmentId,omitempty" url:"environmentId,omitempty"`
+	Email         *string        `json:"email,omitempty" url:"email,omitempty"`
+	Name          *string        `json:"name,omitempty" url:"name,omitempty"`
+	Spaces        []*GuestSpace  `json:"spaces,omitempty" url:"spaces,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -119,7 +119,7 @@ func (g *GuestConfigUpdate) String() string {
 }
 
 type GuestResponse struct {
-	Data *Guest `json:"data,omitempty"`
+	Data *Guest `json:"data,omitempty" url:"data,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -148,7 +148,7 @@ func (g *GuestResponse) String() string {
 }
 
 type GuestTokenResponse struct {
-	Data *GuestToken `json:"data,omitempty"`
+	Data *GuestToken `json:"data,omitempty" url:"data,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -177,12 +177,12 @@ func (g *GuestTokenResponse) String() string {
 }
 
 type Invite struct {
-	GuestId GuestId `json:"guestId"`
-	SpaceId SpaceId `json:"spaceId"`
+	GuestId GuestId `json:"guestId" url:"guestId"`
+	SpaceId SpaceId `json:"spaceId" url:"spaceId"`
 	// The name of the person or company sending the invitation
-	FromName *string `json:"fromName,omitempty"`
+	FromName *string `json:"fromName,omitempty" url:"fromName,omitempty"`
 	// Message to send with the invite
-	Message *string `json:"message,omitempty"`
+	Message *string `json:"message,omitempty" url:"message,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -211,7 +211,7 @@ func (i *Invite) String() string {
 }
 
 type ListGuestsResponse struct {
-	Data []*Guest `json:"data,omitempty"`
+	Data []*Guest `json:"data,omitempty" url:"data,omitempty"`
 
 	_rawJSON json.RawMessage
 }

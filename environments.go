@@ -10,29 +10,29 @@ import (
 
 type GetEnvironmentEventTokenRequest struct {
 	// ID of environment to return
-	EnvironmentId EnvironmentId `json:"-"`
+	EnvironmentId EnvironmentId `json:"-" url:"environmentId"`
 }
 
 type ListEnvironmentsRequest struct {
 	// Number of environments to return in a page (default 10)
-	PageSize *int `json:"-"`
+	PageSize *int `json:"-" url:"pageSize,omitempty"`
 	// Based on pageSize, which page of environments to return
-	PageNumber *int `json:"-"`
+	PageNumber *int `json:"-" url:"pageNumber,omitempty"`
 }
 
 type Environment struct {
-	Id        EnvironmentId `json:"id"`
-	AccountId AccountId     `json:"accountId"`
+	Id        EnvironmentId `json:"id" url:"id"`
+	AccountId AccountId     `json:"accountId" url:"accountId"`
 	// The name of the environment
-	Name string `json:"name"`
+	Name string `json:"name" url:"name"`
 	// Whether or not the environment is a production environment
-	IsProd              bool                      `json:"isProd"`
-	GuestAuthentication []GuestAuthenticationEnum `json:"guestAuthentication,omitempty"`
-	Features            map[string]interface{}    `json:"features,omitempty"`
-	Metadata            map[string]interface{}    `json:"metadata,omitempty"`
-	TranslationsPath    *string                   `json:"translationsPath,omitempty"`
-	Namespaces          []string                  `json:"namespaces,omitempty"`
-	LanguageOverride    *string                   `json:"languageOverride,omitempty"`
+	IsProd              bool                      `json:"isProd" url:"isProd"`
+	GuestAuthentication []GuestAuthenticationEnum `json:"guestAuthentication,omitempty" url:"guestAuthentication,omitempty"`
+	Features            map[string]interface{}    `json:"features,omitempty" url:"features,omitempty"`
+	Metadata            map[string]interface{}    `json:"metadata,omitempty" url:"metadata,omitempty"`
+	TranslationsPath    *string                   `json:"translationsPath,omitempty" url:"translationsPath,omitempty"`
+	Namespaces          []string                  `json:"namespaces,omitempty" url:"namespaces,omitempty"`
+	LanguageOverride    *string                   `json:"languageOverride,omitempty" url:"languageOverride,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -63,14 +63,14 @@ func (e *Environment) String() string {
 // Properties used to create a new environment
 type EnvironmentConfigCreate struct {
 	// The name of the environment
-	Name string `json:"name"`
+	Name string `json:"name" url:"name"`
 	// Whether or not the environment is a production environment
-	IsProd              bool                      `json:"isProd"`
-	GuestAuthentication []GuestAuthenticationEnum `json:"guestAuthentication,omitempty"`
-	Metadata            map[string]interface{}    `json:"metadata,omitempty"`
-	TranslationsPath    *string                   `json:"translationsPath,omitempty"`
-	Namespaces          []string                  `json:"namespaces,omitempty"`
-	LanguageOverride    *string                   `json:"languageOverride,omitempty"`
+	IsProd              bool                      `json:"isProd" url:"isProd"`
+	GuestAuthentication []GuestAuthenticationEnum `json:"guestAuthentication,omitempty" url:"guestAuthentication,omitempty"`
+	Metadata            map[string]interface{}    `json:"metadata,omitempty" url:"metadata,omitempty"`
+	TranslationsPath    *string                   `json:"translationsPath,omitempty" url:"translationsPath,omitempty"`
+	Namespaces          []string                  `json:"namespaces,omitempty" url:"namespaces,omitempty"`
+	LanguageOverride    *string                   `json:"languageOverride,omitempty" url:"languageOverride,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -101,14 +101,14 @@ func (e *EnvironmentConfigCreate) String() string {
 // Properties used to update an environment
 type EnvironmentConfigUpdate struct {
 	// The name of the environment
-	Name *string `json:"name,omitempty"`
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
 	// Whether or not the environment is a production environment
-	IsProd              *bool                     `json:"isProd,omitempty"`
-	GuestAuthentication []GuestAuthenticationEnum `json:"guestAuthentication,omitempty"`
-	Metadata            map[string]interface{}    `json:"metadata,omitempty"`
-	TranslationsPath    *string                   `json:"translationsPath,omitempty"`
-	Namespaces          []string                  `json:"namespaces,omitempty"`
-	LanguageOverride    *string                   `json:"languageOverride,omitempty"`
+	IsProd              *bool                     `json:"isProd,omitempty" url:"isProd,omitempty"`
+	GuestAuthentication []GuestAuthenticationEnum `json:"guestAuthentication,omitempty" url:"guestAuthentication,omitempty"`
+	Metadata            map[string]interface{}    `json:"metadata,omitempty" url:"metadata,omitempty"`
+	TranslationsPath    *string                   `json:"translationsPath,omitempty" url:"translationsPath,omitempty"`
+	Namespaces          []string                  `json:"namespaces,omitempty" url:"namespaces,omitempty"`
+	LanguageOverride    *string                   `json:"languageOverride,omitempty" url:"languageOverride,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -137,7 +137,7 @@ func (e *EnvironmentConfigUpdate) String() string {
 }
 
 type EnvironmentResponse struct {
-	Data *Environment `json:"data,omitempty"`
+	Data *Environment `json:"data,omitempty" url:"data,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -166,8 +166,8 @@ func (e *EnvironmentResponse) String() string {
 }
 
 type ListEnvironmentsResponse struct {
-	Data       []*Environment `json:"data,omitempty"`
-	Pagination *Pagination    `json:"pagination,omitempty"`
+	Data       []*Environment `json:"data,omitempty" url:"data,omitempty"`
+	Pagination *Pagination    `json:"pagination,omitempty" url:"pagination,omitempty"`
 
 	_rawJSON json.RawMessage
 }

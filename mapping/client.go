@@ -10,10 +10,9 @@ import (
 	fmt "fmt"
 	flatfilego "github.com/FlatFilers/flatfile-go"
 	core "github.com/FlatFilers/flatfile-go/core"
+	option "github.com/FlatFilers/flatfile-go/option"
 	io "io"
 	http "net/http"
-	url "net/url"
-	time "time"
 )
 
 type Client struct {
@@ -22,25 +21,38 @@ type Client struct {
 	header  http.Header
 }
 
-func NewClient(opts ...core.ClientOption) *Client {
-	options := core.NewClientOptions()
-	for _, opt := range opts {
-		opt(options)
-	}
+func NewClient(opts ...option.RequestOption) *Client {
+	options := core.NewRequestOptions(opts...)
 	return &Client{
 		baseURL: options.BaseURL,
-		caller:  core.NewCaller(options.HTTPClient),
-		header:  options.ToHeader(),
+		caller: core.NewCaller(
+			&core.CallerParams{
+				Client:      options.HTTPClient,
+				MaxAttempts: options.MaxAttempts,
+			},
+		),
+		header: options.ToHeader(),
 	}
 }
 
 // Creates a list of mapping rules based on two provided schemas
-func (c *Client) CreateMappingProgram(ctx context.Context, request *flatfilego.ProgramConfig) (*flatfilego.ProgramResponse, error) {
+func (c *Client) CreateMappingProgram(
+	ctx context.Context,
+	request *flatfilego.ProgramConfig,
+	opts ...option.RequestOption,
+) (*flatfilego.ProgramResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := baseURL + "/" + "mapping"
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -74,7 +86,9 @@ func (c *Client) CreateMappingProgram(ctx context.Context, request *flatfilego.P
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodPost,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Request:      request,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
@@ -85,48 +99,94 @@ func (c *Client) CreateMappingProgram(ctx context.Context, request *flatfilego.P
 	return response, nil
 }
 
-// List all mapping programs
-func (c *Client) ListMappingPrograms(ctx context.Context, request *flatfilego.ListProgramsRequest) (*flatfilego.ProgramsResponse, error) {
+// Deletes all history for the authenticated user
+func (c *Client) DeleteAllHistoryForUser(
+	ctx context.Context,
+	opts ...option.RequestOption,
+) (*flatfilego.Success, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := baseURL + "/" + "mapping"
 
-	queryParams := make(url.Values)
-	if request.PageSize != nil {
-		queryParams.Add("pageSize", fmt.Sprintf("%v", *request.PageSize))
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
+
+	errorDecoder := func(statusCode int, body io.Reader) error {
+		raw, err := io.ReadAll(body)
+		if err != nil {
+			return err
+		}
+		apiError := core.NewAPIError(statusCode, errors.New(string(raw)))
+		decoder := json.NewDecoder(bytes.NewReader(raw))
+		switch statusCode {
+		case 400:
+			value := new(flatfilego.BadRequestError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 404:
+			value := new(flatfilego.NotFoundError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		}
+		return apiError
 	}
-	if request.PageNumber != nil {
-		queryParams.Add("pageNumber", fmt.Sprintf("%v", *request.PageNumber))
+
+	var response *flatfilego.Success
+	if err := c.caller.Call(
+		ctx,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodDelete,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
+	); err != nil {
+		return nil, err
 	}
-	if request.CreatedBy != nil {
-		queryParams.Add("createdBy", fmt.Sprintf("%v", request.CreatedBy))
+	return response, nil
+}
+
+// List all mapping programs
+func (c *Client) ListMappingPrograms(
+	ctx context.Context,
+	request *flatfilego.ListProgramsRequest,
+	opts ...option.RequestOption,
+) (*flatfilego.ProgramsResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
+	baseURL := "https://api.x.flatfile.com/v1"
+	if c.baseURL != "" {
+		baseURL = c.baseURL
 	}
-	if request.CreatedAfter != nil {
-		queryParams.Add("createdAfter", fmt.Sprintf("%v", request.CreatedAfter.Format(time.RFC3339)))
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
 	}
-	if request.CreatedBefore != nil {
-		queryParams.Add("createdBefore", fmt.Sprintf("%v", request.CreatedBefore.Format(time.RFC3339)))
-	}
-	if request.EnvironmentId != nil {
-		queryParams.Add("environmentId", fmt.Sprintf("%v", request.EnvironmentId))
-	}
-	if request.FamilyId != nil {
-		queryParams.Add("familyId", fmt.Sprintf("%v", request.FamilyId))
-	}
-	if request.Namespace != nil {
-		queryParams.Add("namespace", fmt.Sprintf("%v", *request.Namespace))
-	}
-	if request.SourceKeys != nil {
-		queryParams.Add("sourceKeys", fmt.Sprintf("%v", *request.SourceKeys))
-	}
-	if request.DestinationKeys != nil {
-		queryParams.Add("destinationKeys", fmt.Sprintf("%v", *request.DestinationKeys))
+	endpointURL := baseURL + "/" + "mapping"
+
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
 	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -153,7 +213,9 @@ func (c *Client) ListMappingPrograms(ctx context.Context, request *flatfilego.Li
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodGet,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
 		},
@@ -164,14 +226,24 @@ func (c *Client) ListMappingPrograms(ctx context.Context, request *flatfilego.Li
 }
 
 // Get a mapping program
-//
-// ID of the program
-func (c *Client) GetMappingProgram(ctx context.Context, programId flatfilego.ProgramId) (*flatfilego.ProgramResponse, error) {
+func (c *Client) GetMappingProgram(
+	ctx context.Context,
+	// ID of the program
+	programId flatfilego.ProgramId,
+	opts ...option.RequestOption,
+) (*flatfilego.ProgramResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"mapping/%v", programId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -205,7 +277,9 @@ func (c *Client) GetMappingProgram(ctx context.Context, programId flatfilego.Pro
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodGet,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
 		},
@@ -216,14 +290,25 @@ func (c *Client) GetMappingProgram(ctx context.Context, programId flatfilego.Pro
 }
 
 // Updates a mapping program
-//
-// ID of the program
-func (c *Client) UpdateMappingProgram(ctx context.Context, programId flatfilego.ProgramId, request *flatfilego.ProgramConfig) (*flatfilego.ProgramResponse, error) {
+func (c *Client) UpdateMappingProgram(
+	ctx context.Context,
+	// ID of the program
+	programId flatfilego.ProgramId,
+	request *flatfilego.ProgramConfig,
+	opts ...option.RequestOption,
+) (*flatfilego.ProgramResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"mapping/%v", programId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -257,7 +342,9 @@ func (c *Client) UpdateMappingProgram(ctx context.Context, programId flatfilego.
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodPatch,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Request:      request,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
@@ -269,14 +356,24 @@ func (c *Client) UpdateMappingProgram(ctx context.Context, programId flatfilego.
 }
 
 // Deletes a mapping program
-//
-// ID of the program
-func (c *Client) DeleteMappingProgram(ctx context.Context, programId flatfilego.ProgramId) (*flatfilego.Success, error) {
+func (c *Client) DeleteMappingProgram(
+	ctx context.Context,
+	// ID of the program
+	programId flatfilego.ProgramId,
+	opts ...option.RequestOption,
+) (*flatfilego.Success, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"mapping/%v", programId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -310,7 +407,9 @@ func (c *Client) DeleteMappingProgram(ctx context.Context, programId flatfilego.
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodDelete,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
 		},
@@ -321,14 +420,25 @@ func (c *Client) DeleteMappingProgram(ctx context.Context, programId flatfilego.
 }
 
 // Add mapping rules to a program
-//
-// ID of the program
-func (c *Client) CreateRules(ctx context.Context, programId flatfilego.ProgramId, request flatfilego.CreateMappingRulesRequest) (*flatfilego.MappingRulesResponse, error) {
+func (c *Client) CreateRules(
+	ctx context.Context,
+	// ID of the program
+	programId flatfilego.ProgramId,
+	request flatfilego.CreateMappingRulesRequest,
+	opts ...option.RequestOption,
+) (*flatfilego.MappingRulesResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"mapping/%v/rules", programId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -362,7 +472,9 @@ func (c *Client) CreateRules(ctx context.Context, programId flatfilego.ProgramId
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodPost,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Request:      request,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
@@ -374,14 +486,24 @@ func (c *Client) CreateRules(ctx context.Context, programId flatfilego.ProgramId
 }
 
 // List all mapping rules in a program
-//
-// ID of the program
-func (c *Client) ListRules(ctx context.Context, programId flatfilego.ProgramId) (*flatfilego.MappingRulesResponse, error) {
+func (c *Client) ListRules(
+	ctx context.Context,
+	// ID of the program
+	programId flatfilego.ProgramId,
+	opts ...option.RequestOption,
+) (*flatfilego.MappingRulesResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"mapping/%v/rules", programId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -415,7 +537,9 @@ func (c *Client) ListRules(ctx context.Context, programId flatfilego.ProgramId) 
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodGet,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
 		},
@@ -426,15 +550,26 @@ func (c *Client) ListRules(ctx context.Context, programId flatfilego.ProgramId) 
 }
 
 // Get a mapping rule from a program
-//
-// ID of the program
-// ID of mapping rule
-func (c *Client) GetRule(ctx context.Context, programId flatfilego.ProgramId, mappingId flatfilego.MappingId) (*flatfilego.MappingRuleResponse, error) {
+func (c *Client) GetRule(
+	ctx context.Context,
+	// ID of the program
+	programId flatfilego.ProgramId,
+	// ID of mapping rule
+	mappingId flatfilego.MappingId,
+	opts ...option.RequestOption,
+) (*flatfilego.MappingRuleResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"mapping/%v/rules/%v", programId, mappingId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -468,7 +603,9 @@ func (c *Client) GetRule(ctx context.Context, programId flatfilego.ProgramId, ma
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodGet,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
 		},
@@ -479,15 +616,27 @@ func (c *Client) GetRule(ctx context.Context, programId flatfilego.ProgramId, ma
 }
 
 // Updates a mapping rule in a program
-//
-// ID of the program
-// ID of mapping rule
-func (c *Client) UpdateRule(ctx context.Context, programId flatfilego.ProgramId, mappingId flatfilego.MappingId, request *flatfilego.MappingRuleConfig) (*flatfilego.MappingRuleResponse, error) {
+func (c *Client) UpdateRule(
+	ctx context.Context,
+	// ID of the program
+	programId flatfilego.ProgramId,
+	// ID of mapping rule
+	mappingId flatfilego.MappingId,
+	request *flatfilego.MappingRuleConfig,
+	opts ...option.RequestOption,
+) (*flatfilego.MappingRuleResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"mapping/%v/rules/%v", programId, mappingId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -521,7 +670,75 @@ func (c *Client) UpdateRule(ctx context.Context, programId flatfilego.ProgramId,
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodPatch,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Request:      request,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
+	); err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
+// Updates a list of mapping rules in a program
+func (c *Client) UpdateRules(
+	ctx context.Context,
+	// ID of the program
+	programId flatfilego.ProgramId,
+	request flatfilego.UpdateMappingRulesRequest,
+	opts ...option.RequestOption,
+) (*flatfilego.MappingRulesResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
+	baseURL := "https://api.x.flatfile.com/v1"
+	if c.baseURL != "" {
+		baseURL = c.baseURL
+	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := fmt.Sprintf(baseURL+"/"+"mapping/%v/rules", programId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
+
+	errorDecoder := func(statusCode int, body io.Reader) error {
+		raw, err := io.ReadAll(body)
+		if err != nil {
+			return err
+		}
+		apiError := core.NewAPIError(statusCode, errors.New(string(raw)))
+		decoder := json.NewDecoder(bytes.NewReader(raw))
+		switch statusCode {
+		case 400:
+			value := new(flatfilego.BadRequestError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 404:
+			value := new(flatfilego.NotFoundError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		}
+		return apiError
+	}
+
+	var response *flatfilego.MappingRulesResponse
+	if err := c.caller.Call(
+		ctx,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodPatch,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Request:      request,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
@@ -533,15 +750,26 @@ func (c *Client) UpdateRule(ctx context.Context, programId flatfilego.ProgramId,
 }
 
 // Deletes a mapping rule from a program
-//
-// ID of the program
-// ID of mapping rule
-func (c *Client) DeleteRule(ctx context.Context, programId flatfilego.ProgramId, mappingId flatfilego.MappingId) (*flatfilego.Success, error) {
+func (c *Client) DeleteRule(
+	ctx context.Context,
+	// ID of the program
+	programId flatfilego.ProgramId,
+	// ID of mapping rule
+	mappingId flatfilego.MappingId,
+	opts ...option.RequestOption,
+) (*flatfilego.Success, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"mapping/%v/rules/%v", programId, mappingId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -575,7 +803,9 @@ func (c *Client) DeleteRule(ctx context.Context, programId flatfilego.ProgramId,
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodDelete,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
 		},

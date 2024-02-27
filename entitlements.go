@@ -8,24 +8,29 @@ import (
 	core "github.com/FlatFilers/flatfile-go/core"
 )
 
-type ListRolesResponse struct {
-	Data []*RoleResponse `json:"data,omitempty" url:"data,omitempty"`
+type ListEntitlementsRequest struct {
+	// The associated Resource ID for the entitlements.
+	ResourceId string `json:"-" url:"resourceId"`
+}
+
+type ListEntitlementsResponse struct {
+	Data []*Entitlement `json:"data,omitempty" url:"data,omitempty"`
 
 	_rawJSON json.RawMessage
 }
 
-func (l *ListRolesResponse) UnmarshalJSON(data []byte) error {
-	type unmarshaler ListRolesResponse
+func (l *ListEntitlementsResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler ListEntitlementsResponse
 	var value unmarshaler
 	if err := json.Unmarshal(data, &value); err != nil {
 		return err
 	}
-	*l = ListRolesResponse(value)
+	*l = ListEntitlementsResponse(value)
 	l._rawJSON = json.RawMessage(data)
 	return nil
 }
 
-func (l *ListRolesResponse) String() string {
+func (l *ListEntitlementsResponse) String() string {
 	if len(l._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(l._rawJSON); err == nil {
 			return value

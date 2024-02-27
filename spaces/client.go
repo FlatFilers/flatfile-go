@@ -10,9 +10,9 @@ import (
 	fmt "fmt"
 	flatfilego "github.com/FlatFilers/flatfile-go"
 	core "github.com/FlatFilers/flatfile-go/core"
+	option "github.com/FlatFilers/flatfile-go/option"
 	io "io"
 	http "net/http"
-	url "net/url"
 )
 
 type Client struct {
@@ -21,57 +21,46 @@ type Client struct {
 	header  http.Header
 }
 
-func NewClient(opts ...core.ClientOption) *Client {
-	options := core.NewClientOptions()
-	for _, opt := range opts {
-		opt(options)
-	}
+func NewClient(opts ...option.RequestOption) *Client {
+	options := core.NewRequestOptions(opts...)
 	return &Client{
 		baseURL: options.BaseURL,
-		caller:  core.NewCaller(options.HTTPClient),
-		header:  options.ToHeader(),
+		caller: core.NewCaller(
+			&core.CallerParams{
+				Client:      options.HTTPClient,
+				MaxAttempts: options.MaxAttempts,
+			},
+		),
+		header: options.ToHeader(),
 	}
 }
 
 // Returns all spaces for an account or environment
-func (c *Client) List(ctx context.Context, request *flatfilego.ListSpacesRequest) (*flatfilego.ListSpacesResponse, error) {
+func (c *Client) List(
+	ctx context.Context,
+	request *flatfilego.ListSpacesRequest,
+	opts ...option.RequestOption,
+) (*flatfilego.ListSpacesResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := baseURL + "/" + "spaces"
 
-	queryParams := make(url.Values)
-	if request.EnvironmentId != nil {
-		queryParams.Add("environmentId", fmt.Sprintf("%v", request.EnvironmentId))
-	}
-	if request.PageSize != nil {
-		queryParams.Add("pageSize", fmt.Sprintf("%v", *request.PageSize))
-	}
-	if request.PageNumber != nil {
-		queryParams.Add("pageNumber", fmt.Sprintf("%v", *request.PageNumber))
-	}
-	if request.Search != nil {
-		queryParams.Add("search", fmt.Sprintf("%v", *request.Search))
-	}
-	if request.Namespace != nil {
-		queryParams.Add("namespace", fmt.Sprintf("%v", *request.Namespace))
-	}
-	if request.Archived != nil {
-		queryParams.Add("archived", fmt.Sprintf("%v", *request.Archived))
-	}
-	if request.SortField != nil {
-		queryParams.Add("sortField", fmt.Sprintf("%v", request.SortField))
-	}
-	if request.SortDirection != nil {
-		queryParams.Add("sortDirection", fmt.Sprintf("%v", request.SortDirection))
-	}
-	if request.IsCollaborative != nil {
-		queryParams.Add("isCollaborative", fmt.Sprintf("%v", *request.IsCollaborative))
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
 	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -98,7 +87,9 @@ func (c *Client) List(ctx context.Context, request *flatfilego.ListSpacesRequest
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodGet,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
 		},
@@ -109,12 +100,23 @@ func (c *Client) List(ctx context.Context, request *flatfilego.ListSpacesRequest
 }
 
 // Creates a new space based on an existing Space Config
-func (c *Client) Create(ctx context.Context, request *flatfilego.SpaceConfig) (*flatfilego.SpaceResponse, error) {
+func (c *Client) Create(
+	ctx context.Context,
+	request *flatfilego.SpaceConfig,
+	opts ...option.RequestOption,
+) (*flatfilego.SpaceResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := baseURL + "/" + "spaces"
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -148,7 +150,9 @@ func (c *Client) Create(ctx context.Context, request *flatfilego.SpaceConfig) (*
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodPost,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Request:      request,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
@@ -160,14 +164,24 @@ func (c *Client) Create(ctx context.Context, request *flatfilego.SpaceConfig) (*
 }
 
 // Returns a single space
-//
-// ID of space to return
-func (c *Client) Get(ctx context.Context, spaceId flatfilego.SpaceId) (*flatfilego.SpaceResponse, error) {
+func (c *Client) Get(
+	ctx context.Context,
+	// ID of space to return
+	spaceId flatfilego.SpaceId,
+	opts ...option.RequestOption,
+) (*flatfilego.SpaceResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"spaces/%v", spaceId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -201,7 +215,9 @@ func (c *Client) Get(ctx context.Context, spaceId flatfilego.SpaceId) (*flatfile
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodGet,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
 		},
@@ -212,14 +228,24 @@ func (c *Client) Get(ctx context.Context, spaceId flatfilego.SpaceId) (*flatfile
 }
 
 // Delete a space
-//
-// ID of space to delete
-func (c *Client) Delete(ctx context.Context, spaceId flatfilego.SpaceId) (*flatfilego.Success, error) {
+func (c *Client) Delete(
+	ctx context.Context,
+	// ID of space to delete
+	spaceId flatfilego.SpaceId,
+	opts ...option.RequestOption,
+) (*flatfilego.Success, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"spaces/%v", spaceId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -253,7 +279,9 @@ func (c *Client) Delete(ctx context.Context, spaceId flatfilego.SpaceId) (*flatf
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodDelete,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
 		},
@@ -264,20 +292,31 @@ func (c *Client) Delete(ctx context.Context, spaceId flatfilego.SpaceId) (*flatf
 }
 
 // Delete multiple spaces by id
-func (c *Client) BulkDelete(ctx context.Context, request *flatfilego.DeleteSpacesRequest) (*flatfilego.Success, error) {
+func (c *Client) BulkDelete(
+	ctx context.Context,
+	request *flatfilego.DeleteSpacesRequest,
+	opts ...option.RequestOption,
+) (*flatfilego.Success, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := baseURL + "/" + "spaces"
 
-	queryParams := make(url.Values)
-	for _, value := range request.Ids {
-		queryParams.Add("ids", fmt.Sprintf("%v", value))
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
 	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -311,7 +350,9 @@ func (c *Client) BulkDelete(ctx context.Context, request *flatfilego.DeleteSpace
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodDelete,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
 		},
@@ -322,14 +363,25 @@ func (c *Client) BulkDelete(ctx context.Context, request *flatfilego.DeleteSpace
 }
 
 // Update a space, to change the name for example
-//
-// ID of space to update
-func (c *Client) Update(ctx context.Context, spaceId flatfilego.SpaceId, request *flatfilego.SpaceConfig) (*flatfilego.SpaceResponse, error) {
+func (c *Client) Update(
+	ctx context.Context,
+	// ID of space to update
+	spaceId flatfilego.SpaceId,
+	request *flatfilego.SpaceConfig,
+	opts ...option.RequestOption,
+) (*flatfilego.SpaceResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"spaces/%v", spaceId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -363,7 +415,9 @@ func (c *Client) Update(ctx context.Context, spaceId flatfilego.SpaceId, request
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodPatch,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Request:      request,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
@@ -375,14 +429,24 @@ func (c *Client) Update(ctx context.Context, spaceId flatfilego.SpaceId, request
 }
 
 // Sets archivedAt timestamp on a space
-//
-// ID of space to archive
-func (c *Client) ArchiveSpace(ctx context.Context, spaceId flatfilego.SpaceId) (*flatfilego.Success, error) {
+func (c *Client) ArchiveSpace(
+	ctx context.Context,
+	// ID of space to archive
+	spaceId flatfilego.SpaceId,
+	opts ...option.RequestOption,
+) (*flatfilego.Success, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"spaces/%v/archive", spaceId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -416,7 +480,9 @@ func (c *Client) ArchiveSpace(ctx context.Context, spaceId flatfilego.SpaceId) (
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodPost,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
 		},

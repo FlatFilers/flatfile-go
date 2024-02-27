@@ -9,47 +9,47 @@ import (
 )
 
 type ListFilesRequest struct {
-	SpaceId *string `json:"-"`
+	SpaceId *string `json:"-" url:"spaceId,omitempty"`
 	// Number of jobs to return in a page (default 20)
-	PageSize *int `json:"-"`
+	PageSize *int `json:"-" url:"pageSize,omitempty"`
 	// Based on pageSize, which page of jobs to return
-	PageNumber *int `json:"-"`
+	PageNumber *int `json:"-" url:"pageNumber,omitempty"`
 	// The storage mode of file to fetch, defaults to "import"
-	Mode *Mode `json:"-"`
+	Mode *Mode `json:"-" url:"mode,omitempty"`
 }
 
 type Action struct {
 	// **This is deprecated. Use `operation` instead.**
-	Slug *string `json:"slug,omitempty"`
+	Slug *string `json:"slug,omitempty" url:"slug,omitempty"`
 	// This will become the job operation that is triggered
-	Operation *string `json:"operation,omitempty"`
+	Operation *string `json:"operation,omitempty" url:"operation,omitempty"`
 	// Foreground and toolbarBlocking action mode will prevent interacting with the resource until complete
-	Mode *ActionMode `json:"mode,omitempty"`
+	Mode *ActionMode `json:"mode,omitempty" url:"mode,omitempty"`
 	// The text on the button itself.
-	Label string `json:"label"`
+	Label string `json:"label" url:"label"`
 	// A tooltip that appears when hovering the action button
-	Tooltip  *string          `json:"tooltip,omitempty"`
-	Messages []*ActionMessage `json:"messages,omitempty"`
+	Tooltip  *string          `json:"tooltip,omitempty" url:"tooltip,omitempty"`
+	Messages []*ActionMessage `json:"messages,omitempty" url:"messages,omitempty"`
 	// **This is deprecated.**
-	Type *string `json:"type,omitempty"`
+	Type *string `json:"type,omitempty" url:"type,omitempty"`
 	// The text that appears in the dialog after the action is clicked.
-	Description *string `json:"description,omitempty"`
+	Description *string `json:"description,omitempty" url:"description,omitempty"`
 	// Determines if the action should happen on a regular cadence.
-	Schedule *ActionSchedule `json:"schedule,omitempty"`
+	Schedule *ActionSchedule `json:"schedule,omitempty" url:"schedule,omitempty"`
 	// A primary action will be more visibly present, whether in Sheet or Workbook.
-	Primary *bool `json:"primary,omitempty"`
+	Primary *bool `json:"primary,omitempty" url:"primary,omitempty"`
 	// Whether to show a modal to confirm the action
-	Confirm *bool `json:"confirm,omitempty"`
+	Confirm *bool `json:"confirm,omitempty" url:"confirm,omitempty"`
 	// Icon will work on primary actions. It will only accept an already existing Flatfile design system icon.
-	Icon *string `json:"icon,omitempty"`
+	Icon *string `json:"icon,omitempty" url:"icon,omitempty"`
 	// **This is deprecated. Use `constraints` instead.**
-	RequireAllValid *bool `json:"requireAllValid,omitempty"`
+	RequireAllValid *bool `json:"requireAllValid,omitempty" url:"requireAllValid,omitempty"`
 	// **This is deprecated. Use `constraints` instead.**
-	RequireSelection *bool `json:"requireSelection,omitempty"`
+	RequireSelection *bool `json:"requireSelection,omitempty" url:"requireSelection,omitempty"`
 	// Adds an input form for this action after it is clicked.
-	InputForm *InputForm `json:"inputForm,omitempty"`
+	InputForm *InputForm `json:"inputForm,omitempty" url:"inputForm,omitempty"`
 	// A limitation or restriction on the action.
-	Constraints []*ActionConstraint `json:"constraints,omitempty"`
+	Constraints []*ActionConstraint `json:"constraints,omitempty" url:"constraints,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -78,7 +78,7 @@ func (a *Action) String() string {
 }
 
 type FileResponse struct {
-	Data *File `json:"data,omitempty"`
+	Data *File `json:"data,omitempty" url:"data,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -107,8 +107,8 @@ func (f *FileResponse) String() string {
 }
 
 type ListFilesResponse struct {
-	Pagination *Pagination `json:"pagination,omitempty"`
-	Data       []*File     `json:"data,omitempty"`
+	Pagination *Pagination `json:"pagination,omitempty" url:"pagination,omitempty"`
+	Data       []*File     `json:"data,omitempty" url:"data,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -190,22 +190,22 @@ func (m ModelFileStatusEnum) Ptr() *ModelFileStatusEnum {
 }
 
 type UpdateFileRequest struct {
-	WorkbookId *WorkbookId `json:"workbookId,omitempty"`
+	WorkbookId *WorkbookId `json:"workbookId,omitempty" url:"workbookId,omitempty"`
 	// The name of the file
-	Name *string `json:"name,omitempty"`
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
 	// The storage mode of file to update
-	Mode *Mode `json:"mode,omitempty"`
+	Mode *Mode `json:"mode,omitempty" url:"mode,omitempty"`
 	// Status of the file
-	Status *ModelFileStatusEnum `json:"status,omitempty"`
+	Status *ModelFileStatusEnum `json:"status,omitempty" url:"status,omitempty"`
 	// The actions attached to the file
-	Actions []*Action `json:"actions,omitempty"`
+	Actions []*Action `json:"actions,omitempty" url:"actions,omitempty"`
 }
 
 type CreateFileRequest struct {
-	SpaceId       SpaceId       `json:"spaceId"`
-	EnvironmentId EnvironmentId `json:"environmentId"`
+	SpaceId       SpaceId       `json:"spaceId" url:"spaceId"`
+	EnvironmentId EnvironmentId `json:"environmentId" url:"environmentId"`
 	// The storage mode of file to insert, defaults to "import"
-	Mode *Mode `json:"mode,omitempty"`
+	Mode *Mode `json:"mode,omitempty" url:"mode,omitempty"`
 	// The actions attached to the file
-	Actions []*Action `json:"actions,omitempty"`
+	Actions []*Action `json:"actions,omitempty" url:"actions,omitempty"`
 }

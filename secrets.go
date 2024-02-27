@@ -10,16 +10,16 @@ import (
 
 type ListSecrets struct {
 	// The Environment of the secret.
-	EnvironmentId EnvironmentId `json:"-"`
+	EnvironmentId *EnvironmentId `json:"-" url:"environmentId,omitempty"`
 	// The Space of the secret.
-	SpaceId *SpaceId `json:"-"`
+	SpaceId *SpaceId `json:"-" url:"spaceId,omitempty"`
 }
 
 // Secret ID
 type SecretId = string
 
 type SecretsResponse struct {
-	Data []*Secret `json:"data,omitempty"`
+	Data []*Secret `json:"data,omitempty" url:"data,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -50,13 +50,13 @@ func (s *SecretsResponse) String() string {
 // The properties required to write to a secret. Value is the only mutable property. Name, environmentId, spaceId (optional) are used for finding the secret.
 type WriteSecret struct {
 	// The reference name for a secret.
-	Name SecretName `json:"name"`
+	Name SecretName `json:"name" url:"name"`
 	// The secret value. This is hidden in the UI.
-	Value SecretValue `json:"value"`
+	Value SecretValue `json:"value" url:"value"`
 	// The Environment of the secret.
-	EnvironmentId EnvironmentId `json:"environmentId"`
+	EnvironmentId *EnvironmentId `json:"environmentId,omitempty" url:"environmentId,omitempty"`
 	// The Space of the secret.
-	SpaceId *SpaceId `json:"spaceId,omitempty"`
+	SpaceId *SpaceId `json:"spaceId,omitempty" url:"spaceId,omitempty"`
 
 	_rawJSON json.RawMessage
 }

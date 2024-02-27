@@ -11,25 +11,25 @@ import (
 
 type ListProgramsRequest struct {
 	// Number of programs to return in a page (default 10)
-	PageSize *int `json:"-"`
+	PageSize *int `json:"-" url:"pageSize,omitempty"`
 	// Based on pageSize, which page of records to return
-	PageNumber *int `json:"-"`
+	PageNumber *int `json:"-" url:"pageNumber,omitempty"`
 	// Filter by creator
-	CreatedBy *UserId `json:"-"`
+	CreatedBy *UserId `json:"-" url:"createdBy,omitempty"`
 	// Filter by creation time
-	CreatedAfter *time.Time `json:"-"`
+	CreatedAfter *time.Time `json:"-" url:"createdAfter,omitempty"`
 	// Filter by creation time
-	CreatedBefore *time.Time `json:"-"`
+	CreatedBefore *time.Time `json:"-" url:"createdBefore,omitempty"`
 	// The ID of the environment
-	EnvironmentId *EnvironmentId `json:"-"`
+	EnvironmentId *EnvironmentId `json:"-" url:"environmentId,omitempty"`
 	// Filter by family
-	FamilyId *FamilyId `json:"-"`
+	FamilyId *FamilyId `json:"-" url:"familyId,omitempty"`
 	// Filter by namespace
-	Namespace *string `json:"-"`
+	Namespace *string `json:"-" url:"namespace,omitempty"`
 	// Filter by source keys
-	SourceKeys *string `json:"-"`
+	SourceKeys *string `json:"-" url:"sourceKeys,omitempty"`
 	// Filter by destination keys
-	DestinationKeys *string `json:"-"`
+	DestinationKeys *string `json:"-" url:"destinationKeys,omitempty"`
 }
 
 // Mapping Family ID
@@ -45,26 +45,44 @@ type CreateMappingRulesRequest = []*MappingRuleConfig
 
 type MappingRuleConfig struct {
 	// Name of the mapping rule
-	Name   string      `json:"name"`
-	Type   string      `json:"type"`
-	Config interface{} `json:"config,omitempty"`
-	// Confidence of the mapping rule
-	Confidence *int `json:"confidence,omitempty"`
+	Name   string      `json:"name" url:"name"`
+	Type   string      `json:"type" url:"type"`
+	Config interface{} `json:"config,omitempty" url:"config,omitempty"`
+	// Time the mapping rule was last updated
+	AcceptedAt *time.Time `json:"acceptedAt,omitempty" url:"acceptedAt,omitempty"`
 	// User ID of the contributor of the mapping rule
-	Contributor *UserId `json:"contributor,omitempty"`
+	AcceptedBy *UserId `json:"acceptedBy,omitempty" url:"acceptedBy,omitempty"`
 
 	_rawJSON json.RawMessage
 }
 
 func (m *MappingRuleConfig) UnmarshalJSON(data []byte) error {
-	type unmarshaler MappingRuleConfig
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
+	type embed MappingRuleConfig
+	var unmarshaler = struct {
+		embed
+		AcceptedAt *core.DateTime `json:"acceptedAt,omitempty"`
+	}{
+		embed: embed(*m),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
 		return err
 	}
-	*m = MappingRuleConfig(value)
+	*m = MappingRuleConfig(unmarshaler.embed)
+	m.AcceptedAt = unmarshaler.AcceptedAt.TimePtr()
 	m._rawJSON = json.RawMessage(data)
 	return nil
+}
+
+func (m *MappingRuleConfig) MarshalJSON() ([]byte, error) {
+	type embed MappingRuleConfig
+	var marshaler = struct {
+		embed
+		AcceptedAt *core.DateTime `json:"acceptedAt,omitempty"`
+	}{
+		embed:      embed(*m),
+		AcceptedAt: core.NewOptionalDateTime(m.AcceptedAt),
+	}
+	return json.Marshal(marshaler)
 }
 
 func (m *MappingRuleConfig) String() string {
@@ -80,7 +98,7 @@ func (m *MappingRuleConfig) String() string {
 }
 
 type MappingRuleResponse struct {
-	Data *MappingRule `json:"data,omitempty"`
+	Data *MappingRule `json:"data,omitempty" url:"data,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -109,7 +127,7 @@ func (m *MappingRuleResponse) String() string {
 }
 
 type MappingRulesResponse struct {
-	Data []*MappingRule `json:"data,omitempty"`
+	Data []*MappingRule `json:"data,omitempty" url:"data,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -139,15 +157,15 @@ func (m *MappingRulesResponse) String() string {
 
 type ProgramConfig struct {
 	// Source schema
-	Source *SheetConfig `json:"source,omitempty"`
+	Source *SheetConfig `json:"source,omitempty" url:"source,omitempty"`
 	// Destination schema
-	Destination *SheetConfig `json:"destination,omitempty"`
+	Destination *SheetConfig `json:"destination,omitempty" url:"destination,omitempty"`
 	// ID of the family to add the program to
-	FamilyId *FamilyId `json:"familyId,omitempty"`
+	FamilyId *FamilyId `json:"familyId,omitempty" url:"familyId,omitempty"`
 	// Namespace of the program
-	Namespace *string `json:"namespace,omitempty"`
+	Namespace *string `json:"namespace,omitempty" url:"namespace,omitempty"`
 	// Whether to save the program for editing later. Defaults to false. If true, the response will contain an ID and access token.
-	Save *bool `json:"save,omitempty"`
+	Save *bool `json:"save,omitempty" url:"save,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -176,7 +194,7 @@ func (p *ProgramConfig) String() string {
 }
 
 type ProgramResponse struct {
-	Data *Program `json:"data,omitempty"`
+	Data *Program `json:"data,omitempty" url:"data,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -205,7 +223,7 @@ func (p *ProgramResponse) String() string {
 }
 
 type ProgramsResponse struct {
-	Data []*Program `json:"data,omitempty"`
+	Data []*Program `json:"data,omitempty" url:"data,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -232,3 +250,5 @@ func (p *ProgramsResponse) String() string {
 	}
 	return fmt.Sprintf("%#v", p)
 }
+
+type UpdateMappingRulesRequest = []*MappingRule

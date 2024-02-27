@@ -10,10 +10,10 @@ import (
 	fmt "fmt"
 	flatfilego "github.com/FlatFilers/flatfile-go"
 	core "github.com/FlatFilers/flatfile-go/core"
+	option "github.com/FlatFilers/flatfile-go/option"
 	io "io"
 	multipart "mime/multipart"
 	http "net/http"
-	url "net/url"
 )
 
 type Client struct {
@@ -22,50 +22,56 @@ type Client struct {
 	header  http.Header
 }
 
-func NewClient(opts ...core.ClientOption) *Client {
-	options := core.NewClientOptions()
-	for _, opt := range opts {
-		opt(options)
-	}
+func NewClient(opts ...option.RequestOption) *Client {
+	options := core.NewRequestOptions(opts...)
 	return &Client{
 		baseURL: options.BaseURL,
-		caller:  core.NewCaller(options.HTTPClient),
-		header:  options.ToHeader(),
+		caller: core.NewCaller(
+			&core.CallerParams{
+				Client:      options.HTTPClient,
+				MaxAttempts: options.MaxAttempts,
+			},
+		),
+		header: options.ToHeader(),
 	}
 }
 
-func (c *Client) List(ctx context.Context, request *flatfilego.ListFilesRequest) (*flatfilego.ListFilesResponse, error) {
+func (c *Client) List(
+	ctx context.Context,
+	request *flatfilego.ListFilesRequest,
+	opts ...option.RequestOption,
+) (*flatfilego.ListFilesResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := baseURL + "/" + "files"
 
-	queryParams := make(url.Values)
-	if request.SpaceId != nil {
-		queryParams.Add("spaceId", fmt.Sprintf("%v", *request.SpaceId))
-	}
-	if request.PageSize != nil {
-		queryParams.Add("pageSize", fmt.Sprintf("%v", *request.PageSize))
-	}
-	if request.PageNumber != nil {
-		queryParams.Add("pageNumber", fmt.Sprintf("%v", *request.PageNumber))
-	}
-	if request.Mode != nil {
-		queryParams.Add("mode", fmt.Sprintf("%v", request.Mode))
+	queryParams, err := core.QueryValues(request)
+	if err != nil {
+		return nil, err
 	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
 
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
+
 	var response *flatfilego.ListFilesResponse
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
-			URL:      endpointURL,
-			Method:   http.MethodGet,
-			Headers:  c.header,
-			Response: &response,
+			URL:         endpointURL,
+			Method:      http.MethodGet,
+			MaxAttempts: options.MaxAttempts,
+			Headers:     headers,
+			Client:      options.HTTPClient,
+			Response:    &response,
 		},
 	); err != nil {
 		return nil, err
@@ -73,12 +79,24 @@ func (c *Client) List(ctx context.Context, request *flatfilego.ListFilesRequest)
 	return response, nil
 }
 
-func (c *Client) Upload(ctx context.Context, file io.Reader, request *flatfilego.CreateFileRequest) (*flatfilego.FileResponse, error) {
+func (c *Client) Upload(
+	ctx context.Context,
+	file io.Reader,
+	request *flatfilego.CreateFileRequest,
+	opts ...option.RequestOption,
+) (*flatfilego.FileResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := baseURL + "/" + "files"
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -120,7 +138,7 @@ func (c *Client) Upload(ctx context.Context, file io.Reader, request *flatfilego
 		return nil, err
 	}
 	if request.Mode != nil {
-		if err := core.WriteMultipartJSON(writer, "mode", request.Mode); err != nil {
+		if err := core.WriteMultipartJSON(writer, "mode", *request.Mode); err != nil {
 			return nil, err
 		}
 	}
@@ -132,14 +150,16 @@ func (c *Client) Upload(ctx context.Context, file io.Reader, request *flatfilego
 	if err := writer.Close(); err != nil {
 		return nil, err
 	}
-	c.header.Set("Content-Type", writer.FormDataContentType())
+	headers.Set("Content-Type", writer.FormDataContentType())
 
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodPost,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Request:      requestBuffer,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
@@ -150,12 +170,23 @@ func (c *Client) Upload(ctx context.Context, file io.Reader, request *flatfilego
 	return response, nil
 }
 
-func (c *Client) Get(ctx context.Context, fileId string) (*flatfilego.FileResponse, error) {
+func (c *Client) Get(
+	ctx context.Context,
+	fileId string,
+	opts ...option.RequestOption,
+) (*flatfilego.FileResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"files/%v", fileId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -189,7 +220,9 @@ func (c *Client) Get(ctx context.Context, fileId string) (*flatfilego.FileRespon
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodGet,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
 		},
@@ -199,12 +232,23 @@ func (c *Client) Get(ctx context.Context, fileId string) (*flatfilego.FileRespon
 	return response, nil
 }
 
-func (c *Client) Delete(ctx context.Context, fileId string) (*flatfilego.Success, error) {
+func (c *Client) Delete(
+	ctx context.Context,
+	fileId string,
+	opts ...option.RequestOption,
+) (*flatfilego.Success, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"files/%v", fileId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -238,7 +282,9 @@ func (c *Client) Delete(ctx context.Context, fileId string) (*flatfilego.Success
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodDelete,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
 		},
@@ -249,14 +295,25 @@ func (c *Client) Delete(ctx context.Context, fileId string) (*flatfilego.Success
 }
 
 // Update a file, to change the workbook id for example
-//
-// ID of file to update
-func (c *Client) Update(ctx context.Context, fileId string, request *flatfilego.UpdateFileRequest) (*flatfilego.FileResponse, error) {
+func (c *Client) Update(
+	ctx context.Context,
+	// ID of file to update
+	fileId string,
+	request *flatfilego.UpdateFileRequest,
+	opts ...option.RequestOption,
+) (*flatfilego.FileResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"files/%v", fileId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -290,7 +347,9 @@ func (c *Client) Update(ctx context.Context, fileId string, request *flatfilego.
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodPatch,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Request:      request,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
@@ -301,12 +360,23 @@ func (c *Client) Update(ctx context.Context, fileId string, request *flatfilego.
 	return response, nil
 }
 
-func (c *Client) Download(ctx context.Context, fileId flatfilego.FileId) (io.Reader, error) {
+func (c *Client) Download(
+	ctx context.Context,
+	fileId flatfilego.FileId,
+	opts ...option.RequestOption,
+) (io.Reader, error) {
+	options := core.NewRequestOptions(opts...)
+
 	baseURL := "https://api.x.flatfile.com/v1"
 	if c.baseURL != "" {
 		baseURL = c.baseURL
 	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
 	endpointURL := fmt.Sprintf(baseURL+"/"+"files/%v/download", fileId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
 	errorDecoder := func(statusCode int, body io.Reader) error {
 		raw, err := io.ReadAll(body)
@@ -340,7 +410,9 @@ func (c *Client) Download(ctx context.Context, fileId flatfilego.FileId) (io.Rea
 		&core.CallParams{
 			URL:          endpointURL,
 			Method:       http.MethodGet,
-			Headers:      c.header,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
 			Response:     response,
 			ErrorDecoder: errorDecoder,
 		},

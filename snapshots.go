@@ -10,28 +10,28 @@ import (
 
 type CreateSnapshotRequest struct {
 	// ID of sheet
-	SheetId SheetId `json:"sheetId"`
+	SheetId SheetId `json:"sheetId" url:"sheetId"`
 	// Label for the snapshot
-	Label *string `json:"label,omitempty"`
+	Label *string `json:"label,omitempty" url:"label,omitempty"`
 }
 
 type GetSnapshotRequest struct {
 	// Whether to include a summary in the snapshot response
-	IncludeSummary bool `json:"-"`
+	IncludeSummary bool `json:"-" url:"includeSummary"`
 }
 
 type GetSnapshotRecordsRequest struct {
 	// Number of records to return in a page
-	PageSize *int `json:"-"`
+	PageSize *int `json:"-" url:"pageSize,omitempty"`
 	// Based on pageSize, which page of records to return
-	PageNumber *int `json:"-"`
+	PageNumber *int `json:"-" url:"pageNumber,omitempty"`
 	// Filter records by change type
-	ChangeType *ChangeType `json:"-"`
+	ChangeType *ChangeType `json:"-" url:"changeType,omitempty"`
 }
 
 type ListSnapshotRequest struct {
 	// ID of sheet
-	SheetId SheetId `json:"-"`
+	SheetId SheetId `json:"-" url:"sheetId"`
 }
 
 // Snapshot ID
@@ -64,9 +64,9 @@ func (c ChangeType) Ptr() *ChangeType {
 }
 
 type RestoreOptions struct {
-	Created bool `json:"created"`
-	Updated bool `json:"updated"`
-	Deleted bool `json:"deleted"`
+	Created bool `json:"created" url:"created"`
+	Updated bool `json:"updated" url:"updated"`
+	Deleted bool `json:"deleted" url:"deleted"`
 
 	_rawJSON json.RawMessage
 }
@@ -95,7 +95,7 @@ func (r *RestoreOptions) String() string {
 }
 
 type SnapshotResponse struct {
-	Data *Snapshot `json:"data,omitempty"`
+	Data *Snapshot `json:"data,omitempty" url:"data,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -124,7 +124,7 @@ func (s *SnapshotResponse) String() string {
 }
 
 type SnapshotsResponse struct {
-	Data []*Snapshot `json:"data,omitempty"`
+	Data []*Snapshot `json:"data,omitempty" url:"data,omitempty"`
 
 	_rawJSON json.RawMessage
 }

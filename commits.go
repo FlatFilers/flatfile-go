@@ -9,7 +9,7 @@ import (
 )
 
 type CommitResponse struct {
-	Data *Commit `json:"data,omitempty"`
+	Data *Commit `json:"data,omitempty" url:"data,omitempty"`
 
 	_rawJSON json.RawMessage
 }
