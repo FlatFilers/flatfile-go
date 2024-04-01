@@ -11,13 +11,14 @@ import (
 
 // Create an app
 type AppCreate struct {
-	Name         string      `json:"name" url:"name"`
-	Namespace    string      `json:"namespace" url:"namespace"`
-	Type         AppType     `json:"type,omitempty" url:"type,omitempty"`
-	Entity       *string     `json:"entity,omitempty" url:"entity,omitempty"`
-	EntityPlural *string     `json:"entityPlural,omitempty" url:"entityPlural,omitempty"`
-	Icon         *string     `json:"icon,omitempty" url:"icon,omitempty"`
-	Metadata     interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
+	Name               string      `json:"name" url:"name"`
+	Namespace          string      `json:"namespace" url:"namespace"`
+	Type               AppType     `json:"type,omitempty" url:"type,omitempty"`
+	Entity             *string     `json:"entity,omitempty" url:"entity,omitempty"`
+	EntityPlural       *string     `json:"entityPlural,omitempty" url:"entityPlural,omitempty"`
+	Icon               *string     `json:"icon,omitempty" url:"icon,omitempty"`
+	Metadata           interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
+	EnvironmentFilters interface{} `json:"environmentFilters,omitempty" url:"environmentFilters,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -47,13 +48,14 @@ func (a *AppCreate) String() string {
 
 // Update an app
 type AppPatch struct {
-	Name         *string     `json:"name,omitempty" url:"name,omitempty"`
-	Namespace    *string     `json:"namespace,omitempty" url:"namespace,omitempty"`
-	Entity       *string     `json:"entity,omitempty" url:"entity,omitempty"`
-	EntityPlural *string     `json:"entityPlural,omitempty" url:"entityPlural,omitempty"`
-	Icon         *string     `json:"icon,omitempty" url:"icon,omitempty"`
-	Metadata     interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
-	ActivatedAt  *time.Time  `json:"activatedAt,omitempty" url:"activatedAt,omitempty"`
+	Name               *string     `json:"name,omitempty" url:"name,omitempty"`
+	Namespace          *string     `json:"namespace,omitempty" url:"namespace,omitempty"`
+	Entity             *string     `json:"entity,omitempty" url:"entity,omitempty"`
+	EntityPlural       *string     `json:"entityPlural,omitempty" url:"entityPlural,omitempty"`
+	Icon               *string     `json:"icon,omitempty" url:"icon,omitempty"`
+	Metadata           interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
+	EnvironmentFilters interface{} `json:"environmentFilters,omitempty" url:"environmentFilters,omitempty"`
+	ActivatedAt        *time.Time  `json:"activatedAt,omitempty" url:"activatedAt,omitempty"`
 
 	_rawJSON json.RawMessage
 }

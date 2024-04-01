@@ -9,6 +9,69 @@ import (
 	time "time"
 )
 
+// An account
+type Account struct {
+	Id                      AccountId              `json:"id" url:"id"`
+	Name                    string                 `json:"name" url:"name"`
+	Subdomain               *string                `json:"subdomain,omitempty" url:"subdomain,omitempty"`
+	VanityDomainDashboard   *string                `json:"vanityDomainDashboard,omitempty" url:"vanityDomainDashboard,omitempty"`
+	VanityDomainSpaces      *string                `json:"vanityDomainSpaces,omitempty" url:"vanityDomainSpaces,omitempty"`
+	EmbeddedDomainWhitelist []string               `json:"embeddedDomainWhitelist,omitempty" url:"embeddedDomainWhitelist,omitempty"`
+	CustomFromEmail         *string                `json:"customFromEmail,omitempty" url:"customFromEmail,omitempty"`
+	StripeCustomerId        *string                `json:"stripeCustomerId,omitempty" url:"stripeCustomerId,omitempty"`
+	Metadata                map[string]interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
+	CreatedAt               time.Time              `json:"createdAt" url:"createdAt"`
+	UpdatedAt               time.Time              `json:"updatedAt" url:"updatedAt"`
+	DefaultAppId            *AppId                 `json:"defaultAppId,omitempty" url:"defaultAppId,omitempty"`
+
+	_rawJSON json.RawMessage
+}
+
+func (a *Account) UnmarshalJSON(data []byte) error {
+	type embed Account
+	var unmarshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"createdAt"`
+		UpdatedAt *core.DateTime `json:"updatedAt"`
+	}{
+		embed: embed(*a),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*a = Account(unmarshaler.embed)
+	a.CreatedAt = unmarshaler.CreatedAt.Time()
+	a.UpdatedAt = unmarshaler.UpdatedAt.Time()
+	a._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (a *Account) MarshalJSON() ([]byte, error) {
+	type embed Account
+	var marshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"createdAt"`
+		UpdatedAt *core.DateTime `json:"updatedAt"`
+	}{
+		embed:     embed(*a),
+		CreatedAt: core.NewDateTime(a.CreatedAt),
+		UpdatedAt: core.NewDateTime(a.UpdatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (a *Account) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
 type Agent struct {
 	// The topics the agent should listen for
 	Topics []EventTopic `json:"topics,omitempty" url:"topics,omitempty"`
@@ -353,18 +416,19 @@ func (l *ListAgentsResponse) String() string {
 
 // An app
 type App struct {
-	Id           AppId       `json:"id" url:"id"`
-	Name         string      `json:"name" url:"name"`
-	Namespace    string      `json:"namespace" url:"namespace"`
-	Type         AppType     `json:"type,omitempty" url:"type,omitempty"`
-	Entity       string      `json:"entity" url:"entity"`
-	EntityPlural string      `json:"entityPlural" url:"entityPlural"`
-	Icon         *string     `json:"icon,omitempty" url:"icon,omitempty"`
-	Metadata     interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
-	CreatedAt    time.Time   `json:"createdAt" url:"createdAt"`
-	UpdatedAt    time.Time   `json:"updatedAt" url:"updatedAt"`
-	DeletedAt    *time.Time  `json:"deletedAt,omitempty" url:"deletedAt,omitempty"`
-	ActivatedAt  *time.Time  `json:"activatedAt,omitempty" url:"activatedAt,omitempty"`
+	Id                 AppId       `json:"id" url:"id"`
+	Name               string      `json:"name" url:"name"`
+	Namespace          string      `json:"namespace" url:"namespace"`
+	Type               AppType     `json:"type,omitempty" url:"type,omitempty"`
+	Entity             string      `json:"entity" url:"entity"`
+	EntityPlural       string      `json:"entityPlural" url:"entityPlural"`
+	Icon               *string     `json:"icon,omitempty" url:"icon,omitempty"`
+	Metadata           interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
+	EnvironmentFilters interface{} `json:"environmentFilters,omitempty" url:"environmentFilters,omitempty"`
+	CreatedAt          time.Time   `json:"createdAt" url:"createdAt"`
+	UpdatedAt          time.Time   `json:"updatedAt" url:"updatedAt"`
+	DeletedAt          *time.Time  `json:"deletedAt,omitempty" url:"deletedAt,omitempty"`
+	ActivatedAt        *time.Time  `json:"activatedAt,omitempty" url:"activatedAt,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -451,6 +515,69 @@ func NewAppTypeFromString(s string) (AppType, error) {
 
 func (a AppType) Ptr() *AppType {
 	return &a
+}
+
+type Prompt struct {
+	Id PromptId `json:"id" url:"id"`
+	// ID of the user/guest who created the prompt
+	CreatedById string    `json:"createdById" url:"createdById"`
+	AccountId   AccountId `json:"accountId" url:"accountId"`
+	// Text for prompts for AI Assist
+	Prompt    string     `json:"prompt" url:"prompt"`
+	CreatedAt time.Time  `json:"createdAt" url:"createdAt"`
+	UpdatedAt time.Time  `json:"updatedAt" url:"updatedAt"`
+	DeletedAt *time.Time `json:"deletedAt,omitempty" url:"deletedAt,omitempty"`
+
+	_rawJSON json.RawMessage
+}
+
+func (p *Prompt) UnmarshalJSON(data []byte) error {
+	type embed Prompt
+	var unmarshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"createdAt"`
+		UpdatedAt *core.DateTime `json:"updatedAt"`
+		DeletedAt *core.DateTime `json:"deletedAt,omitempty"`
+	}{
+		embed: embed(*p),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*p = Prompt(unmarshaler.embed)
+	p.CreatedAt = unmarshaler.CreatedAt.Time()
+	p.UpdatedAt = unmarshaler.UpdatedAt.Time()
+	p.DeletedAt = unmarshaler.DeletedAt.TimePtr()
+	p._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (p *Prompt) MarshalJSON() ([]byte, error) {
+	type embed Prompt
+	var marshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"createdAt"`
+		UpdatedAt *core.DateTime `json:"updatedAt"`
+		DeletedAt *core.DateTime `json:"deletedAt,omitempty"`
+	}{
+		embed:     embed(*p),
+		CreatedAt: core.NewDateTime(p.CreatedAt),
+		UpdatedAt: core.NewDateTime(p.UpdatedAt),
+		DeletedAt: core.NewOptionalDateTime(p.DeletedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (p *Prompt) String() string {
+	if len(p._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
 }
 
 // A commit version
@@ -1064,6 +1191,9 @@ func (p *Pagination) String() string {
 	return fmt.Sprintf("%#v", p)
 }
 
+// Prompt ID
+type PromptId = string
+
 // Record ID
 type RecordId = string
 
@@ -1451,6 +1581,7 @@ type Context struct {
 	PrecedingEventId *EventId    `json:"precedingEventId,omitempty" url:"precedingEventId,omitempty"`
 	// Can be a UserId, GuestId, or AgentId
 	ActorId *string `json:"actorId,omitempty" url:"actorId,omitempty"`
+	AppId   *AppId  `json:"appId,omitempty" url:"appId,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -1545,6 +1676,7 @@ type Event struct {
 	SheetCreated           *GenericEvent
 	SheetUpdated           *GenericEvent
 	SheetDeleted           *GenericEvent
+	SheetCountsUpdated     *GenericEvent
 	SnapshotCreated        *GenericEvent
 	RecordsCreated         *GenericEvent
 	RecordsUpdated         *GenericEvent
@@ -1651,6 +1783,10 @@ func NewEventFromSheetUpdated(value *GenericEvent) *Event {
 
 func NewEventFromSheetDeleted(value *GenericEvent) *Event {
 	return &Event{Topic: "sheetDeleted", SheetDeleted: value}
+}
+
+func NewEventFromSheetCountsUpdated(value *GenericEvent) *Event {
+	return &Event{Topic: "sheetCountsUpdated", SheetCountsUpdated: value}
 }
 
 func NewEventFromSnapshotCreated(value *GenericEvent) *Event {
@@ -1886,6 +2022,12 @@ func (e *Event) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		e.SheetDeleted = value
+	case "sheetCountsUpdated":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.SheetCountsUpdated = value
 	case "snapshotCreated":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -2230,6 +2372,15 @@ func (e Event) MarshalJSON() ([]byte, error) {
 			GenericEvent: e.SheetDeleted,
 		}
 		return json.Marshal(marshaler)
+	case "sheetCountsUpdated":
+		var marshaler = struct {
+			Topic string `json:"topic"`
+			*GenericEvent
+		}{
+			Topic:        e.Topic,
+			GenericEvent: e.SheetCountsUpdated,
+		}
+		return json.Marshal(marshaler)
 	case "snapshotCreated":
 		var marshaler = struct {
 			Topic string `json:"topic"`
@@ -2488,6 +2639,7 @@ type EventVisitor interface {
 	VisitSheetCreated(*GenericEvent) error
 	VisitSheetUpdated(*GenericEvent) error
 	VisitSheetDeleted(*GenericEvent) error
+	VisitSheetCountsUpdated(*GenericEvent) error
 	VisitSnapshotCreated(*GenericEvent) error
 	VisitRecordsCreated(*GenericEvent) error
 	VisitRecordsUpdated(*GenericEvent) error
@@ -2560,6 +2712,8 @@ func (e *Event) Accept(visitor EventVisitor) error {
 		return visitor.VisitSheetUpdated(e.SheetUpdated)
 	case "sheetDeleted":
 		return visitor.VisitSheetDeleted(e.SheetDeleted)
+	case "sheetCountsUpdated":
+		return visitor.VisitSheetCountsUpdated(e.SheetCountsUpdated)
 	case "snapshotCreated":
 		return visitor.VisitSnapshotCreated(e.SnapshotCreated)
 	case "recordsCreated":
@@ -6020,12 +6174,14 @@ type DiffData = map[string]*DiffValue
 type DiffRecord struct {
 	Id RecordId `json:"id" url:"id"`
 	// Deprecated, use `commitId` instead.
-	VersionId *VersionId             `json:"versionId,omitempty" url:"versionId,omitempty"`
-	CommitId  *CommitId              `json:"commitId,omitempty" url:"commitId,omitempty"`
-	Valid     *bool                  `json:"valid,omitempty" url:"valid,omitempty"`
-	Messages  []*ValidationMessage   `json:"messages,omitempty" url:"messages,omitempty"`
-	Metadata  map[string]interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
-	Values    DiffData               `json:"values,omitempty" url:"values,omitempty"`
+	VersionId *VersionId `json:"versionId,omitempty" url:"versionId,omitempty"`
+	CommitId  *CommitId  `json:"commitId,omitempty" url:"commitId,omitempty"`
+	// Auto-generated value based on whether the record contains a field with an error message. Cannot be set via the API.
+	Valid *bool `json:"valid,omitempty" url:"valid,omitempty"`
+	// This record level `messages` property is deprecated and no longer stored or used. Use the `messages` property on the individual cell values instead. This property will be removed in a future release.
+	Messages []*ValidationMessage   `json:"messages,omitempty" url:"messages,omitempty"`
+	Metadata map[string]interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
+	Values   DiffData               `json:"values,omitempty" url:"values,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -6209,12 +6365,14 @@ func (g *GetRecordsResponseData) String() string {
 type Record struct {
 	Id RecordId `json:"id" url:"id"`
 	// Deprecated, use `commitId` instead.
-	VersionId *VersionId             `json:"versionId,omitempty" url:"versionId,omitempty"`
-	CommitId  *CommitId              `json:"commitId,omitempty" url:"commitId,omitempty"`
-	Valid     *bool                  `json:"valid,omitempty" url:"valid,omitempty"`
-	Messages  []*ValidationMessage   `json:"messages,omitempty" url:"messages,omitempty"`
-	Metadata  map[string]interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
-	Values    RecordData             `json:"values,omitempty" url:"values,omitempty"`
+	VersionId *VersionId `json:"versionId,omitempty" url:"versionId,omitempty"`
+	CommitId  *CommitId  `json:"commitId,omitempty" url:"commitId,omitempty"`
+	// Auto-generated value based on whether the record contains a field with an error message. Cannot be set via the API.
+	Valid *bool `json:"valid,omitempty" url:"valid,omitempty"`
+	// This record level `messages` property is deprecated and no longer stored or used. Use the `messages` property on the individual cell values instead. This property will be removed in a future release.
+	Messages []*ValidationMessage   `json:"messages,omitempty" url:"messages,omitempty"`
+	Metadata map[string]interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
+	Values   RecordData             `json:"values,omitempty" url:"values,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -6245,11 +6403,13 @@ func (r *Record) String() string {
 type RecordBase struct {
 	Id RecordId `json:"id" url:"id"`
 	// Deprecated, use `commitId` instead.
-	VersionId *VersionId             `json:"versionId,omitempty" url:"versionId,omitempty"`
-	CommitId  *CommitId              `json:"commitId,omitempty" url:"commitId,omitempty"`
-	Valid     *bool                  `json:"valid,omitempty" url:"valid,omitempty"`
-	Messages  []*ValidationMessage   `json:"messages,omitempty" url:"messages,omitempty"`
-	Metadata  map[string]interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
+	VersionId *VersionId `json:"versionId,omitempty" url:"versionId,omitempty"`
+	CommitId  *CommitId  `json:"commitId,omitempty" url:"commitId,omitempty"`
+	// Auto-generated value based on whether the record contains a field with an error message. Cannot be set via the API.
+	Valid *bool `json:"valid,omitempty" url:"valid,omitempty"`
+	// This record level `messages` property is deprecated and no longer stored or used. Use the `messages` property on the individual cell values instead. This property will be removed in a future release.
+	Messages []*ValidationMessage   `json:"messages,omitempty" url:"messages,omitempty"`
+	Metadata map[string]interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -7173,8 +7333,6 @@ type Sheet struct {
 	Slug string `json:"slug" url:"slug"`
 	// Describes shape of data as well as behavior
 	Config *SheetConfig `json:"config,omitempty" url:"config,omitempty"`
-	// The amount of records in the Sheet.
-	CountRecords *RecordCounts `json:"countRecords,omitempty" url:"countRecords,omitempty"`
 	// The scoped namespace of the Sheet.
 	Namespace *string `json:"namespace,omitempty" url:"namespace,omitempty"`
 	// The actor who locked the Sheet.
@@ -7185,6 +7343,8 @@ type Sheet struct {
 	CreatedAt time.Time `json:"createdAt" url:"createdAt"`
 	// The time the Sheet was locked.
 	LockedAt *time.Time `json:"lockedAt,omitempty" url:"lockedAt,omitempty"`
+	// The precomputed counts of records in the Sheet (may not exist).
+	RecordCounts *RecordCounts `json:"recordCounts,omitempty" url:"recordCounts,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -7325,7 +7485,7 @@ type SheetConfigOrUpdate struct {
 	Name *string `json:"name,omitempty" url:"name,omitempty"`
 	// A sentence or two describing the purpose of your Sheet.
 	Description *string `json:"description,omitempty" url:"description,omitempty"`
-	// A unique identifier for your Sheet.
+	// A unique identifier for your Sheet. **Required when updating a Workbook.**
 	Slug *string `json:"slug,omitempty" url:"slug,omitempty"`
 	// A boolean specifying whether or not this sheet is read only. Read only sheets are not editable by end users.
 	Readonly *bool `json:"readonly,omitempty" url:"readonly,omitempty"`
@@ -7345,8 +7505,6 @@ type SheetConfigOrUpdate struct {
 	WorkbookId *WorkbookId `json:"workbookId,omitempty" url:"workbookId,omitempty"`
 	// Describes shape of data as well as behavior.
 	Config *SheetConfig `json:"config,omitempty" url:"config,omitempty"`
-	// The amount of records in the Sheet.
-	CountRecords *RecordCounts `json:"countRecords,omitempty" url:"countRecords,omitempty"`
 	// The scoped namespace of the Sheet.
 	Namespace *string `json:"namespace,omitempty" url:"namespace,omitempty"`
 	// Date the sheet was last updated
@@ -7408,7 +7566,7 @@ type SheetConfigUpdate struct {
 	Name *string `json:"name,omitempty" url:"name,omitempty"`
 	// A sentence or two describing the purpose of your Sheet.
 	Description *string `json:"description,omitempty" url:"description,omitempty"`
-	// A unique identifier for your Sheet.
+	// A unique identifier for your Sheet. **Required when updating a Workbook.**
 	Slug *string `json:"slug,omitempty" url:"slug,omitempty"`
 	// A boolean specifying whether or not this sheet is read only. Read only sheets are not editable by end users.
 	Readonly *bool `json:"readonly,omitempty" url:"readonly,omitempty"`
@@ -7537,8 +7695,6 @@ type SheetUpdate struct {
 	WorkbookId *WorkbookId `json:"workbookId,omitempty" url:"workbookId,omitempty"`
 	// Describes shape of data as well as behavior.
 	Config *SheetConfig `json:"config,omitempty" url:"config,omitempty"`
-	// The amount of records in the Sheet.
-	CountRecords *RecordCounts `json:"countRecords,omitempty" url:"countRecords,omitempty"`
 	// The scoped namespace of the Sheet.
 	Namespace *string `json:"namespace,omitempty" url:"namespace,omitempty"`
 	// Date the sheet was last updated
@@ -7794,6 +7950,8 @@ type InternalSpaceConfigBase struct {
 	LanguageOverride *string       `json:"languageOverride,omitempty" url:"languageOverride,omitempty"`
 	// Date when space was archived
 	ArchivedAt *time.Time `json:"archivedAt,omitempty" url:"archivedAt,omitempty"`
+	// The ID of the App that space is associated with
+	AppId *AppId `json:"appId,omitempty" url:"appId,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -7855,7 +8013,9 @@ type Space struct {
 	LanguageOverride *string       `json:"languageOverride,omitempty" url:"languageOverride,omitempty"`
 	// Date when space was archived
 	ArchivedAt *time.Time `json:"archivedAt,omitempty" url:"archivedAt,omitempty"`
-	Id         SpaceId    `json:"id" url:"id"`
+	// The ID of the App that space is associated with
+	AppId *AppId  `json:"appId,omitempty" url:"appId,omitempty"`
+	Id    SpaceId `json:"id" url:"id"`
 	// Amount of workbooks in the space
 	WorkbooksCount *int `json:"workbooksCount,omitempty" url:"workbooksCount,omitempty"`
 	// Amount of files in the space
@@ -7869,7 +8029,7 @@ type Space struct {
 	UpdatedAt time.Time `json:"updatedAt" url:"updatedAt"`
 	// Date when space was expired
 	ExpiredAt *time.Time `json:"expiredAt,omitempty" url:"expiredAt,omitempty"`
-	// Date that the last activity in the space occurred. This could include any create or update activity in the space like adding a record to a sheet, uploading a new file, or updating the configuration of a workbook. This date is only tracked to the precision of a day.
+	// This date marks the most recent activity within the space, tracking actions to the second. Activities include creating or updating records in a sheet, uploading files, or modifying a workbook's configuration.
 	LastActivityAt *time.Time `json:"lastActivityAt,omitempty" url:"lastActivityAt,omitempty"`
 	// Guest link to the space
 	GuestLink *string `json:"guestLink,omitempty" url:"guestLink,omitempty"`
@@ -8010,15 +8170,17 @@ func (s *SpaceSize) String() string {
 
 // Configurations for the user
 type User struct {
-	Email     string                 `json:"email" url:"email"`
-	Name      string                 `json:"name" url:"name"`
-	AccountId AccountId              `json:"accountId" url:"accountId"`
-	Id        UserId                 `json:"id" url:"id"`
-	Idp       string                 `json:"idp" url:"idp"`
-	IdpRef    *string                `json:"idpRef,omitempty" url:"idpRef,omitempty"`
-	Metadata  map[string]interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
-	CreatedAt time.Time              `json:"createdAt" url:"createdAt"`
-	UpdatedAt time.Time              `json:"updatedAt" url:"updatedAt"`
+	Email      string                 `json:"email" url:"email"`
+	Name       string                 `json:"name" url:"name"`
+	AccountId  AccountId              `json:"accountId" url:"accountId"`
+	Id         UserId                 `json:"id" url:"id"`
+	Idp        string                 `json:"idp" url:"idp"`
+	IdpRef     *string                `json:"idpRef,omitempty" url:"idpRef,omitempty"`
+	Metadata   map[string]interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
+	CreatedAt  time.Time              `json:"createdAt" url:"createdAt"`
+	UpdatedAt  time.Time              `json:"updatedAt" url:"updatedAt"`
+	LastSeenAt *time.Time             `json:"lastSeenAt,omitempty" url:"lastSeenAt,omitempty"`
+	Dashboard  *int                   `json:"dashboard,omitempty" url:"dashboard,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -8027,8 +8189,9 @@ func (u *User) UnmarshalJSON(data []byte) error {
 	type embed User
 	var unmarshaler = struct {
 		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-		UpdatedAt *core.DateTime `json:"updatedAt"`
+		CreatedAt  *core.DateTime `json:"createdAt"`
+		UpdatedAt  *core.DateTime `json:"updatedAt"`
+		LastSeenAt *core.DateTime `json:"lastSeenAt,omitempty"`
 	}{
 		embed: embed(*u),
 	}
@@ -8038,6 +8201,7 @@ func (u *User) UnmarshalJSON(data []byte) error {
 	*u = User(unmarshaler.embed)
 	u.CreatedAt = unmarshaler.CreatedAt.Time()
 	u.UpdatedAt = unmarshaler.UpdatedAt.Time()
+	u.LastSeenAt = unmarshaler.LastSeenAt.TimePtr()
 	u._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -8046,12 +8210,14 @@ func (u *User) MarshalJSON() ([]byte, error) {
 	type embed User
 	var marshaler = struct {
 		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-		UpdatedAt *core.DateTime `json:"updatedAt"`
+		CreatedAt  *core.DateTime `json:"createdAt"`
+		UpdatedAt  *core.DateTime `json:"updatedAt"`
+		LastSeenAt *core.DateTime `json:"lastSeenAt,omitempty"`
 	}{
-		embed:     embed(*u),
-		CreatedAt: core.NewDateTime(u.CreatedAt),
-		UpdatedAt: core.NewDateTime(u.UpdatedAt),
+		embed:      embed(*u),
+		CreatedAt:  core.NewDateTime(u.CreatedAt),
+		UpdatedAt:  core.NewDateTime(u.UpdatedAt),
+		LastSeenAt: core.NewOptionalDateTime(u.LastSeenAt),
 	}
 	return json.Marshal(marshaler)
 }

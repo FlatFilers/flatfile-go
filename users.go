@@ -74,6 +74,39 @@ func (u *UserConfig) String() string {
 	return fmt.Sprintf("%#v", u)
 }
 
+// Properties used to create a new user
+type UserCreateAndInviteRequest struct {
+	Email      string                    `json:"email" url:"email"`
+	Name       string                    `json:"name" url:"name"`
+	ActorRoles []*AssignActorRoleRequest `json:"actorRoles,omitempty" url:"actorRoles,omitempty"`
+
+	_rawJSON json.RawMessage
+}
+
+func (u *UserCreateAndInviteRequest) UnmarshalJSON(data []byte) error {
+	type unmarshaler UserCreateAndInviteRequest
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*u = UserCreateAndInviteRequest(value)
+	u._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (u *UserCreateAndInviteRequest) String() string {
+	if len(u._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(u._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(u); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", u)
+}
+
 type UpdateUserRequest struct {
-	Name *string `json:"name,omitempty" url:"name,omitempty"`
+	Name      *string `json:"name,omitempty" url:"name,omitempty"`
+	Dashboard *int    `json:"dashboard,omitempty" url:"dashboard,omitempty"`
 }

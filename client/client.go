@@ -3,8 +3,10 @@
 package client
 
 import (
+	accounts "github.com/FlatFilers/flatfile-go/accounts"
 	agents "github.com/FlatFilers/flatfile-go/agents"
 	apps "github.com/FlatFilers/flatfile-go/apps"
+	assistant "github.com/FlatFilers/flatfile-go/assistant"
 	commits "github.com/FlatFilers/flatfile-go/commits"
 	core "github.com/FlatFilers/flatfile-go/core"
 	dataretentionpolicies "github.com/FlatFilers/flatfile-go/dataretentionpolicies"
@@ -34,8 +36,10 @@ type Client struct {
 	caller  *core.Caller
 	header  http.Header
 
+	Accounts              *accounts.Client
 	Agents                *agents.Client
 	Apps                  *apps.Client
+	Assistant             *assistant.Client
 	Commits               *commits.Client
 	DataRetentionPolicies *dataretentionpolicies.Client
 	Documents             *documents.Client
@@ -68,8 +72,10 @@ func NewClient(opts ...option.RequestOption) *Client {
 			},
 		),
 		header:                options.ToHeader(),
+		Accounts:              accounts.NewClient(opts...),
 		Agents:                agents.NewClient(opts...),
 		Apps:                  apps.NewClient(opts...),
+		Assistant:             assistant.NewClient(opts...),
 		Commits:               commits.NewClient(opts...),
 		DataRetentionPolicies: dataretentionpolicies.NewClient(opts...),
 		Documents:             documents.NewClient(opts...),

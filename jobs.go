@@ -456,12 +456,14 @@ type MutateJobConfig struct {
 	// A JavaScript function that will be run on each record in the sheet, it should return a mutated record.
 	MutateRecord string `json:"mutateRecord" url:"mutateRecord"`
 	// If the mutation was generated through some sort of id-ed process, this links this job and that process.
-	MutationId  *string      `json:"mutationId,omitempty" url:"mutationId,omitempty"`
-	Filter      *Filter      `json:"filter,omitempty" url:"filter,omitempty"`
-	FilterField *FilterField `json:"filterField,omitempty" url:"filterField,omitempty"`
-	SearchValue *SearchValue `json:"searchValue,omitempty" url:"searchValue,omitempty"`
-	SearchField *SearchField `json:"searchField,omitempty" url:"searchField,omitempty"`
-	Q           *string      `json:"q,omitempty" url:"q,omitempty"`
+	MutationId *string `json:"mutationId,omitempty" url:"mutationId,omitempty"`
+	// If specified, a snapshot will be generated with this label
+	SnapshotLabel *string      `json:"snapshotLabel,omitempty" url:"snapshotLabel,omitempty"`
+	Filter        *Filter      `json:"filter,omitempty" url:"filter,omitempty"`
+	FilterField   *FilterField `json:"filterField,omitempty" url:"filterField,omitempty"`
+	SearchValue   *SearchValue `json:"searchValue,omitempty" url:"searchValue,omitempty"`
+	SearchField   *SearchField `json:"searchField,omitempty" url:"searchField,omitempty"`
+	Q             *string      `json:"q,omitempty" url:"q,omitempty"`
 	// The Record Ids param (ids) is a list of record ids that can be passed to several record endpoints allowing the user to identify specific records to INCLUDE in the query, or specific records to EXCLUDE, depending on whether or not filters are being applied. When passing a query param that filters the record dataset, such as 'searchValue', or a 'filter' of 'valid' | 'error' | 'all', the 'ids' param will EXCLUDE those records from the filtered results. For basic queries that do not filter the dataset, passing record ids in the 'ids' param will limit the dataset to INCLUDE just those specific records
 	Ids []RecordId `json:"ids,omitempty" url:"ids,omitempty"`
 

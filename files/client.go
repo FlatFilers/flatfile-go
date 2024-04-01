@@ -81,7 +81,6 @@ func (c *Client) List(
 
 func (c *Client) Upload(
 	ctx context.Context,
-	file io.Reader,
 	request *flatfilego.CreateFileRequest,
 	opts ...option.RequestOption,
 ) (*flatfilego.FileResponse, error) {
@@ -120,17 +119,6 @@ func (c *Client) Upload(
 	var response *flatfilego.FileResponse
 	requestBuffer := bytes.NewBuffer(nil)
 	writer := multipart.NewWriter(requestBuffer)
-	fileFilename := "file_filename"
-	if named, ok := file.(interface{ Name() string }); ok {
-		fileFilename = named.Name()
-	}
-	filePart, err := writer.CreateFormFile("file", fileFilename)
-	if err != nil {
-		return nil, err
-	}
-	if _, err := io.Copy(filePart, file); err != nil {
-		return nil, err
-	}
 	if err := core.WriteMultipartJSON(writer, "spaceId", request.SpaceId); err != nil {
 		return nil, err
 	}

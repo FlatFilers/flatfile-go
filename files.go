@@ -10,9 +10,9 @@ import (
 
 type ListFilesRequest struct {
 	SpaceId *string `json:"-" url:"spaceId,omitempty"`
-	// Number of jobs to return in a page (default 20)
+	// Number of files to return in a page (default 20)
 	PageSize *int `json:"-" url:"pageSize,omitempty"`
-	// Based on pageSize, which page of jobs to return
+	// Based on pageSize, which page of files to return
 	PageNumber *int `json:"-" url:"pageNumber,omitempty"`
 	// The storage mode of file to fetch, defaults to "import"
 	Mode *Mode `json:"-" url:"mode,omitempty"`

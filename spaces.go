@@ -11,7 +11,7 @@ import (
 
 type DeleteSpacesRequest struct {
 	// List of ids for the spaces to be deleted
-	Ids []SpaceId `json:"-" url:"ids"`
+	SpaceIds []SpaceId `json:"-" url:"spaceIds"`
 }
 
 type ListSpacesRequest struct {
@@ -59,6 +59,7 @@ const (
 	EventTopicSheetCreated           EventTopic = "sheet:created"
 	EventTopicSheetUpdated           EventTopic = "sheet:updated"
 	EventTopicSheetDeleted           EventTopic = "sheet:deleted"
+	EventTopicSheetCountsUpdated     EventTopic = "sheet:counts-updated"
 	EventTopicSnapshotCreated        EventTopic = "snapshot:created"
 	EventTopicRecordsCreated         EventTopic = "records:created"
 	EventTopicRecordsUpdated         EventTopic = "records:updated"
@@ -133,6 +134,8 @@ func NewEventTopicFromString(s string) (EventTopic, error) {
 		return EventTopicSheetUpdated, nil
 	case "sheet:deleted":
 		return EventTopicSheetDeleted, nil
+	case "sheet:counts-updated":
+		return EventTopicSheetCountsUpdated, nil
 	case "snapshot:created":
 		return EventTopicSnapshotCreated, nil
 	case "records:created":
@@ -283,6 +286,8 @@ type SpaceConfig struct {
 	LanguageOverride *string       `json:"languageOverride,omitempty" url:"languageOverride,omitempty"`
 	// Date when space was archived
 	ArchivedAt *time.Time `json:"archivedAt,omitempty" url:"archivedAt,omitempty"`
+	// The ID of the App that space is associated with
+	AppId *AppId `json:"appId,omitempty" url:"appId,omitempty"`
 	// The name of the space
 	Name *string `json:"name,omitempty" url:"name,omitempty"`
 	// The display order

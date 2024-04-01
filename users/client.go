@@ -79,6 +79,43 @@ func (c *Client) List(
 	return response, nil
 }
 
+// Creates and invites a new user to your account.
+func (c *Client) CreateAndInvite(
+	ctx context.Context,
+	request *flatfilego.UserCreateAndInviteRequest,
+	opts ...option.RequestOption,
+) (*flatfilego.UserResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
+	baseURL := "https://api.x.flatfile.com/v1"
+	if c.baseURL != "" {
+		baseURL = c.baseURL
+	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := baseURL + "/" + "users/invite"
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
+
+	var response *flatfilego.UserResponse
+	if err := c.caller.Call(
+		ctx,
+		&core.CallParams{
+			URL:         endpointURL,
+			Method:      http.MethodPost,
+			MaxAttempts: options.MaxAttempts,
+			Headers:     headers,
+			Client:      options.HTTPClient,
+			Request:     request,
+			Response:    &response,
+		},
+	); err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
 // Updates a user
 func (c *Client) Update(
 	ctx context.Context,
