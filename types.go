@@ -23,6 +23,7 @@ type Account struct {
 	CreatedAt               time.Time              `json:"createdAt" url:"createdAt"`
 	UpdatedAt               time.Time              `json:"updatedAt" url:"updatedAt"`
 	DefaultAppId            *AppId                 `json:"defaultAppId,omitempty" url:"defaultAppId,omitempty"`
+	Dashboard               *int                   `json:"dashboard,omitempty" url:"dashboard,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -3087,6 +3088,7 @@ type File struct {
 	WorkbookId *WorkbookId `json:"workbookId,omitempty" url:"workbookId,omitempty"`
 	SheetId    *SheetId    `json:"sheetId,omitempty" url:"sheetId,omitempty"`
 	Actions    []*Action   `json:"actions,omitempty" url:"actions,omitempty"`
+	Origin     *FileOrigin `json:"origin,omitempty" url:"origin,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -5302,9 +5304,10 @@ type BaseProperty struct {
 	// User friendly field name
 	Label *string `json:"label,omitempty" url:"label,omitempty"`
 	// A short description of the field. Markdown syntax is supported.
-	Description *string       `json:"description,omitempty" url:"description,omitempty"`
-	Constraints []*Constraint `json:"constraints,omitempty" url:"constraints,omitempty"`
-	Readonly    *bool         `json:"readonly,omitempty" url:"readonly,omitempty"`
+	Description *string          `json:"description,omitempty" url:"description,omitempty"`
+	Constraints []*Constraint    `json:"constraints,omitempty" url:"constraints,omitempty"`
+	Readonly    *bool            `json:"readonly,omitempty" url:"readonly,omitempty"`
+	Appearance  *FieldAppearance `json:"appearance,omitempty" url:"appearance,omitempty"`
 	// Useful for any contextual metadata regarding the schema. Store any valid json here.
 	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
 	// A unique presentation for a field in the UI.
@@ -5343,9 +5346,10 @@ type BooleanProperty struct {
 	// User friendly field name
 	Label *string `json:"label,omitempty" url:"label,omitempty"`
 	// A short description of the field. Markdown syntax is supported.
-	Description *string       `json:"description,omitempty" url:"description,omitempty"`
-	Constraints []*Constraint `json:"constraints,omitempty" url:"constraints,omitempty"`
-	Readonly    *bool         `json:"readonly,omitempty" url:"readonly,omitempty"`
+	Description *string          `json:"description,omitempty" url:"description,omitempty"`
+	Constraints []*Constraint    `json:"constraints,omitempty" url:"constraints,omitempty"`
+	Readonly    *bool            `json:"readonly,omitempty" url:"readonly,omitempty"`
+	Appearance  *FieldAppearance `json:"appearance,omitempty" url:"appearance,omitempty"`
 	// Useful for any contextual metadata regarding the schema. Store any valid json here.
 	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
 	// A unique presentation for a field in the UI.
@@ -5541,9 +5545,10 @@ type DateProperty struct {
 	// User friendly field name
 	Label *string `json:"label,omitempty" url:"label,omitempty"`
 	// A short description of the field. Markdown syntax is supported.
-	Description *string       `json:"description,omitempty" url:"description,omitempty"`
-	Constraints []*Constraint `json:"constraints,omitempty" url:"constraints,omitempty"`
-	Readonly    *bool         `json:"readonly,omitempty" url:"readonly,omitempty"`
+	Description *string          `json:"description,omitempty" url:"description,omitempty"`
+	Constraints []*Constraint    `json:"constraints,omitempty" url:"constraints,omitempty"`
+	Readonly    *bool            `json:"readonly,omitempty" url:"readonly,omitempty"`
+	Appearance  *FieldAppearance `json:"appearance,omitempty" url:"appearance,omitempty"`
 	// Useful for any contextual metadata regarding the schema. Store any valid json here.
 	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
 	// A unique presentation for a field in the UI.
@@ -5582,9 +5587,10 @@ type EnumProperty struct {
 	// User friendly field name
 	Label *string `json:"label,omitempty" url:"label,omitempty"`
 	// A short description of the field. Markdown syntax is supported.
-	Description *string       `json:"description,omitempty" url:"description,omitempty"`
-	Constraints []*Constraint `json:"constraints,omitempty" url:"constraints,omitempty"`
-	Readonly    *bool         `json:"readonly,omitempty" url:"readonly,omitempty"`
+	Description *string          `json:"description,omitempty" url:"description,omitempty"`
+	Constraints []*Constraint    `json:"constraints,omitempty" url:"constraints,omitempty"`
+	Readonly    *bool            `json:"readonly,omitempty" url:"readonly,omitempty"`
+	Appearance  *FieldAppearance `json:"appearance,omitempty" url:"appearance,omitempty"`
 	// Useful for any contextual metadata regarding the schema. Store any valid json here.
 	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
 	// A unique presentation for a field in the UI.
@@ -5725,6 +5731,68 @@ func (e *ExternalConstraint) String() string {
 	return fmt.Sprintf("%#v", e)
 }
 
+// Control the appearance of this field when it's displayed in a table or input
+type FieldAppearance struct {
+	Size *FieldSize `json:"size,omitempty" url:"size,omitempty"`
+
+	_rawJSON json.RawMessage
+}
+
+func (f *FieldAppearance) UnmarshalJSON(data []byte) error {
+	type unmarshaler FieldAppearance
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*f = FieldAppearance(value)
+	f._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (f *FieldAppearance) String() string {
+	if len(f._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(f._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(f); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", f)
+}
+
+// The default visual sizing. This sizing may be overridden by a user
+type FieldSize string
+
+const (
+	FieldSizeXs FieldSize = "xs"
+	FieldSizeS  FieldSize = "s"
+	FieldSizeM  FieldSize = "m"
+	FieldSizeL  FieldSize = "l"
+	FieldSizeXl FieldSize = "xl"
+)
+
+func NewFieldSizeFromString(s string) (FieldSize, error) {
+	switch s {
+	case "xs":
+		return FieldSizeXs, nil
+	case "s":
+		return FieldSizeS, nil
+	case "m":
+		return FieldSizeM, nil
+	case "l":
+		return FieldSizeL, nil
+	case "xl":
+		return FieldSizeXl, nil
+	}
+	var t FieldSize
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (f FieldSize) Ptr() *FieldSize {
+	return &f
+}
+
 type NumberConfig struct {
 	// Number of decimal places to round data to
 	DecimalPlaces *int `json:"decimalPlaces,omitempty" url:"decimalPlaces,omitempty"`
@@ -5761,9 +5829,10 @@ type NumberProperty struct {
 	// User friendly field name
 	Label *string `json:"label,omitempty" url:"label,omitempty"`
 	// A short description of the field. Markdown syntax is supported.
-	Description *string       `json:"description,omitempty" url:"description,omitempty"`
-	Constraints []*Constraint `json:"constraints,omitempty" url:"constraints,omitempty"`
-	Readonly    *bool         `json:"readonly,omitempty" url:"readonly,omitempty"`
+	Description *string          `json:"description,omitempty" url:"description,omitempty"`
+	Constraints []*Constraint    `json:"constraints,omitempty" url:"constraints,omitempty"`
+	Readonly    *bool            `json:"readonly,omitempty" url:"readonly,omitempty"`
+	Appearance  *FieldAppearance `json:"appearance,omitempty" url:"appearance,omitempty"`
 	// Useful for any contextual metadata regarding the schema. Store any valid json here.
 	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
 	// A unique presentation for a field in the UI.
@@ -5805,9 +5874,10 @@ type ReferenceProperty struct {
 	// User friendly field name
 	Label *string `json:"label,omitempty" url:"label,omitempty"`
 	// A short description of the field. Markdown syntax is supported.
-	Description *string       `json:"description,omitempty" url:"description,omitempty"`
-	Constraints []*Constraint `json:"constraints,omitempty" url:"constraints,omitempty"`
-	Readonly    *bool         `json:"readonly,omitempty" url:"readonly,omitempty"`
+	Description *string          `json:"description,omitempty" url:"description,omitempty"`
+	Constraints []*Constraint    `json:"constraints,omitempty" url:"constraints,omitempty"`
+	Readonly    *bool            `json:"readonly,omitempty" url:"readonly,omitempty"`
+	Appearance  *FieldAppearance `json:"appearance,omitempty" url:"appearance,omitempty"`
 	// Useful for any contextual metadata regarding the schema. Store any valid json here.
 	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
 	// A unique presentation for a field in the UI.
@@ -5967,9 +6037,10 @@ type StringProperty struct {
 	// User friendly field name
 	Label *string `json:"label,omitempty" url:"label,omitempty"`
 	// A short description of the field. Markdown syntax is supported.
-	Description *string       `json:"description,omitempty" url:"description,omitempty"`
-	Constraints []*Constraint `json:"constraints,omitempty" url:"constraints,omitempty"`
-	Readonly    *bool         `json:"readonly,omitempty" url:"readonly,omitempty"`
+	Description *string          `json:"description,omitempty" url:"description,omitempty"`
+	Constraints []*Constraint    `json:"constraints,omitempty" url:"constraints,omitempty"`
+	Readonly    *bool            `json:"readonly,omitempty" url:"readonly,omitempty"`
+	Appearance  *FieldAppearance `json:"appearance,omitempty" url:"appearance,omitempty"`
 	// Useful for any contextual metadata regarding the schema. Store any valid json here.
 	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
 	// A unique presentation for a field in the UI.
@@ -6062,6 +6133,36 @@ func (u *UniqueConstraintConfig) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", u)
+}
+
+// CellConfig
+type CellConfig struct {
+	Readonly *bool `json:"readonly,omitempty" url:"readonly,omitempty"`
+
+	_rawJSON json.RawMessage
+}
+
+func (c *CellConfig) UnmarshalJSON(data []byte) error {
+	type unmarshaler CellConfig
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CellConfig(value)
+	c._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CellConfig) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
 }
 
 type CellValue struct {
@@ -6181,6 +6282,7 @@ type DiffRecord struct {
 	// This record level `messages` property is deprecated and no longer stored or used. Use the `messages` property on the individual cell values instead. This property will be removed in a future release.
 	Messages []*ValidationMessage   `json:"messages,omitempty" url:"messages,omitempty"`
 	Metadata map[string]interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
+	Config   *RecordConfig          `json:"config,omitempty" url:"config,omitempty"`
 	Values   DiffData               `json:"values,omitempty" url:"values,omitempty"`
 
 	_rawJSON json.RawMessage
@@ -6372,6 +6474,7 @@ type Record struct {
 	// This record level `messages` property is deprecated and no longer stored or used. Use the `messages` property on the individual cell values instead. This property will be removed in a future release.
 	Messages []*ValidationMessage   `json:"messages,omitempty" url:"messages,omitempty"`
 	Metadata map[string]interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
+	Config   *RecordConfig          `json:"config,omitempty" url:"config,omitempty"`
 	Values   RecordData             `json:"values,omitempty" url:"values,omitempty"`
 
 	_rawJSON json.RawMessage
@@ -6410,6 +6513,7 @@ type RecordBase struct {
 	// This record level `messages` property is deprecated and no longer stored or used. Use the `messages` property on the individual cell values instead. This property will be removed in a future release.
 	Messages []*ValidationMessage   `json:"messages,omitempty" url:"messages,omitempty"`
 	Metadata map[string]interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
+	Config   *RecordConfig          `json:"config,omitempty" url:"config,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -6426,6 +6530,37 @@ func (r *RecordBase) UnmarshalJSON(data []byte) error {
 }
 
 func (r *RecordBase) String() string {
+	if len(r._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(r._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(r); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", r)
+}
+
+// Configuration of a record or specific fields in the record
+type RecordConfig struct {
+	Readonly *bool                  `json:"readonly,omitempty" url:"readonly,omitempty"`
+	Fields   map[string]*CellConfig `json:"fields,omitempty" url:"fields,omitempty"`
+
+	_rawJSON json.RawMessage
+}
+
+func (r *RecordConfig) UnmarshalJSON(data []byte) error {
+	type unmarshaler RecordConfig
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*r = RecordConfig(value)
+	r._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (r *RecordConfig) String() string {
 	if len(r._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(r._rawJSON); err == nil {
 			return value
@@ -6484,6 +6619,7 @@ type RecordWithLinks struct {
 	Valid    *bool                  `json:"valid,omitempty" url:"valid,omitempty"`
 	Messages []*ValidationMessage   `json:"messages,omitempty" url:"messages,omitempty"`
 	Metadata map[string]interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
+	Config   *RecordConfig          `json:"config,omitempty" url:"config,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -7940,14 +8076,16 @@ type InternalSpaceConfigBase struct {
 	EnvironmentId     *EnvironmentId `json:"environmentId,omitempty" url:"environmentId,omitempty"`
 	PrimaryWorkbookId *WorkbookId    `json:"primaryWorkbookId,omitempty" url:"primaryWorkbookId,omitempty"`
 	// Metadata for the space
-	Metadata         interface{}   `json:"metadata,omitempty" url:"metadata,omitempty"`
-	Actions          []*Action     `json:"actions,omitempty" url:"actions,omitempty"`
-	Access           []SpaceAccess `json:"access,omitempty" url:"access,omitempty"`
-	AutoConfigure    *bool         `json:"autoConfigure,omitempty" url:"autoConfigure,omitempty"`
-	Namespace        *string       `json:"namespace,omitempty" url:"namespace,omitempty"`
-	Labels           []string      `json:"labels,omitempty" url:"labels,omitempty"`
-	TranslationsPath *string       `json:"translationsPath,omitempty" url:"translationsPath,omitempty"`
-	LanguageOverride *string       `json:"languageOverride,omitempty" url:"languageOverride,omitempty"`
+	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
+	// The Space settings.
+	Settings         *SpaceSettings `json:"settings,omitempty" url:"settings,omitempty"`
+	Actions          []*Action      `json:"actions,omitempty" url:"actions,omitempty"`
+	Access           []SpaceAccess  `json:"access,omitempty" url:"access,omitempty"`
+	AutoConfigure    *bool          `json:"autoConfigure,omitempty" url:"autoConfigure,omitempty"`
+	Namespace        *string        `json:"namespace,omitempty" url:"namespace,omitempty"`
+	Labels           []string       `json:"labels,omitempty" url:"labels,omitempty"`
+	TranslationsPath *string        `json:"translationsPath,omitempty" url:"translationsPath,omitempty"`
+	LanguageOverride *string        `json:"languageOverride,omitempty" url:"languageOverride,omitempty"`
 	// Date when space was archived
 	ArchivedAt *time.Time `json:"archivedAt,omitempty" url:"archivedAt,omitempty"`
 	// The ID of the App that space is associated with
@@ -8003,14 +8141,16 @@ type Space struct {
 	EnvironmentId     *EnvironmentId `json:"environmentId,omitempty" url:"environmentId,omitempty"`
 	PrimaryWorkbookId *WorkbookId    `json:"primaryWorkbookId,omitempty" url:"primaryWorkbookId,omitempty"`
 	// Metadata for the space
-	Metadata         interface{}   `json:"metadata,omitempty" url:"metadata,omitempty"`
-	Actions          []*Action     `json:"actions,omitempty" url:"actions,omitempty"`
-	Access           []SpaceAccess `json:"access,omitempty" url:"access,omitempty"`
-	AutoConfigure    *bool         `json:"autoConfigure,omitempty" url:"autoConfigure,omitempty"`
-	Namespace        *string       `json:"namespace,omitempty" url:"namespace,omitempty"`
-	Labels           []string      `json:"labels,omitempty" url:"labels,omitempty"`
-	TranslationsPath *string       `json:"translationsPath,omitempty" url:"translationsPath,omitempty"`
-	LanguageOverride *string       `json:"languageOverride,omitempty" url:"languageOverride,omitempty"`
+	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
+	// The Space settings.
+	Settings         *SpaceSettings `json:"settings,omitempty" url:"settings,omitempty"`
+	Actions          []*Action      `json:"actions,omitempty" url:"actions,omitempty"`
+	Access           []SpaceAccess  `json:"access,omitempty" url:"access,omitempty"`
+	AutoConfigure    *bool          `json:"autoConfigure,omitempty" url:"autoConfigure,omitempty"`
+	Namespace        *string        `json:"namespace,omitempty" url:"namespace,omitempty"`
+	Labels           []string       `json:"labels,omitempty" url:"labels,omitempty"`
+	TranslationsPath *string        `json:"translationsPath,omitempty" url:"translationsPath,omitempty"`
+	LanguageOverride *string        `json:"languageOverride,omitempty" url:"languageOverride,omitempty"`
 	// Date when space was archived
 	ArchivedAt *time.Time `json:"archivedAt,omitempty" url:"archivedAt,omitempty"`
 	// The ID of the App that space is associated with
@@ -8134,6 +8274,67 @@ func (s SpaceAccess) Ptr() *SpaceAccess {
 	return &s
 }
 
+// Settings for a space
+type SpaceSettings struct {
+	// The sidebar configuration for the space. (This will eventually replace metadata.sidebarconfig)
+	SidebarConfig *SpaceSidebarConfig `json:"sidebarConfig,omitempty" url:"sidebarConfig,omitempty"`
+
+	_rawJSON json.RawMessage
+}
+
+func (s *SpaceSettings) UnmarshalJSON(data []byte) error {
+	type unmarshaler SpaceSettings
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SpaceSettings(value)
+	s._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *SpaceSettings) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
+type SpaceSidebarConfig struct {
+	// Used to set the order of workbooks in the sidebar. This will not affect workbooks that are pinned and workbooks that are not specified here will be sorted alphabetically.
+	WorkbookSidebarOrder []WorkbookId `json:"workbookSidebarOrder,omitempty" url:"workbookSidebarOrder,omitempty"`
+
+	_rawJSON json.RawMessage
+}
+
+func (s *SpaceSidebarConfig) UnmarshalJSON(data []byte) error {
+	type unmarshaler SpaceSidebarConfig
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SpaceSidebarConfig(value)
+	s._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *SpaceSidebarConfig) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
 // The size of a space
 type SpaceSize struct {
 	Name     string `json:"name" url:"name"`
@@ -8252,6 +8453,72 @@ func (u *UserResponse) UnmarshalJSON(data []byte) error {
 }
 
 func (u *UserResponse) String() string {
+	if len(u._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(u._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(u); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", u)
+}
+
+type UserWithRoles struct {
+	Email      string                 `json:"email" url:"email"`
+	Name       string                 `json:"name" url:"name"`
+	AccountId  AccountId              `json:"accountId" url:"accountId"`
+	Id         UserId                 `json:"id" url:"id"`
+	Idp        string                 `json:"idp" url:"idp"`
+	IdpRef     *string                `json:"idpRef,omitempty" url:"idpRef,omitempty"`
+	Metadata   map[string]interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
+	CreatedAt  time.Time              `json:"createdAt" url:"createdAt"`
+	UpdatedAt  time.Time              `json:"updatedAt" url:"updatedAt"`
+	LastSeenAt *time.Time             `json:"lastSeenAt,omitempty" url:"lastSeenAt,omitempty"`
+	Dashboard  *int                   `json:"dashboard,omitempty" url:"dashboard,omitempty"`
+	ActorRoles []*ActorRoleResponse   `json:"actorRoles,omitempty" url:"actorRoles,omitempty"`
+
+	_rawJSON json.RawMessage
+}
+
+func (u *UserWithRoles) UnmarshalJSON(data []byte) error {
+	type embed UserWithRoles
+	var unmarshaler = struct {
+		embed
+		CreatedAt  *core.DateTime `json:"createdAt"`
+		UpdatedAt  *core.DateTime `json:"updatedAt"`
+		LastSeenAt *core.DateTime `json:"lastSeenAt,omitempty"`
+	}{
+		embed: embed(*u),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*u = UserWithRoles(unmarshaler.embed)
+	u.CreatedAt = unmarshaler.CreatedAt.Time()
+	u.UpdatedAt = unmarshaler.UpdatedAt.Time()
+	u.LastSeenAt = unmarshaler.LastSeenAt.TimePtr()
+	u._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (u *UserWithRoles) MarshalJSON() ([]byte, error) {
+	type embed UserWithRoles
+	var marshaler = struct {
+		embed
+		CreatedAt  *core.DateTime `json:"createdAt"`
+		UpdatedAt  *core.DateTime `json:"updatedAt"`
+		LastSeenAt *core.DateTime `json:"lastSeenAt,omitempty"`
+	}{
+		embed:      embed(*u),
+		CreatedAt:  core.NewDateTime(u.CreatedAt),
+		UpdatedAt:  core.NewDateTime(u.UpdatedAt),
+		LastSeenAt: core.NewOptionalDateTime(u.LastSeenAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (u *UserWithRoles) String() string {
 	if len(u._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(u._rawJSON); err == nil {
 			return value

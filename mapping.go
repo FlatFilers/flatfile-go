@@ -9,6 +9,10 @@ import (
 	time "time"
 )
 
+type DeleteAllHistoryForUserRequest struct {
+	EnvironmentId *EnvironmentId `json:"environmentId,omitempty" url:"environmentId,omitempty"`
+}
+
 type ListProgramsRequest struct {
 	// Number of programs to return in a page (default 10)
 	PageSize *int `json:"-" url:"pageSize,omitempty"`

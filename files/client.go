@@ -135,6 +135,11 @@ func (c *Client) Upload(
 			return nil, err
 		}
 	}
+	if request.Origin != nil {
+		if err := core.WriteMultipartJSON(writer, "origin", *request.Origin); err != nil {
+			return nil, err
+		}
+	}
 	if err := writer.Close(); err != nil {
 		return nil, err
 	}

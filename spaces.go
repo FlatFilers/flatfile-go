@@ -276,14 +276,16 @@ type SpaceConfig struct {
 	EnvironmentId     *EnvironmentId `json:"environmentId,omitempty" url:"environmentId,omitempty"`
 	PrimaryWorkbookId *WorkbookId    `json:"primaryWorkbookId,omitempty" url:"primaryWorkbookId,omitempty"`
 	// Metadata for the space
-	Metadata         interface{}   `json:"metadata,omitempty" url:"metadata,omitempty"`
-	Actions          []*Action     `json:"actions,omitempty" url:"actions,omitempty"`
-	Access           []SpaceAccess `json:"access,omitempty" url:"access,omitempty"`
-	AutoConfigure    *bool         `json:"autoConfigure,omitempty" url:"autoConfigure,omitempty"`
-	Namespace        *string       `json:"namespace,omitempty" url:"namespace,omitempty"`
-	Labels           []string      `json:"labels,omitempty" url:"labels,omitempty"`
-	TranslationsPath *string       `json:"translationsPath,omitempty" url:"translationsPath,omitempty"`
-	LanguageOverride *string       `json:"languageOverride,omitempty" url:"languageOverride,omitempty"`
+	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
+	// The Space settings.
+	Settings         *SpaceSettings `json:"settings,omitempty" url:"settings,omitempty"`
+	Actions          []*Action      `json:"actions,omitempty" url:"actions,omitempty"`
+	Access           []SpaceAccess  `json:"access,omitempty" url:"access,omitempty"`
+	AutoConfigure    *bool          `json:"autoConfigure,omitempty" url:"autoConfigure,omitempty"`
+	Namespace        *string        `json:"namespace,omitempty" url:"namespace,omitempty"`
+	Labels           []string       `json:"labels,omitempty" url:"labels,omitempty"`
+	TranslationsPath *string        `json:"translationsPath,omitempty" url:"translationsPath,omitempty"`
+	LanguageOverride *string        `json:"languageOverride,omitempty" url:"languageOverride,omitempty"`
 	// Date when space was archived
 	ArchivedAt *time.Time `json:"archivedAt,omitempty" url:"archivedAt,omitempty"`
 	// The ID of the App that space is associated with

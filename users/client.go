@@ -84,7 +84,7 @@ func (c *Client) CreateAndInvite(
 	ctx context.Context,
 	request *flatfilego.UserCreateAndInviteRequest,
 	opts ...option.RequestOption,
-) (*flatfilego.UserResponse, error) {
+) (*flatfilego.UserWithRolesResponse, error) {
 	options := core.NewRequestOptions(opts...)
 
 	baseURL := "https://api.x.flatfile.com/v1"
@@ -98,7 +98,7 @@ func (c *Client) CreateAndInvite(
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
-	var response *flatfilego.UserResponse
+	var response *flatfilego.UserWithRolesResponse
 	if err := c.caller.Call(
 		ctx,
 		&core.CallParams{
@@ -181,6 +181,43 @@ func (c *Client) Get(
 		&core.CallParams{
 			URL:         endpointURL,
 			Method:      http.MethodGet,
+			MaxAttempts: options.MaxAttempts,
+			Headers:     headers,
+			Client:      options.HTTPClient,
+			Response:    &response,
+		},
+	); err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
+// Deletes a user
+func (c *Client) Delete(
+	ctx context.Context,
+	// The user id
+	userId flatfilego.UserId,
+	opts ...option.RequestOption,
+) (*flatfilego.Success, error) {
+	options := core.NewRequestOptions(opts...)
+
+	baseURL := "https://api.x.flatfile.com/v1"
+	if c.baseURL != "" {
+		baseURL = c.baseURL
+	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := fmt.Sprintf(baseURL+"/"+"users/%v", userId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
+
+	var response *flatfilego.Success
+	if err := c.caller.Call(
+		ctx,
+		&core.CallParams{
+			URL:         endpointURL,
+			Method:      http.MethodDelete,
 			MaxAttempts: options.MaxAttempts,
 			Headers:     headers,
 			Client:      options.HTTPClient,

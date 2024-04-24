@@ -102,6 +102,7 @@ func (c *Client) CreateMappingProgram(
 // Deletes all history for the authenticated user
 func (c *Client) DeleteAllHistoryForUser(
 	ctx context.Context,
+	request *flatfilego.DeleteAllHistoryForUserRequest,
 	opts ...option.RequestOption,
 ) (*flatfilego.Success, error) {
 	options := core.NewRequestOptions(opts...)
@@ -152,6 +153,7 @@ func (c *Client) DeleteAllHistoryForUser(
 			MaxAttempts:  options.MaxAttempts,
 			Headers:      headers,
 			Client:       options.HTTPClient,
+			Request:      request,
 			Response:     &response,
 			ErrorDecoder: errorDecoder,
 		},

@@ -77,6 +77,34 @@ func (a *Action) String() string {
 	return fmt.Sprintf("%#v", a)
 }
 
+type FileOrigin string
+
+const (
+	FileOriginFilesystem  FileOrigin = "filesystem"
+	FileOriginGoogledrive FileOrigin = "googledrive"
+	FileOriginBox         FileOrigin = "box"
+	FileOriginOnedrive    FileOrigin = "onedrive"
+)
+
+func NewFileOriginFromString(s string) (FileOrigin, error) {
+	switch s {
+	case "filesystem":
+		return FileOriginFilesystem, nil
+	case "googledrive":
+		return FileOriginGoogledrive, nil
+	case "box":
+		return FileOriginBox, nil
+	case "onedrive":
+		return FileOriginOnedrive, nil
+	}
+	var t FileOrigin
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (f FileOrigin) Ptr() *FileOrigin {
+	return &f
+}
+
 type FileResponse struct {
 	Data *File `json:"data,omitempty" url:"data,omitempty"`
 
@@ -208,4 +236,6 @@ type CreateFileRequest struct {
 	Mode *Mode `json:"mode,omitempty" url:"mode,omitempty"`
 	// The actions attached to the file
 	Actions []*Action `json:"actions,omitempty" url:"actions,omitempty"`
+	// The origin of the file, ie filesystem
+	Origin *FileOrigin `json:"origin,omitempty" url:"origin,omitempty"`
 }

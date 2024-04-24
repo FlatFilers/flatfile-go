@@ -18,8 +18,9 @@ type GetFieldValuesRequest struct {
 	// Number of records to return in a page (default 1000 if pageNumber included)
 	PageSize *PageSize `json:"-" url:"pageSize,omitempty"`
 	// Based on pageSize, which page of records to return
-	PageNumber    *PageNumber    `json:"-" url:"pageNumber,omitempty"`
-	Distinct      *Distinct      `json:"-" url:"distinct,omitempty"`
+	PageNumber *PageNumber `json:"-" url:"pageNumber,omitempty"`
+	// Must be set to true
+	Distinct      Distinct       `json:"-" url:"distinct"`
 	IncludeCounts *IncludeCounts `json:"-" url:"includeCounts,omitempty"`
 	// A value to find for a given field in a sheet. Wrap the value in "" for exact match
 	SearchValue *SearchValue `json:"-" url:"searchValue,omitempty"`

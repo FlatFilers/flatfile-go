@@ -106,6 +106,35 @@ func (u *UserCreateAndInviteRequest) String() string {
 	return fmt.Sprintf("%#v", u)
 }
 
+type UserWithRolesResponse struct {
+	Data *UserWithRoles `json:"data,omitempty" url:"data,omitempty"`
+
+	_rawJSON json.RawMessage
+}
+
+func (u *UserWithRolesResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler UserWithRolesResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*u = UserWithRolesResponse(value)
+	u._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (u *UserWithRolesResponse) String() string {
+	if len(u._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(u._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(u); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", u)
+}
+
 type UpdateUserRequest struct {
 	Name      *string `json:"name,omitempty" url:"name,omitempty"`
 	Dashboard *int    `json:"dashboard,omitempty" url:"dashboard,omitempty"`
