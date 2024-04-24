@@ -27,6 +27,7 @@ import (
 	spaces "github.com/FlatFilers/flatfile-go/spaces"
 	users "github.com/FlatFilers/flatfile-go/users"
 	versions "github.com/FlatFilers/flatfile-go/versions"
+	views "github.com/FlatFilers/flatfile-go/views"
 	workbooks "github.com/FlatFilers/flatfile-go/workbooks"
 	http "net/http"
 )
@@ -58,6 +59,7 @@ type Client struct {
 	Spaces                *spaces.Client
 	Users                 *users.Client
 	Versions              *versions.Client
+	Views                 *views.Client
 	Workbooks             *workbooks.Client
 }
 
@@ -94,6 +96,7 @@ func NewClient(opts ...option.RequestOption) *Client {
 		Spaces:                spaces.NewClient(opts...),
 		Users:                 users.NewClient(opts...),
 		Versions:              versions.NewClient(opts...),
+		Views:                 views.NewClient(opts...),
 		Workbooks:             workbooks.NewClient(opts...),
 	}
 }
