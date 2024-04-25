@@ -5581,6 +5581,49 @@ func (d *DateProperty) String() string {
 	return fmt.Sprintf("%#v", d)
 }
 
+// Defines an array of values selected from an enumerated list of options. Matching tooling attempts to resolve incoming data assigment to a valid option. The maximum number of items that can be in this list is `100`.
+type EnumListProperty struct {
+	Key string `json:"key" url:"key"`
+	// User friendly field name
+	Label *string `json:"label,omitempty" url:"label,omitempty"`
+	// A short description of the field. Markdown syntax is supported.
+	Description *string          `json:"description,omitempty" url:"description,omitempty"`
+	Constraints []*Constraint    `json:"constraints,omitempty" url:"constraints,omitempty"`
+	Readonly    *bool            `json:"readonly,omitempty" url:"readonly,omitempty"`
+	Appearance  *FieldAppearance `json:"appearance,omitempty" url:"appearance,omitempty"`
+	// Useful for any contextual metadata regarding the schema. Store any valid json here.
+	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
+	// A unique presentation for a field in the UI.
+	Treatments       []string            `json:"treatments,omitempty" url:"treatments,omitempty"`
+	AlternativeNames []string            `json:"alternativeNames,omitempty" url:"alternativeNames,omitempty"`
+	Config           *EnumPropertyConfig `json:"config,omitempty" url:"config,omitempty"`
+
+	_rawJSON json.RawMessage
+}
+
+func (e *EnumListProperty) UnmarshalJSON(data []byte) error {
+	type unmarshaler EnumListProperty
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = EnumListProperty(value)
+	e._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (e *EnumListProperty) String() string {
+	if len(e._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
 // Defines an enumerated list of options for the user to select from. Matching tooling attempts to resolve incoming data assigment to a valid option. The maximum number of options for this list is `100`. For larger lists, users should use the reference or future `lookup` types.
 type EnumProperty struct {
 	Key string `json:"key" url:"key"`
@@ -6029,6 +6072,48 @@ func NewStringConfigOptionsFromString(s string) (StringConfigOptions, error) {
 
 func (s StringConfigOptions) Ptr() *StringConfigOptions {
 	return &s
+}
+
+// Defines a property that should be stored and read as an array of strings. Database engines should expect any number of items to be provided here. The maximum number of items that can be in this list is `100`.
+type StringListProperty struct {
+	Key string `json:"key" url:"key"`
+	// User friendly field name
+	Label *string `json:"label,omitempty" url:"label,omitempty"`
+	// A short description of the field. Markdown syntax is supported.
+	Description *string          `json:"description,omitempty" url:"description,omitempty"`
+	Constraints []*Constraint    `json:"constraints,omitempty" url:"constraints,omitempty"`
+	Readonly    *bool            `json:"readonly,omitempty" url:"readonly,omitempty"`
+	Appearance  *FieldAppearance `json:"appearance,omitempty" url:"appearance,omitempty"`
+	// Useful for any contextual metadata regarding the schema. Store any valid json here.
+	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
+	// A unique presentation for a field in the UI.
+	Treatments       []string `json:"treatments,omitempty" url:"treatments,omitempty"`
+	AlternativeNames []string `json:"alternativeNames,omitempty" url:"alternativeNames,omitempty"`
+
+	_rawJSON json.RawMessage
+}
+
+func (s *StringListProperty) UnmarshalJSON(data []byte) error {
+	type unmarshaler StringListProperty
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = StringListProperty(value)
+	s._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *StringListProperty) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
 }
 
 // Defines a property that should be stored and read as a basic string. Database engines should expect any length of text to be provided here unless explicitly defined in the config.
