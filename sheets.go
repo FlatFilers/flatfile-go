@@ -397,3 +397,38 @@ func (s *SheetResponse) String() string {
 	}
 	return fmt.Sprintf("%#v", s)
 }
+
+// Changes to make to an existing sheet
+type SheetUpdateRequest struct {
+	// The name of the Sheet.
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
+	// The slug of the Sheet.
+	Slug *string `json:"slug,omitempty" url:"slug,omitempty"`
+	// Useful for any contextual metadata regarding the sheet. Store any valid json
+	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
+
+	_rawJSON json.RawMessage
+}
+
+func (s *SheetUpdateRequest) UnmarshalJSON(data []byte) error {
+	type unmarshaler SheetUpdateRequest
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SheetUpdateRequest(value)
+	s._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *SheetUpdateRequest) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}

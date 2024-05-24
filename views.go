@@ -11,6 +11,10 @@ import (
 type ListViewsRequest struct {
 	// The associated sheet ID of the view.
 	SheetId SheetId `json:"-" url:"sheetId"`
+	// Number of prompts to return in a page (default 10)
+	PageSize *int `json:"-" url:"pageSize,omitempty"`
+	// Based on pageSize, which page of prompts to return
+	PageNumber *int `json:"-" url:"pageNumber,omitempty"`
 }
 
 // View ID

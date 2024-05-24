@@ -13,6 +13,11 @@ type DeleteAllHistoryForUserRequest struct {
 	EnvironmentId *EnvironmentId `json:"environmentId,omitempty" url:"environmentId,omitempty"`
 }
 
+type DeleteMultipleRulesRequest struct {
+	// Array of rule IDs to be deleted
+	RuleIds []MappingId `json:"ruleIds,omitempty" url:"ruleIds,omitempty"`
+}
+
 type ListProgramsRequest struct {
 	// Number of programs to return in a page (default 10)
 	PageSize *int `json:"-" url:"pageSize,omitempty"`

@@ -74,7 +74,7 @@ func (d *DocumentResponse) String() string {
 }
 
 type ListDocumentsResponse struct {
-	Data []*DocumentResponse `json:"data,omitempty" url:"data,omitempty"`
+	Data []*Document `json:"data,omitempty" url:"data,omitempty"`
 
 	_rawJSON json.RawMessage
 }

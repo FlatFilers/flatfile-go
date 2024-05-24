@@ -158,3 +158,32 @@ func (a *AppsResponse) String() string {
 	}
 	return fmt.Sprintf("%#v", a)
 }
+
+type SuccessResponse struct {
+	Success bool `json:"success" url:"success"`
+
+	_rawJSON json.RawMessage
+}
+
+func (s *SuccessResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler SuccessResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SuccessResponse(value)
+	s._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *SuccessResponse) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}

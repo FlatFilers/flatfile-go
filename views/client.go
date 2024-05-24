@@ -35,7 +35,7 @@ func NewClient(opts ...option.RequestOption) *Client {
 	}
 }
 
-// Returns all views for user and sheet
+// Returns all views for the sheet
 func (c *Client) List(
 	ctx context.Context,
 	request *flatfilego.ListViewsRequest,

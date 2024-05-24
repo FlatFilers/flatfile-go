@@ -181,6 +181,8 @@ type JobConfig struct {
 	PartExecution *JobPartExecution `json:"partExecution,omitempty" url:"partExecution,omitempty"`
 	// The id of the parent job
 	ParentId *JobId `json:"parentId,omitempty" url:"parentId,omitempty"`
+	// The ids of the jobs that must complete before this job can start
+	PredecessorIds []JobId `json:"predecessorIds,omitempty" url:"predecessorIds,omitempty"`
 
 	_rawJSON json.RawMessage
 }

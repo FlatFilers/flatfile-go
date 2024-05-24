@@ -1151,6 +1151,9 @@ func (i InputFormType) Ptr() *InputFormType {
 	return &i
 }
 
+// A JSONPath string - https://www.rfc-editor.org/rfc/rfc9535
+type JsonPathString = string
+
 // Based on pageSize, which page of records to return
 type PageNumber = int
 
@@ -1614,15 +1617,16 @@ func (c *Context) String() string {
 type Domain string
 
 const (
-	DomainFile     Domain = "file"
-	DomainSpace    Domain = "space"
-	DomainWorkbook Domain = "workbook"
-	DomainJob      Domain = "job"
-	DomainDocument Domain = "document"
-	DomainSheet    Domain = "sheet"
-	DomainProgram  Domain = "program"
-	DomainSecret   Domain = "secret"
-	DomainCron     Domain = "cron"
+	DomainFile        Domain = "file"
+	DomainSpace       Domain = "space"
+	DomainWorkbook    Domain = "workbook"
+	DomainJob         Domain = "job"
+	DomainDocument    Domain = "document"
+	DomainSheet       Domain = "sheet"
+	DomainProgram     Domain = "program"
+	DomainSecret      Domain = "secret"
+	DomainCron        Domain = "cron"
+	DomainEnvironment Domain = "environment"
 )
 
 func NewDomainFromString(s string) (Domain, error) {
@@ -1645,6 +1649,8 @@ func NewDomainFromString(s string) (Domain, error) {
 		return DomainSecret, nil
 	case "cron":
 		return DomainCron, nil
+	case "environment":
+		return DomainEnvironment, nil
 	}
 	var t Domain
 	return "", fmt.Errorf("%s is not a valid %T", s, t)
@@ -1704,6 +1710,9 @@ type Event struct {
 	SecretUpdated          *GenericEvent
 	SecretDeleted          *GenericEvent
 	LayerCreated           *GenericEvent
+	EnvironmentCreated     *GenericEvent
+	EnvironmentUpdated     *GenericEvent
+	EnvironmentDeleted     *GenericEvent
 }
 
 func NewEventFromAgentCreated(value *GenericEvent) *Event {
@@ -1892,6 +1901,18 @@ func NewEventFromSecretDeleted(value *GenericEvent) *Event {
 
 func NewEventFromLayerCreated(value *GenericEvent) *Event {
 	return &Event{Topic: "layerCreated", LayerCreated: value}
+}
+
+func NewEventFromEnvironmentCreated(value *GenericEvent) *Event {
+	return &Event{Topic: "environmentCreated", EnvironmentCreated: value}
+}
+
+func NewEventFromEnvironmentUpdated(value *GenericEvent) *Event {
+	return &Event{Topic: "environmentUpdated", EnvironmentUpdated: value}
+}
+
+func NewEventFromEnvironmentDeleted(value *GenericEvent) *Event {
+	return &Event{Topic: "environmentDeleted", EnvironmentDeleted: value}
 }
 
 func (e *Event) UnmarshalJSON(data []byte) error {
@@ -2185,6 +2206,24 @@ func (e *Event) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		e.LayerCreated = value
+	case "environmentCreated":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.EnvironmentCreated = value
+	case "environmentUpdated":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.EnvironmentUpdated = value
+	case "environmentDeleted":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.EnvironmentDeleted = value
 	}
 	return nil
 }
@@ -2616,6 +2655,33 @@ func (e Event) MarshalJSON() ([]byte, error) {
 			GenericEvent: e.LayerCreated,
 		}
 		return json.Marshal(marshaler)
+	case "environmentCreated":
+		var marshaler = struct {
+			Topic string `json:"topic"`
+			*GenericEvent
+		}{
+			Topic:        e.Topic,
+			GenericEvent: e.EnvironmentCreated,
+		}
+		return json.Marshal(marshaler)
+	case "environmentUpdated":
+		var marshaler = struct {
+			Topic string `json:"topic"`
+			*GenericEvent
+		}{
+			Topic:        e.Topic,
+			GenericEvent: e.EnvironmentUpdated,
+		}
+		return json.Marshal(marshaler)
+	case "environmentDeleted":
+		var marshaler = struct {
+			Topic string `json:"topic"`
+			*GenericEvent
+		}{
+			Topic:        e.Topic,
+			GenericEvent: e.EnvironmentDeleted,
+		}
+		return json.Marshal(marshaler)
 	}
 }
 
@@ -2667,6 +2733,9 @@ type EventVisitor interface {
 	VisitSecretUpdated(*GenericEvent) error
 	VisitSecretDeleted(*GenericEvent) error
 	VisitLayerCreated(*GenericEvent) error
+	VisitEnvironmentCreated(*GenericEvent) error
+	VisitEnvironmentUpdated(*GenericEvent) error
+	VisitEnvironmentDeleted(*GenericEvent) error
 }
 
 func (e *Event) Accept(visitor EventVisitor) error {
@@ -2767,6 +2836,12 @@ func (e *Event) Accept(visitor EventVisitor) error {
 		return visitor.VisitSecretDeleted(e.SecretDeleted)
 	case "layerCreated":
 		return visitor.VisitLayerCreated(e.LayerCreated)
+	case "environmentCreated":
+		return visitor.VisitEnvironmentCreated(e.EnvironmentCreated)
+	case "environmentUpdated":
+		return visitor.VisitEnvironmentUpdated(e.EnvironmentUpdated)
+	case "environmentDeleted":
+		return visitor.VisitEnvironmentDeleted(e.EnvironmentDeleted)
 	}
 }
 
@@ -3403,7 +3478,9 @@ func (c *CollectionJobSubject) String() string {
 
 // The configuration for a delete job
 type DeleteRecordsJobConfig struct {
-	Filter      *Filter      `json:"filter,omitempty" url:"filter,omitempty"`
+	// Options to filter records (default=none)
+	Filter *Filter `json:"filter,omitempty" url:"filter,omitempty"`
+	// Use this to narrow the valid/error filter results to a specific field (Requires filter to be set)
 	FilterField *FilterField `json:"filterField,omitempty" url:"filterField,omitempty"`
 	SearchValue *SearchValue `json:"searchValue,omitempty" url:"searchValue,omitempty"`
 	SearchField *SearchField `json:"searchField,omitempty" url:"searchField,omitempty"`
@@ -3857,7 +3934,9 @@ type Job struct {
 	PartExecution *JobPartExecution `json:"partExecution,omitempty" url:"partExecution,omitempty"`
 	// The id of the parent job
 	ParentId *JobId `json:"parentId,omitempty" url:"parentId,omitempty"`
-	Id       JobId  `json:"id" url:"id"`
+	// The ids of the jobs that must complete before this job can start
+	PredecessorIds []JobId `json:"predecessorIds,omitempty" url:"predecessorIds,omitempty"`
+	Id             JobId   `json:"id" url:"id"`
 	// Date the item was created
 	CreatedAt time.Time `json:"createdAt" url:"createdAt"`
 	// Date the item was last updated
@@ -4064,9 +4143,11 @@ type JobOutcomeNext struct {
 	Id       *JobOutcomeNextId
 	Url      *JobOutcomeNextUrl
 	Download *JobOutcomeNextDownload
+	Files    *JobOutcomeNextFiles
 	Wait     *JobOutcomeNextWait
 	Snapshot *JobOutcomeNextSnapshot
 	Retry    *JobOutcomeNextRetry
+	View     *JobOutcomeNextView
 }
 
 func NewJobOutcomeNextFromId(value *JobOutcomeNextId) *JobOutcomeNext {
@@ -4081,6 +4162,10 @@ func NewJobOutcomeNextFromDownload(value *JobOutcomeNextDownload) *JobOutcomeNex
 	return &JobOutcomeNext{Type: "download", Download: value}
 }
 
+func NewJobOutcomeNextFromFiles(value *JobOutcomeNextFiles) *JobOutcomeNext {
+	return &JobOutcomeNext{Type: "files", Files: value}
+}
+
 func NewJobOutcomeNextFromWait(value *JobOutcomeNextWait) *JobOutcomeNext {
 	return &JobOutcomeNext{Type: "wait", Wait: value}
 }
@@ -4091,6 +4176,10 @@ func NewJobOutcomeNextFromSnapshot(value *JobOutcomeNextSnapshot) *JobOutcomeNex
 
 func NewJobOutcomeNextFromRetry(value *JobOutcomeNextRetry) *JobOutcomeNext {
 	return &JobOutcomeNext{Type: "retry", Retry: value}
+}
+
+func NewJobOutcomeNextFromView(value *JobOutcomeNextView) *JobOutcomeNext {
+	return &JobOutcomeNext{Type: "view", View: value}
 }
 
 func (j *JobOutcomeNext) UnmarshalJSON(data []byte) error {
@@ -4120,6 +4209,12 @@ func (j *JobOutcomeNext) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		j.Download = value
+	case "files":
+		value := new(JobOutcomeNextFiles)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		j.Files = value
 	case "wait":
 		value := new(JobOutcomeNextWait)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -4138,6 +4233,12 @@ func (j *JobOutcomeNext) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		j.Retry = value
+	case "view":
+		value := new(JobOutcomeNextView)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		j.View = value
 	}
 	return nil
 }
@@ -4173,6 +4274,15 @@ func (j JobOutcomeNext) MarshalJSON() ([]byte, error) {
 			JobOutcomeNextDownload: j.Download,
 		}
 		return json.Marshal(marshaler)
+	case "files":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*JobOutcomeNextFiles
+		}{
+			Type:                j.Type,
+			JobOutcomeNextFiles: j.Files,
+		}
+		return json.Marshal(marshaler)
 	case "wait":
 		var marshaler = struct {
 			Type string `json:"type"`
@@ -4200,6 +4310,15 @@ func (j JobOutcomeNext) MarshalJSON() ([]byte, error) {
 			JobOutcomeNextRetry: j.Retry,
 		}
 		return json.Marshal(marshaler)
+	case "view":
+		var marshaler = struct {
+			Type string `json:"type"`
+			*JobOutcomeNextView
+		}{
+			Type:               j.Type,
+			JobOutcomeNextView: j.View,
+		}
+		return json.Marshal(marshaler)
 	}
 }
 
@@ -4207,9 +4326,11 @@ type JobOutcomeNextVisitor interface {
 	VisitId(*JobOutcomeNextId) error
 	VisitUrl(*JobOutcomeNextUrl) error
 	VisitDownload(*JobOutcomeNextDownload) error
+	VisitFiles(*JobOutcomeNextFiles) error
 	VisitWait(*JobOutcomeNextWait) error
 	VisitSnapshot(*JobOutcomeNextSnapshot) error
 	VisitRetry(*JobOutcomeNextRetry) error
+	VisitView(*JobOutcomeNextView) error
 }
 
 func (j *JobOutcomeNext) Accept(visitor JobOutcomeNextVisitor) error {
@@ -4222,12 +4343,16 @@ func (j *JobOutcomeNext) Accept(visitor JobOutcomeNextVisitor) error {
 		return visitor.VisitUrl(j.Url)
 	case "download":
 		return visitor.VisitDownload(j.Download)
+	case "files":
+		return visitor.VisitFiles(j.Files)
 	case "wait":
 		return visitor.VisitWait(j.Wait)
 	case "snapshot":
 		return visitor.VisitSnapshot(j.Snapshot)
 	case "retry":
 		return visitor.VisitRetry(j.Retry)
+	case "view":
+		return visitor.VisitView(j.View)
 	}
 }
 
@@ -4251,6 +4376,66 @@ func (j *JobOutcomeNextDownload) UnmarshalJSON(data []byte) error {
 }
 
 func (j *JobOutcomeNextDownload) String() string {
+	if len(j._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(j); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", j)
+}
+
+type JobOutcomeNextFileObject struct {
+	FileId string  `json:"fileId" url:"fileId"`
+	Label  *string `json:"label,omitempty" url:"label,omitempty"`
+
+	_rawJSON json.RawMessage
+}
+
+func (j *JobOutcomeNextFileObject) UnmarshalJSON(data []byte) error {
+	type unmarshaler JobOutcomeNextFileObject
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*j = JobOutcomeNextFileObject(value)
+	j._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (j *JobOutcomeNextFileObject) String() string {
+	if len(j._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(j); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", j)
+}
+
+type JobOutcomeNextFiles struct {
+	Files []*JobOutcomeNextFileObject `json:"files,omitempty" url:"files,omitempty"`
+	Label *string                     `json:"label,omitempty" url:"label,omitempty"`
+
+	_rawJSON json.RawMessage
+}
+
+func (j *JobOutcomeNextFiles) UnmarshalJSON(data []byte) error {
+	type unmarshaler JobOutcomeNextFiles
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*j = JobOutcomeNextFiles(value)
+	j._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (j *JobOutcomeNextFiles) String() string {
 	if len(j._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
 			return value
@@ -4372,6 +4557,38 @@ func (j *JobOutcomeNextUrl) UnmarshalJSON(data []byte) error {
 }
 
 func (j *JobOutcomeNextUrl) String() string {
+	if len(j._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(j); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", j)
+}
+
+type JobOutcomeNextView struct {
+	SheetId string `json:"sheetId" url:"sheetId"`
+	// An array of field keys from the sheet
+	HiddenColumns []string `json:"hiddenColumns,omitempty" url:"hiddenColumns,omitempty"`
+	Label         *string  `json:"label,omitempty" url:"label,omitempty"`
+
+	_rawJSON json.RawMessage
+}
+
+func (j *JobOutcomeNextView) UnmarshalJSON(data []byte) error {
+	type unmarshaler JobOutcomeNextView
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*j = JobOutcomeNextView(value)
+	j._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (j *JobOutcomeNextView) String() string {
 	if len(j._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
 			return value
@@ -4542,6 +4759,7 @@ const (
 	JobStatusComplete  JobStatus = "complete"
 	JobStatusFailed    JobStatus = "failed"
 	JobStatusCanceled  JobStatus = "canceled"
+	JobStatusWaiting   JobStatus = "waiting"
 )
 
 func NewJobStatusFromString(s string) (JobStatus, error) {
@@ -4562,6 +4780,8 @@ func NewJobStatusFromString(s string) (JobStatus, error) {
 		return JobStatusFailed, nil
 	case "canceled":
 		return JobStatusCanceled, nil
+	case "waiting":
+		return JobStatusWaiting, nil
 	}
 	var t JobStatus
 	return "", fmt.Errorf("%s is not a valid %T", s, t)
@@ -6803,9 +7023,12 @@ type RecordsWithLinks = []*RecordWithLinks
 
 // Record data validation messages
 type ValidationMessage struct {
+	Field   *string           `json:"field,omitempty" url:"field,omitempty"`
 	Type    *ValidationType   `json:"type,omitempty" url:"type,omitempty"`
 	Source  *ValidationSource `json:"source,omitempty" url:"source,omitempty"`
 	Message *string           `json:"message,omitempty" url:"message,omitempty"`
+	// This JSONPath is based on the root of mapped cell object.
+	Path *JsonPathString `json:"path,omitempty" url:"path,omitempty"`
 
 	_rawJSON json.RawMessage
 }
@@ -7554,6 +7777,8 @@ type Sheet struct {
 	Slug string `json:"slug" url:"slug"`
 	// Describes shape of data as well as behavior
 	Config *SheetConfig `json:"config,omitempty" url:"config,omitempty"`
+	// Useful for any contextual metadata regarding the sheet. Store any valid json
+	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
 	// The scoped namespace of the Sheet.
 	Namespace *string `json:"namespace,omitempty" url:"namespace,omitempty"`
 	// The actor who locked the Sheet.
@@ -7726,6 +7951,8 @@ type SheetConfigOrUpdate struct {
 	WorkbookId *WorkbookId `json:"workbookId,omitempty" url:"workbookId,omitempty"`
 	// Describes shape of data as well as behavior.
 	Config *SheetConfig `json:"config,omitempty" url:"config,omitempty"`
+	// Useful for any contextual metadata regarding the sheet. Store any valid json
+	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
 	// The scoped namespace of the Sheet.
 	Namespace *string `json:"namespace,omitempty" url:"namespace,omitempty"`
 	// Date the sheet was last updated
@@ -7916,6 +8143,8 @@ type SheetUpdate struct {
 	WorkbookId *WorkbookId `json:"workbookId,omitempty" url:"workbookId,omitempty"`
 	// Describes shape of data as well as behavior.
 	Config *SheetConfig `json:"config,omitempty" url:"config,omitempty"`
+	// Useful for any contextual metadata regarding the sheet. Store any valid json
+	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
 	// The scoped namespace of the Sheet.
 	Namespace *string `json:"namespace,omitempty" url:"namespace,omitempty"`
 	// Date the sheet was last updated
@@ -8157,9 +8386,10 @@ func (e *EventTokenResponse) String() string {
 }
 
 type InternalSpaceConfigBase struct {
-	SpaceConfigId     *SpaceConfigId `json:"spaceConfigId,omitempty" url:"spaceConfigId,omitempty"`
-	EnvironmentId     *EnvironmentId `json:"environmentId,omitempty" url:"environmentId,omitempty"`
-	PrimaryWorkbookId *WorkbookId    `json:"primaryWorkbookId,omitempty" url:"primaryWorkbookId,omitempty"`
+	SpaceConfigId *SpaceConfigId `json:"spaceConfigId,omitempty" url:"spaceConfigId,omitempty"`
+	EnvironmentId *EnvironmentId `json:"environmentId,omitempty" url:"environmentId,omitempty"`
+	// The ID of the primary workbook for the space. This should not be included in create space requests.
+	PrimaryWorkbookId *WorkbookId `json:"primaryWorkbookId,omitempty" url:"primaryWorkbookId,omitempty"`
 	// Metadata for the space
 	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
 	// The Space settings.
@@ -8222,9 +8452,10 @@ func (i *InternalSpaceConfigBase) String() string {
 
 // A place to store your workbooks
 type Space struct {
-	SpaceConfigId     *SpaceConfigId `json:"spaceConfigId,omitempty" url:"spaceConfigId,omitempty"`
-	EnvironmentId     *EnvironmentId `json:"environmentId,omitempty" url:"environmentId,omitempty"`
-	PrimaryWorkbookId *WorkbookId    `json:"primaryWorkbookId,omitempty" url:"primaryWorkbookId,omitempty"`
+	SpaceConfigId *SpaceConfigId `json:"spaceConfigId,omitempty" url:"spaceConfigId,omitempty"`
+	EnvironmentId *EnvironmentId `json:"environmentId,omitempty" url:"environmentId,omitempty"`
+	// The ID of the primary workbook for the space. This should not be included in create space requests.
+	PrimaryWorkbookId *WorkbookId `json:"primaryWorkbookId,omitempty" url:"primaryWorkbookId,omitempty"`
 	// Metadata for the space
 	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
 	// The Space settings.
@@ -8683,6 +8914,8 @@ type View struct {
 	Name string `json:"name" url:"name"`
 	// The view filters of the view
 	Config *ViewConfig `json:"config,omitempty" url:"config,omitempty"`
+	// ID of the actor who created the view
+	CreatedBy string `json:"createdBy" url:"createdBy"`
 
 	_rawJSON json.RawMessage
 }

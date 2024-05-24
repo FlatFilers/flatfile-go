@@ -90,6 +90,9 @@ const (
 	EventTopicCronHourly             EventTopic = "cron:hourly"
 	EventTopicCronDaily              EventTopic = "cron:daily"
 	EventTopicCronWeekly             EventTopic = "cron:weekly"
+	EventTopicEnvironmentCreated     EventTopic = "environment:created"
+	EventTopicEnvironmentUpdated     EventTopic = "environment:updated"
+	EventTopicEnvironmentDeleted     EventTopic = "environment:deleted"
 )
 
 func NewEventTopicFromString(s string) (EventTopic, error) {
@@ -196,6 +199,12 @@ func NewEventTopicFromString(s string) (EventTopic, error) {
 		return EventTopicCronDaily, nil
 	case "cron:weekly":
 		return EventTopicCronWeekly, nil
+	case "environment:created":
+		return EventTopicEnvironmentCreated, nil
+	case "environment:updated":
+		return EventTopicEnvironmentUpdated, nil
+	case "environment:deleted":
+		return EventTopicEnvironmentDeleted, nil
 	}
 	var t EventTopic
 	return "", fmt.Errorf("%s is not a valid %T", s, t)
@@ -272,9 +281,10 @@ func (l *ListSpacesResponse) String() string {
 
 // Properties used to create a new Space
 type SpaceConfig struct {
-	SpaceConfigId     *SpaceConfigId `json:"spaceConfigId,omitempty" url:"spaceConfigId,omitempty"`
-	EnvironmentId     *EnvironmentId `json:"environmentId,omitempty" url:"environmentId,omitempty"`
-	PrimaryWorkbookId *WorkbookId    `json:"primaryWorkbookId,omitempty" url:"primaryWorkbookId,omitempty"`
+	SpaceConfigId *SpaceConfigId `json:"spaceConfigId,omitempty" url:"spaceConfigId,omitempty"`
+	EnvironmentId *EnvironmentId `json:"environmentId,omitempty" url:"environmentId,omitempty"`
+	// The ID of the primary workbook for the space. This should not be included in create space requests.
+	PrimaryWorkbookId *WorkbookId `json:"primaryWorkbookId,omitempty" url:"primaryWorkbookId,omitempty"`
 	// Metadata for the space
 	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
 	// The Space settings.

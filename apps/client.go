@@ -178,3 +178,40 @@ func (c *Client) Create(
 	}
 	return response, nil
 }
+
+// Deletes an app
+func (c *Client) Delete(
+	ctx context.Context,
+	// ID of app to delete
+	appId flatfilego.AppId,
+	opts ...option.RequestOption,
+) (*flatfilego.SuccessResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
+	baseURL := "https://api.x.flatfile.com/v1"
+	if c.baseURL != "" {
+		baseURL = c.baseURL
+	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := fmt.Sprintf(baseURL+"/"+"apps/%v", appId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
+
+	var response *flatfilego.SuccessResponse
+	if err := c.caller.Call(
+		ctx,
+		&core.CallParams{
+			URL:         endpointURL,
+			Method:      http.MethodDelete,
+			MaxAttempts: options.MaxAttempts,
+			Headers:     headers,
+			Client:      options.HTTPClient,
+			Response:    &response,
+		},
+	); err != nil {
+		return nil, err
+	}
+	return response, nil
+}
