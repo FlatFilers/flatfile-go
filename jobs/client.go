@@ -4,7 +4,6 @@ package jobs
 
 import (
 	context "context"
-	fmt "fmt"
 	flatfilego "github.com/FlatFilers/flatfile-go"
 	core "github.com/FlatFilers/flatfile-go/core"
 	option "github.com/FlatFilers/flatfile-go/option"
@@ -45,7 +44,7 @@ func (c *Client) List(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := baseURL + "/" + "jobs"
+	endpointURL := baseURL + "/jobs"
 
 	queryParams, err := core.QueryValues(request)
 	if err != nil {
@@ -88,7 +87,7 @@ func (c *Client) Create(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := baseURL + "/" + "jobs"
+	endpointURL := baseURL + "/jobs"
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -125,7 +124,7 @@ func (c *Client) Get(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"jobs/%v", jobId)
+	endpointURL := core.EncodeURL(baseURL+"/jobs/%v", jobId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -162,7 +161,7 @@ func (c *Client) Update(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"jobs/%v", jobId)
+	endpointURL := core.EncodeURL(baseURL+"/jobs/%v", jobId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -199,7 +198,7 @@ func (c *Client) Delete(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"jobs/%v", jobId)
+	endpointURL := core.EncodeURL(baseURL+"/jobs/%v", jobId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -236,7 +235,7 @@ func (c *Client) Execute(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"jobs/%v/execute", jobId)
+	endpointURL := core.EncodeURL(baseURL+"/jobs/%v/execute", jobId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -273,7 +272,7 @@ func (c *Client) GetExecutionPlan(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"jobs/%v/plan", jobId)
+	endpointURL := core.EncodeURL(baseURL+"/jobs/%v/plan", jobId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -311,7 +310,7 @@ func (c *Client) UpdateExecutionPlan(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"jobs/%v/plan", jobId)
+	endpointURL := core.EncodeURL(baseURL+"/jobs/%v/plan", jobId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -350,7 +349,7 @@ func (c *Client) UpdateExecutionPlanFields(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"jobs/%v/plan", jobId)
+	endpointURL := core.EncodeURL(baseURL+"/jobs/%v/plan", jobId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -389,7 +388,7 @@ func (c *Client) Ack(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"jobs/%v/ack", jobId)
+	endpointURL := core.EncodeURL(baseURL+"/jobs/%v/ack", jobId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -427,7 +426,7 @@ func (c *Client) AckOutcome(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"jobs/%v/outcome/ack", jobId)
+	endpointURL := core.EncodeURL(baseURL+"/jobs/%v/outcome/ack", jobId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -465,7 +464,7 @@ func (c *Client) Complete(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"jobs/%v/complete", jobId)
+	endpointURL := core.EncodeURL(baseURL+"/jobs/%v/complete", jobId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -504,7 +503,7 @@ func (c *Client) Fail(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"jobs/%v/fail", jobId)
+	endpointURL := core.EncodeURL(baseURL+"/jobs/%v/fail", jobId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -543,7 +542,7 @@ func (c *Client) Cancel(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"jobs/%v/cancel", jobId)
+	endpointURL := core.EncodeURL(baseURL+"/jobs/%v/cancel", jobId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -581,7 +580,7 @@ func (c *Client) Retry(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"jobs/%v/retry", jobId)
+	endpointURL := core.EncodeURL(baseURL+"/jobs/%v/retry", jobId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -617,7 +616,7 @@ func (c *Client) PreviewMutation(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := baseURL + "/" + "jobs/preview-mutation"
+	endpointURL := baseURL + "/jobs/preview-mutation"
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -656,7 +655,7 @@ func (c *Client) Split(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"jobs/%v/split", jobId)
+	endpointURL := core.EncodeURL(baseURL+"/jobs/%v/split", jobId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 

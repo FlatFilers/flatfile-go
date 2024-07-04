@@ -21,7 +21,12 @@ type SecretId = string
 type SecretsResponse struct {
 	Data []*Secret `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SecretsResponse) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
 }
 
 func (s *SecretsResponse) UnmarshalJSON(data []byte) error {
@@ -31,6 +36,13 @@ func (s *SecretsResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*s = SecretsResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
 	s._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -58,7 +70,12 @@ type WriteSecret struct {
 	// The Space of the secret.
 	SpaceId *SpaceId `json:"spaceId,omitempty" url:"spaceId,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (w *WriteSecret) GetExtraProperties() map[string]interface{} {
+	return w.extraProperties
 }
 
 func (w *WriteSecret) UnmarshalJSON(data []byte) error {
@@ -68,6 +85,13 @@ func (w *WriteSecret) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*w = WriteSecret(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *w)
+	if err != nil {
+		return err
+	}
+	w.extraProperties = extraProperties
+
 	w._rawJSON = json.RawMessage(data)
 	return nil
 }

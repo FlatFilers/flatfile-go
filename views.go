@@ -24,7 +24,12 @@ type ListViewsResponse struct {
 	Pagination *Pagination `json:"pagination,omitempty" url:"pagination,omitempty"`
 	Data       []*View     `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (l *ListViewsResponse) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
 }
 
 func (l *ListViewsResponse) UnmarshalJSON(data []byte) error {
@@ -34,6 +39,13 @@ func (l *ListViewsResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*l = ListViewsResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+
 	l._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -55,7 +67,12 @@ type ViewCreate struct {
 	Name    string      `json:"name" url:"name"`
 	Config  *ViewConfig `json:"config,omitempty" url:"config,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (v *ViewCreate) GetExtraProperties() map[string]interface{} {
+	return v.extraProperties
 }
 
 func (v *ViewCreate) UnmarshalJSON(data []byte) error {
@@ -65,6 +82,13 @@ func (v *ViewCreate) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*v = ViewCreate(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *v)
+	if err != nil {
+		return err
+	}
+	v.extraProperties = extraProperties
+
 	v._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -84,7 +108,12 @@ func (v *ViewCreate) String() string {
 type ViewResponse struct {
 	Data *View `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (v *ViewResponse) GetExtraProperties() map[string]interface{} {
+	return v.extraProperties
 }
 
 func (v *ViewResponse) UnmarshalJSON(data []byte) error {
@@ -94,6 +123,13 @@ func (v *ViewResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*v = ViewResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *v)
+	if err != nil {
+		return err
+	}
+	v.extraProperties = extraProperties
+
 	v._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -114,7 +150,12 @@ type ViewUpdate struct {
 	Name   *string     `json:"name,omitempty" url:"name,omitempty"`
 	Config *ViewConfig `json:"config,omitempty" url:"config,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (v *ViewUpdate) GetExtraProperties() map[string]interface{} {
+	return v.extraProperties
 }
 
 func (v *ViewUpdate) UnmarshalJSON(data []byte) error {
@@ -124,6 +165,13 @@ func (v *ViewUpdate) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*v = ViewUpdate(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *v)
+	if err != nil {
+		return err
+	}
+	v.extraProperties = extraProperties
+
 	v._rawJSON = json.RawMessage(data)
 	return nil
 }

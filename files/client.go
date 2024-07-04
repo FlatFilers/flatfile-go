@@ -7,7 +7,6 @@ import (
 	context "context"
 	json "encoding/json"
 	errors "errors"
-	fmt "fmt"
 	flatfilego "github.com/FlatFilers/flatfile-go"
 	core "github.com/FlatFilers/flatfile-go/core"
 	option "github.com/FlatFilers/flatfile-go/option"
@@ -50,7 +49,7 @@ func (c *Client) List(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := baseURL + "/" + "files"
+	endpointURL := baseURL + "/files"
 
 	queryParams, err := core.QueryValues(request)
 	if err != nil {
@@ -81,6 +80,7 @@ func (c *Client) List(
 
 func (c *Client) Upload(
 	ctx context.Context,
+	file io.Reader,
 	request *flatfilego.CreateFileRequest,
 	opts ...option.RequestOption,
 ) (*flatfilego.FileResponse, error) {
@@ -93,7 +93,7 @@ func (c *Client) Upload(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := baseURL + "/" + "files"
+	endpointURL := baseURL + "/files"
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -119,6 +119,17 @@ func (c *Client) Upload(
 	var response *flatfilego.FileResponse
 	requestBuffer := bytes.NewBuffer(nil)
 	writer := multipart.NewWriter(requestBuffer)
+	fileFilename := "file_filename"
+	if named, ok := file.(interface{ Name() string }); ok {
+		fileFilename = named.Name()
+	}
+	filePart, err := writer.CreateFormFile("file", fileFilename)
+	if err != nil {
+		return nil, err
+	}
+	if _, err := io.Copy(filePart, file); err != nil {
+		return nil, err
+	}
 	if err := core.WriteMultipartJSON(writer, "spaceId", request.SpaceId); err != nil {
 		return nil, err
 	}
@@ -177,7 +188,7 @@ func (c *Client) Get(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"files/%v", fileId)
+	endpointURL := core.EncodeURL(baseURL+"/files/%v", fileId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -239,7 +250,7 @@ func (c *Client) Delete(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"files/%v", fileId)
+	endpointURL := core.EncodeURL(baseURL+"/files/%v", fileId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -304,7 +315,7 @@ func (c *Client) Update(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"files/%v", fileId)
+	endpointURL := core.EncodeURL(baseURL+"/files/%v", fileId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -367,7 +378,7 @@ func (c *Client) Download(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"files/%v/download", fileId)
+	endpointURL := core.EncodeURL(baseURL+"/files/%v/download", fileId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 

@@ -4,7 +4,6 @@ package assistant
 
 import (
 	context "context"
-	fmt "fmt"
 	flatfilego "github.com/FlatFilers/flatfile-go"
 	core "github.com/FlatFilers/flatfile-go/core"
 	option "github.com/FlatFilers/flatfile-go/option"
@@ -46,7 +45,7 @@ func (c *Client) List(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := baseURL + "/" + "prompts"
+	endpointURL := baseURL + "/prompts"
 
 	queryParams, err := core.QueryValues(request)
 	if err != nil {
@@ -91,7 +90,7 @@ func (c *Client) Get(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"prompts/%v", promptId)
+	endpointURL := core.EncodeURL(baseURL+"/prompts/%v", promptId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -129,7 +128,7 @@ func (c *Client) Update(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"prompts/%v", promptId)
+	endpointURL := core.EncodeURL(baseURL+"/prompts/%v", promptId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -166,7 +165,7 @@ func (c *Client) Create(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := baseURL + "/" + "prompts"
+	endpointURL := baseURL + "/prompts"
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -204,7 +203,7 @@ func (c *Client) Delete(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"prompts/%v", promptId)
+	endpointURL := core.EncodeURL(baseURL+"/prompts/%v", promptId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 

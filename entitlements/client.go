@@ -49,7 +49,7 @@ func (c *Client) List(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := baseURL + "/" + "entitlements"
+	endpointURL := baseURL + "/entitlements"
 
 	queryParams, err := core.QueryValues(request)
 	if err != nil {

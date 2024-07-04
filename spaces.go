@@ -253,7 +253,12 @@ type ListSpacesResponse struct {
 	Pagination *Pagination `json:"pagination,omitempty" url:"pagination,omitempty"`
 	Data       []*Space    `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (l *ListSpacesResponse) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
 }
 
 func (l *ListSpacesResponse) UnmarshalJSON(data []byte) error {
@@ -263,6 +268,13 @@ func (l *ListSpacesResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*l = ListSpacesResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+
 	l._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -306,7 +318,12 @@ type SpaceConfig struct {
 	DisplayOrder        *int                      `json:"displayOrder,omitempty" url:"displayOrder,omitempty"`
 	GuestAuthentication []GuestAuthenticationEnum `json:"guestAuthentication,omitempty" url:"guestAuthentication,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SpaceConfig) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
 }
 
 func (s *SpaceConfig) UnmarshalJSON(data []byte) error {
@@ -322,6 +339,13 @@ func (s *SpaceConfig) UnmarshalJSON(data []byte) error {
 	}
 	*s = SpaceConfig(unmarshaler.embed)
 	s.ArchivedAt = unmarshaler.ArchivedAt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
 	s._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -353,7 +377,12 @@ func (s *SpaceConfig) String() string {
 type SpaceResponse struct {
 	Data *Space `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SpaceResponse) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
 }
 
 func (s *SpaceResponse) UnmarshalJSON(data []byte) error {
@@ -363,6 +392,13 @@ func (s *SpaceResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*s = SpaceResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
 	s._rawJSON = json.RawMessage(data)
 	return nil
 }

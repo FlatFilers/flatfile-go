@@ -34,7 +34,12 @@ type Environment struct {
 	Namespaces          []string                  `json:"namespaces,omitempty" url:"namespaces,omitempty"`
 	LanguageOverride    *string                   `json:"languageOverride,omitempty" url:"languageOverride,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *Environment) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
 }
 
 func (e *Environment) UnmarshalJSON(data []byte) error {
@@ -44,6 +49,13 @@ func (e *Environment) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*e = Environment(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
 	e._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -72,7 +84,12 @@ type EnvironmentConfigCreate struct {
 	Namespaces          []string                  `json:"namespaces,omitempty" url:"namespaces,omitempty"`
 	LanguageOverride    *string                   `json:"languageOverride,omitempty" url:"languageOverride,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *EnvironmentConfigCreate) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
 }
 
 func (e *EnvironmentConfigCreate) UnmarshalJSON(data []byte) error {
@@ -82,6 +99,13 @@ func (e *EnvironmentConfigCreate) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*e = EnvironmentConfigCreate(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
 	e._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -110,7 +134,12 @@ type EnvironmentConfigUpdate struct {
 	Namespaces          []string                  `json:"namespaces,omitempty" url:"namespaces,omitempty"`
 	LanguageOverride    *string                   `json:"languageOverride,omitempty" url:"languageOverride,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *EnvironmentConfigUpdate) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
 }
 
 func (e *EnvironmentConfigUpdate) UnmarshalJSON(data []byte) error {
@@ -120,6 +149,13 @@ func (e *EnvironmentConfigUpdate) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*e = EnvironmentConfigUpdate(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
 	e._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -139,7 +175,12 @@ func (e *EnvironmentConfigUpdate) String() string {
 type EnvironmentResponse struct {
 	Data *Environment `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *EnvironmentResponse) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
 }
 
 func (e *EnvironmentResponse) UnmarshalJSON(data []byte) error {
@@ -149,6 +190,13 @@ func (e *EnvironmentResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*e = EnvironmentResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
 	e._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -169,7 +217,12 @@ type ListEnvironmentsResponse struct {
 	Data       []*Environment `json:"data,omitempty" url:"data,omitempty"`
 	Pagination *Pagination    `json:"pagination,omitempty" url:"pagination,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (l *ListEnvironmentsResponse) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
 }
 
 func (l *ListEnvironmentsResponse) UnmarshalJSON(data []byte) error {
@@ -179,6 +232,13 @@ func (l *ListEnvironmentsResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*l = ListEnvironmentsResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+
 	l._rawJSON = json.RawMessage(data)
 	return nil
 }

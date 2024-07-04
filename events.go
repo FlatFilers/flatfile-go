@@ -38,7 +38,7 @@ type ListEventsRequest struct {
 // Properties used to create a new event
 type CreateEventConfig struct {
 	// The domain of the event
-	Domain Domain `json:"domain,omitempty" url:"domain,omitempty"`
+	Domain Domain `json:"domain" url:"domain"`
 	// The context of the event
 	Context *Context `json:"context,omitempty" url:"context,omitempty"`
 	// The attributes of the event
@@ -50,12 +50,17 @@ type CreateEventConfig struct {
 	Target     *string                `json:"target,omitempty" url:"target,omitempty"`
 	Origin     *Origin                `json:"origin,omitempty" url:"origin,omitempty"`
 	Namespaces []string               `json:"namespaces,omitempty" url:"namespaces,omitempty"`
-	Topic      EventTopic             `json:"topic,omitempty" url:"topic,omitempty"`
+	Topic      EventTopic             `json:"topic" url:"topic"`
 	Payload    map[string]interface{} `json:"payload,omitempty" url:"payload,omitempty"`
 	// Date the event was deleted
 	DeletedAt *time.Time `json:"deletedAt,omitempty" url:"deletedAt,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateEventConfig) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
 }
 
 func (c *CreateEventConfig) UnmarshalJSON(data []byte) error {
@@ -71,6 +76,13 @@ func (c *CreateEventConfig) UnmarshalJSON(data []byte) error {
 	}
 	*c = CreateEventConfig(unmarshaler.embed)
 	c.DeletedAt = unmarshaler.DeletedAt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
 	c._rawJSON = json.RawMessage(data)
 	return nil
 }

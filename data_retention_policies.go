@@ -17,11 +17,16 @@ type ListDataRetentionPoliciesRequest struct {
 type DataRetentionPolicyId = string
 
 type DataRetentionPolicyConfig struct {
-	Type          DataRetentionPolicyEnum `json:"type,omitempty" url:"type,omitempty"`
+	Type          DataRetentionPolicyEnum `json:"type" url:"type"`
 	Period        int                     `json:"period" url:"period"`
 	EnvironmentId EnvironmentId           `json:"environmentId" url:"environmentId"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (d *DataRetentionPolicyConfig) GetExtraProperties() map[string]interface{} {
+	return d.extraProperties
 }
 
 func (d *DataRetentionPolicyConfig) UnmarshalJSON(data []byte) error {
@@ -31,6 +36,13 @@ func (d *DataRetentionPolicyConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*d = DataRetentionPolicyConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *d)
+	if err != nil {
+		return err
+	}
+	d.extraProperties = extraProperties
+
 	d._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -50,7 +62,12 @@ func (d *DataRetentionPolicyConfig) String() string {
 type DataRetentionPolicyResponse struct {
 	Data *DataRetentionPolicy `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (d *DataRetentionPolicyResponse) GetExtraProperties() map[string]interface{} {
+	return d.extraProperties
 }
 
 func (d *DataRetentionPolicyResponse) UnmarshalJSON(data []byte) error {
@@ -60,6 +77,13 @@ func (d *DataRetentionPolicyResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*d = DataRetentionPolicyResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *d)
+	if err != nil {
+		return err
+	}
+	d.extraProperties = extraProperties
+
 	d._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -79,7 +103,12 @@ func (d *DataRetentionPolicyResponse) String() string {
 type ListDataRetentionPoliciesResponse struct {
 	Data []*DataRetentionPolicy `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (l *ListDataRetentionPoliciesResponse) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
 }
 
 func (l *ListDataRetentionPoliciesResponse) UnmarshalJSON(data []byte) error {
@@ -89,6 +118,13 @@ func (l *ListDataRetentionPoliciesResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*l = ListDataRetentionPoliciesResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+
 	l._rawJSON = json.RawMessage(data)
 	return nil
 }

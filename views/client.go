@@ -7,7 +7,6 @@ import (
 	context "context"
 	json "encoding/json"
 	errors "errors"
-	fmt "fmt"
 	flatfilego "github.com/FlatFilers/flatfile-go"
 	core "github.com/FlatFilers/flatfile-go/core"
 	option "github.com/FlatFilers/flatfile-go/option"
@@ -50,7 +49,7 @@ func (c *Client) List(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := baseURL + "/" + "views"
+	endpointURL := baseURL + "/views"
 
 	queryParams, err := core.QueryValues(request)
 	if err != nil {
@@ -121,7 +120,7 @@ func (c *Client) Create(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := baseURL + "/" + "views"
+	endpointURL := baseURL + "/views"
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -186,7 +185,7 @@ func (c *Client) Get(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"views/%v", viewId)
+	endpointURL := core.EncodeURL(baseURL+"/views/%v", viewId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -251,7 +250,7 @@ func (c *Client) Update(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"views/%v", viewId)
+	endpointURL := core.EncodeURL(baseURL+"/views/%v", viewId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -316,7 +315,7 @@ func (c *Client) Delete(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"views/%v", viewId)
+	endpointURL := core.EncodeURL(baseURL+"/views/%v", viewId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 

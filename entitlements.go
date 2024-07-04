@@ -16,7 +16,12 @@ type ListEntitlementsRequest struct {
 type ListEntitlementsResponse struct {
 	Data []*Entitlement `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (l *ListEntitlementsResponse) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
 }
 
 func (l *ListEntitlementsResponse) UnmarshalJSON(data []byte) error {
@@ -26,6 +31,13 @@ func (l *ListEntitlementsResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*l = ListEntitlementsResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+
 	l._rawJSON = json.RawMessage(data)
 	return nil
 }

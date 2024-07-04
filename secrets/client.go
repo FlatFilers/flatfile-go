@@ -7,7 +7,6 @@ import (
 	context "context"
 	json "encoding/json"
 	errors "errors"
-	fmt "fmt"
 	flatfilego "github.com/FlatFilers/flatfile-go"
 	core "github.com/FlatFilers/flatfile-go/core"
 	option "github.com/FlatFilers/flatfile-go/option"
@@ -50,7 +49,7 @@ func (c *Client) List(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := baseURL + "/" + "secrets"
+	endpointURL := baseURL + "/secrets"
 
 	queryParams, err := core.QueryValues(request)
 	if err != nil {
@@ -121,7 +120,7 @@ func (c *Client) Upsert(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := baseURL + "/" + "secrets"
+	endpointURL := baseURL + "/secrets"
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -186,7 +185,7 @@ func (c *Client) Delete(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"secrets/%v", secretId)
+	endpointURL := core.EncodeURL(baseURL+"/secrets/%v", secretId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 

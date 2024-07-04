@@ -7,7 +7,6 @@ import (
 	context "context"
 	json "encoding/json"
 	errors "errors"
-	fmt "fmt"
 	flatfilego "github.com/FlatFilers/flatfile-go"
 	core "github.com/FlatFilers/flatfile-go/core"
 	option "github.com/FlatFilers/flatfile-go/option"
@@ -50,7 +49,7 @@ func (c *Client) CreateMappingProgram(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := baseURL + "/" + "mapping"
+	endpointURL := baseURL + "/mapping"
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -114,7 +113,7 @@ func (c *Client) DeleteAllHistoryForUser(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := baseURL + "/" + "mapping"
+	endpointURL := baseURL + "/mapping"
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -178,7 +177,7 @@ func (c *Client) ListMappingPrograms(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := baseURL + "/" + "mapping"
+	endpointURL := baseURL + "/mapping"
 
 	queryParams, err := core.QueryValues(request)
 	if err != nil {
@@ -243,7 +242,7 @@ func (c *Client) GetMappingProgram(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"mapping/%v", programId)
+	endpointURL := core.EncodeURL(baseURL+"/mapping/%v", programId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -308,7 +307,7 @@ func (c *Client) UpdateMappingProgram(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"mapping/%v", programId)
+	endpointURL := core.EncodeURL(baseURL+"/mapping/%v", programId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -373,7 +372,7 @@ func (c *Client) DeleteMappingProgram(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"mapping/%v", programId)
+	endpointURL := core.EncodeURL(baseURL+"/mapping/%v", programId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -438,7 +437,7 @@ func (c *Client) CreateRules(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"mapping/%v/rules", programId)
+	endpointURL := core.EncodeURL(baseURL+"/mapping/%v/rules", programId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -504,7 +503,7 @@ func (c *Client) DeleteMultipleRules(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"mapping/%v/rules", programId)
+	endpointURL := core.EncodeURL(baseURL+"/mapping/%v/rules", programId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -569,7 +568,7 @@ func (c *Client) ListRules(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"mapping/%v/rules", programId)
+	endpointURL := core.EncodeURL(baseURL+"/mapping/%v/rules", programId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -635,7 +634,11 @@ func (c *Client) GetRule(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"mapping/%v/rules/%v", programId, mappingId)
+	endpointURL := core.EncodeURL(
+		baseURL+"/mapping/%v/rules/%v",
+		programId,
+		mappingId,
+	)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -702,7 +705,11 @@ func (c *Client) UpdateRule(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"mapping/%v/rules/%v", programId, mappingId)
+	endpointURL := core.EncodeURL(
+		baseURL+"/mapping/%v/rules/%v",
+		programId,
+		mappingId,
+	)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -768,7 +775,7 @@ func (c *Client) UpdateRules(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"mapping/%v/rules", programId)
+	endpointURL := core.EncodeURL(baseURL+"/mapping/%v/rules", programId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -835,7 +842,11 @@ func (c *Client) DeleteRule(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"mapping/%v/rules/%v", programId, mappingId)
+	endpointURL := core.EncodeURL(
+		baseURL+"/mapping/%v/rules/%v",
+		programId,
+		mappingId,
+	)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 

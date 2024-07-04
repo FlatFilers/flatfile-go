@@ -26,7 +26,12 @@ type GuestId = string
 type CreateGuestResponse struct {
 	Data []*Guest `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateGuestResponse) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
 }
 
 func (c *CreateGuestResponse) UnmarshalJSON(data []byte) error {
@@ -36,6 +41,13 @@ func (c *CreateGuestResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*c = CreateGuestResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
 	c._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -59,7 +71,12 @@ type GuestConfig struct {
 	Name          string        `json:"name" url:"name"`
 	Spaces        []*GuestSpace `json:"spaces,omitempty" url:"spaces,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GuestConfig) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
 }
 
 func (g *GuestConfig) UnmarshalJSON(data []byte) error {
@@ -69,6 +86,13 @@ func (g *GuestConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*g = GuestConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
 	g._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -92,7 +116,12 @@ type GuestConfigUpdate struct {
 	Name          *string        `json:"name,omitempty" url:"name,omitempty"`
 	Spaces        []*GuestSpace  `json:"spaces,omitempty" url:"spaces,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GuestConfigUpdate) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
 }
 
 func (g *GuestConfigUpdate) UnmarshalJSON(data []byte) error {
@@ -102,6 +131,13 @@ func (g *GuestConfigUpdate) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*g = GuestConfigUpdate(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
 	g._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -121,7 +157,12 @@ func (g *GuestConfigUpdate) String() string {
 type GuestResponse struct {
 	Data *Guest `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GuestResponse) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
 }
 
 func (g *GuestResponse) UnmarshalJSON(data []byte) error {
@@ -131,6 +172,13 @@ func (g *GuestResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*g = GuestResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
 	g._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -150,7 +198,12 @@ func (g *GuestResponse) String() string {
 type GuestTokenResponse struct {
 	Data *GuestToken `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GuestTokenResponse) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
 }
 
 func (g *GuestTokenResponse) UnmarshalJSON(data []byte) error {
@@ -160,6 +213,13 @@ func (g *GuestTokenResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*g = GuestTokenResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
 	g._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -184,7 +244,12 @@ type Invite struct {
 	// Message to send with the invite
 	Message *string `json:"message,omitempty" url:"message,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (i *Invite) GetExtraProperties() map[string]interface{} {
+	return i.extraProperties
 }
 
 func (i *Invite) UnmarshalJSON(data []byte) error {
@@ -194,6 +259,13 @@ func (i *Invite) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*i = Invite(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+
 	i._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -213,7 +285,12 @@ func (i *Invite) String() string {
 type ListGuestsResponse struct {
 	Data []*Guest `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (l *ListGuestsResponse) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
 }
 
 func (l *ListGuestsResponse) UnmarshalJSON(data []byte) error {
@@ -223,6 +300,13 @@ func (l *ListGuestsResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*l = ListGuestsResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+
 	l._rawJSON = json.RawMessage(data)
 	return nil
 }

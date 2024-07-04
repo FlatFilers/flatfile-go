@@ -19,7 +19,12 @@ type ListPromptsRequest struct {
 type PromptCreate struct {
 	Prompt string `json:"prompt" url:"prompt"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *PromptCreate) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
 }
 
 func (p *PromptCreate) UnmarshalJSON(data []byte) error {
@@ -29,6 +34,13 @@ func (p *PromptCreate) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*p = PromptCreate(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
 	p._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -49,7 +61,12 @@ func (p *PromptCreate) String() string {
 type PromptPatch struct {
 	Prompt *string `json:"prompt,omitempty" url:"prompt,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *PromptPatch) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
 }
 
 func (p *PromptPatch) UnmarshalJSON(data []byte) error {
@@ -59,6 +76,13 @@ func (p *PromptPatch) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*p = PromptPatch(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
 	p._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -78,7 +102,12 @@ func (p *PromptPatch) String() string {
 type PromptResponse struct {
 	Data *Prompt `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *PromptResponse) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
 }
 
 func (p *PromptResponse) UnmarshalJSON(data []byte) error {
@@ -88,6 +117,13 @@ func (p *PromptResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*p = PromptResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
 	p._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -108,7 +144,12 @@ type PromptsResponse struct {
 	Pagination *Pagination `json:"pagination,omitempty" url:"pagination,omitempty"`
 	Data       []*Prompt   `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *PromptsResponse) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
 }
 
 func (p *PromptsResponse) UnmarshalJSON(data []byte) error {
@@ -118,6 +159,13 @@ func (p *PromptsResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*p = PromptsResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
 	p._rawJSON = json.RawMessage(data)
 	return nil
 }

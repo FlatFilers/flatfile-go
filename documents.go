@@ -18,7 +18,12 @@ type DocumentConfig struct {
 	Treatments []string  `json:"treatments,omitempty" url:"treatments,omitempty"`
 	Actions    []*Action `json:"actions,omitempty" url:"actions,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (d *DocumentConfig) GetExtraProperties() map[string]interface{} {
+	return d.extraProperties
 }
 
 func (d *DocumentConfig) UnmarshalJSON(data []byte) error {
@@ -28,6 +33,13 @@ func (d *DocumentConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*d = DocumentConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *d)
+	if err != nil {
+		return err
+	}
+	d.extraProperties = extraProperties
+
 	d._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -47,7 +59,12 @@ func (d *DocumentConfig) String() string {
 type DocumentResponse struct {
 	Data *Document `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (d *DocumentResponse) GetExtraProperties() map[string]interface{} {
+	return d.extraProperties
 }
 
 func (d *DocumentResponse) UnmarshalJSON(data []byte) error {
@@ -57,6 +74,13 @@ func (d *DocumentResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*d = DocumentResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *d)
+	if err != nil {
+		return err
+	}
+	d.extraProperties = extraProperties
+
 	d._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -76,7 +100,12 @@ func (d *DocumentResponse) String() string {
 type ListDocumentsResponse struct {
 	Data []*Document `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (l *ListDocumentsResponse) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
 }
 
 func (l *ListDocumentsResponse) UnmarshalJSON(data []byte) error {
@@ -86,6 +115,13 @@ func (l *ListDocumentsResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*l = ListDocumentsResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+
 	l._rawJSON = json.RawMessage(data)
 	return nil
 }

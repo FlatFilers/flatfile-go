@@ -12,7 +12,12 @@ import (
 type AccountPatch struct {
 	DefaultAppId AppId `json:"defaultAppId" url:"defaultAppId"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AccountPatch) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
 }
 
 func (a *AccountPatch) UnmarshalJSON(data []byte) error {
@@ -22,6 +27,13 @@ func (a *AccountPatch) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*a = AccountPatch(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
 	a._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -41,7 +53,12 @@ func (a *AccountPatch) String() string {
 type AccountResponse struct {
 	Data *Account `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AccountResponse) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
 }
 
 func (a *AccountResponse) UnmarshalJSON(data []byte) error {
@@ -51,6 +68,13 @@ func (a *AccountResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*a = AccountResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
 	a._rawJSON = json.RawMessage(data)
 	return nil
 }

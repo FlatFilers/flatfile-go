@@ -7,7 +7,6 @@ import (
 	context "context"
 	json "encoding/json"
 	errors "errors"
-	fmt "fmt"
 	flatfilego "github.com/FlatFilers/flatfile-go"
 	core "github.com/FlatFilers/flatfile-go/core"
 	option "github.com/FlatFilers/flatfile-go/option"
@@ -49,7 +48,7 @@ func (c *Client) List(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := baseURL + "/" + "agents"
+	endpointURL := baseURL + "/agents"
 
 	queryParams, err := core.QueryValues(request)
 	if err != nil {
@@ -92,7 +91,7 @@ func (c *Client) Create(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := baseURL + "/" + "agents"
+	endpointURL := baseURL + "/agents"
 
 	queryParams, err := core.QueryValues(request)
 	if err != nil {
@@ -157,7 +156,7 @@ func (c *Client) Get(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"agents/%v", agentId)
+	endpointURL := core.EncodeURL(baseURL+"/agents/%v", agentId)
 
 	queryParams, err := core.QueryValues(request)
 	if err != nil {
@@ -229,7 +228,7 @@ func (c *Client) ListAgentRoles(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"agents/%v/roles", agentId)
+	endpointURL := core.EncodeURL(baseURL+"/agents/%v/roles", agentId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -301,7 +300,7 @@ func (c *Client) AssignAgentRole(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"agents/%v/roles", agentId)
+	endpointURL := core.EncodeURL(baseURL+"/agents/%v/roles", agentId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -375,7 +374,11 @@ func (c *Client) DeleteAgentRole(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"agents/%v/roles/%v", agentId, actorRoleId)
+	endpointURL := core.EncodeURL(
+		baseURL+"/agents/%v/roles/%v",
+		agentId,
+		actorRoleId,
+	)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -445,7 +448,7 @@ func (c *Client) GetAgentLogs(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"agents/%v/logs", agentId)
+	endpointURL := core.EncodeURL(baseURL+"/agents/%v/logs", agentId)
 
 	queryParams, err := core.QueryValues(request)
 	if err != nil {
@@ -516,7 +519,7 @@ func (c *Client) GetAgentLog(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"agents/log/%v", eventId)
+	endpointURL := core.EncodeURL(baseURL+"/agents/log/%v", eventId)
 
 	queryParams, err := core.QueryValues(request)
 	if err != nil {
@@ -586,7 +589,7 @@ func (c *Client) GetEnvironmentAgentLogs(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := baseURL + "/" + "agents/logs"
+	endpointURL := baseURL + "/agents/logs"
 
 	queryParams, err := core.QueryValues(request)
 	if err != nil {
@@ -656,7 +659,7 @@ func (c *Client) GetEnvironmentAgentExecutions(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := baseURL + "/" + "agents/executions"
+	endpointURL := baseURL + "/agents/executions"
 
 	queryParams, err := core.QueryValues(request)
 	if err != nil {
@@ -728,7 +731,7 @@ func (c *Client) Delete(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"agents/%v", agentId)
+	endpointURL := core.EncodeURL(baseURL+"/agents/%v", agentId)
 
 	queryParams, err := core.QueryValues(request)
 	if err != nil {

@@ -10,9 +10,9 @@ import (
 
 type CreateSnapshotRequest struct {
 	// ID of sheet
-	SheetId SheetId `json:"sheetId" url:"sheetId"`
+	SheetId SheetId `json:"sheetId" url:"-"`
 	// Label for the snapshot
-	Label *string `json:"label,omitempty" url:"label,omitempty"`
+	Label *string `json:"label,omitempty" url:"-"`
 }
 
 type GetSnapshotRequest struct {
@@ -68,7 +68,12 @@ type RestoreOptions struct {
 	Updated bool `json:"updated" url:"updated"`
 	Deleted bool `json:"deleted" url:"deleted"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (r *RestoreOptions) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
 }
 
 func (r *RestoreOptions) UnmarshalJSON(data []byte) error {
@@ -78,6 +83,13 @@ func (r *RestoreOptions) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*r = RestoreOptions(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+
 	r._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -97,7 +109,12 @@ func (r *RestoreOptions) String() string {
 type SnapshotResponse struct {
 	Data *Snapshot `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SnapshotResponse) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
 }
 
 func (s *SnapshotResponse) UnmarshalJSON(data []byte) error {
@@ -107,6 +124,13 @@ func (s *SnapshotResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*s = SnapshotResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
 	s._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -126,7 +150,12 @@ func (s *SnapshotResponse) String() string {
 type SnapshotsResponse struct {
 	Data []*Snapshot `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SnapshotsResponse) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
 }
 
 func (s *SnapshotsResponse) UnmarshalJSON(data []byte) error {
@@ -136,6 +165,13 @@ func (s *SnapshotsResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*s = SnapshotsResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
 	s._rawJSON = json.RawMessage(data)
 	return nil
 }

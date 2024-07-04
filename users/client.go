@@ -7,7 +7,6 @@ import (
 	context "context"
 	json "encoding/json"
 	errors "errors"
-	fmt "fmt"
 	flatfilego "github.com/FlatFilers/flatfile-go"
 	core "github.com/FlatFilers/flatfile-go/core"
 	option "github.com/FlatFilers/flatfile-go/option"
@@ -50,7 +49,7 @@ func (c *Client) List(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := baseURL + "/" + "users"
+	endpointURL := baseURL + "/users"
 
 	queryParams, err := core.QueryValues(request)
 	if err != nil {
@@ -94,7 +93,7 @@ func (c *Client) CreateAndInvite(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := baseURL + "/" + "users/invite"
+	endpointURL := baseURL + "/users/invite"
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -108,6 +107,43 @@ func (c *Client) CreateAndInvite(
 			Headers:     headers,
 			Client:      options.HTTPClient,
 			Request:     request,
+			Response:    &response,
+		},
+	); err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
+// Resends an invite to a user for your account.
+func (c *Client) ResendInvite(
+	ctx context.Context,
+	// The user id
+	userId flatfilego.UserId,
+	opts ...option.RequestOption,
+) (*flatfilego.Success, error) {
+	options := core.NewRequestOptions(opts...)
+
+	baseURL := "https://api.x.flatfile.com/v1"
+	if c.baseURL != "" {
+		baseURL = c.baseURL
+	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(baseURL+"/users/%v/resend-invite", userId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
+
+	var response *flatfilego.Success
+	if err := c.caller.Call(
+		ctx,
+		&core.CallParams{
+			URL:         endpointURL,
+			Method:      http.MethodPost,
+			MaxAttempts: options.MaxAttempts,
+			Headers:     headers,
+			Client:      options.HTTPClient,
 			Response:    &response,
 		},
 	); err != nil {
@@ -133,7 +169,7 @@ func (c *Client) Update(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"users/%v", userId)
+	endpointURL := core.EncodeURL(baseURL+"/users/%v", userId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -171,7 +207,7 @@ func (c *Client) Get(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"users/%v", userId)
+	endpointURL := core.EncodeURL(baseURL+"/users/%v", userId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -208,7 +244,7 @@ func (c *Client) Delete(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"users/%v", userId)
+	endpointURL := core.EncodeURL(baseURL+"/users/%v", userId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -245,7 +281,7 @@ func (c *Client) ListUserRoles(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"users/%v/roles", userId)
+	endpointURL := core.EncodeURL(baseURL+"/users/%v/roles", userId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -317,7 +353,7 @@ func (c *Client) AssignUserRole(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"users/%v/roles", userId)
+	endpointURL := core.EncodeURL(baseURL+"/users/%v/roles", userId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -391,7 +427,11 @@ func (c *Client) DeleteUserRole(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"users/%v/roles/%v", userId, actorRoleId)
+	endpointURL := core.EncodeURL(
+		baseURL+"/users/%v/roles/%v",
+		userId,
+		actorRoleId,
+	)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 

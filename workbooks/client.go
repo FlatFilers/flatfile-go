@@ -7,7 +7,6 @@ import (
 	context "context"
 	json "encoding/json"
 	errors "errors"
-	fmt "fmt"
 	flatfilego "github.com/FlatFilers/flatfile-go"
 	core "github.com/FlatFilers/flatfile-go/core"
 	option "github.com/FlatFilers/flatfile-go/option"
@@ -50,7 +49,7 @@ func (c *Client) List(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := baseURL + "/" + "workbooks"
+	endpointURL := baseURL + "/workbooks"
 
 	queryParams, err := core.QueryValues(request)
 	if err != nil {
@@ -114,7 +113,7 @@ func (c *Client) Create(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := baseURL + "/" + "workbooks"
+	endpointURL := baseURL + "/workbooks"
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -172,7 +171,7 @@ func (c *Client) Get(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"workbooks/%v", workbookId)
+	endpointURL := core.EncodeURL(baseURL+"/workbooks/%v", workbookId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -236,7 +235,7 @@ func (c *Client) Delete(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"workbooks/%v", workbookId)
+	endpointURL := core.EncodeURL(baseURL+"/workbooks/%v", workbookId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -301,7 +300,7 @@ func (c *Client) Update(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"workbooks/%v", workbookId)
+	endpointURL := core.EncodeURL(baseURL+"/workbooks/%v", workbookId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -367,7 +366,7 @@ func (c *Client) GetWorkbookCommits(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"workbooks/%v/commits", workbookId)
+	endpointURL := core.EncodeURL(baseURL+"/workbooks/%v/commits", workbookId)
 
 	queryParams, err := core.QueryValues(request)
 	if err != nil {

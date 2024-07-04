@@ -7,7 +7,6 @@ import (
 	context "context"
 	json "encoding/json"
 	errors "errors"
-	fmt "fmt"
 	flatfilego "github.com/FlatFilers/flatfile-go"
 	core "github.com/FlatFilers/flatfile-go/core"
 	option "github.com/FlatFilers/flatfile-go/option"
@@ -51,7 +50,7 @@ func (c *Client) Get(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"commits/%v", commitId)
+	endpointURL := core.EncodeURL(baseURL+"/commits/%v", commitId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -115,7 +114,7 @@ func (c *Client) Complete(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"commits/%v/complete", commitId)
+	endpointURL := core.EncodeURL(baseURL+"/commits/%v/complete", commitId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -179,7 +178,7 @@ func (c *Client) Replay(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"commits/%v/replay", commitId)
+	endpointURL := core.EncodeURL(baseURL+"/commits/%v/replay", commitId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 

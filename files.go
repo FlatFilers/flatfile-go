@@ -51,7 +51,12 @@ type Action struct {
 	// A limitation or restriction on the action.
 	Constraints []*ActionConstraint `json:"constraints,omitempty" url:"constraints,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *Action) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
 }
 
 func (a *Action) UnmarshalJSON(data []byte) error {
@@ -61,6 +66,13 @@ func (a *Action) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*a = Action(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
 	a._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -108,7 +120,12 @@ func (f FileOrigin) Ptr() *FileOrigin {
 type FileResponse struct {
 	Data *File `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (f *FileResponse) GetExtraProperties() map[string]interface{} {
+	return f.extraProperties
 }
 
 func (f *FileResponse) UnmarshalJSON(data []byte) error {
@@ -118,6 +135,13 @@ func (f *FileResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*f = FileResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *f)
+	if err != nil {
+		return err
+	}
+	f.extraProperties = extraProperties
+
 	f._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -138,7 +162,12 @@ type ListFilesResponse struct {
 	Pagination *Pagination `json:"pagination,omitempty" url:"pagination,omitempty"`
 	Data       []*File     `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (l *ListFilesResponse) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
 }
 
 func (l *ListFilesResponse) UnmarshalJSON(data []byte) error {
@@ -148,6 +177,13 @@ func (l *ListFilesResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*l = ListFilesResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+
 	l._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -218,24 +254,24 @@ func (m ModelFileStatusEnum) Ptr() *ModelFileStatusEnum {
 }
 
 type UpdateFileRequest struct {
-	WorkbookId *WorkbookId `json:"workbookId,omitempty" url:"workbookId,omitempty"`
+	WorkbookId *WorkbookId `json:"workbookId,omitempty" url:"-"`
 	// The name of the file
-	Name *string `json:"name,omitempty" url:"name,omitempty"`
+	Name *string `json:"name,omitempty" url:"-"`
 	// The storage mode of file to update
-	Mode *Mode `json:"mode,omitempty" url:"mode,omitempty"`
+	Mode *Mode `json:"mode,omitempty" url:"-"`
 	// Status of the file
-	Status *ModelFileStatusEnum `json:"status,omitempty" url:"status,omitempty"`
+	Status *ModelFileStatusEnum `json:"status,omitempty" url:"-"`
 	// The actions attached to the file
-	Actions []*Action `json:"actions,omitempty" url:"actions,omitempty"`
+	Actions []*Action `json:"actions,omitempty" url:"-"`
 }
 
 type CreateFileRequest struct {
-	SpaceId       SpaceId       `json:"spaceId" url:"spaceId"`
-	EnvironmentId EnvironmentId `json:"environmentId" url:"environmentId"`
+	SpaceId       SpaceId       `json:"spaceId" url:"-"`
+	EnvironmentId EnvironmentId `json:"environmentId" url:"-"`
 	// The storage mode of file to insert, defaults to "import"
-	Mode *Mode `json:"mode,omitempty" url:"mode,omitempty"`
+	Mode *Mode `json:"mode,omitempty" url:"-"`
 	// The actions attached to the file
-	Actions []*Action `json:"actions,omitempty" url:"actions,omitempty"`
+	Actions []*Action `json:"actions,omitempty" url:"-"`
 	// The origin of the file, ie filesystem
-	Origin *FileOrigin `json:"origin,omitempty" url:"origin,omitempty"`
+	Origin *FileOrigin `json:"origin,omitempty" url:"-"`
 }

@@ -7,7 +7,6 @@ import (
 	context "context"
 	json "encoding/json"
 	errors "errors"
-	fmt "fmt"
 	flatfilego "github.com/FlatFilers/flatfile-go"
 	core "github.com/FlatFilers/flatfile-go/core"
 	option "github.com/FlatFilers/flatfile-go/option"
@@ -50,7 +49,7 @@ func (c *Client) CreateSnapshot(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := baseURL + "/" + "snapshots"
+	endpointURL := baseURL + "/snapshots"
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -114,7 +113,7 @@ func (c *Client) ListSnapshots(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := baseURL + "/" + "snapshots"
+	endpointURL := baseURL + "/snapshots"
 
 	queryParams, err := core.QueryValues(request)
 	if err != nil {
@@ -187,7 +186,7 @@ func (c *Client) GetSnapshot(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"snapshots/%v", snapshotId)
+	endpointURL := core.EncodeURL(baseURL+"/snapshots/%v", snapshotId)
 
 	queryParams, err := core.QueryValues(request)
 	if err != nil {
@@ -259,7 +258,7 @@ func (c *Client) DeleteSnapshot(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"snapshots/%v", snapshotId)
+	endpointURL := core.EncodeURL(baseURL+"/snapshots/%v", snapshotId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -324,7 +323,7 @@ func (c *Client) RestoreSnapshot(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"snapshots/%v/restore", snapshotId)
+	endpointURL := core.EncodeURL(baseURL+"/snapshots/%v/restore", snapshotId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -390,7 +389,7 @@ func (c *Client) GetSnapshotRecords(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"snapshots/%v/records", snapshotId)
+	endpointURL := core.EncodeURL(baseURL+"/snapshots/%v/records", snapshotId)
 
 	queryParams, err := core.QueryValues(request)
 	if err != nil {

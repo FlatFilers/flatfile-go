@@ -44,7 +44,7 @@ func (c *Client) GetCurrent(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := baseURL + "/" + "accounts/current"
+	endpointURL := baseURL + "/accounts/current"
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -80,7 +80,7 @@ func (c *Client) UpdateCurrent(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := baseURL + "/" + "accounts/current"
+	endpointURL := baseURL + "/accounts/current"
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 

@@ -41,7 +41,12 @@ type CreateWorkbookConfig struct {
 	// Metadata for the workbook
 	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CreateWorkbookConfig) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
 }
 
 func (c *CreateWorkbookConfig) UnmarshalJSON(data []byte) error {
@@ -51,6 +56,13 @@ func (c *CreateWorkbookConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*c = CreateWorkbookConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
 	c._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -70,7 +82,12 @@ func (c *CreateWorkbookConfig) String() string {
 type ListWorkbooksResponse struct {
 	Data []*Workbook `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (l *ListWorkbooksResponse) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
 }
 
 func (l *ListWorkbooksResponse) UnmarshalJSON(data []byte) error {
@@ -80,6 +97,13 @@ func (l *ListWorkbooksResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*l = ListWorkbooksResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+
 	l._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -99,7 +123,12 @@ func (l *ListWorkbooksResponse) String() string {
 type WorkbookResponse struct {
 	Data *Workbook `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (w *WorkbookResponse) GetExtraProperties() map[string]interface{} {
+	return w.extraProperties
 }
 
 func (w *WorkbookResponse) UnmarshalJSON(data []byte) error {
@@ -109,6 +138,13 @@ func (w *WorkbookResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*w = WorkbookResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *w)
+	if err != nil {
+		return err
+	}
+	w.extraProperties = extraProperties
+
 	w._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -143,7 +179,12 @@ type WorkbookUpdate struct {
 	// Metadata for the workbook
 	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (w *WorkbookUpdate) GetExtraProperties() map[string]interface{} {
+	return w.extraProperties
 }
 
 func (w *WorkbookUpdate) UnmarshalJSON(data []byte) error {
@@ -153,6 +194,13 @@ func (w *WorkbookUpdate) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*w = WorkbookUpdate(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *w)
+	if err != nil {
+		return err
+	}
+	w.extraProperties = extraProperties
+
 	w._rawJSON = json.RawMessage(data)
 	return nil
 }

@@ -7,7 +7,6 @@ import (
 	context "context"
 	json "encoding/json"
 	errors "errors"
-	fmt "fmt"
 	flatfilego "github.com/FlatFilers/flatfile-go"
 	core "github.com/FlatFilers/flatfile-go/core"
 	option "github.com/FlatFilers/flatfile-go/option"
@@ -50,7 +49,7 @@ func (c *Client) List(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := baseURL + "/" + "guests"
+	endpointURL := baseURL + "/guests"
 
 	queryParams, err := core.QueryValues(request)
 	if err != nil {
@@ -94,7 +93,7 @@ func (c *Client) Create(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := baseURL + "/" + "guests"
+	endpointURL := baseURL + "/guests"
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -132,7 +131,7 @@ func (c *Client) Get(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"guests/%v", guestId)
+	endpointURL := core.EncodeURL(baseURL+"/guests/%v", guestId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -169,7 +168,7 @@ func (c *Client) Delete(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"guests/%v", guestId)
+	endpointURL := core.EncodeURL(baseURL+"/guests/%v", guestId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -207,7 +206,7 @@ func (c *Client) Update(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"guests/%v", guestId)
+	endpointURL := core.EncodeURL(baseURL+"/guests/%v", guestId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -246,7 +245,7 @@ func (c *Client) GetGuestToken(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"guests/%v/token", guestId)
+	endpointURL := core.EncodeURL(baseURL+"/guests/%v/token", guestId)
 
 	queryParams, err := core.QueryValues(request)
 	if err != nil {
@@ -291,7 +290,7 @@ func (c *Client) ListGuestRoles(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"guests/%v/roles", guestId)
+	endpointURL := core.EncodeURL(baseURL+"/guests/%v/roles", guestId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -363,7 +362,7 @@ func (c *Client) AssignGuestRole(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"guests/%v/roles", guestId)
+	endpointURL := core.EncodeURL(baseURL+"/guests/%v/roles", guestId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -437,7 +436,11 @@ func (c *Client) DeleteGuestRole(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"guests/%v/roles/%v", guestId, actorRoleId)
+	endpointURL := core.EncodeURL(
+		baseURL+"/guests/%v/roles/%v",
+		guestId,
+		actorRoleId,
+	)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -507,7 +510,7 @@ func (c *Client) Invite(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := baseURL + "/" + "invitations"
+	endpointURL := baseURL + "/invitations"
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 

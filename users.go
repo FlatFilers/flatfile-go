@@ -11,12 +11,28 @@ import (
 type ListUsersRequest struct {
 	// Email of guest to return
 	Email *string `json:"-" url:"email,omitempty"`
+	// String to search for users by name and email
+	Search *string `json:"-" url:"search,omitempty"`
+	// Field to sort users by
+	SortField *ListUsersSortField `json:"-" url:"sortField,omitempty"`
+	// Direction of sorting
+	SortDirection *SortDirection `json:"-" url:"sortDirection,omitempty"`
+	// Number of users to return in a page (default 20)
+	PageSize *int `json:"-" url:"pageSize,omitempty"`
+	// Based on pageSize, which page of users to return
+	PageNumber *int `json:"-" url:"pageNumber,omitempty"`
 }
 
 type ListUsersResponse struct {
-	Data []*User `json:"data,omitempty" url:"data,omitempty"`
+	Data       []*User     `json:"data,omitempty" url:"data,omitempty"`
+	Pagination *Pagination `json:"pagination,omitempty" url:"pagination,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (l *ListUsersResponse) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
 }
 
 func (l *ListUsersResponse) UnmarshalJSON(data []byte) error {
@@ -26,6 +42,13 @@ func (l *ListUsersResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*l = ListUsersResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+
 	l._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -42,13 +65,61 @@ func (l *ListUsersResponse) String() string {
 	return fmt.Sprintf("%#v", l)
 }
 
+type ListUsersSortField string
+
+const (
+	ListUsersSortFieldEmail      ListUsersSortField = "email"
+	ListUsersSortFieldName       ListUsersSortField = "name"
+	ListUsersSortFieldId         ListUsersSortField = "id"
+	ListUsersSortFieldIdp        ListUsersSortField = "idp"
+	ListUsersSortFieldIdpRef     ListUsersSortField = "idp_ref"
+	ListUsersSortFieldCreatedAt  ListUsersSortField = "created_at"
+	ListUsersSortFieldUpdatedAt  ListUsersSortField = "updated_at"
+	ListUsersSortFieldLastSeenAt ListUsersSortField = "last_seen_at"
+	ListUsersSortFieldDashboard  ListUsersSortField = "dashboard"
+)
+
+func NewListUsersSortFieldFromString(s string) (ListUsersSortField, error) {
+	switch s {
+	case "email":
+		return ListUsersSortFieldEmail, nil
+	case "name":
+		return ListUsersSortFieldName, nil
+	case "id":
+		return ListUsersSortFieldId, nil
+	case "idp":
+		return ListUsersSortFieldIdp, nil
+	case "idp_ref":
+		return ListUsersSortFieldIdpRef, nil
+	case "created_at":
+		return ListUsersSortFieldCreatedAt, nil
+	case "updated_at":
+		return ListUsersSortFieldUpdatedAt, nil
+	case "last_seen_at":
+		return ListUsersSortFieldLastSeenAt, nil
+	case "dashboard":
+		return ListUsersSortFieldDashboard, nil
+	}
+	var t ListUsersSortField
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (l ListUsersSortField) Ptr() *ListUsersSortField {
+	return &l
+}
+
 // Properties used to create a new user
 type UserConfig struct {
 	Email     string    `json:"email" url:"email"`
 	Name      string    `json:"name" url:"name"`
 	AccountId AccountId `json:"accountId" url:"accountId"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (u *UserConfig) GetExtraProperties() map[string]interface{} {
+	return u.extraProperties
 }
 
 func (u *UserConfig) UnmarshalJSON(data []byte) error {
@@ -58,6 +129,13 @@ func (u *UserConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*u = UserConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *u)
+	if err != nil {
+		return err
+	}
+	u.extraProperties = extraProperties
+
 	u._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -80,7 +158,12 @@ type UserCreateAndInviteRequest struct {
 	Name       string                    `json:"name" url:"name"`
 	ActorRoles []*AssignActorRoleRequest `json:"actorRoles,omitempty" url:"actorRoles,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (u *UserCreateAndInviteRequest) GetExtraProperties() map[string]interface{} {
+	return u.extraProperties
 }
 
 func (u *UserCreateAndInviteRequest) UnmarshalJSON(data []byte) error {
@@ -90,6 +173,13 @@ func (u *UserCreateAndInviteRequest) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*u = UserCreateAndInviteRequest(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *u)
+	if err != nil {
+		return err
+	}
+	u.extraProperties = extraProperties
+
 	u._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -109,7 +199,12 @@ func (u *UserCreateAndInviteRequest) String() string {
 type UserWithRolesResponse struct {
 	Data *UserWithRoles `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (u *UserWithRolesResponse) GetExtraProperties() map[string]interface{} {
+	return u.extraProperties
 }
 
 func (u *UserWithRolesResponse) UnmarshalJSON(data []byte) error {
@@ -119,6 +214,13 @@ func (u *UserWithRolesResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*u = UserWithRolesResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *u)
+	if err != nil {
+		return err
+	}
+	u.extraProperties = extraProperties
+
 	u._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -136,6 +238,6 @@ func (u *UserWithRolesResponse) String() string {
 }
 
 type UpdateUserRequest struct {
-	Name      *string `json:"name,omitempty" url:"name,omitempty"`
-	Dashboard *int    `json:"dashboard,omitempty" url:"dashboard,omitempty"`
+	Name      *string `json:"name,omitempty" url:"-"`
+	Dashboard *int    `json:"dashboard,omitempty" url:"-"`
 }

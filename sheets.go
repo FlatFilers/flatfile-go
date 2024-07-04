@@ -194,77 +194,21 @@ func (p Property) MarshalJSON() ([]byte, error) {
 	default:
 		return nil, fmt.Errorf("invalid type %s in %T", p.Type, p)
 	case "string":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*StringProperty
-		}{
-			Type:           p.Type,
-			StringProperty: p.String,
-		}
-		return json.Marshal(marshaler)
+		return core.MarshalJSONWithExtraProperty(p.String, "type", "string")
 	case "number":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*NumberProperty
-		}{
-			Type:           p.Type,
-			NumberProperty: p.Number,
-		}
-		return json.Marshal(marshaler)
+		return core.MarshalJSONWithExtraProperty(p.Number, "type", "number")
 	case "boolean":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*BooleanProperty
-		}{
-			Type:            p.Type,
-			BooleanProperty: p.Boolean,
-		}
-		return json.Marshal(marshaler)
+		return core.MarshalJSONWithExtraProperty(p.Boolean, "type", "boolean")
 	case "date":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*DateProperty
-		}{
-			Type:         p.Type,
-			DateProperty: p.Date,
-		}
-		return json.Marshal(marshaler)
+		return core.MarshalJSONWithExtraProperty(p.Date, "type", "date")
 	case "enum":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*EnumProperty
-		}{
-			Type:         p.Type,
-			EnumProperty: p.Enum,
-		}
-		return json.Marshal(marshaler)
+		return core.MarshalJSONWithExtraProperty(p.Enum, "type", "enum")
 	case "reference":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*ReferenceProperty
-		}{
-			Type:              p.Type,
-			ReferenceProperty: p.Reference,
-		}
-		return json.Marshal(marshaler)
+		return core.MarshalJSONWithExtraProperty(p.Reference, "type", "reference")
 	case "string-list":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*StringListProperty
-		}{
-			Type:               p.Type,
-			StringListProperty: p.StringList,
-		}
-		return json.Marshal(marshaler)
+		return core.MarshalJSONWithExtraProperty(p.StringList, "type", "string-list")
 	case "enum-list":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*EnumListProperty
-		}{
-			Type:             p.Type,
-			EnumListProperty: p.EnumList,
-		}
-		return json.Marshal(marshaler)
+		return core.MarshalJSONWithExtraProperty(p.EnumList, "type", "enum-list")
 	}
 }
 
@@ -305,7 +249,12 @@ func (p *Property) Accept(visitor PropertyVisitor) error {
 type CellsResponse struct {
 	Data CellsResponseData `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CellsResponse) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
 }
 
 func (c *CellsResponse) UnmarshalJSON(data []byte) error {
@@ -315,6 +264,13 @@ func (c *CellsResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*c = CellsResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
 	c._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -343,7 +299,12 @@ type IncludeCounts = bool
 type RecordCountsResponse struct {
 	Data *RecordCountsResponseData `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (r *RecordCountsResponse) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
 }
 
 func (r *RecordCountsResponse) UnmarshalJSON(data []byte) error {
@@ -353,6 +314,13 @@ func (r *RecordCountsResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*r = RecordCountsResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+
 	r._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -372,7 +340,12 @@ func (r *RecordCountsResponse) String() string {
 type SheetResponse struct {
 	Data *Sheet `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SheetResponse) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
 }
 
 func (s *SheetResponse) UnmarshalJSON(data []byte) error {
@@ -382,6 +355,13 @@ func (s *SheetResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*s = SheetResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
 	s._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -407,7 +387,12 @@ type SheetUpdateRequest struct {
 	// Useful for any contextual metadata regarding the sheet. Store any valid json
 	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SheetUpdateRequest) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
 }
 
 func (s *SheetUpdateRequest) UnmarshalJSON(data []byte) error {
@@ -417,6 +402,13 @@ func (s *SheetUpdateRequest) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*s = SheetUpdateRequest(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
 	s._rawJSON = json.RawMessage(data)
 	return nil
 }

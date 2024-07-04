@@ -11,7 +11,12 @@ import (
 type CommitResponse struct {
 	Data *Commit `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CommitResponse) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
 }
 
 func (c *CommitResponse) UnmarshalJSON(data []byte) error {
@@ -21,6 +26,13 @@ func (c *CommitResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*c = CommitResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
 	c._rawJSON = json.RawMessage(data)
 	return nil
 }

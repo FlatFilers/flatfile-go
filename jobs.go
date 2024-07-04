@@ -26,6 +26,8 @@ type ListJobsRequest struct {
 	PageNumber *int `json:"-" url:"pageNumber,omitempty"`
 	// Sort direction - asc (ascending) or desc (descending)
 	SortDirection *SortDirection `json:"-" url:"sortDirection,omitempty"`
+	// When true, only top-level jobs will be returned unless a parentId is specified
+	ExcludeChildJobs *bool `json:"-" url:"excludeChildJobs,omitempty"`
 }
 
 // Pipeline Job ID
@@ -38,7 +40,12 @@ type JobAckDetails struct {
 	Progress              *int       `json:"progress,omitempty" url:"progress,omitempty"`
 	EstimatedCompletionAt *time.Time `json:"estimatedCompletionAt,omitempty" url:"estimatedCompletionAt,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (j *JobAckDetails) GetExtraProperties() map[string]interface{} {
+	return j.extraProperties
 }
 
 func (j *JobAckDetails) UnmarshalJSON(data []byte) error {
@@ -54,6 +61,13 @@ func (j *JobAckDetails) UnmarshalJSON(data []byte) error {
 	}
 	*j = JobAckDetails(unmarshaler.embed)
 	j.EstimatedCompletionAt = unmarshaler.EstimatedCompletionAt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	if err != nil {
+		return err
+	}
+	j.extraProperties = extraProperties
+
 	j._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -86,7 +100,12 @@ func (j *JobAckDetails) String() string {
 type JobCancelDetails struct {
 	Info *string `json:"info,omitempty" url:"info,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (j *JobCancelDetails) GetExtraProperties() map[string]interface{} {
+	return j.extraProperties
 }
 
 func (j *JobCancelDetails) UnmarshalJSON(data []byte) error {
@@ -96,6 +115,13 @@ func (j *JobCancelDetails) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*j = JobCancelDetails(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	if err != nil {
+		return err
+	}
+	j.extraProperties = extraProperties
+
 	j._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -117,7 +143,12 @@ type JobCompleteDetails struct {
 	Outcome *JobOutcome `json:"outcome,omitempty" url:"outcome,omitempty"`
 	Info    *string     `json:"info,omitempty" url:"info,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (j *JobCompleteDetails) GetExtraProperties() map[string]interface{} {
+	return j.extraProperties
 }
 
 func (j *JobCompleteDetails) UnmarshalJSON(data []byte) error {
@@ -127,6 +158,13 @@ func (j *JobCompleteDetails) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*j = JobCompleteDetails(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	if err != nil {
+		return err
+	}
+	j.extraProperties = extraProperties
+
 	j._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -146,7 +184,7 @@ func (j *JobCompleteDetails) String() string {
 // A single unit of work that a pipeline will execute
 type JobConfig struct {
 	// The type of job
-	Type JobType `json:"type,omitempty" url:"type,omitempty"`
+	Type JobType `json:"type" url:"type"`
 	// the type of operation to perform on the data. For example, "export".
 	Operation   string           `json:"operation" url:"operation"`
 	Source      JobSource        `json:"source" url:"source"`
@@ -184,7 +222,12 @@ type JobConfig struct {
 	// The ids of the jobs that must complete before this job can start
 	PredecessorIds []JobId `json:"predecessorIds,omitempty" url:"predecessorIds,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (j *JobConfig) GetExtraProperties() map[string]interface{} {
+	return j.extraProperties
 }
 
 func (j *JobConfig) UnmarshalJSON(data []byte) error {
@@ -194,6 +237,13 @@ func (j *JobConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*j = JobConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	if err != nil {
+		return err
+	}
+	j.extraProperties = extraProperties
+
 	j._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -218,7 +268,12 @@ type JobExecutionPlanConfigRequest struct {
 	FileId                    FileId              `json:"fileId" url:"fileId"`
 	JobId                     JobId               `json:"jobId" url:"jobId"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (j *JobExecutionPlanConfigRequest) GetExtraProperties() map[string]interface{} {
+	return j.extraProperties
 }
 
 func (j *JobExecutionPlanConfigRequest) UnmarshalJSON(data []byte) error {
@@ -228,6 +283,13 @@ func (j *JobExecutionPlanConfigRequest) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*j = JobExecutionPlanConfigRequest(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	if err != nil {
+		return err
+	}
+	j.extraProperties = extraProperties
+
 	j._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -252,7 +314,12 @@ type JobExecutionPlanRequest struct {
 	FileId                    FileId              `json:"fileId" url:"fileId"`
 	JobId                     JobId               `json:"jobId" url:"jobId"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (j *JobExecutionPlanRequest) GetExtraProperties() map[string]interface{} {
+	return j.extraProperties
 }
 
 func (j *JobExecutionPlanRequest) UnmarshalJSON(data []byte) error {
@@ -262,6 +329,13 @@ func (j *JobExecutionPlanRequest) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*j = JobExecutionPlanRequest(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	if err != nil {
+		return err
+	}
+	j.extraProperties = extraProperties
+
 	j._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -281,7 +355,12 @@ func (j *JobExecutionPlanRequest) String() string {
 type JobPlanResponse struct {
 	Data *JobPlan `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (j *JobPlanResponse) GetExtraProperties() map[string]interface{} {
+	return j.extraProperties
 }
 
 func (j *JobPlanResponse) UnmarshalJSON(data []byte) error {
@@ -291,6 +370,13 @@ func (j *JobPlanResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*j = JobPlanResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	if err != nil {
+		return err
+	}
+	j.extraProperties = extraProperties
+
 	j._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -310,7 +396,12 @@ func (j *JobPlanResponse) String() string {
 type JobResponse struct {
 	Data *Job `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (j *JobResponse) GetExtraProperties() map[string]interface{} {
+	return j.extraProperties
 }
 
 func (j *JobResponse) UnmarshalJSON(data []byte) error {
@@ -320,6 +411,13 @@ func (j *JobResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*j = JobResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	if err != nil {
+		return err
+	}
+	j.extraProperties = extraProperties
+
 	j._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -341,7 +439,12 @@ type JobSplitDetails struct {
 	Parts         *JobParts `json:"parts,omitempty" url:"parts,omitempty"`
 	RunInParallel *bool     `json:"runInParallel,omitempty" url:"runInParallel,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (j *JobSplitDetails) GetExtraProperties() map[string]interface{} {
+	return j.extraProperties
 }
 
 func (j *JobSplitDetails) UnmarshalJSON(data []byte) error {
@@ -351,6 +454,13 @@ func (j *JobSplitDetails) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*j = JobSplitDetails(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	if err != nil {
+		return err
+	}
+	j.extraProperties = extraProperties
+
 	j._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -379,7 +489,12 @@ type JobUpdate struct {
 	// Current status of job in text
 	Info *string `json:"info,omitempty" url:"info,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (j *JobUpdate) GetExtraProperties() map[string]interface{} {
+	return j.extraProperties
 }
 
 func (j *JobUpdate) UnmarshalJSON(data []byte) error {
@@ -395,6 +510,13 @@ func (j *JobUpdate) UnmarshalJSON(data []byte) error {
 	}
 	*j = JobUpdate(unmarshaler.embed)
 	j.OutcomeAcknowledgedAt = unmarshaler.OutcomeAcknowledgedAt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	if err != nil {
+		return err
+	}
+	j.extraProperties = extraProperties
+
 	j._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -427,7 +549,12 @@ type ListJobsResponse struct {
 	Pagination *Pagination `json:"pagination,omitempty" url:"pagination,omitempty"`
 	Data       []*Job      `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (l *ListJobsResponse) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
 }
 
 func (l *ListJobsResponse) UnmarshalJSON(data []byte) error {
@@ -437,6 +564,13 @@ func (l *ListJobsResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*l = ListJobsResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+
 	l._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -471,7 +605,12 @@ type MutateJobConfig struct {
 	// The Record Ids param (ids) is a list of record ids that can be passed to several record endpoints allowing the user to identify specific records to INCLUDE in the query, or specific records to EXCLUDE, depending on whether or not filters are being applied. When passing a query param that filters the record dataset, such as 'searchValue', or a 'filter' of 'valid' | 'error' | 'all', the 'ids' param will EXCLUDE those records from the filtered results. For basic queries that do not filter the dataset, passing record ids in the 'ids' param will limit the dataset to INCLUDE just those specific records
 	Ids []RecordId `json:"ids,omitempty" url:"ids,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (m *MutateJobConfig) GetExtraProperties() map[string]interface{} {
+	return m.extraProperties
 }
 
 func (m *MutateJobConfig) UnmarshalJSON(data []byte) error {
@@ -481,6 +620,13 @@ func (m *MutateJobConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*m = MutateJobConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *m)
+	if err != nil {
+		return err
+	}
+	m.extraProperties = extraProperties
+
 	m._rawJSON = json.RawMessage(data)
 	return nil
 }

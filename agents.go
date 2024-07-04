@@ -65,7 +65,12 @@ type ListAgentsRequest struct {
 type GetDetailedAgentLogResponse struct {
 	Data *DetailedAgentLog `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GetDetailedAgentLogResponse) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
 }
 
 func (g *GetDetailedAgentLogResponse) UnmarshalJSON(data []byte) error {
@@ -75,6 +80,13 @@ func (g *GetDetailedAgentLogResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*g = GetDetailedAgentLogResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
 	g._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -95,7 +107,12 @@ type GetDetailedAgentLogsResponse struct {
 	Pagination *Pagination         `json:"pagination,omitempty" url:"pagination,omitempty"`
 	Data       []*DetailedAgentLog `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GetDetailedAgentLogsResponse) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
 }
 
 func (g *GetDetailedAgentLogsResponse) UnmarshalJSON(data []byte) error {
@@ -105,6 +122,13 @@ func (g *GetDetailedAgentLogsResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*g = GetDetailedAgentLogsResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
 	g._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -125,7 +149,12 @@ type GetExecutionsResponse struct {
 	Pagination *Pagination  `json:"pagination,omitempty" url:"pagination,omitempty"`
 	Data       []*Execution `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GetExecutionsResponse) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
 }
 
 func (g *GetExecutionsResponse) UnmarshalJSON(data []byte) error {
@@ -135,6 +164,13 @@ func (g *GetExecutionsResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*g = GetExecutionsResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
 	g._rawJSON = json.RawMessage(data)
 	return nil
 }

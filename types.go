@@ -25,7 +25,12 @@ type Account struct {
 	DefaultAppId            *AppId                 `json:"defaultAppId,omitempty" url:"defaultAppId,omitempty"`
 	Dashboard               *int                   `json:"dashboard,omitempty" url:"dashboard,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *Account) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
 }
 
 func (a *Account) UnmarshalJSON(data []byte) error {
@@ -43,6 +48,13 @@ func (a *Account) UnmarshalJSON(data []byte) error {
 	*a = Account(unmarshaler.embed)
 	a.CreatedAt = unmarshaler.CreatedAt.Time()
 	a.UpdatedAt = unmarshaler.UpdatedAt.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
 	a._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -84,7 +96,12 @@ type Agent struct {
 	Slug *string `json:"slug,omitempty" url:"slug,omitempty"`
 	Id   AgentId `json:"id" url:"id"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *Agent) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
 }
 
 func (a *Agent) UnmarshalJSON(data []byte) error {
@@ -94,6 +111,13 @@ func (a *Agent) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*a = Agent(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
 	a._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -121,7 +145,12 @@ type AgentConfig struct {
 	// The slug of the agent
 	Slug *string `json:"slug,omitempty" url:"slug,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AgentConfig) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
 }
 
 func (a *AgentConfig) UnmarshalJSON(data []byte) error {
@@ -131,6 +160,13 @@ func (a *AgentConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*a = AgentConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
 	a._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -157,7 +193,12 @@ type AgentLog struct {
 	// The log of the agent execution
 	Log *string `json:"log,omitempty" url:"log,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AgentLog) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
 }
 
 func (a *AgentLog) UnmarshalJSON(data []byte) error {
@@ -167,6 +208,13 @@ func (a *AgentLog) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*a = AgentLog(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
 	a._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -186,7 +234,12 @@ func (a *AgentLog) String() string {
 type AgentResponse struct {
 	Data *Agent `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AgentResponse) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
 }
 
 func (a *AgentResponse) UnmarshalJSON(data []byte) error {
@@ -196,6 +249,13 @@ func (a *AgentResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*a = AgentResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
 	a._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -248,7 +308,12 @@ type DetailedAgentLog struct {
 	// The log of the agent execution
 	Log *string `json:"log,omitempty" url:"log,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (d *DetailedAgentLog) GetExtraProperties() map[string]interface{} {
+	return d.extraProperties
 }
 
 func (d *DetailedAgentLog) UnmarshalJSON(data []byte) error {
@@ -266,6 +331,13 @@ func (d *DetailedAgentLog) UnmarshalJSON(data []byte) error {
 	*d = DetailedAgentLog(unmarshaler.embed)
 	d.CreatedAt = unmarshaler.CreatedAt.Time()
 	d.CompletedAt = unmarshaler.CompletedAt.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *d)
+	if err != nil {
+		return err
+	}
+	d.extraProperties = extraProperties
+
 	d._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -308,7 +380,12 @@ type Execution struct {
 	// The topics of the agent execution
 	Topic string `json:"topic" url:"topic"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *Execution) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
 }
 
 func (e *Execution) UnmarshalJSON(data []byte) error {
@@ -326,6 +403,13 @@ func (e *Execution) UnmarshalJSON(data []byte) error {
 	*e = Execution(unmarshaler.embed)
 	e.CreatedAt = unmarshaler.CreatedAt.Time()
 	e.CompletedAt = unmarshaler.CompletedAt.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
 	e._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -360,7 +444,12 @@ type GetAgentLogsResponse struct {
 	Pagination *Pagination `json:"pagination,omitempty" url:"pagination,omitempty"`
 	Data       []*AgentLog `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GetAgentLogsResponse) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
 }
 
 func (g *GetAgentLogsResponse) UnmarshalJSON(data []byte) error {
@@ -370,6 +459,13 @@ func (g *GetAgentLogsResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*g = GetAgentLogsResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
 	g._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -389,7 +485,12 @@ func (g *GetAgentLogsResponse) String() string {
 type ListAgentsResponse struct {
 	Data []*Agent `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (l *ListAgentsResponse) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
 }
 
 func (l *ListAgentsResponse) UnmarshalJSON(data []byte) error {
@@ -399,6 +500,13 @@ func (l *ListAgentsResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*l = ListAgentsResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+
 	l._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -420,7 +528,7 @@ type App struct {
 	Id                 AppId       `json:"id" url:"id"`
 	Name               string      `json:"name" url:"name"`
 	Namespace          string      `json:"namespace" url:"namespace"`
-	Type               AppType     `json:"type,omitempty" url:"type,omitempty"`
+	Type               AppType     `json:"type" url:"type"`
 	Entity             string      `json:"entity" url:"entity"`
 	EntityPlural       string      `json:"entityPlural" url:"entityPlural"`
 	Icon               *string     `json:"icon,omitempty" url:"icon,omitempty"`
@@ -431,7 +539,12 @@ type App struct {
 	DeletedAt          *time.Time  `json:"deletedAt,omitempty" url:"deletedAt,omitempty"`
 	ActivatedAt        *time.Time  `json:"activatedAt,omitempty" url:"activatedAt,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *App) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
 }
 
 func (a *App) UnmarshalJSON(data []byte) error {
@@ -453,6 +566,13 @@ func (a *App) UnmarshalJSON(data []byte) error {
 	a.UpdatedAt = unmarshaler.UpdatedAt.Time()
 	a.DeletedAt = unmarshaler.DeletedAt.TimePtr()
 	a.ActivatedAt = unmarshaler.ActivatedAt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
 	a._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -529,7 +649,12 @@ type Prompt struct {
 	UpdatedAt time.Time  `json:"updatedAt" url:"updatedAt"`
 	DeletedAt *time.Time `json:"deletedAt,omitempty" url:"deletedAt,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *Prompt) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
 }
 
 func (p *Prompt) UnmarshalJSON(data []byte) error {
@@ -549,6 +674,13 @@ func (p *Prompt) UnmarshalJSON(data []byte) error {
 	p.CreatedAt = unmarshaler.CreatedAt.Time()
 	p.UpdatedAt = unmarshaler.UpdatedAt.Time()
 	p.DeletedAt = unmarshaler.DeletedAt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
 	p._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -594,7 +726,12 @@ type Commit struct {
 	// The time the commit was acknowledged
 	CompletedAt *time.Time `json:"completedAt,omitempty" url:"completedAt,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *Commit) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
 }
 
 func (c *Commit) UnmarshalJSON(data []byte) error {
@@ -612,6 +749,13 @@ func (c *Commit) UnmarshalJSON(data []byte) error {
 	*c = Commit(unmarshaler.embed)
 	c.CreatedAt = unmarshaler.CreatedAt.Time()
 	c.CompletedAt = unmarshaler.CompletedAt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
 	c._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -645,7 +789,12 @@ func (c *Commit) String() string {
 type ListCommitsResponse struct {
 	Data []*Commit `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (l *ListCommitsResponse) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
 }
 
 func (l *ListCommitsResponse) UnmarshalJSON(data []byte) error {
@@ -655,6 +804,13 @@ func (l *ListCommitsResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*l = ListCommitsResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+
 	l._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -675,9 +831,14 @@ func (l *ListCommitsResponse) String() string {
 type AccountId = string
 
 type ActionConstraint struct {
-	Type ActionConstraintType `json:"type,omitempty" url:"type,omitempty"`
+	Type ActionConstraintType `json:"type" url:"type"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *ActionConstraint) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
 }
 
 func (a *ActionConstraint) UnmarshalJSON(data []byte) error {
@@ -687,6 +848,13 @@ func (a *ActionConstraint) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*a = ActionConstraint(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
 	a._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -729,10 +897,15 @@ func (a ActionConstraintType) Ptr() *ActionConstraintType {
 }
 
 type ActionMessage struct {
-	Type    ActionMessageType `json:"type,omitempty" url:"type,omitempty"`
+	Type    ActionMessageType `json:"type" url:"type"`
 	Content string            `json:"content" url:"content"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *ActionMessage) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
 }
 
 func (a *ActionMessage) UnmarshalJSON(data []byte) error {
@@ -742,6 +915,13 @@ func (a *ActionMessage) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*a = ActionMessage(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
 	a._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -850,7 +1030,12 @@ type Error struct {
 	Key     *string `json:"key,omitempty" url:"key,omitempty"`
 	Message string  `json:"message" url:"message"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *Error) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
 }
 
 func (e *Error) UnmarshalJSON(data []byte) error {
@@ -860,6 +1045,13 @@ func (e *Error) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*e = Error(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
 	e._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -879,7 +1071,12 @@ func (e *Error) String() string {
 type Errors struct {
 	Errors []*Error `json:"errors,omitempty" url:"errors,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *Errors) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
 }
 
 func (e *Errors) UnmarshalJSON(data []byte) error {
@@ -889,6 +1086,13 @@ func (e *Errors) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*e = Errors(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
 	e._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -946,7 +1150,12 @@ type FilterField = string
 type InputConfig struct {
 	Options []*InputEnumPropertyOption `json:"options,omitempty" url:"options,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (i *InputConfig) GetExtraProperties() map[string]interface{} {
+	return i.extraProperties
 }
 
 func (i *InputConfig) UnmarshalJSON(data []byte) error {
@@ -956,6 +1165,13 @@ func (i *InputConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*i = InputConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+
 	i._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -973,9 +1189,14 @@ func (i *InputConfig) String() string {
 }
 
 type InputConstraint struct {
-	Type InputConstraintType `json:"type,omitempty" url:"type,omitempty"`
+	Type InputConstraintType `json:"type" url:"type"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (i *InputConstraint) GetExtraProperties() map[string]interface{} {
+	return i.extraProperties
 }
 
 func (i *InputConstraint) UnmarshalJSON(data []byte) error {
@@ -985,6 +1206,13 @@ func (i *InputConstraint) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*i = InputConstraint(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+
 	i._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -1034,7 +1262,12 @@ type InputEnumPropertyOption struct {
 	// The value or ID of this option. This value will be sent in egress. The type is a string | integer | boolean.
 	Value interface{} `json:"value,omitempty" url:"value,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (i *InputEnumPropertyOption) GetExtraProperties() map[string]interface{} {
+	return i.extraProperties
 }
 
 func (i *InputEnumPropertyOption) UnmarshalJSON(data []byte) error {
@@ -1044,6 +1277,13 @@ func (i *InputEnumPropertyOption) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*i = InputEnumPropertyOption(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+
 	i._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -1076,7 +1316,12 @@ type InputField struct {
 	// Indicate additional validations that will be applied to the Field.
 	Constraints []*InputConstraint `json:"constraints,omitempty" url:"constraints,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (i *InputField) GetExtraProperties() map[string]interface{} {
+	return i.extraProperties
 }
 
 func (i *InputField) UnmarshalJSON(data []byte) error {
@@ -1086,6 +1331,13 @@ func (i *InputField) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*i = InputField(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+
 	i._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -1103,10 +1355,15 @@ func (i *InputField) String() string {
 }
 
 type InputForm struct {
-	Type   InputFormType `json:"type,omitempty" url:"type,omitempty"`
+	Type   InputFormType `json:"type" url:"type"`
 	Fields []*InputField `json:"fields,omitempty" url:"fields,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (i *InputForm) GetExtraProperties() map[string]interface{} {
+	return i.extraProperties
 }
 
 func (i *InputForm) UnmarshalJSON(data []byte) error {
@@ -1116,6 +1373,13 @@ func (i *InputForm) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*i = InputForm(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+
 	i._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -1169,7 +1433,12 @@ type Pagination struct {
 	// total available results
 	TotalCount int `json:"totalCount" url:"totalCount"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *Pagination) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
 }
 
 func (p *Pagination) UnmarshalJSON(data []byte) error {
@@ -1179,6 +1448,13 @@ func (p *Pagination) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*p = Pagination(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
 	p._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -1249,7 +1525,12 @@ type SpaceId = string
 type Success struct {
 	Data *SuccessData `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *Success) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
 }
 
 func (s *Success) UnmarshalJSON(data []byte) error {
@@ -1259,6 +1540,13 @@ func (s *Success) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*s = Success(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
 	s._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -1278,7 +1566,12 @@ func (s *Success) String() string {
 type SuccessData struct {
 	Success bool `json:"success" url:"success"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SuccessData) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
 }
 
 func (s *SuccessData) UnmarshalJSON(data []byte) error {
@@ -1288,6 +1581,13 @@ func (s *SuccessData) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*s = SuccessData(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
 	s._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -1318,7 +1618,7 @@ type WorkbookId = string
 
 // A data retention policy belonging to an environment
 type DataRetentionPolicy struct {
-	Type          DataRetentionPolicyEnum `json:"type,omitempty" url:"type,omitempty"`
+	Type          DataRetentionPolicyEnum `json:"type" url:"type"`
 	Period        int                     `json:"period" url:"period"`
 	EnvironmentId EnvironmentId           `json:"environmentId" url:"environmentId"`
 	Id            DataRetentionPolicyId   `json:"id" url:"id"`
@@ -1327,7 +1627,12 @@ type DataRetentionPolicy struct {
 	// Date the policy was last updated
 	UpdatedAt time.Time `json:"updatedAt" url:"updatedAt"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (d *DataRetentionPolicy) GetExtraProperties() map[string]interface{} {
+	return d.extraProperties
 }
 
 func (d *DataRetentionPolicy) UnmarshalJSON(data []byte) error {
@@ -1345,6 +1650,13 @@ func (d *DataRetentionPolicy) UnmarshalJSON(data []byte) error {
 	*d = DataRetentionPolicy(unmarshaler.embed)
 	d.CreatedAt = unmarshaler.CreatedAt.Time()
 	d.UpdatedAt = unmarshaler.UpdatedAt.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *d)
+	if err != nil {
+		return err
+	}
+	d.extraProperties = extraProperties
+
 	d._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -1413,7 +1725,12 @@ type Document struct {
 	// Date the document was last updated
 	UpdatedAt time.Time `json:"updatedAt" url:"updatedAt"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (d *Document) GetExtraProperties() map[string]interface{} {
+	return d.extraProperties
 }
 
 func (d *Document) UnmarshalJSON(data []byte) error {
@@ -1431,6 +1748,13 @@ func (d *Document) UnmarshalJSON(data []byte) error {
 	*d = Document(unmarshaler.embed)
 	d.CreatedAt = unmarshaler.CreatedAt.Time()
 	d.UpdatedAt = unmarshaler.UpdatedAt.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *d)
+	if err != nil {
+		return err
+	}
+	d.extraProperties = extraProperties
+
 	d._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -1468,7 +1792,12 @@ type Entitlement struct {
 	// Contains conditions or limits for an entitlement
 	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *Entitlement) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
 }
 
 func (e *Entitlement) UnmarshalJSON(data []byte) error {
@@ -1478,6 +1807,13 @@ func (e *Entitlement) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*e = Entitlement(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
 	e._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -1522,7 +1858,7 @@ type ActionName = string
 
 type BaseEvent struct {
 	// The domain of the event
-	Domain Domain `json:"domain,omitempty" url:"domain,omitempty"`
+	Domain Domain `json:"domain" url:"domain"`
 	// The context of the event
 	Context *Context `json:"context,omitempty" url:"context,omitempty"`
 	// The attributes of the event
@@ -1535,7 +1871,12 @@ type BaseEvent struct {
 	Origin     *Origin  `json:"origin,omitempty" url:"origin,omitempty"`
 	Namespaces []string `json:"namespaces,omitempty" url:"namespaces,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (b *BaseEvent) GetExtraProperties() map[string]interface{} {
+	return b.extraProperties
 }
 
 func (b *BaseEvent) UnmarshalJSON(data []byte) error {
@@ -1545,6 +1886,13 @@ func (b *BaseEvent) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*b = BaseEvent(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *b)
+	if err != nil {
+		return err
+	}
+	b.extraProperties = extraProperties
+
 	b._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -1587,7 +1935,12 @@ type Context struct {
 	ActorId *string `json:"actorId,omitempty" url:"actorId,omitempty"`
 	AppId   *AppId  `json:"appId,omitempty" url:"appId,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *Context) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
 }
 
 func (c *Context) UnmarshalJSON(data []byte) error {
@@ -1597,6 +1950,13 @@ func (c *Context) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*c = Context(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
 	c._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -1716,203 +2076,203 @@ type Event struct {
 }
 
 func NewEventFromAgentCreated(value *GenericEvent) *Event {
-	return &Event{Topic: "agentCreated", AgentCreated: value}
+	return &Event{Topic: "agent:created", AgentCreated: value}
 }
 
 func NewEventFromAgentUpdated(value *GenericEvent) *Event {
-	return &Event{Topic: "agentUpdated", AgentUpdated: value}
+	return &Event{Topic: "agent:updated", AgentUpdated: value}
 }
 
 func NewEventFromAgentDeleted(value *GenericEvent) *Event {
-	return &Event{Topic: "agentDeleted", AgentDeleted: value}
+	return &Event{Topic: "agent:deleted", AgentDeleted: value}
 }
 
 func NewEventFromSpaceCreated(value *GenericEvent) *Event {
-	return &Event{Topic: "spaceCreated", SpaceCreated: value}
+	return &Event{Topic: "space:created", SpaceCreated: value}
 }
 
 func NewEventFromSpaceUpdated(value *GenericEvent) *Event {
-	return &Event{Topic: "spaceUpdated", SpaceUpdated: value}
+	return &Event{Topic: "space:updated", SpaceUpdated: value}
 }
 
 func NewEventFromSpaceDeleted(value *GenericEvent) *Event {
-	return &Event{Topic: "spaceDeleted", SpaceDeleted: value}
+	return &Event{Topic: "space:deleted", SpaceDeleted: value}
 }
 
 func NewEventFromSpaceArchived(value *GenericEvent) *Event {
-	return &Event{Topic: "spaceArchived", SpaceArchived: value}
+	return &Event{Topic: "space:archived", SpaceArchived: value}
 }
 
 func NewEventFromSpaceExpired(value *GenericEvent) *Event {
-	return &Event{Topic: "spaceExpired", SpaceExpired: value}
+	return &Event{Topic: "space:expired", SpaceExpired: value}
 }
 
 func NewEventFromSpaceGuestAdded(value *GenericEvent) *Event {
-	return &Event{Topic: "spaceGuestAdded", SpaceGuestAdded: value}
+	return &Event{Topic: "space:guestAdded", SpaceGuestAdded: value}
 }
 
 func NewEventFromSpaceGuestRemoved(value *GenericEvent) *Event {
-	return &Event{Topic: "spaceGuestRemoved", SpaceGuestRemoved: value}
+	return &Event{Topic: "space:guestRemoved", SpaceGuestRemoved: value}
 }
 
 func NewEventFromDocumentCreated(value *GenericEvent) *Event {
-	return &Event{Topic: "documentCreated", DocumentCreated: value}
+	return &Event{Topic: "document:created", DocumentCreated: value}
 }
 
 func NewEventFromDocumentUpdated(value *GenericEvent) *Event {
-	return &Event{Topic: "documentUpdated", DocumentUpdated: value}
+	return &Event{Topic: "document:updated", DocumentUpdated: value}
 }
 
 func NewEventFromDocumentDeleted(value *GenericEvent) *Event {
-	return &Event{Topic: "documentDeleted", DocumentDeleted: value}
+	return &Event{Topic: "document:deleted", DocumentDeleted: value}
 }
 
 func NewEventFromWorkbookCreated(value *GenericEvent) *Event {
-	return &Event{Topic: "workbookCreated", WorkbookCreated: value}
+	return &Event{Topic: "workbook:created", WorkbookCreated: value}
 }
 
 func NewEventFromWorkbookUpdated(value *GenericEvent) *Event {
-	return &Event{Topic: "workbookUpdated", WorkbookUpdated: value}
+	return &Event{Topic: "workbook:updated", WorkbookUpdated: value}
 }
 
 func NewEventFromWorkbookDeleted(value *GenericEvent) *Event {
-	return &Event{Topic: "workbookDeleted", WorkbookDeleted: value}
+	return &Event{Topic: "workbook:deleted", WorkbookDeleted: value}
 }
 
 func NewEventFromWorkbookExpired(value *GenericEvent) *Event {
-	return &Event{Topic: "workbookExpired", WorkbookExpired: value}
+	return &Event{Topic: "workbook:expired", WorkbookExpired: value}
 }
 
 func NewEventFromSheetCreated(value *GenericEvent) *Event {
-	return &Event{Topic: "sheetCreated", SheetCreated: value}
+	return &Event{Topic: "sheet:created", SheetCreated: value}
 }
 
 func NewEventFromSheetUpdated(value *GenericEvent) *Event {
-	return &Event{Topic: "sheetUpdated", SheetUpdated: value}
+	return &Event{Topic: "sheet:updated", SheetUpdated: value}
 }
 
 func NewEventFromSheetDeleted(value *GenericEvent) *Event {
-	return &Event{Topic: "sheetDeleted", SheetDeleted: value}
+	return &Event{Topic: "sheet:deleted", SheetDeleted: value}
 }
 
 func NewEventFromSheetCountsUpdated(value *GenericEvent) *Event {
-	return &Event{Topic: "sheetCountsUpdated", SheetCountsUpdated: value}
+	return &Event{Topic: "sheet:counts-updated", SheetCountsUpdated: value}
 }
 
 func NewEventFromSnapshotCreated(value *GenericEvent) *Event {
-	return &Event{Topic: "snapshotCreated", SnapshotCreated: value}
+	return &Event{Topic: "snapshot:created", SnapshotCreated: value}
 }
 
 func NewEventFromRecordsCreated(value *GenericEvent) *Event {
-	return &Event{Topic: "recordsCreated", RecordsCreated: value}
+	return &Event{Topic: "records:created", RecordsCreated: value}
 }
 
 func NewEventFromRecordsUpdated(value *GenericEvent) *Event {
-	return &Event{Topic: "recordsUpdated", RecordsUpdated: value}
+	return &Event{Topic: "records:updated", RecordsUpdated: value}
 }
 
 func NewEventFromRecordsDeleted(value *GenericEvent) *Event {
-	return &Event{Topic: "recordsDeleted", RecordsDeleted: value}
+	return &Event{Topic: "records:deleted", RecordsDeleted: value}
 }
 
 func NewEventFromFileCreated(value *GenericEvent) *Event {
-	return &Event{Topic: "fileCreated", FileCreated: value}
+	return &Event{Topic: "file:created", FileCreated: value}
 }
 
 func NewEventFromFileUpdated(value *GenericEvent) *Event {
-	return &Event{Topic: "fileUpdated", FileUpdated: value}
+	return &Event{Topic: "file:updated", FileUpdated: value}
 }
 
 func NewEventFromFileDeleted(value *GenericEvent) *Event {
-	return &Event{Topic: "fileDeleted", FileDeleted: value}
+	return &Event{Topic: "file:deleted", FileDeleted: value}
 }
 
 func NewEventFromFileExpired(value *GenericEvent) *Event {
-	return &Event{Topic: "fileExpired", FileExpired: value}
+	return &Event{Topic: "file:expired", FileExpired: value}
 }
 
 func NewEventFromJobCreated(value *GenericEvent) *Event {
-	return &Event{Topic: "jobCreated", JobCreated: value}
+	return &Event{Topic: "job:created", JobCreated: value}
 }
 
 func NewEventFromJobUpdated(value *GenericEvent) *Event {
-	return &Event{Topic: "jobUpdated", JobUpdated: value}
+	return &Event{Topic: "job:updated", JobUpdated: value}
 }
 
 func NewEventFromJobDeleted(value *GenericEvent) *Event {
-	return &Event{Topic: "jobDeleted", JobDeleted: value}
+	return &Event{Topic: "job:deleted", JobDeleted: value}
 }
 
 func NewEventFromJobFailed(value *GenericEvent) *Event {
-	return &Event{Topic: "jobFailed", JobFailed: value}
+	return &Event{Topic: "job:failed", JobFailed: value}
 }
 
 func NewEventFromJobCompleted(value *GenericEvent) *Event {
-	return &Event{Topic: "jobCompleted", JobCompleted: value}
+	return &Event{Topic: "job:completed", JobCompleted: value}
 }
 
 func NewEventFromJobReady(value *GenericEvent) *Event {
-	return &Event{Topic: "jobReady", JobReady: value}
+	return &Event{Topic: "job:ready", JobReady: value}
 }
 
 func NewEventFromJobScheduled(value *GenericEvent) *Event {
-	return &Event{Topic: "jobScheduled", JobScheduled: value}
+	return &Event{Topic: "job:scheduled", JobScheduled: value}
 }
 
 func NewEventFromJobOutcomeAcknowledged(value *GenericEvent) *Event {
-	return &Event{Topic: "jobOutcomeAcknowledged", JobOutcomeAcknowledged: value}
+	return &Event{Topic: "job:outcome-acknowledged", JobOutcomeAcknowledged: value}
 }
 
 func NewEventFromJobPartsCompleted(value *GenericEvent) *Event {
-	return &Event{Topic: "jobPartsCompleted", JobPartsCompleted: value}
+	return &Event{Topic: "job:parts-completed", JobPartsCompleted: value}
 }
 
 func NewEventFromProgramCreated(value *GenericEvent) *Event {
-	return &Event{Topic: "programCreated", ProgramCreated: value}
+	return &Event{Topic: "program:created", ProgramCreated: value}
 }
 
 func NewEventFromProgramUpdated(value *GenericEvent) *Event {
-	return &Event{Topic: "programUpdated", ProgramUpdated: value}
+	return &Event{Topic: "program:updated", ProgramUpdated: value}
 }
 
 func NewEventFromCommitCreated(value *GenericEvent) *Event {
-	return &Event{Topic: "commitCreated", CommitCreated: value}
+	return &Event{Topic: "commit:created", CommitCreated: value}
 }
 
 func NewEventFromCommitUpdated(value *GenericEvent) *Event {
-	return &Event{Topic: "commitUpdated", CommitUpdated: value}
+	return &Event{Topic: "commit:updated", CommitUpdated: value}
 }
 
 func NewEventFromCommitCompleted(value *GenericEvent) *Event {
-	return &Event{Topic: "commitCompleted", CommitCompleted: value}
+	return &Event{Topic: "commit:completed", CommitCompleted: value}
 }
 
 func NewEventFromSecretCreated(value *GenericEvent) *Event {
-	return &Event{Topic: "secretCreated", SecretCreated: value}
+	return &Event{Topic: "secret:created", SecretCreated: value}
 }
 
 func NewEventFromSecretUpdated(value *GenericEvent) *Event {
-	return &Event{Topic: "secretUpdated", SecretUpdated: value}
+	return &Event{Topic: "secret:updated", SecretUpdated: value}
 }
 
 func NewEventFromSecretDeleted(value *GenericEvent) *Event {
-	return &Event{Topic: "secretDeleted", SecretDeleted: value}
+	return &Event{Topic: "secret:deleted", SecretDeleted: value}
 }
 
 func NewEventFromLayerCreated(value *GenericEvent) *Event {
-	return &Event{Topic: "layerCreated", LayerCreated: value}
+	return &Event{Topic: "layer:created", LayerCreated: value}
 }
 
 func NewEventFromEnvironmentCreated(value *GenericEvent) *Event {
-	return &Event{Topic: "environmentCreated", EnvironmentCreated: value}
+	return &Event{Topic: "environment:created", EnvironmentCreated: value}
 }
 
 func NewEventFromEnvironmentUpdated(value *GenericEvent) *Event {
-	return &Event{Topic: "environmentUpdated", EnvironmentUpdated: value}
+	return &Event{Topic: "environment:updated", EnvironmentUpdated: value}
 }
 
 func NewEventFromEnvironmentDeleted(value *GenericEvent) *Event {
-	return &Event{Topic: "environmentDeleted", EnvironmentDeleted: value}
+	return &Event{Topic: "environment:deleted", EnvironmentDeleted: value}
 }
 
 func (e *Event) UnmarshalJSON(data []byte) error {
@@ -1924,301 +2284,301 @@ func (e *Event) UnmarshalJSON(data []byte) error {
 	}
 	e.Topic = unmarshaler.Topic
 	switch unmarshaler.Topic {
-	case "agentCreated":
+	case "agent:created":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.AgentCreated = value
-	case "agentUpdated":
+	case "agent:updated":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.AgentUpdated = value
-	case "agentDeleted":
+	case "agent:deleted":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.AgentDeleted = value
-	case "spaceCreated":
+	case "space:created":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.SpaceCreated = value
-	case "spaceUpdated":
+	case "space:updated":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.SpaceUpdated = value
-	case "spaceDeleted":
+	case "space:deleted":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.SpaceDeleted = value
-	case "spaceArchived":
+	case "space:archived":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.SpaceArchived = value
-	case "spaceExpired":
+	case "space:expired":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.SpaceExpired = value
-	case "spaceGuestAdded":
+	case "space:guestAdded":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.SpaceGuestAdded = value
-	case "spaceGuestRemoved":
+	case "space:guestRemoved":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.SpaceGuestRemoved = value
-	case "documentCreated":
+	case "document:created":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.DocumentCreated = value
-	case "documentUpdated":
+	case "document:updated":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.DocumentUpdated = value
-	case "documentDeleted":
+	case "document:deleted":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.DocumentDeleted = value
-	case "workbookCreated":
+	case "workbook:created":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.WorkbookCreated = value
-	case "workbookUpdated":
+	case "workbook:updated":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.WorkbookUpdated = value
-	case "workbookDeleted":
+	case "workbook:deleted":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.WorkbookDeleted = value
-	case "workbookExpired":
+	case "workbook:expired":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.WorkbookExpired = value
-	case "sheetCreated":
+	case "sheet:created":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.SheetCreated = value
-	case "sheetUpdated":
+	case "sheet:updated":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.SheetUpdated = value
-	case "sheetDeleted":
+	case "sheet:deleted":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.SheetDeleted = value
-	case "sheetCountsUpdated":
+	case "sheet:counts-updated":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.SheetCountsUpdated = value
-	case "snapshotCreated":
+	case "snapshot:created":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.SnapshotCreated = value
-	case "recordsCreated":
+	case "records:created":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.RecordsCreated = value
-	case "recordsUpdated":
+	case "records:updated":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.RecordsUpdated = value
-	case "recordsDeleted":
+	case "records:deleted":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.RecordsDeleted = value
-	case "fileCreated":
+	case "file:created":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.FileCreated = value
-	case "fileUpdated":
+	case "file:updated":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.FileUpdated = value
-	case "fileDeleted":
+	case "file:deleted":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.FileDeleted = value
-	case "fileExpired":
+	case "file:expired":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.FileExpired = value
-	case "jobCreated":
+	case "job:created":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.JobCreated = value
-	case "jobUpdated":
+	case "job:updated":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.JobUpdated = value
-	case "jobDeleted":
+	case "job:deleted":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.JobDeleted = value
-	case "jobFailed":
+	case "job:failed":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.JobFailed = value
-	case "jobCompleted":
+	case "job:completed":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.JobCompleted = value
-	case "jobReady":
+	case "job:ready":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.JobReady = value
-	case "jobScheduled":
+	case "job:scheduled":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.JobScheduled = value
-	case "jobOutcomeAcknowledged":
+	case "job:outcome-acknowledged":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.JobOutcomeAcknowledged = value
-	case "jobPartsCompleted":
+	case "job:parts-completed":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.JobPartsCompleted = value
-	case "programCreated":
+	case "program:created":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.ProgramCreated = value
-	case "programUpdated":
+	case "program:updated":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.ProgramUpdated = value
-	case "commitCreated":
+	case "commit:created":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.CommitCreated = value
-	case "commitUpdated":
+	case "commit:updated":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.CommitUpdated = value
-	case "commitCompleted":
+	case "commit:completed":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.CommitCompleted = value
-	case "secretCreated":
+	case "secret:created":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.SecretCreated = value
-	case "secretUpdated":
+	case "secret:updated":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.SecretUpdated = value
-	case "secretDeleted":
+	case "secret:deleted":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.SecretDeleted = value
-	case "layerCreated":
+	case "layer:created":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.LayerCreated = value
-	case "environmentCreated":
+	case "environment:created":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.EnvironmentCreated = value
-	case "environmentUpdated":
+	case "environment:updated":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
 		}
 		e.EnvironmentUpdated = value
-	case "environmentDeleted":
+	case "environment:deleted":
 		value := new(GenericEvent)
 		if err := json.Unmarshal(data, &value); err != nil {
 			return err
@@ -2232,456 +2592,106 @@ func (e Event) MarshalJSON() ([]byte, error) {
 	switch e.Topic {
 	default:
 		return nil, fmt.Errorf("invalid type %s in %T", e.Topic, e)
-	case "agentCreated":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.AgentCreated,
-		}
-		return json.Marshal(marshaler)
-	case "agentUpdated":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.AgentUpdated,
-		}
-		return json.Marshal(marshaler)
-	case "agentDeleted":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.AgentDeleted,
-		}
-		return json.Marshal(marshaler)
-	case "spaceCreated":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.SpaceCreated,
-		}
-		return json.Marshal(marshaler)
-	case "spaceUpdated":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.SpaceUpdated,
-		}
-		return json.Marshal(marshaler)
-	case "spaceDeleted":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.SpaceDeleted,
-		}
-		return json.Marshal(marshaler)
-	case "spaceArchived":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.SpaceArchived,
-		}
-		return json.Marshal(marshaler)
-	case "spaceExpired":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.SpaceExpired,
-		}
-		return json.Marshal(marshaler)
-	case "spaceGuestAdded":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.SpaceGuestAdded,
-		}
-		return json.Marshal(marshaler)
-	case "spaceGuestRemoved":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.SpaceGuestRemoved,
-		}
-		return json.Marshal(marshaler)
-	case "documentCreated":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.DocumentCreated,
-		}
-		return json.Marshal(marshaler)
-	case "documentUpdated":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.DocumentUpdated,
-		}
-		return json.Marshal(marshaler)
-	case "documentDeleted":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.DocumentDeleted,
-		}
-		return json.Marshal(marshaler)
-	case "workbookCreated":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.WorkbookCreated,
-		}
-		return json.Marshal(marshaler)
-	case "workbookUpdated":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.WorkbookUpdated,
-		}
-		return json.Marshal(marshaler)
-	case "workbookDeleted":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.WorkbookDeleted,
-		}
-		return json.Marshal(marshaler)
-	case "workbookExpired":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.WorkbookExpired,
-		}
-		return json.Marshal(marshaler)
-	case "sheetCreated":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.SheetCreated,
-		}
-		return json.Marshal(marshaler)
-	case "sheetUpdated":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.SheetUpdated,
-		}
-		return json.Marshal(marshaler)
-	case "sheetDeleted":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.SheetDeleted,
-		}
-		return json.Marshal(marshaler)
-	case "sheetCountsUpdated":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.SheetCountsUpdated,
-		}
-		return json.Marshal(marshaler)
-	case "snapshotCreated":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.SnapshotCreated,
-		}
-		return json.Marshal(marshaler)
-	case "recordsCreated":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.RecordsCreated,
-		}
-		return json.Marshal(marshaler)
-	case "recordsUpdated":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.RecordsUpdated,
-		}
-		return json.Marshal(marshaler)
-	case "recordsDeleted":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.RecordsDeleted,
-		}
-		return json.Marshal(marshaler)
-	case "fileCreated":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.FileCreated,
-		}
-		return json.Marshal(marshaler)
-	case "fileUpdated":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.FileUpdated,
-		}
-		return json.Marshal(marshaler)
-	case "fileDeleted":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.FileDeleted,
-		}
-		return json.Marshal(marshaler)
-	case "fileExpired":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.FileExpired,
-		}
-		return json.Marshal(marshaler)
-	case "jobCreated":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.JobCreated,
-		}
-		return json.Marshal(marshaler)
-	case "jobUpdated":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.JobUpdated,
-		}
-		return json.Marshal(marshaler)
-	case "jobDeleted":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.JobDeleted,
-		}
-		return json.Marshal(marshaler)
-	case "jobFailed":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.JobFailed,
-		}
-		return json.Marshal(marshaler)
-	case "jobCompleted":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.JobCompleted,
-		}
-		return json.Marshal(marshaler)
-	case "jobReady":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.JobReady,
-		}
-		return json.Marshal(marshaler)
-	case "jobScheduled":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.JobScheduled,
-		}
-		return json.Marshal(marshaler)
-	case "jobOutcomeAcknowledged":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.JobOutcomeAcknowledged,
-		}
-		return json.Marshal(marshaler)
-	case "jobPartsCompleted":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.JobPartsCompleted,
-		}
-		return json.Marshal(marshaler)
-	case "programCreated":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.ProgramCreated,
-		}
-		return json.Marshal(marshaler)
-	case "programUpdated":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.ProgramUpdated,
-		}
-		return json.Marshal(marshaler)
-	case "commitCreated":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.CommitCreated,
-		}
-		return json.Marshal(marshaler)
-	case "commitUpdated":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.CommitUpdated,
-		}
-		return json.Marshal(marshaler)
-	case "commitCompleted":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.CommitCompleted,
-		}
-		return json.Marshal(marshaler)
-	case "secretCreated":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.SecretCreated,
-		}
-		return json.Marshal(marshaler)
-	case "secretUpdated":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.SecretUpdated,
-		}
-		return json.Marshal(marshaler)
-	case "secretDeleted":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.SecretDeleted,
-		}
-		return json.Marshal(marshaler)
-	case "layerCreated":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.LayerCreated,
-		}
-		return json.Marshal(marshaler)
-	case "environmentCreated":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.EnvironmentCreated,
-		}
-		return json.Marshal(marshaler)
-	case "environmentUpdated":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.EnvironmentUpdated,
-		}
-		return json.Marshal(marshaler)
-	case "environmentDeleted":
-		var marshaler = struct {
-			Topic string `json:"topic"`
-			*GenericEvent
-		}{
-			Topic:        e.Topic,
-			GenericEvent: e.EnvironmentDeleted,
-		}
-		return json.Marshal(marshaler)
+	case "agent:created":
+		return core.MarshalJSONWithExtraProperty(e.AgentCreated, "topic", "agent:created")
+	case "agent:updated":
+		return core.MarshalJSONWithExtraProperty(e.AgentUpdated, "topic", "agent:updated")
+	case "agent:deleted":
+		return core.MarshalJSONWithExtraProperty(e.AgentDeleted, "topic", "agent:deleted")
+	case "space:created":
+		return core.MarshalJSONWithExtraProperty(e.SpaceCreated, "topic", "space:created")
+	case "space:updated":
+		return core.MarshalJSONWithExtraProperty(e.SpaceUpdated, "topic", "space:updated")
+	case "space:deleted":
+		return core.MarshalJSONWithExtraProperty(e.SpaceDeleted, "topic", "space:deleted")
+	case "space:archived":
+		return core.MarshalJSONWithExtraProperty(e.SpaceArchived, "topic", "space:archived")
+	case "space:expired":
+		return core.MarshalJSONWithExtraProperty(e.SpaceExpired, "topic", "space:expired")
+	case "space:guestAdded":
+		return core.MarshalJSONWithExtraProperty(e.SpaceGuestAdded, "topic", "space:guestAdded")
+	case "space:guestRemoved":
+		return core.MarshalJSONWithExtraProperty(e.SpaceGuestRemoved, "topic", "space:guestRemoved")
+	case "document:created":
+		return core.MarshalJSONWithExtraProperty(e.DocumentCreated, "topic", "document:created")
+	case "document:updated":
+		return core.MarshalJSONWithExtraProperty(e.DocumentUpdated, "topic", "document:updated")
+	case "document:deleted":
+		return core.MarshalJSONWithExtraProperty(e.DocumentDeleted, "topic", "document:deleted")
+	case "workbook:created":
+		return core.MarshalJSONWithExtraProperty(e.WorkbookCreated, "topic", "workbook:created")
+	case "workbook:updated":
+		return core.MarshalJSONWithExtraProperty(e.WorkbookUpdated, "topic", "workbook:updated")
+	case "workbook:deleted":
+		return core.MarshalJSONWithExtraProperty(e.WorkbookDeleted, "topic", "workbook:deleted")
+	case "workbook:expired":
+		return core.MarshalJSONWithExtraProperty(e.WorkbookExpired, "topic", "workbook:expired")
+	case "sheet:created":
+		return core.MarshalJSONWithExtraProperty(e.SheetCreated, "topic", "sheet:created")
+	case "sheet:updated":
+		return core.MarshalJSONWithExtraProperty(e.SheetUpdated, "topic", "sheet:updated")
+	case "sheet:deleted":
+		return core.MarshalJSONWithExtraProperty(e.SheetDeleted, "topic", "sheet:deleted")
+	case "sheet:counts-updated":
+		return core.MarshalJSONWithExtraProperty(e.SheetCountsUpdated, "topic", "sheet:counts-updated")
+	case "snapshot:created":
+		return core.MarshalJSONWithExtraProperty(e.SnapshotCreated, "topic", "snapshot:created")
+	case "records:created":
+		return core.MarshalJSONWithExtraProperty(e.RecordsCreated, "topic", "records:created")
+	case "records:updated":
+		return core.MarshalJSONWithExtraProperty(e.RecordsUpdated, "topic", "records:updated")
+	case "records:deleted":
+		return core.MarshalJSONWithExtraProperty(e.RecordsDeleted, "topic", "records:deleted")
+	case "file:created":
+		return core.MarshalJSONWithExtraProperty(e.FileCreated, "topic", "file:created")
+	case "file:updated":
+		return core.MarshalJSONWithExtraProperty(e.FileUpdated, "topic", "file:updated")
+	case "file:deleted":
+		return core.MarshalJSONWithExtraProperty(e.FileDeleted, "topic", "file:deleted")
+	case "file:expired":
+		return core.MarshalJSONWithExtraProperty(e.FileExpired, "topic", "file:expired")
+	case "job:created":
+		return core.MarshalJSONWithExtraProperty(e.JobCreated, "topic", "job:created")
+	case "job:updated":
+		return core.MarshalJSONWithExtraProperty(e.JobUpdated, "topic", "job:updated")
+	case "job:deleted":
+		return core.MarshalJSONWithExtraProperty(e.JobDeleted, "topic", "job:deleted")
+	case "job:failed":
+		return core.MarshalJSONWithExtraProperty(e.JobFailed, "topic", "job:failed")
+	case "job:completed":
+		return core.MarshalJSONWithExtraProperty(e.JobCompleted, "topic", "job:completed")
+	case "job:ready":
+		return core.MarshalJSONWithExtraProperty(e.JobReady, "topic", "job:ready")
+	case "job:scheduled":
+		return core.MarshalJSONWithExtraProperty(e.JobScheduled, "topic", "job:scheduled")
+	case "job:outcome-acknowledged":
+		return core.MarshalJSONWithExtraProperty(e.JobOutcomeAcknowledged, "topic", "job:outcome-acknowledged")
+	case "job:parts-completed":
+		return core.MarshalJSONWithExtraProperty(e.JobPartsCompleted, "topic", "job:parts-completed")
+	case "program:created":
+		return core.MarshalJSONWithExtraProperty(e.ProgramCreated, "topic", "program:created")
+	case "program:updated":
+		return core.MarshalJSONWithExtraProperty(e.ProgramUpdated, "topic", "program:updated")
+	case "commit:created":
+		return core.MarshalJSONWithExtraProperty(e.CommitCreated, "topic", "commit:created")
+	case "commit:updated":
+		return core.MarshalJSONWithExtraProperty(e.CommitUpdated, "topic", "commit:updated")
+	case "commit:completed":
+		return core.MarshalJSONWithExtraProperty(e.CommitCompleted, "topic", "commit:completed")
+	case "secret:created":
+		return core.MarshalJSONWithExtraProperty(e.SecretCreated, "topic", "secret:created")
+	case "secret:updated":
+		return core.MarshalJSONWithExtraProperty(e.SecretUpdated, "topic", "secret:updated")
+	case "secret:deleted":
+		return core.MarshalJSONWithExtraProperty(e.SecretDeleted, "topic", "secret:deleted")
+	case "layer:created":
+		return core.MarshalJSONWithExtraProperty(e.LayerCreated, "topic", "layer:created")
+	case "environment:created":
+		return core.MarshalJSONWithExtraProperty(e.EnvironmentCreated, "topic", "environment:created")
+	case "environment:updated":
+		return core.MarshalJSONWithExtraProperty(e.EnvironmentUpdated, "topic", "environment:updated")
+	case "environment:deleted":
+		return core.MarshalJSONWithExtraProperty(e.EnvironmentDeleted, "topic", "environment:deleted")
 	}
 }
 
@@ -2742,105 +2752,105 @@ func (e *Event) Accept(visitor EventVisitor) error {
 	switch e.Topic {
 	default:
 		return fmt.Errorf("invalid type %s in %T", e.Topic, e)
-	case "agentCreated":
+	case "agent:created":
 		return visitor.VisitAgentCreated(e.AgentCreated)
-	case "agentUpdated":
+	case "agent:updated":
 		return visitor.VisitAgentUpdated(e.AgentUpdated)
-	case "agentDeleted":
+	case "agent:deleted":
 		return visitor.VisitAgentDeleted(e.AgentDeleted)
-	case "spaceCreated":
+	case "space:created":
 		return visitor.VisitSpaceCreated(e.SpaceCreated)
-	case "spaceUpdated":
+	case "space:updated":
 		return visitor.VisitSpaceUpdated(e.SpaceUpdated)
-	case "spaceDeleted":
+	case "space:deleted":
 		return visitor.VisitSpaceDeleted(e.SpaceDeleted)
-	case "spaceArchived":
+	case "space:archived":
 		return visitor.VisitSpaceArchived(e.SpaceArchived)
-	case "spaceExpired":
+	case "space:expired":
 		return visitor.VisitSpaceExpired(e.SpaceExpired)
-	case "spaceGuestAdded":
+	case "space:guestAdded":
 		return visitor.VisitSpaceGuestAdded(e.SpaceGuestAdded)
-	case "spaceGuestRemoved":
+	case "space:guestRemoved":
 		return visitor.VisitSpaceGuestRemoved(e.SpaceGuestRemoved)
-	case "documentCreated":
+	case "document:created":
 		return visitor.VisitDocumentCreated(e.DocumentCreated)
-	case "documentUpdated":
+	case "document:updated":
 		return visitor.VisitDocumentUpdated(e.DocumentUpdated)
-	case "documentDeleted":
+	case "document:deleted":
 		return visitor.VisitDocumentDeleted(e.DocumentDeleted)
-	case "workbookCreated":
+	case "workbook:created":
 		return visitor.VisitWorkbookCreated(e.WorkbookCreated)
-	case "workbookUpdated":
+	case "workbook:updated":
 		return visitor.VisitWorkbookUpdated(e.WorkbookUpdated)
-	case "workbookDeleted":
+	case "workbook:deleted":
 		return visitor.VisitWorkbookDeleted(e.WorkbookDeleted)
-	case "workbookExpired":
+	case "workbook:expired":
 		return visitor.VisitWorkbookExpired(e.WorkbookExpired)
-	case "sheetCreated":
+	case "sheet:created":
 		return visitor.VisitSheetCreated(e.SheetCreated)
-	case "sheetUpdated":
+	case "sheet:updated":
 		return visitor.VisitSheetUpdated(e.SheetUpdated)
-	case "sheetDeleted":
+	case "sheet:deleted":
 		return visitor.VisitSheetDeleted(e.SheetDeleted)
-	case "sheetCountsUpdated":
+	case "sheet:counts-updated":
 		return visitor.VisitSheetCountsUpdated(e.SheetCountsUpdated)
-	case "snapshotCreated":
+	case "snapshot:created":
 		return visitor.VisitSnapshotCreated(e.SnapshotCreated)
-	case "recordsCreated":
+	case "records:created":
 		return visitor.VisitRecordsCreated(e.RecordsCreated)
-	case "recordsUpdated":
+	case "records:updated":
 		return visitor.VisitRecordsUpdated(e.RecordsUpdated)
-	case "recordsDeleted":
+	case "records:deleted":
 		return visitor.VisitRecordsDeleted(e.RecordsDeleted)
-	case "fileCreated":
+	case "file:created":
 		return visitor.VisitFileCreated(e.FileCreated)
-	case "fileUpdated":
+	case "file:updated":
 		return visitor.VisitFileUpdated(e.FileUpdated)
-	case "fileDeleted":
+	case "file:deleted":
 		return visitor.VisitFileDeleted(e.FileDeleted)
-	case "fileExpired":
+	case "file:expired":
 		return visitor.VisitFileExpired(e.FileExpired)
-	case "jobCreated":
+	case "job:created":
 		return visitor.VisitJobCreated(e.JobCreated)
-	case "jobUpdated":
+	case "job:updated":
 		return visitor.VisitJobUpdated(e.JobUpdated)
-	case "jobDeleted":
+	case "job:deleted":
 		return visitor.VisitJobDeleted(e.JobDeleted)
-	case "jobFailed":
+	case "job:failed":
 		return visitor.VisitJobFailed(e.JobFailed)
-	case "jobCompleted":
+	case "job:completed":
 		return visitor.VisitJobCompleted(e.JobCompleted)
-	case "jobReady":
+	case "job:ready":
 		return visitor.VisitJobReady(e.JobReady)
-	case "jobScheduled":
+	case "job:scheduled":
 		return visitor.VisitJobScheduled(e.JobScheduled)
-	case "jobOutcomeAcknowledged":
+	case "job:outcome-acknowledged":
 		return visitor.VisitJobOutcomeAcknowledged(e.JobOutcomeAcknowledged)
-	case "jobPartsCompleted":
+	case "job:parts-completed":
 		return visitor.VisitJobPartsCompleted(e.JobPartsCompleted)
-	case "programCreated":
+	case "program:created":
 		return visitor.VisitProgramCreated(e.ProgramCreated)
-	case "programUpdated":
+	case "program:updated":
 		return visitor.VisitProgramUpdated(e.ProgramUpdated)
-	case "commitCreated":
+	case "commit:created":
 		return visitor.VisitCommitCreated(e.CommitCreated)
-	case "commitUpdated":
+	case "commit:updated":
 		return visitor.VisitCommitUpdated(e.CommitUpdated)
-	case "commitCompleted":
+	case "commit:completed":
 		return visitor.VisitCommitCompleted(e.CommitCompleted)
-	case "secretCreated":
+	case "secret:created":
 		return visitor.VisitSecretCreated(e.SecretCreated)
-	case "secretUpdated":
+	case "secret:updated":
 		return visitor.VisitSecretUpdated(e.SecretUpdated)
-	case "secretDeleted":
+	case "secret:deleted":
 		return visitor.VisitSecretDeleted(e.SecretDeleted)
-	case "layerCreated":
+	case "layer:created":
 		return visitor.VisitLayerCreated(e.LayerCreated)
-	case "environmentCreated":
+	case "environment:created":
 		return visitor.VisitEnvironmentCreated(e.EnvironmentCreated)
-	case "environmentUpdated":
+	case "environment:updated":
 		return visitor.VisitEnvironmentUpdated(e.EnvironmentUpdated)
-	case "environmentDeleted":
+	case "environment:deleted":
 		return visitor.VisitEnvironmentDeleted(e.EnvironmentDeleted)
 	}
 }
@@ -2852,7 +2862,12 @@ type EventAttributes struct {
 	// The progress of the event within a collection of iterable events
 	Progress *Progress `json:"progress,omitempty" url:"progress,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *EventAttributes) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
 }
 
 func (e *EventAttributes) UnmarshalJSON(data []byte) error {
@@ -2868,6 +2883,13 @@ func (e *EventAttributes) UnmarshalJSON(data []byte) error {
 	}
 	*e = EventAttributes(unmarshaler.embed)
 	e.TargetUpdatedAt = unmarshaler.TargetUpdatedAt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
 	e._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -2904,7 +2926,12 @@ type EventContextSlugs struct {
 	// The slug of the sheet
 	Sheet *string `json:"sheet,omitempty" url:"sheet,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *EventContextSlugs) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
 }
 
 func (e *EventContextSlugs) UnmarshalJSON(data []byte) error {
@@ -2914,6 +2941,13 @@ func (e *EventContextSlugs) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*e = EventContextSlugs(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
 	e._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -2933,7 +2967,12 @@ func (e *EventContextSlugs) String() string {
 type EventResponse struct {
 	Data *Event `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *EventResponse) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
 }
 
 func (e *EventResponse) UnmarshalJSON(data []byte) error {
@@ -2943,6 +2982,13 @@ func (e *EventResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*e = EventResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
 	e._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -2961,7 +3007,7 @@ func (e *EventResponse) String() string {
 
 type GenericEvent struct {
 	// The domain of the event
-	Domain Domain `json:"domain,omitempty" url:"domain,omitempty"`
+	Domain Domain `json:"domain" url:"domain"`
 	// The context of the event
 	Context *Context `json:"context,omitempty" url:"context,omitempty"`
 	// The attributes of the event
@@ -2984,7 +3030,12 @@ type GenericEvent struct {
 	AcknowledgedBy *string                `json:"acknowledgedBy,omitempty" url:"acknowledgedBy,omitempty"`
 	Payload        map[string]interface{} `json:"payload,omitempty" url:"payload,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GenericEvent) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
 }
 
 func (g *GenericEvent) UnmarshalJSON(data []byte) error {
@@ -3004,6 +3055,13 @@ func (g *GenericEvent) UnmarshalJSON(data []byte) error {
 	g.CreatedAt = unmarshaler.CreatedAt.Time()
 	g.DeletedAt = unmarshaler.DeletedAt.TimePtr()
 	g.AcknowledgedAt = unmarshaler.AcknowledgedAt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
 	g._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -3039,7 +3097,12 @@ func (g *GenericEvent) String() string {
 type ListAllEventsResponse struct {
 	Data []*Event `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (l *ListAllEventsResponse) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
 }
 
 func (l *ListAllEventsResponse) UnmarshalJSON(data []byte) error {
@@ -3049,6 +3112,13 @@ func (l *ListAllEventsResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*l = ListAllEventsResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+
 	l._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -3070,7 +3140,12 @@ type Origin struct {
 	Id   *string `json:"id,omitempty" url:"id,omitempty"`
 	Slug *string `json:"slug,omitempty" url:"slug,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (o *Origin) GetExtraProperties() map[string]interface{} {
+	return o.extraProperties
 }
 
 func (o *Origin) UnmarshalJSON(data []byte) error {
@@ -3080,6 +3155,13 @@ func (o *Origin) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*o = Origin(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *o)
+	if err != nil {
+		return err
+	}
+	o.extraProperties = extraProperties
+
 	o._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -3105,7 +3187,12 @@ type Progress struct {
 	// The percent complete of the event group
 	Percent *int `json:"percent,omitempty" url:"percent,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *Progress) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
 }
 
 func (p *Progress) UnmarshalJSON(data []byte) error {
@@ -3115,6 +3202,13 @@ func (p *Progress) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*p = Progress(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
 	p._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -3146,7 +3240,7 @@ type File struct {
 	// Text encoding of the file
 	Encoding string `json:"encoding" url:"encoding"`
 	// Status of the file
-	Status ModelFileStatusEnum `json:"status,omitempty" url:"status,omitempty"`
+	Status ModelFileStatusEnum `json:"status" url:"status"`
 	// The storage mode of file
 	Mode *Mode `json:"mode,omitempty" url:"mode,omitempty"`
 	// Size of file in bytes
@@ -3165,7 +3259,12 @@ type File struct {
 	Actions    []*Action   `json:"actions,omitempty" url:"actions,omitempty"`
 	Origin     *FileOrigin `json:"origin,omitempty" url:"origin,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (f *File) GetExtraProperties() map[string]interface{} {
+	return f.extraProperties
 }
 
 func (f *File) UnmarshalJSON(data []byte) error {
@@ -3185,6 +3284,13 @@ func (f *File) UnmarshalJSON(data []byte) error {
 	f.CreatedAt = unmarshaler.CreatedAt.Time()
 	f.UpdatedAt = unmarshaler.UpdatedAt.Time()
 	f.ExpiredAt = unmarshaler.ExpiredAt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *f)
+	if err != nil {
+		return err
+	}
+	f.extraProperties = extraProperties
+
 	f._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -3228,7 +3334,12 @@ type Guest struct {
 	// Date the guest object was last updated
 	UpdatedAt time.Time `json:"updatedAt" url:"updatedAt"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *Guest) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
 }
 
 func (g *Guest) UnmarshalJSON(data []byte) error {
@@ -3246,6 +3357,13 @@ func (g *Guest) UnmarshalJSON(data []byte) error {
 	*g = Guest(unmarshaler.embed)
 	g.CreatedAt = unmarshaler.CreatedAt.Time()
 	g.UpdatedAt = unmarshaler.UpdatedAt.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
 	g._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -3281,7 +3399,12 @@ type GuestSpace struct {
 	Workbooks    []*GuestWorkbook `json:"workbooks,omitempty" url:"workbooks,omitempty"`
 	LastAccessed *time.Time       `json:"lastAccessed,omitempty" url:"lastAccessed,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GuestSpace) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
 }
 
 func (g *GuestSpace) UnmarshalJSON(data []byte) error {
@@ -3297,6 +3420,13 @@ func (g *GuestSpace) UnmarshalJSON(data []byte) error {
 	}
 	*g = GuestSpace(unmarshaler.embed)
 	g.LastAccessed = unmarshaler.LastAccessed.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
 	g._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -3330,7 +3460,12 @@ type GuestToken struct {
 	Token string `json:"token" url:"token"`
 	Valid bool   `json:"valid" url:"valid"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GuestToken) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
 }
 
 func (g *GuestToken) UnmarshalJSON(data []byte) error {
@@ -3340,6 +3475,13 @@ func (g *GuestToken) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*g = GuestToken(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
 	g._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -3359,7 +3501,12 @@ func (g *GuestToken) String() string {
 type GuestWorkbook struct {
 	Id WorkbookId `json:"id" url:"id"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GuestWorkbook) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
 }
 
 func (g *GuestWorkbook) UnmarshalJSON(data []byte) error {
@@ -3369,6 +3516,13 @@ func (g *GuestWorkbook) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*g = GuestWorkbook(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
 	g._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -3391,7 +3545,12 @@ type CategoryMapping struct {
 	// The destination value to map to
 	DestinationValue *EnumValue `json:"destinationValue,omitempty" url:"destinationValue,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CategoryMapping) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
 }
 
 func (c *CategoryMapping) UnmarshalJSON(data []byte) error {
@@ -3401,6 +3560,13 @@ func (c *CategoryMapping) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*c = CategoryMapping(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
 	c._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -3450,7 +3616,12 @@ type CollectionJobSubject struct {
 	Params   map[string]interface{} `json:"params,omitempty" url:"params,omitempty"`
 	Query    map[string]interface{} `json:"query,omitempty" url:"query,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CollectionJobSubject) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
 }
 
 func (c *CollectionJobSubject) UnmarshalJSON(data []byte) error {
@@ -3460,6 +3631,13 @@ func (c *CollectionJobSubject) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*c = CollectionJobSubject(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
 	c._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -3490,7 +3668,12 @@ type DeleteRecordsJobConfig struct {
 	// List of record ids to exclude from deletion
 	Exceptions []RecordId `json:"exceptions,omitempty" url:"exceptions,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (d *DeleteRecordsJobConfig) GetExtraProperties() map[string]interface{} {
+	return d.extraProperties
 }
 
 func (d *DeleteRecordsJobConfig) UnmarshalJSON(data []byte) error {
@@ -3500,6 +3683,13 @@ func (d *DeleteRecordsJobConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*d = DeleteRecordsJobConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *d)
+	if err != nil {
+		return err
+	}
+	d.extraProperties = extraProperties
+
 	d._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -3522,7 +3712,12 @@ type DestinationField struct {
 	// A list of preview values of the data in the destination field
 	Preview []string `json:"preview,omitempty" url:"preview,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (d *DestinationField) GetExtraProperties() map[string]interface{} {
+	return d.extraProperties
 }
 
 func (d *DestinationField) UnmarshalJSON(data []byte) error {
@@ -3532,6 +3727,13 @@ func (d *DestinationField) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*d = DestinationField(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *d)
+	if err != nil {
+		return err
+	}
+	d.extraProperties = extraProperties
+
 	d._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -3580,7 +3782,12 @@ type Edge struct {
 	// Metadata about the edge
 	Metadata *Metadata `json:"metadata,omitempty" url:"metadata,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *Edge) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
 }
 
 func (e *Edge) UnmarshalJSON(data []byte) error {
@@ -3590,6 +3797,13 @@ func (e *Edge) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*e = Edge(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
 	e._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -3607,7 +3821,12 @@ func (e *Edge) String() string {
 }
 
 type EmptyObject struct {
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *EmptyObject) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
 }
 
 func (e *EmptyObject) UnmarshalJSON(data []byte) error {
@@ -3617,6 +3836,13 @@ func (e *EmptyObject) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*e = EmptyObject(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
 	e._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -3642,7 +3868,12 @@ type EnumDetails struct {
 	// A list of destination values that are not mapped to
 	UnusedDestinationValues []*EnumValue `json:"unusedDestinationValues,omitempty" url:"unusedDestinationValues,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *EnumDetails) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
 }
 
 func (e *EnumDetails) UnmarshalJSON(data []byte) error {
@@ -3652,6 +3883,13 @@ func (e *EnumDetails) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*e = EnumDetails(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
 	e._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -3669,40 +3907,36 @@ func (e *EnumDetails) String() string {
 }
 
 type EnumValue struct {
-	typeName string
-	String   string
-	Integer  int
-	Boolean  bool
+	String  string
+	Integer int
+	Boolean bool
 }
 
 func NewEnumValueFromString(value string) *EnumValue {
-	return &EnumValue{typeName: "string", String: value}
+	return &EnumValue{String: value}
 }
 
 func NewEnumValueFromInteger(value int) *EnumValue {
-	return &EnumValue{typeName: "integer", Integer: value}
+	return &EnumValue{Integer: value}
 }
 
 func NewEnumValueFromBoolean(value bool) *EnumValue {
-	return &EnumValue{typeName: "boolean", Boolean: value}
+	return &EnumValue{Boolean: value}
 }
 
 func (e *EnumValue) UnmarshalJSON(data []byte) error {
 	var valueString string
 	if err := json.Unmarshal(data, &valueString); err == nil {
-		e.typeName = "string"
 		e.String = valueString
 		return nil
 	}
 	var valueInteger int
 	if err := json.Unmarshal(data, &valueInteger); err == nil {
-		e.typeName = "integer"
 		e.Integer = valueInteger
 		return nil
 	}
 	var valueBoolean bool
 	if err := json.Unmarshal(data, &valueBoolean); err == nil {
-		e.typeName = "boolean"
 		e.Boolean = valueBoolean
 		return nil
 	}
@@ -3710,16 +3944,16 @@ func (e *EnumValue) UnmarshalJSON(data []byte) error {
 }
 
 func (e EnumValue) MarshalJSON() ([]byte, error) {
-	switch e.typeName {
-	default:
-		return nil, fmt.Errorf("invalid type %s in %T", e.typeName, e)
-	case "string":
+	if e.String != "" {
 		return json.Marshal(e.String)
-	case "integer":
+	}
+	if e.Integer != 0 {
 		return json.Marshal(e.Integer)
-	case "boolean":
+	}
+	if e.Boolean != false {
 		return json.Marshal(e.Boolean)
 	}
+	return nil, fmt.Errorf("type %T does not include a non-empty union type", e)
 }
 
 type EnumValueVisitor interface {
@@ -3729,22 +3963,27 @@ type EnumValueVisitor interface {
 }
 
 func (e *EnumValue) Accept(visitor EnumValueVisitor) error {
-	switch e.typeName {
-	default:
-		return fmt.Errorf("invalid type %s in %T", e.typeName, e)
-	case "string":
+	if e.String != "" {
 		return visitor.VisitString(e.String)
-	case "integer":
+	}
+	if e.Integer != 0 {
 		return visitor.VisitInteger(e.Integer)
-	case "boolean":
+	}
+	if e.Boolean != false {
 		return visitor.VisitBoolean(e.Boolean)
 	}
+	return fmt.Errorf("type %T does not include a non-empty union type", e)
 }
 
 type ExportJobConfig struct {
 	Options *ExportOptions `json:"options,omitempty" url:"options,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *ExportJobConfig) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
 }
 
 func (e *ExportJobConfig) UnmarshalJSON(data []byte) error {
@@ -3754,6 +3993,13 @@ func (e *ExportJobConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*e = ExportJobConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
 	e._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -3792,7 +4038,12 @@ type ExportOptions struct {
 	// The Record Ids param (ids) is a list of record ids that can be passed to several record endpoints allowing the user to identify specific records to INCLUDE in the query, or specific records to EXCLUDE, depending on whether or not filters are being applied. When passing a query param that filters the record dataset, such as 'searchValue', or a 'filter' of 'valid' | 'error' | 'all', the 'ids' param will EXCLUDE those records from the filtered results. For basic queries that do not filter the dataset, passing record ids in the 'ids' param will limit the dataset to INCLUDE just those specific records
 	Ids []RecordId `json:"ids,omitempty" url:"ids,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *ExportOptions) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
 }
 
 func (e *ExportOptions) UnmarshalJSON(data []byte) error {
@@ -3802,6 +4053,13 @@ func (e *ExportOptions) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*e = ExportOptions(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
 	e._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -3820,11 +4078,18 @@ func (e *ExportOptions) String() string {
 
 type FileJobConfig struct {
 	// The driver to use for extracting data from the file
-	Driver Driver `json:"driver,omitempty" url:"driver,omitempty"`
+	Driver Driver `json:"driver" url:"driver"`
 	// The options to use for extracting data from the file
 	Options map[string]interface{} `json:"options,omitempty" url:"options,omitempty"`
+	// The row number of the header row detected at extraction time
+	DetectedHeaderRow *int `json:"detectedHeaderRow,omitempty" url:"detectedHeaderRow,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (f *FileJobConfig) GetExtraProperties() map[string]interface{} {
+	return f.extraProperties
 }
 
 func (f *FileJobConfig) UnmarshalJSON(data []byte) error {
@@ -3834,6 +4099,13 @@ func (f *FileJobConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*f = FileJobConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *f)
+	if err != nil {
+		return err
+	}
+	f.extraProperties = extraProperties
+
 	f._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -3870,7 +4142,12 @@ type FindAndReplaceJobConfig struct {
 	// A unique key used to identify a field in a sheet
 	FieldKey string `json:"fieldKey" url:"fieldKey"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (f *FindAndReplaceJobConfig) GetExtraProperties() map[string]interface{} {
+	return f.extraProperties
 }
 
 func (f *FindAndReplaceJobConfig) UnmarshalJSON(data []byte) error {
@@ -3880,6 +4157,13 @@ func (f *FindAndReplaceJobConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*f = FindAndReplaceJobConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *f)
+	if err != nil {
+		return err
+	}
+	f.extraProperties = extraProperties
+
 	f._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -3899,7 +4183,7 @@ func (f *FindAndReplaceJobConfig) String() string {
 // A single unit of work that will execute asynchronously
 type Job struct {
 	// The type of job
-	Type JobType `json:"type,omitempty" url:"type,omitempty"`
+	Type JobType `json:"type" url:"type"`
 	// the type of operation to perform on the data. For example, "export".
 	Operation   string           `json:"operation" url:"operation"`
 	Source      JobSource        `json:"source" url:"source"`
@@ -3948,7 +4232,12 @@ type Job struct {
 	// the time that the job's outcome has been acknowledged by a user
 	OutcomeAcknowledgedAt *time.Time `json:"outcomeAcknowledgedAt,omitempty" url:"outcomeAcknowledgedAt,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (j *Job) GetExtraProperties() map[string]interface{} {
+	return j.extraProperties
 }
 
 func (j *Job) UnmarshalJSON(data []byte) error {
@@ -3972,6 +4261,13 @@ func (j *Job) UnmarshalJSON(data []byte) error {
 	j.StartedAt = unmarshaler.StartedAt.TimePtr()
 	j.FinishedAt = unmarshaler.FinishedAt.TimePtr()
 	j.OutcomeAcknowledgedAt = unmarshaler.OutcomeAcknowledgedAt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	if err != nil {
+		return err
+	}
+	j.extraProperties = extraProperties
+
 	j._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -4018,7 +4314,12 @@ type JobExecutionPlan struct {
 	UnmappedDestinationFields []*DestinationField `json:"unmappedDestinationFields,omitempty" url:"unmappedDestinationFields,omitempty"`
 	ProgramId                 *string             `json:"programId,omitempty" url:"programId,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (j *JobExecutionPlan) GetExtraProperties() map[string]interface{} {
+	return j.extraProperties
 }
 
 func (j *JobExecutionPlan) UnmarshalJSON(data []byte) error {
@@ -4028,6 +4329,13 @@ func (j *JobExecutionPlan) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*j = JobExecutionPlan(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	if err != nil {
+		return err
+	}
+	j.extraProperties = extraProperties
+
 	j._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -4051,7 +4359,12 @@ type JobExecutionPlanConfig struct {
 	UnmappedDestinationFields []*DestinationField `json:"unmappedDestinationFields,omitempty" url:"unmappedDestinationFields,omitempty"`
 	ProgramId                 *string             `json:"programId,omitempty" url:"programId,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (j *JobExecutionPlanConfig) GetExtraProperties() map[string]interface{} {
+	return j.extraProperties
 }
 
 func (j *JobExecutionPlanConfig) UnmarshalJSON(data []byte) error {
@@ -4061,6 +4374,13 @@ func (j *JobExecutionPlanConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*j = JobExecutionPlanConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	if err != nil {
+		return err
+	}
+	j.extraProperties = extraProperties
+
 	j._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -4112,7 +4432,12 @@ type JobOutcome struct {
 	Message           *string         `json:"message,omitempty" url:"message,omitempty"`
 	HideDefaultButton *bool           `json:"hideDefaultButton,omitempty" url:"hideDefaultButton,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (j *JobOutcome) GetExtraProperties() map[string]interface{} {
+	return j.extraProperties
 }
 
 func (j *JobOutcome) UnmarshalJSON(data []byte) error {
@@ -4122,6 +4447,13 @@ func (j *JobOutcome) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*j = JobOutcome(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	if err != nil {
+		return err
+	}
+	j.extraProperties = extraProperties
+
 	j._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -4248,77 +4580,21 @@ func (j JobOutcomeNext) MarshalJSON() ([]byte, error) {
 	default:
 		return nil, fmt.Errorf("invalid type %s in %T", j.Type, j)
 	case "id":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*JobOutcomeNextId
-		}{
-			Type:             j.Type,
-			JobOutcomeNextId: j.Id,
-		}
-		return json.Marshal(marshaler)
+		return core.MarshalJSONWithExtraProperty(j.Id, "type", "id")
 	case "url":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*JobOutcomeNextUrl
-		}{
-			Type:              j.Type,
-			JobOutcomeNextUrl: j.Url,
-		}
-		return json.Marshal(marshaler)
+		return core.MarshalJSONWithExtraProperty(j.Url, "type", "url")
 	case "download":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*JobOutcomeNextDownload
-		}{
-			Type:                   j.Type,
-			JobOutcomeNextDownload: j.Download,
-		}
-		return json.Marshal(marshaler)
+		return core.MarshalJSONWithExtraProperty(j.Download, "type", "download")
 	case "files":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*JobOutcomeNextFiles
-		}{
-			Type:                j.Type,
-			JobOutcomeNextFiles: j.Files,
-		}
-		return json.Marshal(marshaler)
+		return core.MarshalJSONWithExtraProperty(j.Files, "type", "files")
 	case "wait":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*JobOutcomeNextWait
-		}{
-			Type:               j.Type,
-			JobOutcomeNextWait: j.Wait,
-		}
-		return json.Marshal(marshaler)
+		return core.MarshalJSONWithExtraProperty(j.Wait, "type", "wait")
 	case "snapshot":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*JobOutcomeNextSnapshot
-		}{
-			Type:                   j.Type,
-			JobOutcomeNextSnapshot: j.Snapshot,
-		}
-		return json.Marshal(marshaler)
+		return core.MarshalJSONWithExtraProperty(j.Snapshot, "type", "snapshot")
 	case "retry":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*JobOutcomeNextRetry
-		}{
-			Type:                j.Type,
-			JobOutcomeNextRetry: j.Retry,
-		}
-		return json.Marshal(marshaler)
+		return core.MarshalJSONWithExtraProperty(j.Retry, "type", "retry")
 	case "view":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*JobOutcomeNextView
-		}{
-			Type:               j.Type,
-			JobOutcomeNextView: j.View,
-		}
-		return json.Marshal(marshaler)
+		return core.MarshalJSONWithExtraProperty(j.View, "type", "view")
 	}
 }
 
@@ -4361,7 +4637,12 @@ type JobOutcomeNextDownload struct {
 	Label    *string `json:"label,omitempty" url:"label,omitempty"`
 	FileName *string `json:"fileName,omitempty" url:"fileName,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (j *JobOutcomeNextDownload) GetExtraProperties() map[string]interface{} {
+	return j.extraProperties
 }
 
 func (j *JobOutcomeNextDownload) UnmarshalJSON(data []byte) error {
@@ -4371,6 +4652,13 @@ func (j *JobOutcomeNextDownload) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*j = JobOutcomeNextDownload(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	if err != nil {
+		return err
+	}
+	j.extraProperties = extraProperties
+
 	j._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -4391,7 +4679,12 @@ type JobOutcomeNextFileObject struct {
 	FileId string  `json:"fileId" url:"fileId"`
 	Label  *string `json:"label,omitempty" url:"label,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (j *JobOutcomeNextFileObject) GetExtraProperties() map[string]interface{} {
+	return j.extraProperties
 }
 
 func (j *JobOutcomeNextFileObject) UnmarshalJSON(data []byte) error {
@@ -4401,6 +4694,13 @@ func (j *JobOutcomeNextFileObject) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*j = JobOutcomeNextFileObject(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	if err != nil {
+		return err
+	}
+	j.extraProperties = extraProperties
+
 	j._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -4421,7 +4721,12 @@ type JobOutcomeNextFiles struct {
 	Files []*JobOutcomeNextFileObject `json:"files,omitempty" url:"files,omitempty"`
 	Label *string                     `json:"label,omitempty" url:"label,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (j *JobOutcomeNextFiles) GetExtraProperties() map[string]interface{} {
+	return j.extraProperties
 }
 
 func (j *JobOutcomeNextFiles) UnmarshalJSON(data []byte) error {
@@ -4431,6 +4736,13 @@ func (j *JobOutcomeNextFiles) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*j = JobOutcomeNextFiles(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	if err != nil {
+		return err
+	}
+	j.extraProperties = extraProperties
+
 	j._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -4453,7 +4765,12 @@ type JobOutcomeNextId struct {
 	Path  *string `json:"path,omitempty" url:"path,omitempty"`
 	Query *string `json:"query,omitempty" url:"query,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (j *JobOutcomeNextId) GetExtraProperties() map[string]interface{} {
+	return j.extraProperties
 }
 
 func (j *JobOutcomeNextId) UnmarshalJSON(data []byte) error {
@@ -4463,6 +4780,13 @@ func (j *JobOutcomeNextId) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*j = JobOutcomeNextId(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	if err != nil {
+		return err
+	}
+	j.extraProperties = extraProperties
+
 	j._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -4482,7 +4806,12 @@ func (j *JobOutcomeNextId) String() string {
 type JobOutcomeNextRetry struct {
 	Label *string `json:"label,omitempty" url:"label,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (j *JobOutcomeNextRetry) GetExtraProperties() map[string]interface{} {
+	return j.extraProperties
 }
 
 func (j *JobOutcomeNextRetry) UnmarshalJSON(data []byte) error {
@@ -4492,6 +4821,13 @@ func (j *JobOutcomeNextRetry) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*j = JobOutcomeNextRetry(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	if err != nil {
+		return err
+	}
+	j.extraProperties = extraProperties
+
 	j._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -4512,7 +4848,12 @@ type JobOutcomeNextSnapshot struct {
 	SnapshotId string `json:"snapshotId" url:"snapshotId"`
 	SheetId    string `json:"sheetId" url:"sheetId"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (j *JobOutcomeNextSnapshot) GetExtraProperties() map[string]interface{} {
+	return j.extraProperties
 }
 
 func (j *JobOutcomeNextSnapshot) UnmarshalJSON(data []byte) error {
@@ -4522,6 +4863,13 @@ func (j *JobOutcomeNextSnapshot) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*j = JobOutcomeNextSnapshot(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	if err != nil {
+		return err
+	}
+	j.extraProperties = extraProperties
+
 	j._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -4542,7 +4890,12 @@ type JobOutcomeNextUrl struct {
 	Url   string  `json:"url" url:"url"`
 	Label *string `json:"label,omitempty" url:"label,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (j *JobOutcomeNextUrl) GetExtraProperties() map[string]interface{} {
+	return j.extraProperties
 }
 
 func (j *JobOutcomeNextUrl) UnmarshalJSON(data []byte) error {
@@ -4552,6 +4905,13 @@ func (j *JobOutcomeNextUrl) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*j = JobOutcomeNextUrl(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	if err != nil {
+		return err
+	}
+	j.extraProperties = extraProperties
+
 	j._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -4574,7 +4934,12 @@ type JobOutcomeNextView struct {
 	HiddenColumns []string `json:"hiddenColumns,omitempty" url:"hiddenColumns,omitempty"`
 	Label         *string  `json:"label,omitempty" url:"label,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (j *JobOutcomeNextView) GetExtraProperties() map[string]interface{} {
+	return j.extraProperties
 }
 
 func (j *JobOutcomeNextView) UnmarshalJSON(data []byte) error {
@@ -4584,6 +4949,13 @@ func (j *JobOutcomeNextView) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*j = JobOutcomeNextView(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	if err != nil {
+		return err
+	}
+	j.extraProperties = extraProperties
+
 	j._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -4604,7 +4976,12 @@ type JobOutcomeNextWait struct {
 	Fade     *bool `json:"fade,omitempty" url:"fade,omitempty"`
 	Confetti *bool `json:"confetti,omitempty" url:"confetti,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (j *JobOutcomeNextWait) GetExtraProperties() map[string]interface{} {
+	return j.extraProperties
 }
 
 func (j *JobOutcomeNextWait) UnmarshalJSON(data []byte) error {
@@ -4614,6 +4991,13 @@ func (j *JobOutcomeNextWait) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*j = JobOutcomeNextWait(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	if err != nil {
+		return err
+	}
+	j.extraProperties = extraProperties
+
 	j._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -4654,29 +5038,26 @@ func (j JobPartExecution) Ptr() *JobPartExecution {
 
 // Info about the number of parts to create
 type JobParts struct {
-	typeName      string
 	Integer       int
 	JobPartsArray JobPartsArray
 }
 
 func NewJobPartsFromInteger(value int) *JobParts {
-	return &JobParts{typeName: "integer", Integer: value}
+	return &JobParts{Integer: value}
 }
 
 func NewJobPartsFromJobPartsArray(value JobPartsArray) *JobParts {
-	return &JobParts{typeName: "jobPartsArray", JobPartsArray: value}
+	return &JobParts{JobPartsArray: value}
 }
 
 func (j *JobParts) UnmarshalJSON(data []byte) error {
 	var valueInteger int
 	if err := json.Unmarshal(data, &valueInteger); err == nil {
-		j.typeName = "integer"
 		j.Integer = valueInteger
 		return nil
 	}
 	var valueJobPartsArray JobPartsArray
 	if err := json.Unmarshal(data, &valueJobPartsArray); err == nil {
-		j.typeName = "jobPartsArray"
 		j.JobPartsArray = valueJobPartsArray
 		return nil
 	}
@@ -4684,14 +5065,13 @@ func (j *JobParts) UnmarshalJSON(data []byte) error {
 }
 
 func (j JobParts) MarshalJSON() ([]byte, error) {
-	switch j.typeName {
-	default:
-		return nil, fmt.Errorf("invalid type %s in %T", j.typeName, j)
-	case "integer":
+	if j.Integer != 0 {
 		return json.Marshal(j.Integer)
-	case "jobPartsArray":
+	}
+	if j.JobPartsArray != nil {
 		return json.Marshal(j.JobPartsArray)
 	}
+	return nil, fmt.Errorf("type %T does not include a non-empty union type", j)
 }
 
 type JobPartsVisitor interface {
@@ -4700,14 +5080,13 @@ type JobPartsVisitor interface {
 }
 
 func (j *JobParts) Accept(visitor JobPartsVisitor) error {
-	switch j.typeName {
-	default:
-		return fmt.Errorf("invalid type %s in %T", j.typeName, j)
-	case "integer":
+	if j.Integer != 0 {
 		return visitor.VisitInteger(j.Integer)
-	case "jobPartsArray":
+	}
+	if j.JobPartsArray != nil {
 		return visitor.VisitJobPartsArray(j.JobPartsArray)
 	}
+	return fmt.Errorf("type %T does not include a non-empty union type", j)
 }
 
 // Data for each of the job parts
@@ -4718,7 +5097,12 @@ type JobPlan struct {
 	Job  *Job              `json:"job,omitempty" url:"job,omitempty"`
 	Plan *JobExecutionPlan `json:"plan,omitempty" url:"plan,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (j *JobPlan) GetExtraProperties() map[string]interface{} {
+	return j.extraProperties
 }
 
 func (j *JobPlan) UnmarshalJSON(data []byte) error {
@@ -4728,6 +5112,13 @@ func (j *JobPlan) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*j = JobPlan(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	if err != nil {
+		return err
+	}
+	j.extraProperties = extraProperties
+
 	j._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -4836,23 +5227,9 @@ func (j JobSubject) MarshalJSON() ([]byte, error) {
 	default:
 		return nil, fmt.Errorf("invalid type %s in %T", j.Type, j)
 	case "resource":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*ResourceJobSubject
-		}{
-			Type:               j.Type,
-			ResourceJobSubject: j.Resource,
-		}
-		return json.Marshal(marshaler)
+		return core.MarshalJSONWithExtraProperty(j.Resource, "type", "resource")
 	case "collection":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*CollectionJobSubject
-		}{
-			Type:                 j.Type,
-			CollectionJobSubject: j.Collection,
-		}
-		return json.Marshal(marshaler)
+		return core.MarshalJSONWithExtraProperty(j.Collection, "type", "collection")
 	}
 }
 
@@ -4905,7 +5282,6 @@ func (j JobType) Ptr() *JobType {
 }
 
 type JobUpdateConfig struct {
-	typeName                string
 	DeleteRecordsJobConfig  *DeleteRecordsJobConfig
 	FileJobConfig           *FileJobConfig
 	PipelineJobConfig       *PipelineJobConfig
@@ -4917,83 +5293,75 @@ type JobUpdateConfig struct {
 }
 
 func NewJobUpdateConfigFromDeleteRecordsJobConfig(value *DeleteRecordsJobConfig) *JobUpdateConfig {
-	return &JobUpdateConfig{typeName: "deleteRecordsJobConfig", DeleteRecordsJobConfig: value}
+	return &JobUpdateConfig{DeleteRecordsJobConfig: value}
 }
 
 func NewJobUpdateConfigFromFileJobConfig(value *FileJobConfig) *JobUpdateConfig {
-	return &JobUpdateConfig{typeName: "fileJobConfig", FileJobConfig: value}
+	return &JobUpdateConfig{FileJobConfig: value}
 }
 
 func NewJobUpdateConfigFromPipelineJobConfig(value *PipelineJobConfig) *JobUpdateConfig {
-	return &JobUpdateConfig{typeName: "pipelineJobConfig", PipelineJobConfig: value}
+	return &JobUpdateConfig{PipelineJobConfig: value}
 }
 
 func NewJobUpdateConfigFromExportJobConfig(value *ExportJobConfig) *JobUpdateConfig {
-	return &JobUpdateConfig{typeName: "exportJobConfig", ExportJobConfig: value}
+	return &JobUpdateConfig{ExportJobConfig: value}
 }
 
 func NewJobUpdateConfigFromMutateJobConfig(value *MutateJobConfig) *JobUpdateConfig {
-	return &JobUpdateConfig{typeName: "mutateJobConfig", MutateJobConfig: value}
+	return &JobUpdateConfig{MutateJobConfig: value}
 }
 
 func NewJobUpdateConfigFromFindAndReplaceJobConfig(value *FindAndReplaceJobConfig) *JobUpdateConfig {
-	return &JobUpdateConfig{typeName: "findAndReplaceJobConfig", FindAndReplaceJobConfig: value}
+	return &JobUpdateConfig{FindAndReplaceJobConfig: value}
 }
 
 func NewJobUpdateConfigFromMappingProgramJobConfig(value *MappingProgramJobConfig) *JobUpdateConfig {
-	return &JobUpdateConfig{typeName: "mappingProgramJobConfig", MappingProgramJobConfig: value}
+	return &JobUpdateConfig{MappingProgramJobConfig: value}
 }
 
 func NewJobUpdateConfigFromEmptyObject(value *EmptyObject) *JobUpdateConfig {
-	return &JobUpdateConfig{typeName: "emptyObject", EmptyObject: value}
+	return &JobUpdateConfig{EmptyObject: value}
 }
 
 func (j *JobUpdateConfig) UnmarshalJSON(data []byte) error {
 	valueDeleteRecordsJobConfig := new(DeleteRecordsJobConfig)
 	if err := json.Unmarshal(data, &valueDeleteRecordsJobConfig); err == nil {
-		j.typeName = "deleteRecordsJobConfig"
 		j.DeleteRecordsJobConfig = valueDeleteRecordsJobConfig
 		return nil
 	}
 	valueFileJobConfig := new(FileJobConfig)
 	if err := json.Unmarshal(data, &valueFileJobConfig); err == nil {
-		j.typeName = "fileJobConfig"
 		j.FileJobConfig = valueFileJobConfig
 		return nil
 	}
 	valuePipelineJobConfig := new(PipelineJobConfig)
 	if err := json.Unmarshal(data, &valuePipelineJobConfig); err == nil {
-		j.typeName = "pipelineJobConfig"
 		j.PipelineJobConfig = valuePipelineJobConfig
 		return nil
 	}
 	valueExportJobConfig := new(ExportJobConfig)
 	if err := json.Unmarshal(data, &valueExportJobConfig); err == nil {
-		j.typeName = "exportJobConfig"
 		j.ExportJobConfig = valueExportJobConfig
 		return nil
 	}
 	valueMutateJobConfig := new(MutateJobConfig)
 	if err := json.Unmarshal(data, &valueMutateJobConfig); err == nil {
-		j.typeName = "mutateJobConfig"
 		j.MutateJobConfig = valueMutateJobConfig
 		return nil
 	}
 	valueFindAndReplaceJobConfig := new(FindAndReplaceJobConfig)
 	if err := json.Unmarshal(data, &valueFindAndReplaceJobConfig); err == nil {
-		j.typeName = "findAndReplaceJobConfig"
 		j.FindAndReplaceJobConfig = valueFindAndReplaceJobConfig
 		return nil
 	}
 	valueMappingProgramJobConfig := new(MappingProgramJobConfig)
 	if err := json.Unmarshal(data, &valueMappingProgramJobConfig); err == nil {
-		j.typeName = "mappingProgramJobConfig"
 		j.MappingProgramJobConfig = valueMappingProgramJobConfig
 		return nil
 	}
 	valueEmptyObject := new(EmptyObject)
 	if err := json.Unmarshal(data, &valueEmptyObject); err == nil {
-		j.typeName = "emptyObject"
 		j.EmptyObject = valueEmptyObject
 		return nil
 	}
@@ -5001,26 +5369,31 @@ func (j *JobUpdateConfig) UnmarshalJSON(data []byte) error {
 }
 
 func (j JobUpdateConfig) MarshalJSON() ([]byte, error) {
-	switch j.typeName {
-	default:
-		return nil, fmt.Errorf("invalid type %s in %T", j.typeName, j)
-	case "deleteRecordsJobConfig":
+	if j.DeleteRecordsJobConfig != nil {
 		return json.Marshal(j.DeleteRecordsJobConfig)
-	case "fileJobConfig":
+	}
+	if j.FileJobConfig != nil {
 		return json.Marshal(j.FileJobConfig)
-	case "pipelineJobConfig":
+	}
+	if j.PipelineJobConfig != nil {
 		return json.Marshal(j.PipelineJobConfig)
-	case "exportJobConfig":
+	}
+	if j.ExportJobConfig != nil {
 		return json.Marshal(j.ExportJobConfig)
-	case "mutateJobConfig":
+	}
+	if j.MutateJobConfig != nil {
 		return json.Marshal(j.MutateJobConfig)
-	case "findAndReplaceJobConfig":
+	}
+	if j.FindAndReplaceJobConfig != nil {
 		return json.Marshal(j.FindAndReplaceJobConfig)
-	case "mappingProgramJobConfig":
+	}
+	if j.MappingProgramJobConfig != nil {
 		return json.Marshal(j.MappingProgramJobConfig)
-	case "emptyObject":
+	}
+	if j.EmptyObject != nil {
 		return json.Marshal(j.EmptyObject)
 	}
+	return nil, fmt.Errorf("type %T does not include a non-empty union type", j)
 }
 
 type JobUpdateConfigVisitor interface {
@@ -5035,26 +5408,31 @@ type JobUpdateConfigVisitor interface {
 }
 
 func (j *JobUpdateConfig) Accept(visitor JobUpdateConfigVisitor) error {
-	switch j.typeName {
-	default:
-		return fmt.Errorf("invalid type %s in %T", j.typeName, j)
-	case "deleteRecordsJobConfig":
+	if j.DeleteRecordsJobConfig != nil {
 		return visitor.VisitDeleteRecordsJobConfig(j.DeleteRecordsJobConfig)
-	case "fileJobConfig":
+	}
+	if j.FileJobConfig != nil {
 		return visitor.VisitFileJobConfig(j.FileJobConfig)
-	case "pipelineJobConfig":
+	}
+	if j.PipelineJobConfig != nil {
 		return visitor.VisitPipelineJobConfig(j.PipelineJobConfig)
-	case "exportJobConfig":
+	}
+	if j.ExportJobConfig != nil {
 		return visitor.VisitExportJobConfig(j.ExportJobConfig)
-	case "mutateJobConfig":
+	}
+	if j.MutateJobConfig != nil {
 		return visitor.VisitMutateJobConfig(j.MutateJobConfig)
-	case "findAndReplaceJobConfig":
+	}
+	if j.FindAndReplaceJobConfig != nil {
 		return visitor.VisitFindAndReplaceJobConfig(j.FindAndReplaceJobConfig)
-	case "mappingProgramJobConfig":
+	}
+	if j.MappingProgramJobConfig != nil {
 		return visitor.VisitMappingProgramJobConfig(j.MappingProgramJobConfig)
-	case "emptyObject":
+	}
+	if j.EmptyObject != nil {
 		return visitor.VisitEmptyObject(j.EmptyObject)
 	}
+	return fmt.Errorf("type %T does not include a non-empty union type", j)
 }
 
 type MappingProgramJobConfig struct {
@@ -5062,7 +5440,12 @@ type MappingProgramJobConfig struct {
 	DestinationSheetId SheetId                  `json:"destinationSheetId" url:"destinationSheetId"`
 	MappingRules       []map[string]interface{} `json:"mappingRules,omitempty" url:"mappingRules,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (m *MappingProgramJobConfig) GetExtraProperties() map[string]interface{} {
+	return m.extraProperties
 }
 
 func (m *MappingProgramJobConfig) UnmarshalJSON(data []byte) error {
@@ -5072,6 +5455,13 @@ func (m *MappingProgramJobConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*m = MappingProgramJobConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *m)
+	if err != nil {
+		return err
+	}
+	m.extraProperties = extraProperties
+
 	m._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -5093,7 +5483,12 @@ type Metadata struct {
 	Confidence *float64   `json:"confidence,omitempty" url:"confidence,omitempty"`
 	Source     *string    `json:"source,omitempty" url:"source,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (m *Metadata) GetExtraProperties() map[string]interface{} {
+	return m.extraProperties
 }
 
 func (m *Metadata) UnmarshalJSON(data []byte) error {
@@ -5103,6 +5498,13 @@ func (m *Metadata) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*m = Metadata(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *m)
+	if err != nil {
+		return err
+	}
+	m.extraProperties = extraProperties
+
 	m._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -5123,7 +5525,12 @@ type PipelineJobConfig struct {
 	SourceSheetId      SheetId `json:"sourceSheetId" url:"sourceSheetId"`
 	DestinationSheetId SheetId `json:"destinationSheetId" url:"destinationSheetId"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *PipelineJobConfig) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
 }
 
 func (p *PipelineJobConfig) UnmarshalJSON(data []byte) error {
@@ -5133,6 +5540,13 @@ func (p *PipelineJobConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*p = PipelineJobConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
 	p._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -5152,7 +5566,12 @@ func (p *PipelineJobConfig) String() string {
 type ResourceJobSubject struct {
 	Id string `json:"id" url:"id"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (r *ResourceJobSubject) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
 }
 
 func (r *ResourceJobSubject) UnmarshalJSON(data []byte) error {
@@ -5162,6 +5581,13 @@ func (r *ResourceJobSubject) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*r = ResourceJobSubject(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+
 	r._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -5184,7 +5610,12 @@ type SourceField struct {
 	// A list of preview values of the data in the source field
 	Preview []string `json:"preview,omitempty" url:"preview,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SourceField) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
 }
 
 func (s *SourceField) UnmarshalJSON(data []byte) error {
@@ -5194,6 +5625,13 @@ func (s *SourceField) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*s = SourceField(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
 	s._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -5242,6 +5680,8 @@ type MappingRule struct {
 	AcceptedAt *time.Time `json:"acceptedAt,omitempty" url:"acceptedAt,omitempty"`
 	// User ID of the contributor of the mapping rule
 	AcceptedBy *UserId `json:"acceptedBy,omitempty" url:"acceptedBy,omitempty"`
+	// Metadata of the mapping rule
+	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
 	// ID of the mapping rule
 	Id MappingId `json:"id" url:"id"`
 	// Confidence of the mapping rule
@@ -5255,7 +5695,12 @@ type MappingRule struct {
 	// Time the mapping rule was deleted
 	DeletedAt *time.Time `json:"deletedAt,omitempty" url:"deletedAt,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (m *MappingRule) GetExtraProperties() map[string]interface{} {
+	return m.extraProperties
 }
 
 func (m *MappingRule) UnmarshalJSON(data []byte) error {
@@ -5277,6 +5722,13 @@ func (m *MappingRule) UnmarshalJSON(data []byte) error {
 	m.CreatedAt = unmarshaler.CreatedAt.Time()
 	m.UpdatedAt = unmarshaler.UpdatedAt.Time()
 	m.DeletedAt = unmarshaler.DeletedAt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *m)
+	if err != nil {
+		return err
+	}
+	m.extraProperties = extraProperties
+
 	m._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -5320,6 +5772,8 @@ type MappingRuleOrConfig struct {
 	AcceptedAt *time.Time `json:"acceptedAt,omitempty" url:"acceptedAt,omitempty"`
 	// User ID of the contributor of the mapping rule
 	AcceptedBy *UserId `json:"acceptedBy,omitempty" url:"acceptedBy,omitempty"`
+	// Metadata of the mapping rule
+	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
 	// ID of the mapping rule
 	Id *MappingId `json:"id,omitempty" url:"id,omitempty"`
 	// Confidence of the mapping rule
@@ -5333,7 +5787,12 @@ type MappingRuleOrConfig struct {
 	// Time the mapping rule was deleted
 	DeletedAt *time.Time `json:"deletedAt,omitempty" url:"deletedAt,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (m *MappingRuleOrConfig) GetExtraProperties() map[string]interface{} {
+	return m.extraProperties
 }
 
 func (m *MappingRuleOrConfig) UnmarshalJSON(data []byte) error {
@@ -5355,6 +5814,13 @@ func (m *MappingRuleOrConfig) UnmarshalJSON(data []byte) error {
 	m.CreatedAt = unmarshaler.CreatedAt.TimePtr()
 	m.UpdatedAt = unmarshaler.UpdatedAt.TimePtr()
 	m.DeletedAt = unmarshaler.DeletedAt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *m)
+	if err != nil {
+		return err
+	}
+	m.extraProperties = extraProperties
+
 	m._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -5411,7 +5877,12 @@ type Program struct {
 	// If this program was saved, this token allows you to modify the program
 	AccessToken *string `json:"accessToken,omitempty" url:"accessToken,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *Program) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
 }
 
 func (p *Program) UnmarshalJSON(data []byte) error {
@@ -5427,6 +5898,13 @@ func (p *Program) UnmarshalJSON(data []byte) error {
 	}
 	*p = Program(unmarshaler.embed)
 	p.CreatedAt = unmarshaler.CreatedAt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
 	p._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -5463,7 +5941,12 @@ type ProgramSummary struct {
 	// Number of mapping rules deleted
 	DeletedRuleCount int `json:"deletedRuleCount" url:"deletedRuleCount"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *ProgramSummary) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
 }
 
 func (p *ProgramSummary) UnmarshalJSON(data []byte) error {
@@ -5473,6 +5956,13 @@ func (p *ProgramSummary) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*p = ProgramSummary(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
 	p._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -5493,7 +5983,12 @@ type ArrayableProperty struct {
 	// Will allow multiple values and store as an array
 	IsArray *bool `json:"isArray,omitempty" url:"isArray,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *ArrayableProperty) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
 }
 
 func (a *ArrayableProperty) UnmarshalJSON(data []byte) error {
@@ -5503,6 +5998,13 @@ func (a *ArrayableProperty) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*a = ArrayableProperty(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
 	a._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -5528,13 +6030,20 @@ type BaseProperty struct {
 	Constraints []*Constraint    `json:"constraints,omitempty" url:"constraints,omitempty"`
 	Readonly    *bool            `json:"readonly,omitempty" url:"readonly,omitempty"`
 	Appearance  *FieldAppearance `json:"appearance,omitempty" url:"appearance,omitempty"`
+	// An array of actions that end users can perform on this Column.
+	Actions []*Action `json:"actions,omitempty" url:"actions,omitempty"`
 	// Useful for any contextual metadata regarding the schema. Store any valid json here.
 	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
 	// A unique presentation for a field in the UI.
 	Treatments       []string `json:"treatments,omitempty" url:"treatments,omitempty"`
 	AlternativeNames []string `json:"alternativeNames,omitempty" url:"alternativeNames,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (b *BaseProperty) GetExtraProperties() map[string]interface{} {
+	return b.extraProperties
 }
 
 func (b *BaseProperty) UnmarshalJSON(data []byte) error {
@@ -5544,6 +6053,13 @@ func (b *BaseProperty) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*b = BaseProperty(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *b)
+	if err != nil {
+		return err
+	}
+	b.extraProperties = extraProperties
+
 	b._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -5570,6 +6086,8 @@ type BooleanProperty struct {
 	Constraints []*Constraint    `json:"constraints,omitempty" url:"constraints,omitempty"`
 	Readonly    *bool            `json:"readonly,omitempty" url:"readonly,omitempty"`
 	Appearance  *FieldAppearance `json:"appearance,omitempty" url:"appearance,omitempty"`
+	// An array of actions that end users can perform on this Column.
+	Actions []*Action `json:"actions,omitempty" url:"actions,omitempty"`
 	// Useful for any contextual metadata regarding the schema. Store any valid json here.
 	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
 	// A unique presentation for a field in the UI.
@@ -5577,7 +6095,12 @@ type BooleanProperty struct {
 	AlternativeNames []string               `json:"alternativeNames,omitempty" url:"alternativeNames,omitempty"`
 	Config           *BooleanPropertyConfig `json:"config,omitempty" url:"config,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (b *BooleanProperty) GetExtraProperties() map[string]interface{} {
+	return b.extraProperties
 }
 
 func (b *BooleanProperty) UnmarshalJSON(data []byte) error {
@@ -5587,6 +6110,13 @@ func (b *BooleanProperty) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*b = BooleanProperty(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *b)
+	if err != nil {
+		return err
+	}
+	b.extraProperties = extraProperties
+
 	b._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -5607,7 +6137,12 @@ type BooleanPropertyConfig struct {
 	// Allow a neither true or false state to be stored as `null`
 	AllowIndeterminate bool `json:"allowIndeterminate" url:"allowIndeterminate"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (b *BooleanPropertyConfig) GetExtraProperties() map[string]interface{} {
+	return b.extraProperties
 }
 
 func (b *BooleanPropertyConfig) UnmarshalJSON(data []byte) error {
@@ -5617,6 +6152,13 @@ func (b *BooleanPropertyConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*b = BooleanPropertyConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *b)
+	if err != nil {
+		return err
+	}
+	b.extraProperties = extraProperties
+
 	b._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -5703,37 +6245,23 @@ func (c Constraint) MarshalJSON() ([]byte, error) {
 			Type     string      `json:"type"`
 			Required interface{} `json:"required,omitempty"`
 		}{
-			Type:     c.Type,
+			Type:     "required",
 			Required: c.Required,
 		}
 		return json.Marshal(marshaler)
 	case "unique":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*UniqueConstraint
-		}{
-			Type:             c.Type,
-			UniqueConstraint: c.Unique,
-		}
-		return json.Marshal(marshaler)
+		return core.MarshalJSONWithExtraProperty(c.Unique, "type", "unique")
 	case "computed":
 		var marshaler = struct {
 			Type     string      `json:"type"`
 			Computed interface{} `json:"computed,omitempty"`
 		}{
-			Type:     c.Type,
+			Type:     "computed",
 			Computed: c.Computed,
 		}
 		return json.Marshal(marshaler)
 	case "external":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*ExternalConstraint
-		}{
-			Type:               c.Type,
-			ExternalConstraint: c.External,
-		}
-		return json.Marshal(marshaler)
+		return core.MarshalJSONWithExtraProperty(c.External, "type", "external")
 	}
 }
 
@@ -5769,13 +6297,20 @@ type DateProperty struct {
 	Constraints []*Constraint    `json:"constraints,omitempty" url:"constraints,omitempty"`
 	Readonly    *bool            `json:"readonly,omitempty" url:"readonly,omitempty"`
 	Appearance  *FieldAppearance `json:"appearance,omitempty" url:"appearance,omitempty"`
+	// An array of actions that end users can perform on this Column.
+	Actions []*Action `json:"actions,omitempty" url:"actions,omitempty"`
 	// Useful for any contextual metadata regarding the schema. Store any valid json here.
 	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
 	// A unique presentation for a field in the UI.
 	Treatments       []string `json:"treatments,omitempty" url:"treatments,omitempty"`
 	AlternativeNames []string `json:"alternativeNames,omitempty" url:"alternativeNames,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (d *DateProperty) GetExtraProperties() map[string]interface{} {
+	return d.extraProperties
 }
 
 func (d *DateProperty) UnmarshalJSON(data []byte) error {
@@ -5785,6 +6320,13 @@ func (d *DateProperty) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*d = DateProperty(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *d)
+	if err != nil {
+		return err
+	}
+	d.extraProperties = extraProperties
+
 	d._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -5811,6 +6353,8 @@ type EnumListProperty struct {
 	Constraints []*Constraint    `json:"constraints,omitempty" url:"constraints,omitempty"`
 	Readonly    *bool            `json:"readonly,omitempty" url:"readonly,omitempty"`
 	Appearance  *FieldAppearance `json:"appearance,omitempty" url:"appearance,omitempty"`
+	// An array of actions that end users can perform on this Column.
+	Actions []*Action `json:"actions,omitempty" url:"actions,omitempty"`
 	// Useful for any contextual metadata regarding the schema. Store any valid json here.
 	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
 	// A unique presentation for a field in the UI.
@@ -5818,7 +6362,12 @@ type EnumListProperty struct {
 	AlternativeNames []string            `json:"alternativeNames,omitempty" url:"alternativeNames,omitempty"`
 	Config           *EnumPropertyConfig `json:"config,omitempty" url:"config,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *EnumListProperty) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
 }
 
 func (e *EnumListProperty) UnmarshalJSON(data []byte) error {
@@ -5828,6 +6377,13 @@ func (e *EnumListProperty) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*e = EnumListProperty(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
 	e._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -5854,6 +6410,8 @@ type EnumProperty struct {
 	Constraints []*Constraint    `json:"constraints,omitempty" url:"constraints,omitempty"`
 	Readonly    *bool            `json:"readonly,omitempty" url:"readonly,omitempty"`
 	Appearance  *FieldAppearance `json:"appearance,omitempty" url:"appearance,omitempty"`
+	// An array of actions that end users can perform on this Column.
+	Actions []*Action `json:"actions,omitempty" url:"actions,omitempty"`
 	// Useful for any contextual metadata regarding the schema. Store any valid json here.
 	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
 	// A unique presentation for a field in the UI.
@@ -5865,7 +6423,12 @@ type EnumProperty struct {
 	Multi  *bool               `json:"multi,omitempty" url:"multi,omitempty"`
 	Config *EnumPropertyConfig `json:"config,omitempty" url:"config,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *EnumProperty) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
 }
 
 func (e *EnumProperty) UnmarshalJSON(data []byte) error {
@@ -5875,6 +6438,13 @@ func (e *EnumProperty) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*e = EnumProperty(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
 	e._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -5896,7 +6466,12 @@ type EnumPropertyConfig struct {
 	AllowCustom *bool                 `json:"allowCustom,omitempty" url:"allowCustom,omitempty"`
 	Options     []*EnumPropertyOption `json:"options,omitempty" url:"options,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *EnumPropertyConfig) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
 }
 
 func (e *EnumPropertyConfig) UnmarshalJSON(data []byte) error {
@@ -5906,6 +6481,13 @@ func (e *EnumPropertyConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*e = EnumPropertyConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
 	e._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -5938,7 +6520,12 @@ type EnumPropertyOption struct {
 	// Alternative names to match this enum option to
 	AlternativeNames []string `json:"alternativeNames,omitempty" url:"alternativeNames,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *EnumPropertyOption) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
 }
 
 func (e *EnumPropertyOption) UnmarshalJSON(data []byte) error {
@@ -5948,6 +6535,13 @@ func (e *EnumPropertyOption) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*e = EnumPropertyOption(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
 	e._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -5968,7 +6562,12 @@ type ExternalConstraint struct {
 	Validator string      `json:"validator" url:"validator"`
 	Config    interface{} `json:"config,omitempty" url:"config,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *ExternalConstraint) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
 }
 
 func (e *ExternalConstraint) UnmarshalJSON(data []byte) error {
@@ -5978,6 +6577,13 @@ func (e *ExternalConstraint) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*e = ExternalConstraint(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
 	e._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -5998,7 +6604,12 @@ func (e *ExternalConstraint) String() string {
 type FieldAppearance struct {
 	Size *FieldSize `json:"size,omitempty" url:"size,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (f *FieldAppearance) GetExtraProperties() map[string]interface{} {
+	return f.extraProperties
 }
 
 func (f *FieldAppearance) UnmarshalJSON(data []byte) error {
@@ -6008,6 +6619,13 @@ func (f *FieldAppearance) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*f = FieldAppearance(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *f)
+	if err != nil {
+		return err
+	}
+	f.extraProperties = extraProperties
+
 	f._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -6060,7 +6678,12 @@ type NumberConfig struct {
 	// Number of decimal places to round data to
 	DecimalPlaces *int `json:"decimalPlaces,omitempty" url:"decimalPlaces,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (n *NumberConfig) GetExtraProperties() map[string]interface{} {
+	return n.extraProperties
 }
 
 func (n *NumberConfig) UnmarshalJSON(data []byte) error {
@@ -6070,6 +6693,13 @@ func (n *NumberConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*n = NumberConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *n)
+	if err != nil {
+		return err
+	}
+	n.extraProperties = extraProperties
+
 	n._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -6096,6 +6726,8 @@ type NumberProperty struct {
 	Constraints []*Constraint    `json:"constraints,omitempty" url:"constraints,omitempty"`
 	Readonly    *bool            `json:"readonly,omitempty" url:"readonly,omitempty"`
 	Appearance  *FieldAppearance `json:"appearance,omitempty" url:"appearance,omitempty"`
+	// An array of actions that end users can perform on this Column.
+	Actions []*Action `json:"actions,omitempty" url:"actions,omitempty"`
 	// Useful for any contextual metadata regarding the schema. Store any valid json here.
 	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
 	// A unique presentation for a field in the UI.
@@ -6105,7 +6737,12 @@ type NumberProperty struct {
 	IsArray *bool         `json:"isArray,omitempty" url:"isArray,omitempty"`
 	Config  *NumberConfig `json:"config,omitempty" url:"config,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (n *NumberProperty) GetExtraProperties() map[string]interface{} {
+	return n.extraProperties
 }
 
 func (n *NumberProperty) UnmarshalJSON(data []byte) error {
@@ -6115,6 +6752,13 @@ func (n *NumberProperty) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*n = NumberProperty(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *n)
+	if err != nil {
+		return err
+	}
+	n.extraProperties = extraProperties
+
 	n._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -6141,6 +6785,8 @@ type ReferenceProperty struct {
 	Constraints []*Constraint    `json:"constraints,omitempty" url:"constraints,omitempty"`
 	Readonly    *bool            `json:"readonly,omitempty" url:"readonly,omitempty"`
 	Appearance  *FieldAppearance `json:"appearance,omitempty" url:"appearance,omitempty"`
+	// An array of actions that end users can perform on this Column.
+	Actions []*Action `json:"actions,omitempty" url:"actions,omitempty"`
 	// Useful for any contextual metadata regarding the schema. Store any valid json here.
 	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
 	// A unique presentation for a field in the UI.
@@ -6150,7 +6796,12 @@ type ReferenceProperty struct {
 	IsArray *bool                    `json:"isArray,omitempty" url:"isArray,omitempty"`
 	Config  *ReferencePropertyConfig `json:"config,omitempty" url:"config,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (r *ReferenceProperty) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
 }
 
 func (r *ReferenceProperty) UnmarshalJSON(data []byte) error {
@@ -6160,6 +6811,13 @@ func (r *ReferenceProperty) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*r = ReferenceProperty(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+
 	r._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -6182,9 +6840,14 @@ type ReferencePropertyConfig struct {
 	// Key of the property to use as the reference key. Defaults to `id`
 	Key string `json:"key" url:"key"`
 	// The type of relationship this defines
-	Relationship ReferencePropertyRelationship `json:"relationship,omitempty" url:"relationship,omitempty"`
+	Relationship ReferencePropertyRelationship `json:"relationship" url:"relationship"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (r *ReferencePropertyConfig) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
 }
 
 func (r *ReferencePropertyConfig) UnmarshalJSON(data []byte) error {
@@ -6194,6 +6857,13 @@ func (r *ReferencePropertyConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*r = ReferencePropertyConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+
 	r._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -6233,9 +6903,14 @@ func (r ReferencePropertyRelationship) Ptr() *ReferencePropertyRelationship {
 }
 
 type StringConfig struct {
-	Size StringConfigOptions `json:"size,omitempty" url:"size,omitempty"`
+	Size StringConfigOptions `json:"size" url:"size"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *StringConfig) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
 }
 
 func (s *StringConfig) UnmarshalJSON(data []byte) error {
@@ -6245,6 +6920,13 @@ func (s *StringConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*s = StringConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
 	s._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -6304,13 +6986,20 @@ type StringListProperty struct {
 	Constraints []*Constraint    `json:"constraints,omitempty" url:"constraints,omitempty"`
 	Readonly    *bool            `json:"readonly,omitempty" url:"readonly,omitempty"`
 	Appearance  *FieldAppearance `json:"appearance,omitempty" url:"appearance,omitempty"`
+	// An array of actions that end users can perform on this Column.
+	Actions []*Action `json:"actions,omitempty" url:"actions,omitempty"`
 	// Useful for any contextual metadata regarding the schema. Store any valid json here.
 	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
 	// A unique presentation for a field in the UI.
 	Treatments       []string `json:"treatments,omitempty" url:"treatments,omitempty"`
 	AlternativeNames []string `json:"alternativeNames,omitempty" url:"alternativeNames,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *StringListProperty) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
 }
 
 func (s *StringListProperty) UnmarshalJSON(data []byte) error {
@@ -6320,6 +7009,13 @@ func (s *StringListProperty) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*s = StringListProperty(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
 	s._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -6346,6 +7042,8 @@ type StringProperty struct {
 	Constraints []*Constraint    `json:"constraints,omitempty" url:"constraints,omitempty"`
 	Readonly    *bool            `json:"readonly,omitempty" url:"readonly,omitempty"`
 	Appearance  *FieldAppearance `json:"appearance,omitempty" url:"appearance,omitempty"`
+	// An array of actions that end users can perform on this Column.
+	Actions []*Action `json:"actions,omitempty" url:"actions,omitempty"`
 	// Useful for any contextual metadata regarding the schema. Store any valid json here.
 	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
 	// A unique presentation for a field in the UI.
@@ -6353,7 +7051,12 @@ type StringProperty struct {
 	AlternativeNames []string      `json:"alternativeNames,omitempty" url:"alternativeNames,omitempty"`
 	Config           *StringConfig `json:"config,omitempty" url:"config,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *StringProperty) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
 }
 
 func (s *StringProperty) UnmarshalJSON(data []byte) error {
@@ -6363,6 +7066,13 @@ func (s *StringProperty) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*s = StringProperty(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
 	s._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -6382,7 +7092,12 @@ func (s *StringProperty) String() string {
 type UniqueConstraint struct {
 	Config *UniqueConstraintConfig `json:"config,omitempty" url:"config,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (u *UniqueConstraint) GetExtraProperties() map[string]interface{} {
+	return u.extraProperties
 }
 
 func (u *UniqueConstraint) UnmarshalJSON(data []byte) error {
@@ -6392,6 +7107,13 @@ func (u *UniqueConstraint) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*u = UniqueConstraint(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *u)
+	if err != nil {
+		return err
+	}
+	u.extraProperties = extraProperties
+
 	u._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -6414,7 +7136,12 @@ type UniqueConstraintConfig struct {
 	// Do not flag empty values as duplicate
 	IgnoreEmpty *bool `json:"ignoreEmpty,omitempty" url:"ignoreEmpty,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (u *UniqueConstraintConfig) GetExtraProperties() map[string]interface{} {
+	return u.extraProperties
 }
 
 func (u *UniqueConstraintConfig) UnmarshalJSON(data []byte) error {
@@ -6424,6 +7151,13 @@ func (u *UniqueConstraintConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*u = UniqueConstraintConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *u)
+	if err != nil {
+		return err
+	}
+	u.extraProperties = extraProperties
+
 	u._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -6444,7 +7178,12 @@ func (u *UniqueConstraintConfig) String() string {
 type CellConfig struct {
 	Readonly *bool `json:"readonly,omitempty" url:"readonly,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CellConfig) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
 }
 
 func (c *CellConfig) UnmarshalJSON(data []byte) error {
@@ -6454,6 +7193,13 @@ func (c *CellConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*c = CellConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
 	c._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -6478,7 +7224,12 @@ type CellValue struct {
 	Layer     *string                `json:"layer,omitempty" url:"layer,omitempty"`
 	UpdatedAt *time.Time             `json:"updatedAt,omitempty" url:"updatedAt,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CellValue) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
 }
 
 func (c *CellValue) UnmarshalJSON(data []byte) error {
@@ -6494,6 +7245,13 @@ func (c *CellValue) UnmarshalJSON(data []byte) error {
 	}
 	*c = CellValue(unmarshaler.embed)
 	c.UpdatedAt = unmarshaler.UpdatedAt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
 	c._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -6531,7 +7289,12 @@ type CellValueWithLinks struct {
 	UpdatedAt *time.Time             `json:"updatedAt,omitempty" url:"updatedAt,omitempty"`
 	Links     *Records               `json:"links,omitempty" url:"links,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CellValueWithLinks) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
 }
 
 func (c *CellValueWithLinks) UnmarshalJSON(data []byte) error {
@@ -6547,6 +7310,13 @@ func (c *CellValueWithLinks) UnmarshalJSON(data []byte) error {
 	}
 	*c = CellValueWithLinks(unmarshaler.embed)
 	c.UpdatedAt = unmarshaler.UpdatedAt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
 	c._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -6590,7 +7360,12 @@ type DiffRecord struct {
 	Config   *RecordConfig          `json:"config,omitempty" url:"config,omitempty"`
 	Values   DiffData               `json:"values,omitempty" url:"values,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (d *DiffRecord) GetExtraProperties() map[string]interface{} {
+	return d.extraProperties
 }
 
 func (d *DiffRecord) UnmarshalJSON(data []byte) error {
@@ -6600,6 +7375,13 @@ func (d *DiffRecord) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*d = DiffRecord(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *d)
+	if err != nil {
+		return err
+	}
+	d.extraProperties = extraProperties
+
 	d._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -6622,7 +7404,12 @@ type DiffRecords = []*DiffRecord
 type DiffRecordsResponse struct {
 	Data DiffRecords `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (d *DiffRecordsResponse) GetExtraProperties() map[string]interface{} {
+	return d.extraProperties
 }
 
 func (d *DiffRecordsResponse) UnmarshalJSON(data []byte) error {
@@ -6632,6 +7419,13 @@ func (d *DiffRecordsResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*d = DiffRecordsResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *d)
+	if err != nil {
+		return err
+	}
+	d.extraProperties = extraProperties
+
 	d._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -6657,7 +7451,12 @@ type DiffValue struct {
 	UpdatedAt     *time.Time             `json:"updatedAt,omitempty" url:"updatedAt,omitempty"`
 	SnapshotValue *CellValueUnion        `json:"snapshotValue,omitempty" url:"snapshotValue,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (d *DiffValue) GetExtraProperties() map[string]interface{} {
+	return d.extraProperties
 }
 
 func (d *DiffValue) UnmarshalJSON(data []byte) error {
@@ -6673,6 +7472,13 @@ func (d *DiffValue) UnmarshalJSON(data []byte) error {
 	}
 	*d = DiffValue(unmarshaler.embed)
 	d.UpdatedAt = unmarshaler.UpdatedAt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *d)
+	if err != nil {
+		return err
+	}
+	d.extraProperties = extraProperties
+
 	d._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -6707,7 +7513,12 @@ type FieldRecordCounts struct {
 	Error int `json:"error" url:"error"`
 	Empty int `json:"empty" url:"empty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (f *FieldRecordCounts) GetExtraProperties() map[string]interface{} {
+	return f.extraProperties
 }
 
 func (f *FieldRecordCounts) UnmarshalJSON(data []byte) error {
@@ -6717,6 +7528,13 @@ func (f *FieldRecordCounts) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*f = FieldRecordCounts(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *f)
+	if err != nil {
+		return err
+	}
+	f.extraProperties = extraProperties
+
 	f._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -6742,7 +7560,12 @@ type GetRecordsResponseData struct {
 	VersionId *VersionId `json:"versionId,omitempty" url:"versionId,omitempty"`
 	CommitId  *CommitId  `json:"commitId,omitempty" url:"commitId,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GetRecordsResponseData) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
 }
 
 func (g *GetRecordsResponseData) UnmarshalJSON(data []byte) error {
@@ -6752,6 +7575,13 @@ func (g *GetRecordsResponseData) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*g = GetRecordsResponseData(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
 	g._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -6782,7 +7612,12 @@ type Record struct {
 	Config   *RecordConfig          `json:"config,omitempty" url:"config,omitempty"`
 	Values   RecordData             `json:"values,omitempty" url:"values,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (r *Record) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
 }
 
 func (r *Record) UnmarshalJSON(data []byte) error {
@@ -6792,6 +7627,13 @@ func (r *Record) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*r = Record(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+
 	r._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -6820,7 +7662,12 @@ type RecordBase struct {
 	Metadata map[string]interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
 	Config   *RecordConfig          `json:"config,omitempty" url:"config,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (r *RecordBase) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
 }
 
 func (r *RecordBase) UnmarshalJSON(data []byte) error {
@@ -6830,6 +7677,13 @@ func (r *RecordBase) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*r = RecordBase(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+
 	r._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -6851,7 +7705,12 @@ type RecordConfig struct {
 	Readonly *bool                  `json:"readonly,omitempty" url:"readonly,omitempty"`
 	Fields   map[string]*CellConfig `json:"fields,omitempty" url:"fields,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (r *RecordConfig) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
 }
 
 func (r *RecordConfig) UnmarshalJSON(data []byte) error {
@@ -6861,6 +7720,13 @@ func (r *RecordConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*r = RecordConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+
 	r._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -6885,7 +7751,12 @@ type RecordCounts struct {
 	// Counts for valid, error, and total records grouped by field key
 	ByField map[string]*FieldRecordCounts `json:"byField,omitempty" url:"byField,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (r *RecordCounts) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
 }
 
 func (r *RecordCounts) UnmarshalJSON(data []byte) error {
@@ -6895,6 +7766,13 @@ func (r *RecordCounts) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*r = RecordCounts(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+
 	r._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -6926,7 +7804,12 @@ type RecordWithLinks struct {
 	Metadata map[string]interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
 	Config   *RecordConfig          `json:"config,omitempty" url:"config,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (r *RecordWithLinks) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
 }
 
 func (r *RecordWithLinks) UnmarshalJSON(data []byte) error {
@@ -6936,6 +7819,13 @@ func (r *RecordWithLinks) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*r = RecordWithLinks(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+
 	r._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -6958,7 +7848,12 @@ type Records = []*Record
 type RecordsResponse struct {
 	Data *RecordsResponseData `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (r *RecordsResponse) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
 }
 
 func (r *RecordsResponse) UnmarshalJSON(data []byte) error {
@@ -6968,6 +7863,13 @@ func (r *RecordsResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*r = RecordsResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+
 	r._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -6992,7 +7894,12 @@ type RecordsResponseData struct {
 	VersionId *VersionId `json:"versionId,omitempty" url:"versionId,omitempty"`
 	CommitId  *CommitId  `json:"commitId,omitempty" url:"commitId,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (r *RecordsResponseData) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
 }
 
 func (r *RecordsResponseData) UnmarshalJSON(data []byte) error {
@@ -7002,6 +7909,13 @@ func (r *RecordsResponseData) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*r = RecordsResponseData(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+
 	r._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -7030,7 +7944,12 @@ type ValidationMessage struct {
 	// This JSONPath is based on the root of mapped cell object.
 	Path *JsonPathString `json:"path,omitempty" url:"path,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (v *ValidationMessage) GetExtraProperties() map[string]interface{} {
+	return v.extraProperties
 }
 
 func (v *ValidationMessage) UnmarshalJSON(data []byte) error {
@@ -7040,6 +7959,13 @@ func (v *ValidationMessage) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*v = ValidationMessage(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *v)
+	if err != nil {
+		return err
+	}
+	v.extraProperties = extraProperties
+
 	v._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -7116,40 +8042,36 @@ func (v ValidationType) Ptr() *ValidationType {
 }
 
 type ActorIdUnion struct {
-	typeName string
-	UserId   UserId
-	AgentId  AgentId
-	GuestId  GuestId
+	UserId  UserId
+	AgentId AgentId
+	GuestId GuestId
 }
 
 func NewActorIdUnionFromUserId(value UserId) *ActorIdUnion {
-	return &ActorIdUnion{typeName: "userId", UserId: value}
+	return &ActorIdUnion{UserId: value}
 }
 
 func NewActorIdUnionFromAgentId(value AgentId) *ActorIdUnion {
-	return &ActorIdUnion{typeName: "agentId", AgentId: value}
+	return &ActorIdUnion{AgentId: value}
 }
 
 func NewActorIdUnionFromGuestId(value GuestId) *ActorIdUnion {
-	return &ActorIdUnion{typeName: "guestId", GuestId: value}
+	return &ActorIdUnion{GuestId: value}
 }
 
 func (a *ActorIdUnion) UnmarshalJSON(data []byte) error {
 	var valueUserId UserId
 	if err := json.Unmarshal(data, &valueUserId); err == nil {
-		a.typeName = "userId"
 		a.UserId = valueUserId
 		return nil
 	}
 	var valueAgentId AgentId
 	if err := json.Unmarshal(data, &valueAgentId); err == nil {
-		a.typeName = "agentId"
 		a.AgentId = valueAgentId
 		return nil
 	}
 	var valueGuestId GuestId
 	if err := json.Unmarshal(data, &valueGuestId); err == nil {
-		a.typeName = "guestId"
 		a.GuestId = valueGuestId
 		return nil
 	}
@@ -7157,16 +8079,16 @@ func (a *ActorIdUnion) UnmarshalJSON(data []byte) error {
 }
 
 func (a ActorIdUnion) MarshalJSON() ([]byte, error) {
-	switch a.typeName {
-	default:
-		return nil, fmt.Errorf("invalid type %s in %T", a.typeName, a)
-	case "userId":
+	if a.UserId != "" {
 		return json.Marshal(a.UserId)
-	case "agentId":
+	}
+	if a.AgentId != "" {
 		return json.Marshal(a.AgentId)
-	case "guestId":
+	}
+	if a.GuestId != "" {
 		return json.Marshal(a.GuestId)
 	}
+	return nil, fmt.Errorf("type %T does not include a non-empty union type", a)
 }
 
 type ActorIdUnionVisitor interface {
@@ -7176,16 +8098,16 @@ type ActorIdUnionVisitor interface {
 }
 
 func (a *ActorIdUnion) Accept(visitor ActorIdUnionVisitor) error {
-	switch a.typeName {
-	default:
-		return fmt.Errorf("invalid type %s in %T", a.typeName, a)
-	case "userId":
+	if a.UserId != "" {
 		return visitor.VisitUserId(a.UserId)
-	case "agentId":
+	}
+	if a.AgentId != "" {
 		return visitor.VisitAgentId(a.AgentId)
-	case "guestId":
+	}
+	if a.GuestId != "" {
 		return visitor.VisitGuestId(a.GuestId)
 	}
+	return fmt.Errorf("type %T does not include a non-empty union type", a)
 }
 
 type ActorRoleResponse struct {
@@ -7196,7 +8118,12 @@ type ActorRoleResponse struct {
 	CreatedAt  time.Time        `json:"createdAt" url:"createdAt"`
 	UpdatedAt  time.Time        `json:"updatedAt" url:"updatedAt"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *ActorRoleResponse) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
 }
 
 func (a *ActorRoleResponse) UnmarshalJSON(data []byte) error {
@@ -7214,6 +8141,13 @@ func (a *ActorRoleResponse) UnmarshalJSON(data []byte) error {
 	*a = ActorRoleResponse(unmarshaler.embed)
 	a.CreatedAt = unmarshaler.CreatedAt.Time()
 	a.UpdatedAt = unmarshaler.UpdatedAt.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
 	a._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -7248,7 +8182,12 @@ type AssignActorRoleRequest struct {
 	RoleId     RoleId           `json:"roleId" url:"roleId"`
 	ResourceId *ResourceIdUnion `json:"resourceId,omitempty" url:"resourceId,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AssignActorRoleRequest) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
 }
 
 func (a *AssignActorRoleRequest) UnmarshalJSON(data []byte) error {
@@ -7258,6 +8197,13 @@ func (a *AssignActorRoleRequest) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*a = AssignActorRoleRequest(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
 	a._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -7277,7 +8223,12 @@ func (a *AssignActorRoleRequest) String() string {
 type AssignRoleResponse struct {
 	Data *AssignRoleResponseData `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AssignRoleResponse) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
 }
 
 func (a *AssignRoleResponse) UnmarshalJSON(data []byte) error {
@@ -7287,6 +8238,13 @@ func (a *AssignRoleResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*a = AssignRoleResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
 	a._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -7311,7 +8269,12 @@ type AssignRoleResponseData struct {
 	CreatedAt  time.Time        `json:"createdAt" url:"createdAt"`
 	UpdatedAt  time.Time        `json:"updatedAt" url:"updatedAt"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AssignRoleResponseData) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
 }
 
 func (a *AssignRoleResponseData) UnmarshalJSON(data []byte) error {
@@ -7329,6 +8292,13 @@ func (a *AssignRoleResponseData) UnmarshalJSON(data []byte) error {
 	*a = AssignRoleResponseData(unmarshaler.embed)
 	a.CreatedAt = unmarshaler.CreatedAt.Time()
 	a.UpdatedAt = unmarshaler.UpdatedAt.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
 	a._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -7362,7 +8332,12 @@ func (a *AssignRoleResponseData) String() string {
 type ListActorRolesResponse struct {
 	Data []*ActorRoleResponse `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (l *ListActorRolesResponse) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
 }
 
 func (l *ListActorRolesResponse) UnmarshalJSON(data []byte) error {
@@ -7372,6 +8347,13 @@ func (l *ListActorRolesResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*l = ListActorRolesResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+
 	l._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -7389,40 +8371,36 @@ func (l *ListActorRolesResponse) String() string {
 }
 
 type ResourceIdUnion struct {
-	typeName      string
 	AccountId     AccountId
 	EnvironmentId EnvironmentId
 	SpaceId       SpaceId
 }
 
 func NewResourceIdUnionFromAccountId(value AccountId) *ResourceIdUnion {
-	return &ResourceIdUnion{typeName: "accountId", AccountId: value}
+	return &ResourceIdUnion{AccountId: value}
 }
 
 func NewResourceIdUnionFromEnvironmentId(value EnvironmentId) *ResourceIdUnion {
-	return &ResourceIdUnion{typeName: "environmentId", EnvironmentId: value}
+	return &ResourceIdUnion{EnvironmentId: value}
 }
 
 func NewResourceIdUnionFromSpaceId(value SpaceId) *ResourceIdUnion {
-	return &ResourceIdUnion{typeName: "spaceId", SpaceId: value}
+	return &ResourceIdUnion{SpaceId: value}
 }
 
 func (r *ResourceIdUnion) UnmarshalJSON(data []byte) error {
 	var valueAccountId AccountId
 	if err := json.Unmarshal(data, &valueAccountId); err == nil {
-		r.typeName = "accountId"
 		r.AccountId = valueAccountId
 		return nil
 	}
 	var valueEnvironmentId EnvironmentId
 	if err := json.Unmarshal(data, &valueEnvironmentId); err == nil {
-		r.typeName = "environmentId"
 		r.EnvironmentId = valueEnvironmentId
 		return nil
 	}
 	var valueSpaceId SpaceId
 	if err := json.Unmarshal(data, &valueSpaceId); err == nil {
-		r.typeName = "spaceId"
 		r.SpaceId = valueSpaceId
 		return nil
 	}
@@ -7430,16 +8408,16 @@ func (r *ResourceIdUnion) UnmarshalJSON(data []byte) error {
 }
 
 func (r ResourceIdUnion) MarshalJSON() ([]byte, error) {
-	switch r.typeName {
-	default:
-		return nil, fmt.Errorf("invalid type %s in %T", r.typeName, r)
-	case "accountId":
+	if r.AccountId != "" {
 		return json.Marshal(r.AccountId)
-	case "environmentId":
+	}
+	if r.EnvironmentId != "" {
 		return json.Marshal(r.EnvironmentId)
-	case "spaceId":
+	}
+	if r.SpaceId != "" {
 		return json.Marshal(r.SpaceId)
 	}
+	return nil, fmt.Errorf("type %T does not include a non-empty union type", r)
 }
 
 type ResourceIdUnionVisitor interface {
@@ -7449,16 +8427,16 @@ type ResourceIdUnionVisitor interface {
 }
 
 func (r *ResourceIdUnion) Accept(visitor ResourceIdUnionVisitor) error {
-	switch r.typeName {
-	default:
-		return fmt.Errorf("invalid type %s in %T", r.typeName, r)
-	case "accountId":
+	if r.AccountId != "" {
 		return visitor.VisitAccountId(r.AccountId)
-	case "environmentId":
+	}
+	if r.EnvironmentId != "" {
 		return visitor.VisitEnvironmentId(r.EnvironmentId)
-	case "spaceId":
+	}
+	if r.SpaceId != "" {
 		return visitor.VisitSpaceId(r.SpaceId)
 	}
+	return fmt.Errorf("type %T does not include a non-empty union type", r)
 }
 
 type RoleResponse struct {
@@ -7468,7 +8446,12 @@ type RoleResponse struct {
 	CreatedAt time.Time `json:"createdAt" url:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt" url:"updatedAt"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (r *RoleResponse) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
 }
 
 func (r *RoleResponse) UnmarshalJSON(data []byte) error {
@@ -7486,6 +8469,13 @@ func (r *RoleResponse) UnmarshalJSON(data []byte) error {
 	*r = RoleResponse(unmarshaler.embed)
 	r.CreatedAt = unmarshaler.CreatedAt.Time()
 	r.UpdatedAt = unmarshaler.UpdatedAt.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+
 	r._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -7529,7 +8519,12 @@ type Secret struct {
 	// The ID of the secret.
 	Id SecretId `json:"id" url:"id"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *Secret) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
 }
 
 func (s *Secret) UnmarshalJSON(data []byte) error {
@@ -7539,6 +8534,13 @@ func (s *Secret) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*s = Secret(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
 	s._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -7570,7 +8572,12 @@ type CellValueWithCounts struct {
 	UpdatedAt *time.Time             `json:"updatedAt,omitempty" url:"updatedAt,omitempty"`
 	Counts    *RecordCounts          `json:"counts,omitempty" url:"counts,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CellValueWithCounts) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
 }
 
 func (c *CellValueWithCounts) UnmarshalJSON(data []byte) error {
@@ -7586,6 +8593,13 @@ func (c *CellValueWithCounts) UnmarshalJSON(data []byte) error {
 	}
 	*c = CellValueWithCounts(unmarshaler.embed)
 	c.UpdatedAt = unmarshaler.UpdatedAt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
 	c._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -7622,9 +8636,14 @@ type CompositeUniqueConstraint struct {
 	Name string `json:"name" url:"name"`
 	// The fields that must be unique together
 	Fields   []string                          `json:"fields,omitempty" url:"fields,omitempty"`
-	Strategy CompositeUniqueConstraintStrategy `json:"strategy,omitempty" url:"strategy,omitempty"`
+	Strategy CompositeUniqueConstraintStrategy `json:"strategy" url:"strategy"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CompositeUniqueConstraint) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
 }
 
 func (c *CompositeUniqueConstraint) UnmarshalJSON(data []byte) error {
@@ -7634,6 +8653,13 @@ func (c *CompositeUniqueConstraint) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*c = CompositeUniqueConstraint(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
 	c._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -7680,7 +8706,12 @@ type ExternalSheetConstraint struct {
 	Fields []string    `json:"fields,omitempty" url:"fields,omitempty"`
 	Config interface{} `json:"config,omitempty" url:"config,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *ExternalSheetConstraint) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
 }
 
 func (e *ExternalSheetConstraint) UnmarshalJSON(data []byte) error {
@@ -7690,6 +8721,13 @@ func (e *ExternalSheetConstraint) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*e = ExternalSheetConstraint(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
 	e._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -7709,7 +8747,12 @@ func (e *ExternalSheetConstraint) String() string {
 type ListSheetsResponse struct {
 	Data []*Sheet `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (l *ListSheetsResponse) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
 }
 
 func (l *ListSheetsResponse) UnmarshalJSON(data []byte) error {
@@ -7719,6 +8762,13 @@ func (l *ListSheetsResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*l = ListSheetsResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+
 	l._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -7739,7 +8789,12 @@ type RecordCountsResponseData struct {
 	Counts  *RecordCounts `json:"counts,omitempty" url:"counts,omitempty"`
 	Success bool          `json:"success" url:"success"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (r *RecordCountsResponseData) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
 }
 
 func (r *RecordCountsResponseData) UnmarshalJSON(data []byte) error {
@@ -7749,6 +8804,13 @@ func (r *RecordCountsResponseData) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*r = RecordCountsResponseData(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+
 	r._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -7792,7 +8854,12 @@ type Sheet struct {
 	// The precomputed counts of records in the Sheet (may not exist).
 	RecordCounts *RecordCounts `json:"recordCounts,omitempty" url:"recordCounts,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *Sheet) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
 }
 
 func (s *Sheet) UnmarshalJSON(data []byte) error {
@@ -7812,6 +8879,13 @@ func (s *Sheet) UnmarshalJSON(data []byte) error {
 	s.UpdatedAt = unmarshaler.UpdatedAt.Time()
 	s.CreatedAt = unmarshaler.CreatedAt.Time()
 	s.LockedAt = unmarshaler.LockedAt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
 	s._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -7900,7 +8974,12 @@ type SheetConfig struct {
 	// An array of constraints that end users can perform on this Sheet.
 	Constraints []*SheetConstraint `json:"constraints,omitempty" url:"constraints,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SheetConfig) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
 }
 
 func (s *SheetConfig) UnmarshalJSON(data []byte) error {
@@ -7910,6 +8989,13 @@ func (s *SheetConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*s = SheetConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
 	s._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -7960,7 +9046,12 @@ type SheetConfigOrUpdate struct {
 	// Date the sheet was created
 	CreatedAt *time.Time `json:"createdAt,omitempty" url:"createdAt,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SheetConfigOrUpdate) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
 }
 
 func (s *SheetConfigOrUpdate) UnmarshalJSON(data []byte) error {
@@ -7978,6 +9069,13 @@ func (s *SheetConfigOrUpdate) UnmarshalJSON(data []byte) error {
 	*s = SheetConfigOrUpdate(unmarshaler.embed)
 	s.UpdatedAt = unmarshaler.UpdatedAt.TimePtr()
 	s.CreatedAt = unmarshaler.CreatedAt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
 	s._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -8029,7 +9127,12 @@ type SheetConfigUpdate struct {
 	// An array of actions that end users can perform on this Sheet.
 	Actions []*Action `json:"actions,omitempty" url:"actions,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SheetConfigUpdate) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
 }
 
 func (s *SheetConfigUpdate) UnmarshalJSON(data []byte) error {
@@ -8039,6 +9142,13 @@ func (s *SheetConfigUpdate) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*s = SheetConfigUpdate(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
 	s._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -8099,23 +9209,9 @@ func (s SheetConstraint) MarshalJSON() ([]byte, error) {
 	default:
 		return nil, fmt.Errorf("invalid type %s in %T", s.Type, s)
 	case "unique":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*CompositeUniqueConstraint
-		}{
-			Type:                      s.Type,
-			CompositeUniqueConstraint: s.Unique,
-		}
-		return json.Marshal(marshaler)
+		return core.MarshalJSONWithExtraProperty(s.Unique, "type", "unique")
 	case "external":
-		var marshaler = struct {
-			Type string `json:"type"`
-			*ExternalSheetConstraint
-		}{
-			Type:                    s.Type,
-			ExternalSheetConstraint: s.External,
-		}
-		return json.Marshal(marshaler)
+		return core.MarshalJSONWithExtraProperty(s.External, "type", "external")
 	}
 }
 
@@ -8152,7 +9248,12 @@ type SheetUpdate struct {
 	// Date the sheet was created
 	CreatedAt *time.Time `json:"createdAt,omitempty" url:"createdAt,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SheetUpdate) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
 }
 
 func (s *SheetUpdate) UnmarshalJSON(data []byte) error {
@@ -8170,6 +9271,13 @@ func (s *SheetUpdate) UnmarshalJSON(data []byte) error {
 	*s = SheetUpdate(unmarshaler.embed)
 	s.UpdatedAt = unmarshaler.UpdatedAt.TimePtr()
 	s.CreatedAt = unmarshaler.CreatedAt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
 	s._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -8207,14 +9315,19 @@ type Snapshot struct {
 	SheetId SheetId `json:"sheetId" url:"sheetId"`
 	// The title of the Snapshot.
 	Label *string `json:"label,omitempty" url:"label,omitempty"`
-	// A summary of the Snapshot.
+	// A summary of the Snapshot. This field is only available on the single get snapshot endpoint. It is not available for the list snapshots endpoint.
 	Summary *SnapshotSummary `json:"summary,omitempty" url:"summary,omitempty"`
 	// The time the Snapshot was created.
 	CreatedAt time.Time `json:"createdAt" url:"createdAt"`
 	// The actor who created the Snapshot.
 	CreatedBy UserId `json:"createdBy" url:"createdBy"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *Snapshot) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
 }
 
 func (s *Snapshot) UnmarshalJSON(data []byte) error {
@@ -8230,6 +9343,13 @@ func (s *Snapshot) UnmarshalJSON(data []byte) error {
 	}
 	*s = Snapshot(unmarshaler.embed)
 	s.CreatedAt = unmarshaler.CreatedAt.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
 	s._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -8263,7 +9383,12 @@ type SnapshotSummary struct {
 	UpdatedSince *SummarySection `json:"updatedSince,omitempty" url:"updatedSince,omitempty"`
 	DeletedSince *SummarySection `json:"deletedSince,omitempty" url:"deletedSince,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SnapshotSummary) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
 }
 
 func (s *SnapshotSummary) UnmarshalJSON(data []byte) error {
@@ -8273,6 +9398,13 @@ func (s *SnapshotSummary) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*s = SnapshotSummary(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
 	s._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -8293,7 +9425,12 @@ type SummarySection struct {
 	Total   int            `json:"total" url:"total"`
 	ByField map[string]int `json:"byField,omitempty" url:"byField,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SummarySection) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
 }
 
 func (s *SummarySection) UnmarshalJSON(data []byte) error {
@@ -8303,6 +9440,13 @@ func (s *SummarySection) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*s = SummarySection(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
 	s._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -8330,7 +9474,12 @@ type EventToken struct {
 	// This should be your API key.
 	Token *string `json:"token,omitempty" url:"token,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *EventToken) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
 }
 
 func (e *EventToken) UnmarshalJSON(data []byte) error {
@@ -8340,6 +9489,13 @@ func (e *EventToken) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*e = EventToken(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
 	e._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -8359,7 +9515,12 @@ func (e *EventToken) String() string {
 type EventTokenResponse struct {
 	Data *EventToken `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *EventTokenResponse) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
 }
 
 func (e *EventTokenResponse) UnmarshalJSON(data []byte) error {
@@ -8369,6 +9530,13 @@ func (e *EventTokenResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*e = EventTokenResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
 	e._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -8406,7 +9574,12 @@ type InternalSpaceConfigBase struct {
 	// The ID of the App that space is associated with
 	AppId *AppId `json:"appId,omitempty" url:"appId,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (i *InternalSpaceConfigBase) GetExtraProperties() map[string]interface{} {
+	return i.extraProperties
 }
 
 func (i *InternalSpaceConfigBase) UnmarshalJSON(data []byte) error {
@@ -8422,6 +9595,13 @@ func (i *InternalSpaceConfigBase) UnmarshalJSON(data []byte) error {
 	}
 	*i = InternalSpaceConfigBase(unmarshaler.embed)
 	i.ArchivedAt = unmarshaler.ArchivedAt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+
 	i._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -8504,7 +9684,12 @@ type Space struct {
 	// Type of guest authentication
 	GuestAuthentication []GuestAuthenticationEnum `json:"guestAuthentication,omitempty" url:"guestAuthentication,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *Space) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
 }
 
 func (s *Space) UnmarshalJSON(data []byte) error {
@@ -8530,6 +9715,13 @@ func (s *Space) UnmarshalJSON(data []byte) error {
 	s.ExpiredAt = unmarshaler.ExpiredAt.TimePtr()
 	s.LastActivityAt = unmarshaler.LastActivityAt.TimePtr()
 	s.UpgradedAt = unmarshaler.UpgradedAt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
 	s._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -8595,7 +9787,12 @@ type SpaceSettings struct {
 	// The sidebar configuration for the space. (This will eventually replace metadata.sidebarconfig)
 	SidebarConfig *SpaceSidebarConfig `json:"sidebarConfig,omitempty" url:"sidebarConfig,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SpaceSettings) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
 }
 
 func (s *SpaceSettings) UnmarshalJSON(data []byte) error {
@@ -8605,6 +9802,13 @@ func (s *SpaceSettings) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*s = SpaceSettings(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
 	s._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -8625,7 +9829,12 @@ type SpaceSidebarConfig struct {
 	// Used to set the order of workbooks in the sidebar. This will not affect workbooks that are pinned and workbooks that are not specified here will be sorted alphabetically.
 	WorkbookSidebarOrder []WorkbookId `json:"workbookSidebarOrder,omitempty" url:"workbookSidebarOrder,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SpaceSidebarConfig) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
 }
 
 func (s *SpaceSidebarConfig) UnmarshalJSON(data []byte) error {
@@ -8635,6 +9844,13 @@ func (s *SpaceSidebarConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*s = SpaceSidebarConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
 	s._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -8659,7 +9875,12 @@ type SpaceSize struct {
 	Pdv      int    `json:"pdv" url:"pdv"`
 	NumFiles int    `json:"numFiles" url:"numFiles"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SpaceSize) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
 }
 
 func (s *SpaceSize) UnmarshalJSON(data []byte) error {
@@ -8669,6 +9890,13 @@ func (s *SpaceSize) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*s = SpaceSize(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
 	s._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -8699,7 +9927,12 @@ type User struct {
 	LastSeenAt *time.Time             `json:"lastSeenAt,omitempty" url:"lastSeenAt,omitempty"`
 	Dashboard  *int                   `json:"dashboard,omitempty" url:"dashboard,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (u *User) GetExtraProperties() map[string]interface{} {
+	return u.extraProperties
 }
 
 func (u *User) UnmarshalJSON(data []byte) error {
@@ -8719,6 +9952,13 @@ func (u *User) UnmarshalJSON(data []byte) error {
 	u.CreatedAt = unmarshaler.CreatedAt.Time()
 	u.UpdatedAt = unmarshaler.UpdatedAt.Time()
 	u.LastSeenAt = unmarshaler.LastSeenAt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *u)
+	if err != nil {
+		return err
+	}
+	u.extraProperties = extraProperties
+
 	u._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -8754,7 +9994,12 @@ func (u *User) String() string {
 type UserResponse struct {
 	Data *User `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (u *UserResponse) GetExtraProperties() map[string]interface{} {
+	return u.extraProperties
 }
 
 func (u *UserResponse) UnmarshalJSON(data []byte) error {
@@ -8764,6 +10009,13 @@ func (u *UserResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*u = UserResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *u)
+	if err != nil {
+		return err
+	}
+	u.extraProperties = extraProperties
+
 	u._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -8794,7 +10046,12 @@ type UserWithRoles struct {
 	Dashboard  *int                   `json:"dashboard,omitempty" url:"dashboard,omitempty"`
 	ActorRoles []*ActorRoleResponse   `json:"actorRoles,omitempty" url:"actorRoles,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (u *UserWithRoles) GetExtraProperties() map[string]interface{} {
+	return u.extraProperties
 }
 
 func (u *UserWithRoles) UnmarshalJSON(data []byte) error {
@@ -8814,6 +10071,13 @@ func (u *UserWithRoles) UnmarshalJSON(data []byte) error {
 	u.CreatedAt = unmarshaler.CreatedAt.Time()
 	u.UpdatedAt = unmarshaler.UpdatedAt.Time()
 	u.LastSeenAt = unmarshaler.LastSeenAt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *u)
+	if err != nil {
+		return err
+	}
+	u.extraProperties = extraProperties
+
 	u._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -8849,7 +10113,12 @@ func (u *UserWithRoles) String() string {
 type Version struct {
 	VersionId VersionId `json:"versionId" url:"versionId"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (v *Version) GetExtraProperties() map[string]interface{} {
+	return v.extraProperties
 }
 
 func (v *Version) UnmarshalJSON(data []byte) error {
@@ -8859,6 +10128,13 @@ func (v *Version) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*v = Version(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *v)
+	if err != nil {
+		return err
+	}
+	v.extraProperties = extraProperties
+
 	v._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -8878,7 +10154,12 @@ func (v *Version) String() string {
 type VersionResponse struct {
 	Data *Version `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (v *VersionResponse) GetExtraProperties() map[string]interface{} {
+	return v.extraProperties
 }
 
 func (v *VersionResponse) UnmarshalJSON(data []byte) error {
@@ -8888,6 +10169,13 @@ func (v *VersionResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*v = VersionResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *v)
+	if err != nil {
+		return err
+	}
+	v.extraProperties = extraProperties
+
 	v._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -8917,7 +10205,12 @@ type View struct {
 	// ID of the actor who created the view
 	CreatedBy string `json:"createdBy" url:"createdBy"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (v *View) GetExtraProperties() map[string]interface{} {
+	return v.extraProperties
 }
 
 func (v *View) UnmarshalJSON(data []byte) error {
@@ -8927,6 +10220,13 @@ func (v *View) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*v = View(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *v)
+	if err != nil {
+		return err
+	}
+	v.extraProperties = extraProperties
+
 	v._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -8977,7 +10277,12 @@ type ViewConfig struct {
 	// An FFQL query used to filter the result set
 	Q *string `json:"q,omitempty" url:"q,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (v *ViewConfig) GetExtraProperties() map[string]interface{} {
+	return v.extraProperties
 }
 
 func (v *ViewConfig) UnmarshalJSON(data []byte) error {
@@ -8987,6 +10292,13 @@ func (v *ViewConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*v = ViewConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *v)
+	if err != nil {
+		return err
+	}
+	v.extraProperties = extraProperties
+
 	v._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -9031,7 +10343,12 @@ type Workbook struct {
 	// Date the workbook was created
 	ExpiredAt *time.Time `json:"expiredAt,omitempty" url:"expiredAt,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (w *Workbook) GetExtraProperties() map[string]interface{} {
+	return w.extraProperties
 }
 
 func (w *Workbook) UnmarshalJSON(data []byte) error {
@@ -9051,6 +10368,13 @@ func (w *Workbook) UnmarshalJSON(data []byte) error {
 	w.UpdatedAt = unmarshaler.UpdatedAt.Time()
 	w.CreatedAt = unmarshaler.CreatedAt.Time()
 	w.ExpiredAt = unmarshaler.ExpiredAt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *w)
+	if err != nil {
+		return err
+	}
+	w.extraProperties = extraProperties
+
 	w._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -9088,7 +10412,12 @@ type WorkbookConfigSettings struct {
 	// Whether to track changes for this workbook. Defaults to false. Tracking changes on a workbook allows for disabling workbook and sheet actions while data in the workbook is still being processed. You must run a recordHook listener if you enable this feature.
 	TrackChanges *bool `json:"trackChanges,omitempty" url:"trackChanges,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (w *WorkbookConfigSettings) GetExtraProperties() map[string]interface{} {
+	return w.extraProperties
 }
 
 func (w *WorkbookConfigSettings) UnmarshalJSON(data []byte) error {
@@ -9098,6 +10427,13 @@ func (w *WorkbookConfigSettings) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*w = WorkbookConfigSettings(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *w)
+	if err != nil {
+		return err
+	}
+	w.extraProperties = extraProperties
+
 	w._rawJSON = json.RawMessage(data)
 	return nil
 }

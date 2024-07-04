@@ -11,7 +11,12 @@ import (
 type ListRolesResponse struct {
 	Data []*RoleResponse `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (l *ListRolesResponse) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
 }
 
 func (l *ListRolesResponse) UnmarshalJSON(data []byte) error {
@@ -21,6 +26,13 @@ func (l *ListRolesResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*l = ListRolesResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+
 	l._rawJSON = json.RawMessage(data)
 	return nil
 }

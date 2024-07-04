@@ -7,7 +7,6 @@ import (
 	context "context"
 	json "encoding/json"
 	errors "errors"
-	fmt "fmt"
 	flatfilego "github.com/FlatFilers/flatfile-go"
 	core "github.com/FlatFilers/flatfile-go/core"
 	option "github.com/FlatFilers/flatfile-go/option"
@@ -50,7 +49,7 @@ func (c *Client) List(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := baseURL + "/" + "environments"
+	endpointURL := baseURL + "/environments"
 
 	queryParams, err := core.QueryValues(request)
 	if err != nil {
@@ -94,7 +93,7 @@ func (c *Client) Create(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := baseURL + "/" + "environments"
+	endpointURL := baseURL + "/environments"
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -131,7 +130,7 @@ func (c *Client) GetEnvironmentEventToken(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := baseURL + "/" + "environments/subscription-token"
+	endpointURL := baseURL + "/environments/subscription-token"
 
 	queryParams, err := core.QueryValues(request)
 	if err != nil {
@@ -203,7 +202,7 @@ func (c *Client) Get(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"environments/%v", environmentId)
+	endpointURL := core.EncodeURL(baseURL+"/environments/%v", environmentId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -268,7 +267,7 @@ func (c *Client) Update(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"environments/%v", environmentId)
+	endpointURL := core.EncodeURL(baseURL+"/environments/%v", environmentId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -306,7 +305,7 @@ func (c *Client) Delete(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"environments/%v", environmentId)
+	endpointURL := core.EncodeURL(baseURL+"/environments/%v", environmentId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 

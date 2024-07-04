@@ -44,7 +44,7 @@ func (c *Client) CreateId(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := baseURL + "/" + "versions"
+	endpointURL := baseURL + "/versions"
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 

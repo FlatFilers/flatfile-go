@@ -10,12 +10,12 @@ import (
 )
 
 type DeleteAllHistoryForUserRequest struct {
-	EnvironmentId *EnvironmentId `json:"environmentId,omitempty" url:"environmentId,omitempty"`
+	EnvironmentId *EnvironmentId `json:"environmentId,omitempty" url:"-"`
 }
 
 type DeleteMultipleRulesRequest struct {
 	// Array of rule IDs to be deleted
-	RuleIds []MappingId `json:"ruleIds,omitempty" url:"ruleIds,omitempty"`
+	RuleIds []MappingId `json:"ruleIds,omitempty" url:"-"`
 }
 
 type ListProgramsRequest struct {
@@ -61,8 +61,15 @@ type MappingRuleConfig struct {
 	AcceptedAt *time.Time `json:"acceptedAt,omitempty" url:"acceptedAt,omitempty"`
 	// User ID of the contributor of the mapping rule
 	AcceptedBy *UserId `json:"acceptedBy,omitempty" url:"acceptedBy,omitempty"`
+	// Metadata of the mapping rule
+	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (m *MappingRuleConfig) GetExtraProperties() map[string]interface{} {
+	return m.extraProperties
 }
 
 func (m *MappingRuleConfig) UnmarshalJSON(data []byte) error {
@@ -78,6 +85,13 @@ func (m *MappingRuleConfig) UnmarshalJSON(data []byte) error {
 	}
 	*m = MappingRuleConfig(unmarshaler.embed)
 	m.AcceptedAt = unmarshaler.AcceptedAt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *m)
+	if err != nil {
+		return err
+	}
+	m.extraProperties = extraProperties
+
 	m._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -109,7 +123,12 @@ func (m *MappingRuleConfig) String() string {
 type MappingRuleResponse struct {
 	Data *MappingRule `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (m *MappingRuleResponse) GetExtraProperties() map[string]interface{} {
+	return m.extraProperties
 }
 
 func (m *MappingRuleResponse) UnmarshalJSON(data []byte) error {
@@ -119,6 +138,13 @@ func (m *MappingRuleResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*m = MappingRuleResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *m)
+	if err != nil {
+		return err
+	}
+	m.extraProperties = extraProperties
+
 	m._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -138,7 +164,12 @@ func (m *MappingRuleResponse) String() string {
 type MappingRulesResponse struct {
 	Data []*MappingRule `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (m *MappingRulesResponse) GetExtraProperties() map[string]interface{} {
+	return m.extraProperties
 }
 
 func (m *MappingRulesResponse) UnmarshalJSON(data []byte) error {
@@ -148,6 +179,13 @@ func (m *MappingRulesResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*m = MappingRulesResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *m)
+	if err != nil {
+		return err
+	}
+	m.extraProperties = extraProperties
+
 	m._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -176,7 +214,12 @@ type ProgramConfig struct {
 	// Whether to save the program for editing later. Defaults to false. If true, the response will contain an ID and access token.
 	Save *bool `json:"save,omitempty" url:"save,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *ProgramConfig) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
 }
 
 func (p *ProgramConfig) UnmarshalJSON(data []byte) error {
@@ -186,6 +229,13 @@ func (p *ProgramConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*p = ProgramConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
 	p._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -205,7 +255,12 @@ func (p *ProgramConfig) String() string {
 type ProgramResponse struct {
 	Data *Program `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *ProgramResponse) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
 }
 
 func (p *ProgramResponse) UnmarshalJSON(data []byte) error {
@@ -215,6 +270,13 @@ func (p *ProgramResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*p = ProgramResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
 	p._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -234,7 +296,12 @@ func (p *ProgramResponse) String() string {
 type ProgramsResponse struct {
 	Data []*Program `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *ProgramsResponse) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
 }
 
 func (p *ProgramsResponse) UnmarshalJSON(data []byte) error {
@@ -244,6 +311,13 @@ func (p *ProgramsResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*p = ProgramsResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
 	p._rawJSON = json.RawMessage(data)
 	return nil
 }

@@ -7,7 +7,6 @@ import (
 	context "context"
 	json "encoding/json"
 	errors "errors"
-	fmt "fmt"
 	flatfilego "github.com/FlatFilers/flatfile-go"
 	core "github.com/FlatFilers/flatfile-go/core"
 	option "github.com/FlatFilers/flatfile-go/option"
@@ -52,7 +51,7 @@ func (c *Client) Get(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"sheets/%v/records", sheetId)
+	endpointURL := core.EncodeURL(baseURL+"/sheets/%v/records", sheetId)
 
 	queryParams, err := core.QueryValues(request)
 	if err != nil {
@@ -125,7 +124,7 @@ func (c *Client) Update(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"sheets/%v/records", sheetId)
+	endpointURL := core.EncodeURL(baseURL+"/sheets/%v/records", sheetId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -191,7 +190,7 @@ func (c *Client) Insert(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"sheets/%v/records", sheetId)
+	endpointURL := core.EncodeURL(baseURL+"/sheets/%v/records", sheetId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -257,7 +256,7 @@ func (c *Client) Delete(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"sheets/%v/records", sheetId)
+	endpointURL := core.EncodeURL(baseURL+"/sheets/%v/records", sheetId)
 
 	queryParams, err := core.QueryValues(request)
 	if err != nil {
@@ -330,7 +329,7 @@ func (c *Client) FindAndReplace(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"sheets/%v/find-replace", sheetId)
+	endpointURL := core.EncodeURL(baseURL+"/sheets/%v/find-replace", sheetId)
 
 	queryParams, err := core.QueryValues(request)
 	if err != nil {

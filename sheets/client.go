@@ -7,7 +7,6 @@ import (
 	context "context"
 	json "encoding/json"
 	errors "errors"
-	fmt "fmt"
 	flatfilego "github.com/FlatFilers/flatfile-go"
 	core "github.com/FlatFilers/flatfile-go/core"
 	option "github.com/FlatFilers/flatfile-go/option"
@@ -50,7 +49,7 @@ func (c *Client) List(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := baseURL + "/" + "sheets"
+	endpointURL := baseURL + "/sheets"
 
 	queryParams, err := core.QueryValues(request)
 	if err != nil {
@@ -95,7 +94,7 @@ func (c *Client) Get(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"sheets/%v", sheetId)
+	endpointURL := core.EncodeURL(baseURL+"/sheets/%v", sheetId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -132,7 +131,7 @@ func (c *Client) Delete(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"sheets/%v", sheetId)
+	endpointURL := core.EncodeURL(baseURL+"/sheets/%v", sheetId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -196,7 +195,7 @@ func (c *Client) Validate(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"sheets/%v/validate", sheetId)
+	endpointURL := core.EncodeURL(baseURL+"/sheets/%v/validate", sheetId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -261,7 +260,7 @@ func (c *Client) GetRecordsAsCsv(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"sheets/%v/download", sheetId)
+	endpointURL := core.EncodeURL(baseURL+"/sheets/%v/download", sheetId)
 
 	queryParams, err := core.QueryValues(request)
 	if err != nil {
@@ -307,7 +306,7 @@ func (c *Client) GetRecordCounts(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"sheets/%v/counts", sheetId)
+	endpointURL := core.EncodeURL(baseURL+"/sheets/%v/counts", sheetId)
 
 	queryParams, err := core.QueryValues(request)
 	if err != nil {
@@ -353,7 +352,7 @@ func (c *Client) GetSheetCommits(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"sheets/%v/commits", sheetId)
+	endpointURL := core.EncodeURL(baseURL+"/sheets/%v/commits", sheetId)
 
 	queryParams, err := core.QueryValues(request)
 	if err != nil {
@@ -398,7 +397,7 @@ func (c *Client) LockSheet(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"sheets/%v/lock", sheetId)
+	endpointURL := core.EncodeURL(baseURL+"/sheets/%v/lock", sheetId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -462,7 +461,7 @@ func (c *Client) UnlockSheet(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"sheets/%v/unlock", sheetId)
+	endpointURL := core.EncodeURL(baseURL+"/sheets/%v/unlock", sheetId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -527,7 +526,7 @@ func (c *Client) GetCellValues(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"sheets/%v/cells", sheetId)
+	endpointURL := core.EncodeURL(baseURL+"/sheets/%v/cells", sheetId)
 
 	queryParams, err := core.QueryValues(request)
 	if err != nil {
@@ -573,7 +572,7 @@ func (c *Client) UpdateSheet(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"sheets/%v", sheetId)
+	endpointURL := core.EncodeURL(baseURL+"/sheets/%v", sheetId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 

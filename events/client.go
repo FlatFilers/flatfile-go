@@ -7,7 +7,6 @@ import (
 	context "context"
 	json "encoding/json"
 	errors "errors"
-	fmt "fmt"
 	flatfilego "github.com/FlatFilers/flatfile-go"
 	core "github.com/FlatFilers/flatfile-go/core"
 	option "github.com/FlatFilers/flatfile-go/option"
@@ -50,7 +49,7 @@ func (c *Client) List(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := baseURL + "/" + "events"
+	endpointURL := baseURL + "/events"
 
 	queryParams, err := core.QueryValues(request)
 	if err != nil {
@@ -93,7 +92,7 @@ func (c *Client) Create(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := baseURL + "/" + "events"
+	endpointURL := baseURL + "/events"
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -157,7 +156,7 @@ func (c *Client) Get(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"events/%v", eventId)
+	endpointURL := core.EncodeURL(baseURL+"/events/%v", eventId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -193,7 +192,7 @@ func (c *Client) Ack(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := fmt.Sprintf(baseURL+"/"+"events/%v/ack", eventId)
+	endpointURL := core.EncodeURL(baseURL+"/events/%v/ack", eventId)
 
 	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
 
@@ -229,7 +228,7 @@ func (c *Client) GetEventToken(
 	if options.BaseURL != "" {
 		baseURL = options.BaseURL
 	}
-	endpointURL := baseURL + "/" + "subscription"
+	endpointURL := baseURL + "/subscription"
 
 	queryParams, err := core.QueryValues(request)
 	if err != nil {

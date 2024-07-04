@@ -25,11 +25,11 @@ type FindAndReplaceRecordRequest struct {
 	// An FFQL query used to filter the result set
 	Q *string `json:"-" url:"q,omitempty"`
 	// A value to find for a given field in a sheet. For exact matches, wrap the value in double quotes ("Bob")
-	Find *CellValueUnion `json:"find,omitempty" url:"find,omitempty"`
+	Find *CellValueUnion `json:"find,omitempty" url:"-"`
 	// The value to replace found values with
-	Replace *CellValueUnion `json:"replace,omitempty" url:"replace,omitempty"`
+	Replace *CellValueUnion `json:"replace,omitempty" url:"-"`
 	// A unique key used to identify a field in a sheet
-	FieldKey string `json:"fieldKey" url:"fieldKey"`
+	FieldKey string `json:"fieldKey" url:"-"`
 }
 
 type GetRecordsRequest struct {
@@ -60,6 +60,8 @@ type GetRecordsRequest struct {
 	IncludeLinks *bool `json:"-" url:"includeLinks,omitempty"`
 	// Include error messages, defaults to false.
 	IncludeMessages *bool `json:"-" url:"includeMessages,omitempty"`
+	// A list of field keys to include in the response. If not provided, all fields will be included.
+	Fields []*string `json:"-" url:"fields,omitempty"`
 	// if "for" is provided, the query parameters will be pulled from the event payload
 	For *EventId `json:"-" url:"for,omitempty"`
 	// An FFQL query used to filter the result set
@@ -67,7 +69,6 @@ type GetRecordsRequest struct {
 }
 
 type CellValueUnion struct {
-	typeName string
 	String   string
 	Integer  int
 	Long     int64
@@ -78,73 +79,66 @@ type CellValueUnion struct {
 }
 
 func NewCellValueUnionFromString(value string) *CellValueUnion {
-	return &CellValueUnion{typeName: "string", String: value}
+	return &CellValueUnion{String: value}
 }
 
 func NewCellValueUnionFromInteger(value int) *CellValueUnion {
-	return &CellValueUnion{typeName: "integer", Integer: value}
+	return &CellValueUnion{Integer: value}
 }
 
 func NewCellValueUnionFromLong(value int64) *CellValueUnion {
-	return &CellValueUnion{typeName: "long", Long: value}
+	return &CellValueUnion{Long: value}
 }
 
 func NewCellValueUnionFromDouble(value float64) *CellValueUnion {
-	return &CellValueUnion{typeName: "double", Double: value}
+	return &CellValueUnion{Double: value}
 }
 
 func NewCellValueUnionFromBoolean(value bool) *CellValueUnion {
-	return &CellValueUnion{typeName: "boolean", Boolean: value}
+	return &CellValueUnion{Boolean: value}
 }
 
 func NewCellValueUnionFromDate(value time.Time) *CellValueUnion {
-	return &CellValueUnion{typeName: "date", Date: value}
+	return &CellValueUnion{Date: value}
 }
 
 func NewCellValueUnionFromDateTime(value time.Time) *CellValueUnion {
-	return &CellValueUnion{typeName: "dateTime", DateTime: value}
+	return &CellValueUnion{DateTime: value}
 }
 
 func (c *CellValueUnion) UnmarshalJSON(data []byte) error {
 	var valueString string
 	if err := json.Unmarshal(data, &valueString); err == nil {
-		c.typeName = "string"
 		c.String = valueString
 		return nil
 	}
 	var valueInteger int
 	if err := json.Unmarshal(data, &valueInteger); err == nil {
-		c.typeName = "integer"
 		c.Integer = valueInteger
 		return nil
 	}
 	var valueLong int64
 	if err := json.Unmarshal(data, &valueLong); err == nil {
-		c.typeName = "long"
 		c.Long = valueLong
 		return nil
 	}
 	var valueDouble float64
 	if err := json.Unmarshal(data, &valueDouble); err == nil {
-		c.typeName = "double"
 		c.Double = valueDouble
 		return nil
 	}
 	var valueBoolean bool
 	if err := json.Unmarshal(data, &valueBoolean); err == nil {
-		c.typeName = "boolean"
 		c.Boolean = valueBoolean
 		return nil
 	}
 	var valueDate *core.Date
 	if err := json.Unmarshal(data, &valueDate); err == nil {
-		c.typeName = "date"
 		c.Date = valueDate.Time()
 		return nil
 	}
 	var valueDateTime *core.DateTime
 	if err := json.Unmarshal(data, &valueDateTime); err == nil {
-		c.typeName = "dateTime"
 		c.DateTime = valueDateTime.Time()
 		return nil
 	}
@@ -152,24 +146,28 @@ func (c *CellValueUnion) UnmarshalJSON(data []byte) error {
 }
 
 func (c CellValueUnion) MarshalJSON() ([]byte, error) {
-	switch c.typeName {
-	default:
-		return nil, fmt.Errorf("invalid type %s in %T", c.typeName, c)
-	case "string":
+	if c.String != "" {
 		return json.Marshal(c.String)
-	case "integer":
+	}
+	if c.Integer != 0 {
 		return json.Marshal(c.Integer)
-	case "long":
+	}
+	if c.Long != 0 {
 		return json.Marshal(c.Long)
-	case "double":
+	}
+	if c.Double != 0 {
 		return json.Marshal(c.Double)
-	case "boolean":
+	}
+	if c.Boolean != false {
 		return json.Marshal(c.Boolean)
-	case "date":
+	}
+	if !c.Date.IsZero() {
 		return json.Marshal(core.NewDate(c.Date))
-	case "dateTime":
+	}
+	if !c.DateTime.IsZero() {
 		return json.Marshal(core.NewDateTime(c.DateTime))
 	}
+	return nil, fmt.Errorf("type %T does not include a non-empty union type", c)
 }
 
 type CellValueUnionVisitor interface {
@@ -183,30 +181,39 @@ type CellValueUnionVisitor interface {
 }
 
 func (c *CellValueUnion) Accept(visitor CellValueUnionVisitor) error {
-	switch c.typeName {
-	default:
-		return fmt.Errorf("invalid type %s in %T", c.typeName, c)
-	case "string":
+	if c.String != "" {
 		return visitor.VisitString(c.String)
-	case "integer":
+	}
+	if c.Integer != 0 {
 		return visitor.VisitInteger(c.Integer)
-	case "long":
+	}
+	if c.Long != 0 {
 		return visitor.VisitLong(c.Long)
-	case "double":
+	}
+	if c.Double != 0 {
 		return visitor.VisitDouble(c.Double)
-	case "boolean":
+	}
+	if c.Boolean != false {
 		return visitor.VisitBoolean(c.Boolean)
-	case "date":
+	}
+	if !c.Date.IsZero() {
 		return visitor.VisitDate(c.Date)
-	case "dateTime":
+	}
+	if !c.DateTime.IsZero() {
 		return visitor.VisitDateTime(c.DateTime)
 	}
+	return fmt.Errorf("type %T does not include a non-empty union type", c)
 }
 
 type GetRecordsResponse struct {
 	Data *GetRecordsResponseData `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GetRecordsResponse) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
 }
 
 func (g *GetRecordsResponse) UnmarshalJSON(data []byte) error {
@@ -216,6 +223,13 @@ func (g *GetRecordsResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*g = GetRecordsResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
 	g._rawJSON = json.RawMessage(data)
 	return nil
 }

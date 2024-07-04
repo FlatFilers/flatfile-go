@@ -13,14 +13,19 @@ import (
 type AppCreate struct {
 	Name               string      `json:"name" url:"name"`
 	Namespace          string      `json:"namespace" url:"namespace"`
-	Type               AppType     `json:"type,omitempty" url:"type,omitempty"`
+	Type               AppType     `json:"type" url:"type"`
 	Entity             *string     `json:"entity,omitempty" url:"entity,omitempty"`
 	EntityPlural       *string     `json:"entityPlural,omitempty" url:"entityPlural,omitempty"`
 	Icon               *string     `json:"icon,omitempty" url:"icon,omitempty"`
 	Metadata           interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
 	EnvironmentFilters interface{} `json:"environmentFilters,omitempty" url:"environmentFilters,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AppCreate) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
 }
 
 func (a *AppCreate) UnmarshalJSON(data []byte) error {
@@ -30,6 +35,13 @@ func (a *AppCreate) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*a = AppCreate(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
 	a._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -57,7 +69,12 @@ type AppPatch struct {
 	EnvironmentFilters interface{} `json:"environmentFilters,omitempty" url:"environmentFilters,omitempty"`
 	ActivatedAt        *time.Time  `json:"activatedAt,omitempty" url:"activatedAt,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AppPatch) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
 }
 
 func (a *AppPatch) UnmarshalJSON(data []byte) error {
@@ -73,6 +90,13 @@ func (a *AppPatch) UnmarshalJSON(data []byte) error {
 	}
 	*a = AppPatch(unmarshaler.embed)
 	a.ActivatedAt = unmarshaler.ActivatedAt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
 	a._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -104,7 +128,12 @@ func (a *AppPatch) String() string {
 type AppResponse struct {
 	Data *App `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AppResponse) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
 }
 
 func (a *AppResponse) UnmarshalJSON(data []byte) error {
@@ -114,6 +143,13 @@ func (a *AppResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*a = AppResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
 	a._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -133,7 +169,12 @@ func (a *AppResponse) String() string {
 type AppsResponse struct {
 	Data []*App `json:"data,omitempty" url:"data,omitempty"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AppsResponse) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
 }
 
 func (a *AppsResponse) UnmarshalJSON(data []byte) error {
@@ -143,6 +184,13 @@ func (a *AppsResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*a = AppsResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
 	a._rawJSON = json.RawMessage(data)
 	return nil
 }
@@ -162,7 +210,12 @@ func (a *AppsResponse) String() string {
 type SuccessResponse struct {
 	Success bool `json:"success" url:"success"`
 
-	_rawJSON json.RawMessage
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SuccessResponse) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
 }
 
 func (s *SuccessResponse) UnmarshalJSON(data []byte) error {
@@ -172,6 +225,13 @@ func (s *SuccessResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*s = SuccessResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
 	s._rawJSON = json.RawMessage(data)
 	return nil
 }
