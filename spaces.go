@@ -223,6 +223,7 @@ const (
 	GetSpacesSortFieldEnvironmentId     GetSpacesSortField = "environmentId"
 	GetSpacesSortFieldCreatedByUserName GetSpacesSortField = "createdByUserName"
 	GetSpacesSortFieldCreatedAt         GetSpacesSortField = "createdAt"
+	GetSpacesSortFieldLastActivityAt    GetSpacesSortField = "lastActivityAt"
 )
 
 func NewGetSpacesSortFieldFromString(s string) (GetSpacesSortField, error) {
@@ -239,6 +240,8 @@ func NewGetSpacesSortFieldFromString(s string) (GetSpacesSortField, error) {
 		return GetSpacesSortFieldCreatedByUserName, nil
 	case "createdAt":
 		return GetSpacesSortFieldCreatedAt, nil
+	case "lastActivityAt":
+		return GetSpacesSortFieldLastActivityAt, nil
 	}
 	var t GetSpacesSortField
 	return "", fmt.Errorf("%s is not a valid %T", s, t)

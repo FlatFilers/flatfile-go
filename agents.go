@@ -31,7 +31,7 @@ type DeleteAgentRequest struct {
 }
 
 type GetAgentRequest struct {
-	EnvironmentId EnvironmentId `json:"-" url:"environmentId"`
+	EnvironmentId *EnvironmentId `json:"-" url:"environmentId,omitempty"`
 }
 
 type GetAgentLogRequest struct {

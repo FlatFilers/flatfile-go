@@ -40,6 +40,8 @@ type CreateWorkbookConfig struct {
 	Settings *WorkbookConfigSettings `json:"settings,omitempty" url:"settings,omitempty"`
 	// Metadata for the workbook
 	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
+	// Treatments for the workbook
+	Treatments []WorkbookTreatments `json:"treatments,omitempty" url:"treatments,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage

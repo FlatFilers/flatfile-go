@@ -93,8 +93,12 @@ type Agent struct {
 	// The source of the agent
 	Source *string `json:"source,omitempty" url:"source,omitempty"`
 	// The slug of the agent
-	Slug *string `json:"slug,omitempty" url:"slug,omitempty"`
-	Id   AgentId `json:"id" url:"id"`
+	Slug          *string       `json:"slug,omitempty" url:"slug,omitempty"`
+	Id            AgentId       `json:"id" url:"id"`
+	CreatedAt     time.Time     `json:"createdAt" url:"createdAt"`
+	UpdatedAt     time.Time     `json:"updatedAt" url:"updatedAt"`
+	AccountId     AccountId     `json:"accountId" url:"accountId"`
+	EnvironmentId EnvironmentId `json:"environmentId" url:"environmentId"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -105,12 +109,20 @@ func (a *Agent) GetExtraProperties() map[string]interface{} {
 }
 
 func (a *Agent) UnmarshalJSON(data []byte) error {
-	type unmarshaler Agent
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
+	type embed Agent
+	var unmarshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"createdAt"`
+		UpdatedAt *core.DateTime `json:"updatedAt"`
+	}{
+		embed: embed(*a),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
 		return err
 	}
-	*a = Agent(value)
+	*a = Agent(unmarshaler.embed)
+	a.CreatedAt = unmarshaler.CreatedAt.Time()
+	a.UpdatedAt = unmarshaler.UpdatedAt.Time()
 
 	extraProperties, err := core.ExtractExtraProperties(data, *a)
 	if err != nil {
@@ -120,6 +132,20 @@ func (a *Agent) UnmarshalJSON(data []byte) error {
 
 	a._rawJSON = json.RawMessage(data)
 	return nil
+}
+
+func (a *Agent) MarshalJSON() ([]byte, error) {
+	type embed Agent
+	var marshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"createdAt"`
+		UpdatedAt *core.DateTime `json:"updatedAt"`
+	}{
+		embed:     embed(*a),
+		CreatedAt: core.NewDateTime(a.CreatedAt),
+		UpdatedAt: core.NewDateTime(a.UpdatedAt),
+	}
+	return json.Marshal(marshaler)
 }
 
 func (a *Agent) String() string {
@@ -641,8 +667,10 @@ func (a AppType) Ptr() *AppType {
 type Prompt struct {
 	Id PromptId `json:"id" url:"id"`
 	// ID of the user/guest who created the prompt
-	CreatedById string    `json:"createdById" url:"createdById"`
-	AccountId   AccountId `json:"accountId" url:"accountId"`
+	CreatedById   string         `json:"createdById" url:"createdById"`
+	AccountId     AccountId      `json:"accountId" url:"accountId"`
+	EnvironmentId *EnvironmentId `json:"environmentId,omitempty" url:"environmentId,omitempty"`
+	SpaceId       *SpaceId       `json:"spaceId,omitempty" url:"spaceId,omitempty"`
 	// Text for prompts for AI Assist
 	Prompt    string     `json:"prompt" url:"prompt"`
 	CreatedAt time.Time  `json:"createdAt" url:"createdAt"`
@@ -4425,12 +4453,13 @@ func (j JobMode) Ptr() *JobMode {
 
 // Outcome summary of a job
 type JobOutcome struct {
-	Acknowledge       *bool           `json:"acknowledge,omitempty" url:"acknowledge,omitempty"`
-	ButtonText        *string         `json:"buttonText,omitempty" url:"buttonText,omitempty"`
-	Next              *JobOutcomeNext `json:"next,omitempty" url:"next,omitempty"`
-	Heading           *string         `json:"heading,omitempty" url:"heading,omitempty"`
-	Message           *string         `json:"message,omitempty" url:"message,omitempty"`
-	HideDefaultButton *bool           `json:"hideDefaultButton,omitempty" url:"hideDefaultButton,omitempty"`
+	Acknowledge       *bool              `json:"acknowledge,omitempty" url:"acknowledge,omitempty"`
+	Trigger           *JobOutcomeTrigger `json:"trigger,omitempty" url:"trigger,omitempty"`
+	ButtonText        *string            `json:"buttonText,omitempty" url:"buttonText,omitempty"`
+	Next              *JobOutcomeNext    `json:"next,omitempty" url:"next,omitempty"`
+	Heading           *string            `json:"heading,omitempty" url:"heading,omitempty"`
+	Message           *string            `json:"message,omitempty" url:"message,omitempty"`
+	HideDefaultButton *bool              `json:"hideDefaultButton,omitempty" url:"hideDefaultButton,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -5012,6 +5041,32 @@ func (j *JobOutcomeNextWait) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", j)
+}
+
+// Whether a job outcome's effect should be triggered automatically
+type JobOutcomeTrigger string
+
+const (
+	JobOutcomeTriggerManual          JobOutcomeTrigger = "manual"
+	JobOutcomeTriggerAutomatic       JobOutcomeTrigger = "automatic"
+	JobOutcomeTriggerAutomaticSilent JobOutcomeTrigger = "automatic_silent"
+)
+
+func NewJobOutcomeTriggerFromString(s string) (JobOutcomeTrigger, error) {
+	switch s {
+	case "manual":
+		return JobOutcomeTriggerManual, nil
+	case "automatic":
+		return JobOutcomeTriggerAutomatic, nil
+	case "automatic_silent":
+		return JobOutcomeTriggerAutomaticSilent, nil
+	}
+	var t JobOutcomeTrigger
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (j JobOutcomeTrigger) Ptr() *JobOutcomeTrigger {
+	return &j
 }
 
 type JobPartExecution string
@@ -8635,8 +8690,10 @@ type CompositeUniqueConstraint struct {
 	// The name of the constraint
 	Name string `json:"name" url:"name"`
 	// The fields that must be unique together
-	Fields   []string                          `json:"fields,omitempty" url:"fields,omitempty"`
-	Strategy CompositeUniqueConstraintStrategy `json:"strategy" url:"strategy"`
+	Fields []string `json:"fields,omitempty" url:"fields,omitempty"`
+	// Fields that, when empty, will cause this unique constraint to be ignored
+	RequiredFields []string                          `json:"requiredFields,omitempty" url:"requiredFields,omitempty"`
+	Strategy       CompositeUniqueConstraintStrategy `json:"strategy" url:"strategy"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -10334,8 +10391,10 @@ type Workbook struct {
 	// The Workbook settings.
 	Settings *WorkbookConfigSettings `json:"settings,omitempty" url:"settings,omitempty"`
 	// Metadata for the workbook
-	Metadata  interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
-	Namespace *string     `json:"namespace,omitempty" url:"namespace,omitempty"`
+	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
+	// Treatments for the workbook
+	Treatments []WorkbookTreatments `json:"treatments,omitempty" url:"treatments,omitempty"`
+	Namespace  *string              `json:"namespace,omitempty" url:"namespace,omitempty"`
 	// Date the workbook was last updated
 	UpdatedAt time.Time `json:"updatedAt" url:"updatedAt"`
 	// Date the workbook was created
@@ -10448,4 +10507,24 @@ func (w *WorkbookConfigSettings) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", w)
+}
+
+// Available treatments for a workbook
+type WorkbookTreatments string
+
+const (
+	WorkbookTreatmentsExtractedFromSource WorkbookTreatments = "EXTRACTED_FROM_SOURCE"
+)
+
+func NewWorkbookTreatmentsFromString(s string) (WorkbookTreatments, error) {
+	switch s {
+	case "EXTRACTED_FROM_SOURCE":
+		return WorkbookTreatmentsExtractedFromSource, nil
+	}
+	var t WorkbookTreatments
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (w WorkbookTreatments) Ptr() *WorkbookTreatments {
+	return &w
 }

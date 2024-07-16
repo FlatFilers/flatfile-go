@@ -17,7 +17,9 @@ type ListPromptsRequest struct {
 
 // Create a prompts
 type PromptCreate struct {
-	Prompt string `json:"prompt" url:"prompt"`
+	Prompt        string        `json:"prompt" url:"prompt"`
+	EnvironmentId EnvironmentId `json:"environmentId" url:"environmentId"`
+	SpaceId       SpaceId       `json:"spaceId" url:"spaceId"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
