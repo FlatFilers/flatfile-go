@@ -62,6 +62,47 @@ type ListAgentsRequest struct {
 	EnvironmentId EnvironmentId `json:"-" url:"environmentId"`
 }
 
+type AgentVersionResponse struct {
+	Data *AgentVersion `json:"data,omitempty" url:"data,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AgentVersionResponse) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AgentVersionResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler AgentVersionResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AgentVersionResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (a *AgentVersionResponse) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
 type GetDetailedAgentLogResponse struct {
 	Data *DetailedAgentLog `json:"data,omitempty" url:"data,omitempty"`
 
@@ -185,4 +226,45 @@ func (g *GetExecutionsResponse) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", g)
+}
+
+type ListAgentVersionsResponse struct {
+	Data []*AgentVersion `json:"data,omitempty" url:"data,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (l *ListAgentVersionsResponse) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
+}
+
+func (l *ListAgentVersionsResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler ListAgentVersionsResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*l = ListAgentVersionsResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+
+	l._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (l *ListAgentVersionsResponse) String() string {
+	if len(l._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(l._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(l); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", l)
 }

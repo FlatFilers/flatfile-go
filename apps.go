@@ -19,6 +19,7 @@ type AppCreate struct {
 	Icon               *string     `json:"icon,omitempty" url:"icon,omitempty"`
 	Metadata           interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
 	EnvironmentFilters interface{} `json:"environmentFilters,omitempty" url:"environmentFilters,omitempty"`
+	Blueprint          interface{} `json:"blueprint,omitempty" url:"blueprint,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -67,6 +68,7 @@ type AppPatch struct {
 	Icon               *string     `json:"icon,omitempty" url:"icon,omitempty"`
 	Metadata           interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
 	EnvironmentFilters interface{} `json:"environmentFilters,omitempty" url:"environmentFilters,omitempty"`
+	Blueprint          interface{} `json:"blueprint,omitempty" url:"blueprint,omitempty"`
 	ActivatedAt        *time.Time  `json:"activatedAt,omitempty" url:"activatedAt,omitempty"`
 
 	extraProperties map[string]interface{}

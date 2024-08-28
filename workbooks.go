@@ -16,6 +16,16 @@ type ListWorkbookCommitsRequest struct {
 type ListWorkbooksRequest struct {
 	// The associated Space ID of the Workbook.
 	SpaceId *SpaceId `json:"-" url:"spaceId,omitempty"`
+	// Filter by name. Precede with - to negate the filter
+	Name *string `json:"-" url:"name,omitempty"`
+	// Filter by namespace. Precede with - to negate the filter
+	Namespace *string `json:"-" url:"namespace,omitempty"`
+	// Filter by label. Precede with - to negate the filter
+	Label *string `json:"-" url:"label,omitempty"`
+	// Filter by treatment.
+	Treatment *string `json:"-" url:"treatment,omitempty"`
+	// Include sheets for the workbook (default true)
+	IncludeSheets *bool `json:"-" url:"includeSheets,omitempty"`
 	// Include counts for the workbook. **DEPRECATED** Counts will return 0s. Use GET /sheets/:sheetId/counts
 	IncludeCounts *bool `json:"-" url:"includeCounts,omitempty"`
 }

@@ -212,6 +212,135 @@ func (c *Client) Get(
 	return response, nil
 }
 
+func (c *Client) ListVersions(
+	ctx context.Context,
+	agentId flatfilego.AgentId,
+	opts ...option.RequestOption,
+) (*flatfilego.ListAgentVersionsResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
+	baseURL := "https://api.x.flatfile.com/v1"
+	if c.baseURL != "" {
+		baseURL = c.baseURL
+	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(baseURL+"/agents/%v/versions", agentId)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
+
+	errorDecoder := func(statusCode int, body io.Reader) error {
+		raw, err := io.ReadAll(body)
+		if err != nil {
+			return err
+		}
+		apiError := core.NewAPIError(statusCode, errors.New(string(raw)))
+		decoder := json.NewDecoder(bytes.NewReader(raw))
+		switch statusCode {
+		case 400:
+			value := new(flatfilego.BadRequestError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 404:
+			value := new(flatfilego.NotFoundError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		}
+		return apiError
+	}
+
+	var response *flatfilego.ListAgentVersionsResponse
+	if err := c.caller.Call(
+		ctx,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodGet,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
+	); err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
+func (c *Client) Revert(
+	ctx context.Context,
+	agentId flatfilego.AgentId,
+	agentVersionId flatfilego.AgentVersionId,
+	opts ...option.RequestOption,
+) (*flatfilego.AgentVersionResponse, error) {
+	options := core.NewRequestOptions(opts...)
+
+	baseURL := "https://api.x.flatfile.com/v1"
+	if c.baseURL != "" {
+		baseURL = c.baseURL
+	}
+	if options.BaseURL != "" {
+		baseURL = options.BaseURL
+	}
+	endpointURL := core.EncodeURL(
+		baseURL+"/agents/%v/versions/%v/revert",
+		agentId,
+		agentVersionId,
+	)
+
+	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
+
+	errorDecoder := func(statusCode int, body io.Reader) error {
+		raw, err := io.ReadAll(body)
+		if err != nil {
+			return err
+		}
+		apiError := core.NewAPIError(statusCode, errors.New(string(raw)))
+		decoder := json.NewDecoder(bytes.NewReader(raw))
+		switch statusCode {
+		case 400:
+			value := new(flatfilego.BadRequestError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		case 404:
+			value := new(flatfilego.NotFoundError)
+			value.APIError = apiError
+			if err := decoder.Decode(value); err != nil {
+				return apiError
+			}
+			return value
+		}
+		return apiError
+	}
+
+	var response *flatfilego.AgentVersionResponse
+	if err := c.caller.Call(
+		ctx,
+		&core.CallParams{
+			URL:          endpointURL,
+			Method:       http.MethodGet,
+			MaxAttempts:  options.MaxAttempts,
+			Headers:      headers,
+			Client:       options.HTTPClient,
+			Response:     &response,
+			ErrorDecoder: errorDecoder,
+		},
+	); err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
 // Lists roles assigned to an agent.
 func (c *Client) ListAgentRoles(
 	ctx context.Context,

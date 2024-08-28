@@ -69,13 +69,14 @@ type GetRecordsRequest struct {
 }
 
 type CellValueUnion struct {
-	String   string
-	Integer  int
-	Long     int64
-	Double   float64
-	Boolean  bool
-	Date     time.Time
-	DateTime time.Time
+	String     string
+	Integer    int
+	Long       int64
+	Double     float64
+	Boolean    bool
+	Date       time.Time
+	DateTime   time.Time
+	StringList []string
 }
 
 func NewCellValueUnionFromString(value string) *CellValueUnion {
@@ -104,6 +105,10 @@ func NewCellValueUnionFromDate(value time.Time) *CellValueUnion {
 
 func NewCellValueUnionFromDateTime(value time.Time) *CellValueUnion {
 	return &CellValueUnion{DateTime: value}
+}
+
+func NewCellValueUnionFromStringList(value []string) *CellValueUnion {
+	return &CellValueUnion{StringList: value}
 }
 
 func (c *CellValueUnion) UnmarshalJSON(data []byte) error {
@@ -142,6 +147,11 @@ func (c *CellValueUnion) UnmarshalJSON(data []byte) error {
 		c.DateTime = valueDateTime.Time()
 		return nil
 	}
+	var valueStringList []string
+	if err := json.Unmarshal(data, &valueStringList); err == nil {
+		c.StringList = valueStringList
+		return nil
+	}
 	return fmt.Errorf("%s cannot be deserialized as a %T", data, c)
 }
 
@@ -167,6 +177,9 @@ func (c CellValueUnion) MarshalJSON() ([]byte, error) {
 	if !c.DateTime.IsZero() {
 		return json.Marshal(core.NewDateTime(c.DateTime))
 	}
+	if c.StringList != nil {
+		return json.Marshal(c.StringList)
+	}
 	return nil, fmt.Errorf("type %T does not include a non-empty union type", c)
 }
 
@@ -178,6 +191,7 @@ type CellValueUnionVisitor interface {
 	VisitBoolean(bool) error
 	VisitDate(time.Time) error
 	VisitDateTime(time.Time) error
+	VisitStringList([]string) error
 }
 
 func (c *CellValueUnion) Accept(visitor CellValueUnionVisitor) error {
@@ -201,6 +215,9 @@ func (c *CellValueUnion) Accept(visitor CellValueUnionVisitor) error {
 	}
 	if !c.DateTime.IsZero() {
 		return visitor.VisitDateTime(c.DateTime)
+	}
+	if c.StringList != nil {
+		return visitor.VisitStringList(c.StringList)
 	}
 	return fmt.Errorf("type %T does not include a non-empty union type", c)
 }

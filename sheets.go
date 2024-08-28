@@ -85,15 +85,16 @@ type ListSheetsRequest struct {
 }
 
 type Property struct {
-	Type       string
-	String     *StringProperty
-	Number     *NumberProperty
-	Boolean    *BooleanProperty
-	Date       *DateProperty
-	Enum       *EnumProperty
-	Reference  *ReferenceProperty
-	StringList *StringListProperty
-	EnumList   *EnumListProperty
+	Type          string
+	String        *StringProperty
+	Number        *NumberProperty
+	Boolean       *BooleanProperty
+	Date          *DateProperty
+	Enum          *EnumProperty
+	Reference     *ReferenceProperty
+	ReferenceList *ReferenceListProperty
+	StringList    *StringListProperty
+	EnumList      *EnumListProperty
 }
 
 func NewPropertyFromString(value *StringProperty) *Property {
@@ -118,6 +119,10 @@ func NewPropertyFromEnum(value *EnumProperty) *Property {
 
 func NewPropertyFromReference(value *ReferenceProperty) *Property {
 	return &Property{Type: "reference", Reference: value}
+}
+
+func NewPropertyFromReferenceList(value *ReferenceListProperty) *Property {
+	return &Property{Type: "reference-list", ReferenceList: value}
 }
 
 func NewPropertyFromStringList(value *StringListProperty) *Property {
@@ -173,6 +178,12 @@ func (p *Property) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		p.Reference = value
+	case "reference-list":
+		value := new(ReferenceListProperty)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.ReferenceList = value
 	case "string-list":
 		value := new(StringListProperty)
 		if err := json.Unmarshal(data, &value); err != nil {
@@ -205,6 +216,8 @@ func (p Property) MarshalJSON() ([]byte, error) {
 		return core.MarshalJSONWithExtraProperty(p.Enum, "type", "enum")
 	case "reference":
 		return core.MarshalJSONWithExtraProperty(p.Reference, "type", "reference")
+	case "reference-list":
+		return core.MarshalJSONWithExtraProperty(p.ReferenceList, "type", "reference-list")
 	case "string-list":
 		return core.MarshalJSONWithExtraProperty(p.StringList, "type", "string-list")
 	case "enum-list":
@@ -219,6 +232,7 @@ type PropertyVisitor interface {
 	VisitDate(*DateProperty) error
 	VisitEnum(*EnumProperty) error
 	VisitReference(*ReferenceProperty) error
+	VisitReferenceList(*ReferenceListProperty) error
 	VisitStringList(*StringListProperty) error
 	VisitEnumList(*EnumListProperty) error
 }
@@ -239,6 +253,8 @@ func (p *Property) Accept(visitor PropertyVisitor) error {
 		return visitor.VisitEnum(p.Enum)
 	case "reference":
 		return visitor.VisitReference(p.Reference)
+	case "reference-list":
+		return visitor.VisitReferenceList(p.ReferenceList)
 	case "string-list":
 		return visitor.VisitStringList(p.StringList)
 	case "enum-list":

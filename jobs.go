@@ -221,6 +221,8 @@ type JobConfig struct {
 	ParentId *JobId `json:"parentId,omitempty" url:"parentId,omitempty"`
 	// The ids of the jobs that must complete before this job can start
 	PredecessorIds []JobId `json:"predecessorIds,omitempty" url:"predecessorIds,omitempty"`
+	// Additional metadata for the job
+	Metadata map[string]interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage

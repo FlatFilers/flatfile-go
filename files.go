@@ -50,6 +50,8 @@ type Action struct {
 	InputForm *InputForm `json:"inputForm,omitempty" url:"inputForm,omitempty"`
 	// A limitation or restriction on the action.
 	Constraints []*ActionConstraint `json:"constraints,omitempty" url:"constraints,omitempty"`
+	Guide       *Guide              `json:"guide,omitempty" url:"guide,omitempty"`
+	Guardrail   *Guardrail          `json:"guardrail,omitempty" url:"guardrail,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
