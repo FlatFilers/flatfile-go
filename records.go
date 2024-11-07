@@ -77,78 +77,88 @@ type CellValueUnion struct {
 	Date       time.Time
 	DateTime   time.Time
 	StringList []string
+
+	typ string
 }
 
 func NewCellValueUnionFromString(value string) *CellValueUnion {
-	return &CellValueUnion{String: value}
+	return &CellValueUnion{typ: "String", String: value}
 }
 
 func NewCellValueUnionFromInteger(value int) *CellValueUnion {
-	return &CellValueUnion{Integer: value}
+	return &CellValueUnion{typ: "Integer", Integer: value}
 }
 
 func NewCellValueUnionFromLong(value int64) *CellValueUnion {
-	return &CellValueUnion{Long: value}
+	return &CellValueUnion{typ: "Long", Long: value}
 }
 
 func NewCellValueUnionFromDouble(value float64) *CellValueUnion {
-	return &CellValueUnion{Double: value}
+	return &CellValueUnion{typ: "Double", Double: value}
 }
 
 func NewCellValueUnionFromBoolean(value bool) *CellValueUnion {
-	return &CellValueUnion{Boolean: value}
+	return &CellValueUnion{typ: "Boolean", Boolean: value}
 }
 
 func NewCellValueUnionFromDate(value time.Time) *CellValueUnion {
-	return &CellValueUnion{Date: value}
+	return &CellValueUnion{typ: "Date", Date: value}
 }
 
 func NewCellValueUnionFromDateTime(value time.Time) *CellValueUnion {
-	return &CellValueUnion{DateTime: value}
+	return &CellValueUnion{typ: "DateTime", DateTime: value}
 }
 
 func NewCellValueUnionFromStringList(value []string) *CellValueUnion {
-	return &CellValueUnion{StringList: value}
+	return &CellValueUnion{typ: "StringList", StringList: value}
 }
 
 func (c *CellValueUnion) UnmarshalJSON(data []byte) error {
 	var valueString string
 	if err := json.Unmarshal(data, &valueString); err == nil {
+		c.typ = "String"
 		c.String = valueString
 		return nil
 	}
 	var valueInteger int
 	if err := json.Unmarshal(data, &valueInteger); err == nil {
+		c.typ = "Integer"
 		c.Integer = valueInteger
 		return nil
 	}
 	var valueLong int64
 	if err := json.Unmarshal(data, &valueLong); err == nil {
+		c.typ = "Long"
 		c.Long = valueLong
 		return nil
 	}
 	var valueDouble float64
 	if err := json.Unmarshal(data, &valueDouble); err == nil {
+		c.typ = "Double"
 		c.Double = valueDouble
 		return nil
 	}
 	var valueBoolean bool
 	if err := json.Unmarshal(data, &valueBoolean); err == nil {
+		c.typ = "Boolean"
 		c.Boolean = valueBoolean
 		return nil
 	}
 	var valueDate *core.Date
 	if err := json.Unmarshal(data, &valueDate); err == nil {
+		c.typ = "Date"
 		c.Date = valueDate.Time()
 		return nil
 	}
 	var valueDateTime *core.DateTime
 	if err := json.Unmarshal(data, &valueDateTime); err == nil {
+		c.typ = "DateTime"
 		c.DateTime = valueDateTime.Time()
 		return nil
 	}
 	var valueStringList []string
 	if err := json.Unmarshal(data, &valueStringList); err == nil {
+		c.typ = "StringList"
 		c.StringList = valueStringList
 		return nil
 	}
@@ -156,28 +166,28 @@ func (c *CellValueUnion) UnmarshalJSON(data []byte) error {
 }
 
 func (c CellValueUnion) MarshalJSON() ([]byte, error) {
-	if c.String != "" {
+	if c.typ == "String" || c.String != "" {
 		return json.Marshal(c.String)
 	}
-	if c.Integer != 0 {
+	if c.typ == "Integer" || c.Integer != 0 {
 		return json.Marshal(c.Integer)
 	}
-	if c.Long != 0 {
+	if c.typ == "Long" || c.Long != 0 {
 		return json.Marshal(c.Long)
 	}
-	if c.Double != 0 {
+	if c.typ == "Double" || c.Double != 0 {
 		return json.Marshal(c.Double)
 	}
-	if c.Boolean != false {
+	if c.typ == "Boolean" || c.Boolean != false {
 		return json.Marshal(c.Boolean)
 	}
-	if !c.Date.IsZero() {
+	if c.typ == "Date" || !c.Date.IsZero() {
 		return json.Marshal(core.NewDate(c.Date))
 	}
-	if !c.DateTime.IsZero() {
+	if c.typ == "DateTime" || !c.DateTime.IsZero() {
 		return json.Marshal(core.NewDateTime(c.DateTime))
 	}
-	if c.StringList != nil {
+	if c.typ == "StringList" || c.StringList != nil {
 		return json.Marshal(c.StringList)
 	}
 	return nil, fmt.Errorf("type %T does not include a non-empty union type", c)
@@ -195,28 +205,28 @@ type CellValueUnionVisitor interface {
 }
 
 func (c *CellValueUnion) Accept(visitor CellValueUnionVisitor) error {
-	if c.String != "" {
+	if c.typ == "String" || c.String != "" {
 		return visitor.VisitString(c.String)
 	}
-	if c.Integer != 0 {
+	if c.typ == "Integer" || c.Integer != 0 {
 		return visitor.VisitInteger(c.Integer)
 	}
-	if c.Long != 0 {
+	if c.typ == "Long" || c.Long != 0 {
 		return visitor.VisitLong(c.Long)
 	}
-	if c.Double != 0 {
+	if c.typ == "Double" || c.Double != 0 {
 		return visitor.VisitDouble(c.Double)
 	}
-	if c.Boolean != false {
+	if c.typ == "Boolean" || c.Boolean != false {
 		return visitor.VisitBoolean(c.Boolean)
 	}
-	if !c.Date.IsZero() {
+	if c.typ == "Date" || !c.Date.IsZero() {
 		return visitor.VisitDate(c.Date)
 	}
-	if !c.DateTime.IsZero() {
+	if c.typ == "DateTime" || !c.DateTime.IsZero() {
 		return visitor.VisitDateTime(c.DateTime)
 	}
-	if c.StringList != nil {
+	if c.typ == "StringList" || c.StringList != nil {
 		return visitor.VisitStringList(c.StringList)
 	}
 	return fmt.Errorf("type %T does not include a non-empty union type", c)

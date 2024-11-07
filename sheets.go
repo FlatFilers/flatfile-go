@@ -141,6 +141,9 @@ func (p *Property) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	p.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", p)
+	}
 	switch unmarshaler.Type {
 	case "string":
 		value := new(StringProperty)

@@ -9,6 +9,8 @@ import (
 )
 
 type ListPromptsRequest struct {
+	// Type of prompt (default AI_ASSIST)
+	PromptType *PromptTypeQueryEnum `json:"-" url:"promptType,omitempty"`
 	// Number of prompts to return in a page (default 7)
 	PageSize *int `json:"-" url:"pageSize,omitempty"`
 	// Based on pageSize, which page of prompts to return
@@ -17,9 +19,11 @@ type ListPromptsRequest struct {
 
 // Create a prompts
 type PromptCreate struct {
-	Prompt        string        `json:"prompt" url:"prompt"`
-	EnvironmentId EnvironmentId `json:"environmentId" url:"environmentId"`
-	SpaceId       SpaceId       `json:"spaceId" url:"spaceId"`
+	// Type of prompt; Defaults to AI_ASSIST
+	PromptType    *PromptTypeEnum `json:"promptType,omitempty" url:"promptType,omitempty"`
+	Prompt        string          `json:"prompt" url:"prompt"`
+	EnvironmentId EnvironmentId   `json:"environmentId" url:"environmentId"`
+	SpaceId       SpaceId         `json:"spaceId" url:"spaceId"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -61,7 +65,7 @@ func (p *PromptCreate) String() string {
 
 // Update a prompts
 type PromptPatch struct {
-	Prompt *string `json:"prompt,omitempty" url:"prompt,omitempty"`
+	Prompt string `json:"prompt" url:"prompt"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -140,6 +144,31 @@ func (p *PromptResponse) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", p)
+}
+
+type PromptTypeQueryEnum string
+
+const (
+	PromptTypeQueryEnumAll                  PromptTypeQueryEnum = "ALL"
+	PromptTypeQueryEnumAiAssist             PromptTypeQueryEnum = "AI_ASSIST"
+	PromptTypeQueryEnumConstraintGeneration PromptTypeQueryEnum = "CONSTRAINT_GENERATION"
+)
+
+func NewPromptTypeQueryEnumFromString(s string) (PromptTypeQueryEnum, error) {
+	switch s {
+	case "ALL":
+		return PromptTypeQueryEnumAll, nil
+	case "AI_ASSIST":
+		return PromptTypeQueryEnumAiAssist, nil
+	case "CONSTRAINT_GENERATION":
+		return PromptTypeQueryEnumConstraintGeneration, nil
+	}
+	var t PromptTypeQueryEnum
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (p PromptTypeQueryEnum) Ptr() *PromptTypeQueryEnum {
+	return &p
 }
 
 type PromptsResponse struct {

@@ -4,6 +4,7 @@ package client
 
 import (
 	accounts "github.com/FlatFilers/flatfile-go/accounts"
+	actions "github.com/FlatFilers/flatfile-go/actions"
 	agents "github.com/FlatFilers/flatfile-go/agents"
 	apps "github.com/FlatFilers/flatfile-go/apps"
 	assistant "github.com/FlatFilers/flatfile-go/assistant"
@@ -38,6 +39,7 @@ type Client struct {
 	header  http.Header
 
 	Accounts              *accounts.Client
+	Actions               *actions.Client
 	Agents                *agents.Client
 	Apps                  *apps.Client
 	Assistant             *assistant.Client
@@ -75,6 +77,7 @@ func NewClient(opts ...option.RequestOption) *Client {
 		),
 		header:                options.ToHeader(),
 		Accounts:              accounts.NewClient(opts...),
+		Actions:               actions.NewClient(opts...),
 		Agents:                agents.NewClient(opts...),
 		Apps:                  apps.NewClient(opts...),
 		Assistant:             assistant.NewClient(opts...),

@@ -46,6 +46,7 @@ const (
 	EventTopicSpaceUpdated           EventTopic = "space:updated"
 	EventTopicSpaceDeleted           EventTopic = "space:deleted"
 	EventTopicSpaceArchived          EventTopic = "space:archived"
+	EventTopicSpaceUnarchived        EventTopic = "space:unarchived"
 	EventTopicSpaceExpired           EventTopic = "space:expired"
 	EventTopicSpaceGuestAdded        EventTopic = "space:guestAdded"
 	EventTopicSpaceGuestRemoved      EventTopic = "space:guestRemoved"
@@ -93,6 +94,12 @@ const (
 	EventTopicEnvironmentCreated     EventTopic = "environment:created"
 	EventTopicEnvironmentUpdated     EventTopic = "environment:updated"
 	EventTopicEnvironmentDeleted     EventTopic = "environment:deleted"
+	EventTopicActionCreated          EventTopic = "action:created"
+	EventTopicActionUpdated          EventTopic = "action:updated"
+	EventTopicActionDeleted          EventTopic = "action:deleted"
+	EventTopicDataClipCreated        EventTopic = "data-clip:created"
+	EventTopicDataClipUpdated        EventTopic = "data-clip:updated"
+	EventTopicDataClipDeleted        EventTopic = "data-clip:deleted"
 )
 
 func NewEventTopicFromString(s string) (EventTopic, error) {
@@ -111,6 +118,8 @@ func NewEventTopicFromString(s string) (EventTopic, error) {
 		return EventTopicSpaceDeleted, nil
 	case "space:archived":
 		return EventTopicSpaceArchived, nil
+	case "space:unarchived":
+		return EventTopicSpaceUnarchived, nil
 	case "space:expired":
 		return EventTopicSpaceExpired, nil
 	case "space:guestAdded":
@@ -205,6 +214,18 @@ func NewEventTopicFromString(s string) (EventTopic, error) {
 		return EventTopicEnvironmentUpdated, nil
 	case "environment:deleted":
 		return EventTopicEnvironmentDeleted, nil
+	case "action:created":
+		return EventTopicActionCreated, nil
+	case "action:updated":
+		return EventTopicActionUpdated, nil
+	case "action:deleted":
+		return EventTopicActionDeleted, nil
+	case "data-clip:created":
+		return EventTopicDataClipCreated, nil
+	case "data-clip:updated":
+		return EventTopicDataClipUpdated, nil
+	case "data-clip:deleted":
+		return EventTopicDataClipDeleted, nil
 	}
 	var t EventTopic
 	return "", fmt.Errorf("%s is not a valid %T", s, t)

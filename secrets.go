@@ -13,6 +13,82 @@ type ListSecrets struct {
 	EnvironmentId *EnvironmentId `json:"-" url:"environmentId,omitempty"`
 	// The Space of the secret.
 	SpaceId *SpaceId `json:"-" url:"spaceId,omitempty"`
+	// The Actor of the secret.
+	ActorId *ActorIdUnion `json:"-" url:"actorId,omitempty"`
+}
+
+type ActorIdUnion struct {
+	UserId  UserId
+	AgentId AgentId
+	GuestId GuestId
+
+	typ string
+}
+
+func NewActorIdUnionFromUserId(value UserId) *ActorIdUnion {
+	return &ActorIdUnion{typ: "UserId", UserId: value}
+}
+
+func NewActorIdUnionFromAgentId(value AgentId) *ActorIdUnion {
+	return &ActorIdUnion{typ: "AgentId", AgentId: value}
+}
+
+func NewActorIdUnionFromGuestId(value GuestId) *ActorIdUnion {
+	return &ActorIdUnion{typ: "GuestId", GuestId: value}
+}
+
+func (a *ActorIdUnion) UnmarshalJSON(data []byte) error {
+	var valueUserId UserId
+	if err := json.Unmarshal(data, &valueUserId); err == nil {
+		a.typ = "UserId"
+		a.UserId = valueUserId
+		return nil
+	}
+	var valueAgentId AgentId
+	if err := json.Unmarshal(data, &valueAgentId); err == nil {
+		a.typ = "AgentId"
+		a.AgentId = valueAgentId
+		return nil
+	}
+	var valueGuestId GuestId
+	if err := json.Unmarshal(data, &valueGuestId); err == nil {
+		a.typ = "GuestId"
+		a.GuestId = valueGuestId
+		return nil
+	}
+	return fmt.Errorf("%s cannot be deserialized as a %T", data, a)
+}
+
+func (a ActorIdUnion) MarshalJSON() ([]byte, error) {
+	if a.typ == "UserId" || a.UserId != "" {
+		return json.Marshal(a.UserId)
+	}
+	if a.typ == "AgentId" || a.AgentId != "" {
+		return json.Marshal(a.AgentId)
+	}
+	if a.typ == "GuestId" || a.GuestId != "" {
+		return json.Marshal(a.GuestId)
+	}
+	return nil, fmt.Errorf("type %T does not include a non-empty union type", a)
+}
+
+type ActorIdUnionVisitor interface {
+	VisitUserId(UserId) error
+	VisitAgentId(AgentId) error
+	VisitGuestId(GuestId) error
+}
+
+func (a *ActorIdUnion) Accept(visitor ActorIdUnionVisitor) error {
+	if a.typ == "UserId" || a.UserId != "" {
+		return visitor.VisitUserId(a.UserId)
+	}
+	if a.typ == "AgentId" || a.AgentId != "" {
+		return visitor.VisitAgentId(a.AgentId)
+	}
+	if a.typ == "GuestId" || a.GuestId != "" {
+		return visitor.VisitGuestId(a.GuestId)
+	}
+	return fmt.Errorf("type %T does not include a non-empty union type", a)
 }
 
 // Secret ID
@@ -69,6 +145,8 @@ type WriteSecret struct {
 	EnvironmentId *EnvironmentId `json:"environmentId,omitempty" url:"environmentId,omitempty"`
 	// The Space of the secret.
 	SpaceId *SpaceId `json:"spaceId,omitempty" url:"spaceId,omitempty"`
+	// The Actor of the secret.
+	ActorId *ActorIdUnion `json:"actorId,omitempty" url:"actorId,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
