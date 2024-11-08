@@ -1,6 +1,7 @@
 # Specify files that shouldn't be modified by Fern
 LICENSE
 README.md
+tests
 
 # Temporary workaround due to audience filtering.
 data_clip_id.go
