@@ -47,10 +47,99 @@ type FamilyId = string
 // Mapping Rule ID
 type MappingId = string
 
-// Mapping Program ID
-type ProgramId = string
-
 type CreateMappingRulesRequest = []*MappingRuleConfig
+
+type MappingRule struct {
+	// Name of the mapping rule
+	Name   string      `json:"name" url:"name"`
+	Type   string      `json:"type" url:"type"`
+	Config interface{} `json:"config,omitempty" url:"config,omitempty"`
+	// Time the mapping rule was last updated
+	AcceptedAt *time.Time `json:"acceptedAt,omitempty" url:"acceptedAt,omitempty"`
+	// User ID of the contributor of the mapping rule
+	AcceptedBy *UserId `json:"acceptedBy,omitempty" url:"acceptedBy,omitempty"`
+	// Metadata of the mapping rule
+	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
+	// ID of the mapping rule
+	Id MappingId `json:"id" url:"id"`
+	// Confidence of the mapping rule
+	Confidence *int `json:"confidence,omitempty" url:"confidence,omitempty"`
+	// User ID of the user who suggested the mapping rule
+	CreatedBy *UserId `json:"createdBy,omitempty" url:"createdBy,omitempty"`
+	// Time the mapping rule was created
+	CreatedAt time.Time `json:"createdAt" url:"createdAt"`
+	// Time the mapping rule was last updated
+	UpdatedAt time.Time `json:"updatedAt" url:"updatedAt"`
+	// Time the mapping rule was deleted
+	DeletedAt *time.Time `json:"deletedAt,omitempty" url:"deletedAt,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (m *MappingRule) GetExtraProperties() map[string]interface{} {
+	return m.extraProperties
+}
+
+func (m *MappingRule) UnmarshalJSON(data []byte) error {
+	type embed MappingRule
+	var unmarshaler = struct {
+		embed
+		AcceptedAt *core.DateTime `json:"acceptedAt,omitempty"`
+		CreatedAt  *core.DateTime `json:"createdAt"`
+		UpdatedAt  *core.DateTime `json:"updatedAt"`
+		DeletedAt  *core.DateTime `json:"deletedAt,omitempty"`
+	}{
+		embed: embed(*m),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*m = MappingRule(unmarshaler.embed)
+	m.AcceptedAt = unmarshaler.AcceptedAt.TimePtr()
+	m.CreatedAt = unmarshaler.CreatedAt.Time()
+	m.UpdatedAt = unmarshaler.UpdatedAt.Time()
+	m.DeletedAt = unmarshaler.DeletedAt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *m)
+	if err != nil {
+		return err
+	}
+	m.extraProperties = extraProperties
+
+	m._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (m *MappingRule) MarshalJSON() ([]byte, error) {
+	type embed MappingRule
+	var marshaler = struct {
+		embed
+		AcceptedAt *core.DateTime `json:"acceptedAt,omitempty"`
+		CreatedAt  *core.DateTime `json:"createdAt"`
+		UpdatedAt  *core.DateTime `json:"updatedAt"`
+		DeletedAt  *core.DateTime `json:"deletedAt,omitempty"`
+	}{
+		embed:      embed(*m),
+		AcceptedAt: core.NewOptionalDateTime(m.AcceptedAt),
+		CreatedAt:  core.NewDateTime(m.CreatedAt),
+		UpdatedAt:  core.NewDateTime(m.UpdatedAt),
+		DeletedAt:  core.NewOptionalDateTime(m.DeletedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (m *MappingRule) String() string {
+	if len(m._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(m._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(m); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", m)
+}
 
 type MappingRuleConfig struct {
 	// Name of the mapping rule
@@ -109,6 +198,98 @@ func (m *MappingRuleConfig) MarshalJSON() ([]byte, error) {
 }
 
 func (m *MappingRuleConfig) String() string {
+	if len(m._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(m._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(m); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", m)
+}
+
+type MappingRuleOrConfig struct {
+	// Name of the mapping rule
+	Name   string      `json:"name" url:"name"`
+	Type   string      `json:"type" url:"type"`
+	Config interface{} `json:"config,omitempty" url:"config,omitempty"`
+	// Time the mapping rule was last updated
+	AcceptedAt *time.Time `json:"acceptedAt,omitempty" url:"acceptedAt,omitempty"`
+	// User ID of the contributor of the mapping rule
+	AcceptedBy *UserId `json:"acceptedBy,omitempty" url:"acceptedBy,omitempty"`
+	// Metadata of the mapping rule
+	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
+	// ID of the mapping rule
+	Id *MappingId `json:"id,omitempty" url:"id,omitempty"`
+	// Confidence of the mapping rule
+	Confidence *int `json:"confidence,omitempty" url:"confidence,omitempty"`
+	// User ID of the creator of the mapping rule
+	CreatedBy *UserId `json:"createdBy,omitempty" url:"createdBy,omitempty"`
+	// Time the mapping rule was created
+	CreatedAt *time.Time `json:"createdAt,omitempty" url:"createdAt,omitempty"`
+	// Time the mapping rule was last updated
+	UpdatedAt *time.Time `json:"updatedAt,omitempty" url:"updatedAt,omitempty"`
+	// Time the mapping rule was deleted
+	DeletedAt *time.Time `json:"deletedAt,omitempty" url:"deletedAt,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (m *MappingRuleOrConfig) GetExtraProperties() map[string]interface{} {
+	return m.extraProperties
+}
+
+func (m *MappingRuleOrConfig) UnmarshalJSON(data []byte) error {
+	type embed MappingRuleOrConfig
+	var unmarshaler = struct {
+		embed
+		AcceptedAt *core.DateTime `json:"acceptedAt,omitempty"`
+		CreatedAt  *core.DateTime `json:"createdAt,omitempty"`
+		UpdatedAt  *core.DateTime `json:"updatedAt,omitempty"`
+		DeletedAt  *core.DateTime `json:"deletedAt,omitempty"`
+	}{
+		embed: embed(*m),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*m = MappingRuleOrConfig(unmarshaler.embed)
+	m.AcceptedAt = unmarshaler.AcceptedAt.TimePtr()
+	m.CreatedAt = unmarshaler.CreatedAt.TimePtr()
+	m.UpdatedAt = unmarshaler.UpdatedAt.TimePtr()
+	m.DeletedAt = unmarshaler.DeletedAt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *m)
+	if err != nil {
+		return err
+	}
+	m.extraProperties = extraProperties
+
+	m._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (m *MappingRuleOrConfig) MarshalJSON() ([]byte, error) {
+	type embed MappingRuleOrConfig
+	var marshaler = struct {
+		embed
+		AcceptedAt *core.DateTime `json:"acceptedAt,omitempty"`
+		CreatedAt  *core.DateTime `json:"createdAt,omitempty"`
+		UpdatedAt  *core.DateTime `json:"updatedAt,omitempty"`
+		DeletedAt  *core.DateTime `json:"deletedAt,omitempty"`
+	}{
+		embed:      embed(*m),
+		AcceptedAt: core.NewOptionalDateTime(m.AcceptedAt),
+		CreatedAt:  core.NewOptionalDateTime(m.CreatedAt),
+		UpdatedAt:  core.NewOptionalDateTime(m.UpdatedAt),
+		DeletedAt:  core.NewOptionalDateTime(m.DeletedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (m *MappingRuleOrConfig) String() string {
 	if len(m._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(m._rawJSON); err == nil {
 			return value
@@ -202,6 +383,84 @@ func (m *MappingRulesResponse) String() string {
 	return fmt.Sprintf("%#v", m)
 }
 
+type Program struct {
+	// Mapping rules
+	Rules []*MappingRuleOrConfig `json:"rules,omitempty" url:"rules,omitempty"`
+	// If this program was saved, this is the ID of the program
+	Id *string `json:"id,omitempty" url:"id,omitempty"`
+	// Namespace of the program
+	Namespace *string `json:"namespace,omitempty" url:"namespace,omitempty"`
+	// Family ID of the program, if it belongs to a family
+	FamilyId *FamilyId `json:"familyId,omitempty" url:"familyId,omitempty"`
+	// If this program was saved, this is the time it was created
+	CreatedAt *time.Time `json:"createdAt,omitempty" url:"createdAt,omitempty"`
+	// If this program was saved, this is the user ID of the creator
+	CreatedBy *UserId `json:"createdBy,omitempty" url:"createdBy,omitempty"`
+	// Source keys
+	SourceKeys []string `json:"sourceKeys,omitempty" url:"sourceKeys,omitempty"`
+	// Destination keys
+	DestinationKeys []string `json:"destinationKeys,omitempty" url:"destinationKeys,omitempty"`
+	// Summary of the mapping rules
+	Summary *ProgramSummary `json:"summary,omitempty" url:"summary,omitempty"`
+	// If this program was saved, this token allows you to modify the program
+	AccessToken *string `json:"accessToken,omitempty" url:"accessToken,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *Program) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *Program) UnmarshalJSON(data []byte) error {
+	type embed Program
+	var unmarshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"createdAt,omitempty"`
+	}{
+		embed: embed(*p),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*p = Program(unmarshaler.embed)
+	p.CreatedAt = unmarshaler.CreatedAt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
+	p._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (p *Program) MarshalJSON() ([]byte, error) {
+	type embed Program
+	var marshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"createdAt,omitempty"`
+	}{
+		embed:     embed(*p),
+		CreatedAt: core.NewOptionalDateTime(p.CreatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (p *Program) String() string {
+	if len(p._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
+}
+
 type ProgramConfig struct {
 	// Source schema
 	Source *SheetConfig `json:"source,omitempty" url:"source,omitempty"`
@@ -282,6 +541,52 @@ func (p *ProgramResponse) UnmarshalJSON(data []byte) error {
 }
 
 func (p *ProgramResponse) String() string {
+	if len(p._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
+}
+
+type ProgramSummary struct {
+	// Total number of mapping rules
+	TotalRuleCount int `json:"totalRuleCount" url:"totalRuleCount"`
+	// Number of mapping rules added
+	AddedRuleCount int `json:"addedRuleCount" url:"addedRuleCount"`
+	// Number of mapping rules deleted
+	DeletedRuleCount int `json:"deletedRuleCount" url:"deletedRuleCount"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *ProgramSummary) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *ProgramSummary) UnmarshalJSON(data []byte) error {
+	type unmarshaler ProgramSummary
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = ProgramSummary(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
+	p._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (p *ProgramSummary) String() string {
 	if len(p._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
 			return value

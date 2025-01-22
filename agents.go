@@ -6,6 +6,7 @@ import (
 	json "encoding/json"
 	fmt "fmt"
 	core "github.com/FlatFilers/flatfile-go/core"
+	time "time"
 )
 
 type CreateAgentsRequest struct {
@@ -62,6 +63,86 @@ type ListAgentsRequest struct {
 	EnvironmentId EnvironmentId `json:"-" url:"environmentId"`
 }
 
+type AgentVersion struct {
+	// The topics the agent should listen for
+	Topics []EventTopic `json:"topics,omitempty" url:"topics,omitempty"`
+	// The compiler of the agent
+	Compiler *Compiler `json:"compiler,omitempty" url:"compiler,omitempty"`
+	// The source of the agent
+	Source *string `json:"source,omitempty" url:"source,omitempty"`
+	// The source map of the agent
+	SourceMap *string `json:"sourceMap,omitempty" url:"sourceMap,omitempty"`
+	// The slug of the agent
+	Slug *string `json:"slug,omitempty" url:"slug,omitempty"`
+	// Options for the agent
+	Options   map[string]interface{} `json:"options,omitempty" url:"options,omitempty"`
+	Id        AgentVersionId         `json:"id" url:"id"`
+	Version   int                    `json:"version" url:"version"`
+	Origin    int                    `json:"origin" url:"origin"`
+	CreatedAt time.Time              `json:"createdAt" url:"createdAt"`
+	UpdatedAt time.Time              `json:"updatedAt" url:"updatedAt"`
+	AgentId   AgentId                `json:"agent_id" url:"agent_id"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AgentVersion) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AgentVersion) UnmarshalJSON(data []byte) error {
+	type embed AgentVersion
+	var unmarshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"createdAt"`
+		UpdatedAt *core.DateTime `json:"updatedAt"`
+	}{
+		embed: embed(*a),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*a = AgentVersion(unmarshaler.embed)
+	a.CreatedAt = unmarshaler.CreatedAt.Time()
+	a.UpdatedAt = unmarshaler.UpdatedAt.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (a *AgentVersion) MarshalJSON() ([]byte, error) {
+	type embed AgentVersion
+	var marshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"createdAt"`
+		UpdatedAt *core.DateTime `json:"updatedAt"`
+	}{
+		embed:     embed(*a),
+		CreatedAt: core.NewDateTime(a.CreatedAt),
+		UpdatedAt: core.NewDateTime(a.UpdatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (a *AgentVersion) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
 type AgentVersionResponse struct {
 	Data *AgentVersion `json:"data,omitempty" url:"data,omitempty"`
 
@@ -101,6 +182,154 @@ func (a *AgentVersionResponse) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", a)
+}
+
+// A log of an agent execution
+type DetailedAgentLog struct {
+	EventId EventId `json:"eventId" url:"eventId"`
+	// Whether the agent execution was successful
+	Success     bool      `json:"success" url:"success"`
+	CreatedAt   time.Time `json:"createdAt" url:"createdAt"`
+	CompletedAt time.Time `json:"completedAt" url:"completedAt"`
+	// The duration of the agent execution
+	Duration int `json:"duration" url:"duration"`
+	// The topics of the agent execution
+	Topic string `json:"topic" url:"topic"`
+	// The context of the agent execution
+	Context map[string]interface{} `json:"context,omitempty" url:"context,omitempty"`
+	// The log of the agent execution
+	Log *string `json:"log,omitempty" url:"log,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (d *DetailedAgentLog) GetExtraProperties() map[string]interface{} {
+	return d.extraProperties
+}
+
+func (d *DetailedAgentLog) UnmarshalJSON(data []byte) error {
+	type embed DetailedAgentLog
+	var unmarshaler = struct {
+		embed
+		CreatedAt   *core.DateTime `json:"createdAt"`
+		CompletedAt *core.DateTime `json:"completedAt"`
+	}{
+		embed: embed(*d),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*d = DetailedAgentLog(unmarshaler.embed)
+	d.CreatedAt = unmarshaler.CreatedAt.Time()
+	d.CompletedAt = unmarshaler.CompletedAt.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *d)
+	if err != nil {
+		return err
+	}
+	d.extraProperties = extraProperties
+
+	d._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (d *DetailedAgentLog) MarshalJSON() ([]byte, error) {
+	type embed DetailedAgentLog
+	var marshaler = struct {
+		embed
+		CreatedAt   *core.DateTime `json:"createdAt"`
+		CompletedAt *core.DateTime `json:"completedAt"`
+	}{
+		embed:       embed(*d),
+		CreatedAt:   core.NewDateTime(d.CreatedAt),
+		CompletedAt: core.NewDateTime(d.CompletedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (d *DetailedAgentLog) String() string {
+	if len(d._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(d._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(d); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", d)
+}
+
+// An execution of an agent
+type Execution struct {
+	EventId EventId `json:"eventId" url:"eventId"`
+	// Whether the agent execution was successful
+	Success     bool      `json:"success" url:"success"`
+	CreatedAt   time.Time `json:"createdAt" url:"createdAt"`
+	CompletedAt time.Time `json:"completedAt" url:"completedAt"`
+	// The duration of the agent execution
+	Duration int `json:"duration" url:"duration"`
+	// The topics of the agent execution
+	Topic string `json:"topic" url:"topic"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *Execution) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *Execution) UnmarshalJSON(data []byte) error {
+	type embed Execution
+	var unmarshaler = struct {
+		embed
+		CreatedAt   *core.DateTime `json:"createdAt"`
+		CompletedAt *core.DateTime `json:"completedAt"`
+	}{
+		embed: embed(*e),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*e = Execution(unmarshaler.embed)
+	e.CreatedAt = unmarshaler.CreatedAt.Time()
+	e.CompletedAt = unmarshaler.CompletedAt.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
+	e._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (e *Execution) MarshalJSON() ([]byte, error) {
+	type embed Execution
+	var marshaler = struct {
+		embed
+		CreatedAt   *core.DateTime `json:"createdAt"`
+		CompletedAt *core.DateTime `json:"completedAt"`
+	}{
+		embed:       embed(*e),
+		CreatedAt:   core.NewDateTime(e.CreatedAt),
+		CompletedAt: core.NewDateTime(e.CompletedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (e *Execution) String() string {
+	if len(e._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
 }
 
 type GetDetailedAgentLogResponse struct {
@@ -268,3 +497,9 @@ func (l *ListAgentVersionsResponse) String() string {
 	}
 	return fmt.Sprintf("%#v", l)
 }
+
+// Agent version ID
+type AgentVersionId = string
+
+// Boolean
+type SuccessQueryParameter = bool

@@ -6,7 +6,84 @@ import (
 	json "encoding/json"
 	fmt "fmt"
 	core "github.com/FlatFilers/flatfile-go/core"
+	time "time"
 )
+
+// An account
+type Account struct {
+	Id                      AccountId              `json:"id" url:"id"`
+	Name                    string                 `json:"name" url:"name"`
+	Subdomain               *string                `json:"subdomain,omitempty" url:"subdomain,omitempty"`
+	VanityDomainDashboard   *string                `json:"vanityDomainDashboard,omitempty" url:"vanityDomainDashboard,omitempty"`
+	VanityDomainSpaces      *string                `json:"vanityDomainSpaces,omitempty" url:"vanityDomainSpaces,omitempty"`
+	EmbeddedDomainWhitelist []string               `json:"embeddedDomainWhitelist,omitempty" url:"embeddedDomainWhitelist,omitempty"`
+	CustomFromEmail         *string                `json:"customFromEmail,omitempty" url:"customFromEmail,omitempty"`
+	StripeCustomerId        *string                `json:"stripeCustomerId,omitempty" url:"stripeCustomerId,omitempty"`
+	Metadata                map[string]interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
+	CreatedAt               time.Time              `json:"createdAt" url:"createdAt"`
+	UpdatedAt               time.Time              `json:"updatedAt" url:"updatedAt"`
+	DefaultAppId            *AppId                 `json:"defaultAppId,omitempty" url:"defaultAppId,omitempty"`
+	Dashboard               *int                   `json:"dashboard,omitempty" url:"dashboard,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *Account) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *Account) UnmarshalJSON(data []byte) error {
+	type embed Account
+	var unmarshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"createdAt"`
+		UpdatedAt *core.DateTime `json:"updatedAt"`
+	}{
+		embed: embed(*a),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*a = Account(unmarshaler.embed)
+	a.CreatedAt = unmarshaler.CreatedAt.Time()
+	a.UpdatedAt = unmarshaler.UpdatedAt.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (a *Account) MarshalJSON() ([]byte, error) {
+	type embed Account
+	var marshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"createdAt"`
+		UpdatedAt *core.DateTime `json:"updatedAt"`
+	}{
+		embed:     embed(*a),
+		CreatedAt: core.NewDateTime(a.CreatedAt),
+		UpdatedAt: core.NewDateTime(a.UpdatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (a *Account) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
 
 // Properties used to update an account
 type AccountPatch struct {

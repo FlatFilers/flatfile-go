@@ -6,6 +6,7 @@ import (
 	json "encoding/json"
 	fmt "fmt"
 	core "github.com/FlatFilers/flatfile-go/core"
+	time "time"
 )
 
 type CreateSnapshotRequest struct {
@@ -33,9 +34,6 @@ type ListSnapshotRequest struct {
 	// ID of sheet
 	SheetId SheetId `json:"-" url:"sheetId"`
 }
-
-// Snapshot ID
-type SnapshotId = string
 
 // Options to filter records in a snapshot
 type ChangeType string
@@ -106,6 +104,105 @@ func (r *RestoreOptions) String() string {
 	return fmt.Sprintf("%#v", r)
 }
 
+type SchemaDiffData = map[string]SchemaDiffEnum
+
+type SchemaDiffEnum string
+
+const (
+	SchemaDiffEnumAdded     SchemaDiffEnum = "added"
+	SchemaDiffEnumRemoved   SchemaDiffEnum = "removed"
+	SchemaDiffEnumUnchanged SchemaDiffEnum = "unchanged"
+)
+
+func NewSchemaDiffEnumFromString(s string) (SchemaDiffEnum, error) {
+	switch s {
+	case "added":
+		return SchemaDiffEnumAdded, nil
+	case "removed":
+		return SchemaDiffEnumRemoved, nil
+	case "unchanged":
+		return SchemaDiffEnumUnchanged, nil
+	}
+	var t SchemaDiffEnum
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (s SchemaDiffEnum) Ptr() *SchemaDiffEnum {
+	return &s
+}
+
+type SchemaDiffRecord = SchemaDiffData
+
+type Snapshot struct {
+	// The ID of the Snapshot.
+	Id SnapshotId `json:"id" url:"id"`
+	// The ID of the Sheet.
+	SheetId SheetId `json:"sheetId" url:"sheetId"`
+	// The title of the Snapshot.
+	Label *string `json:"label,omitempty" url:"label,omitempty"`
+	// A summary of the Snapshot. This field is only available on the single get snapshot endpoint. It is not available for the list snapshots endpoint.
+	Summary *SnapshotSummary `json:"summary,omitempty" url:"summary,omitempty"`
+	// The time the Snapshot was created.
+	CreatedAt time.Time `json:"createdAt" url:"createdAt"`
+	// The actor who created the Snapshot.
+	CreatedBy UserId `json:"createdBy" url:"createdBy"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *Snapshot) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *Snapshot) UnmarshalJSON(data []byte) error {
+	type embed Snapshot
+	var unmarshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"createdAt"`
+	}{
+		embed: embed(*s),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*s = Snapshot(unmarshaler.embed)
+	s.CreatedAt = unmarshaler.CreatedAt.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *Snapshot) MarshalJSON() ([]byte, error) {
+	type embed Snapshot
+	var marshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"createdAt"`
+	}{
+		embed:     embed(*s),
+		CreatedAt: core.NewDateTime(s.CreatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (s *Snapshot) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
 type SnapshotResponse struct {
 	Data *Snapshot `json:"data,omitempty" url:"data,omitempty"`
 
@@ -147,6 +244,53 @@ func (s *SnapshotResponse) String() string {
 	return fmt.Sprintf("%#v", s)
 }
 
+type SnapshotSummary struct {
+	CreatedSince *SummarySection `json:"createdSince,omitempty" url:"createdSince,omitempty"`
+	UpdatedSince *SummarySection `json:"updatedSince,omitempty" url:"updatedSince,omitempty"`
+	DeletedSince *SummarySection `json:"deletedSince,omitempty" url:"deletedSince,omitempty"`
+	// The schema diff between the snapshot and the current sheet schema.
+	SchemaDiff SchemaDiffRecord `json:"schemaDiff,omitempty" url:"schemaDiff,omitempty"`
+	// The sheet configuration at the time of the snapshot.
+	Config *SheetConfig `json:"config,omitempty" url:"config,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SnapshotSummary) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SnapshotSummary) UnmarshalJSON(data []byte) error {
+	type unmarshaler SnapshotSummary
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SnapshotSummary(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *SnapshotSummary) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
 type SnapshotsResponse struct {
 	Data []*Snapshot `json:"data,omitempty" url:"data,omitempty"`
 
@@ -177,6 +321,48 @@ func (s *SnapshotsResponse) UnmarshalJSON(data []byte) error {
 }
 
 func (s *SnapshotsResponse) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
+type SummarySection struct {
+	Total   int            `json:"total" url:"total"`
+	ByField map[string]int `json:"byField,omitempty" url:"byField,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SummarySection) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SummarySection) UnmarshalJSON(data []byte) error {
+	type unmarshaler SummarySection
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SummarySection(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *SummarySection) String() string {
 	if len(s._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
 			return value

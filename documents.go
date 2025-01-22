@@ -6,10 +6,83 @@ import (
 	json "encoding/json"
 	fmt "fmt"
 	core "github.com/FlatFilers/flatfile-go/core"
+	time "time"
 )
 
-// Document ID
-type DocumentId = string
+// A document (markdown components) belong to a space
+type Document struct {
+	Title string `json:"title" url:"title"`
+	Body  string `json:"body" url:"body"`
+	// Certain treatments will cause your Document to look or behave differently.
+	Treatments    []string       `json:"treatments,omitempty" url:"treatments,omitempty"`
+	Actions       []*Action      `json:"actions,omitempty" url:"actions,omitempty"`
+	Id            DocumentId     `json:"id" url:"id"`
+	SpaceId       *SpaceId       `json:"spaceId,omitempty" url:"spaceId,omitempty"`
+	EnvironmentId *EnvironmentId `json:"environmentId,omitempty" url:"environmentId,omitempty"`
+	// Date the document was created
+	CreatedAt time.Time `json:"createdAt" url:"createdAt"`
+	// Date the document was last updated
+	UpdatedAt time.Time `json:"updatedAt" url:"updatedAt"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (d *Document) GetExtraProperties() map[string]interface{} {
+	return d.extraProperties
+}
+
+func (d *Document) UnmarshalJSON(data []byte) error {
+	type embed Document
+	var unmarshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"createdAt"`
+		UpdatedAt *core.DateTime `json:"updatedAt"`
+	}{
+		embed: embed(*d),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*d = Document(unmarshaler.embed)
+	d.CreatedAt = unmarshaler.CreatedAt.Time()
+	d.UpdatedAt = unmarshaler.UpdatedAt.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *d)
+	if err != nil {
+		return err
+	}
+	d.extraProperties = extraProperties
+
+	d._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (d *Document) MarshalJSON() ([]byte, error) {
+	type embed Document
+	var marshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"createdAt"`
+		UpdatedAt *core.DateTime `json:"updatedAt"`
+	}{
+		embed:     embed(*d),
+		CreatedAt: core.NewDateTime(d.CreatedAt),
+		UpdatedAt: core.NewDateTime(d.UpdatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (d *Document) String() string {
+	if len(d._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(d._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(d); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", d)
+}
 
 type DocumentConfig struct {
 	Title string `json:"title" url:"title"`

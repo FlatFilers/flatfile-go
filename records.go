@@ -6,7 +6,6 @@ import (
 	json "encoding/json"
 	fmt "fmt"
 	core "github.com/FlatFilers/flatfile-go/core"
-	time "time"
 )
 
 type DeleteRecordsRequest struct {
@@ -68,169 +67,23 @@ type GetRecordsRequest struct {
 	Q *string `json:"-" url:"q,omitempty"`
 }
 
-type CellValueUnion struct {
-	String     string
-	Integer    int
-	Long       int64
-	Double     float64
-	Boolean    bool
-	Date       time.Time
-	DateTime   time.Time
-	StringList []string
-
-	typ string
+type GetRecordIndicesRequest struct {
+	CommitId      *CommitId      `json:"-" url:"commitId,omitempty"`
+	SinceCommitId *CommitId      `json:"-" url:"sinceCommitId,omitempty"`
+	SortField     *SortField     `json:"-" url:"sortField,omitempty"`
+	SortDirection *SortDirection `json:"-" url:"sortDirection,omitempty"`
+	Filter        *Filter        `json:"-" url:"filter,omitempty"`
+	// Name of field by which to filter records
+	FilterField *FilterField `json:"-" url:"filterField,omitempty"`
+	SearchValue *SearchValue `json:"-" url:"searchValue,omitempty"`
+	SearchField *SearchField `json:"-" url:"searchField,omitempty"`
+	// List of record IDs to include in the query. Limit 100.
+	Ids []RecordId `json:"-" url:"ids"`
+	// An FFQL query used to filter the result set
+	Q *string `json:"-" url:"q,omitempty"`
 }
 
-func NewCellValueUnionFromString(value string) *CellValueUnion {
-	return &CellValueUnion{typ: "String", String: value}
-}
-
-func NewCellValueUnionFromInteger(value int) *CellValueUnion {
-	return &CellValueUnion{typ: "Integer", Integer: value}
-}
-
-func NewCellValueUnionFromLong(value int64) *CellValueUnion {
-	return &CellValueUnion{typ: "Long", Long: value}
-}
-
-func NewCellValueUnionFromDouble(value float64) *CellValueUnion {
-	return &CellValueUnion{typ: "Double", Double: value}
-}
-
-func NewCellValueUnionFromBoolean(value bool) *CellValueUnion {
-	return &CellValueUnion{typ: "Boolean", Boolean: value}
-}
-
-func NewCellValueUnionFromDate(value time.Time) *CellValueUnion {
-	return &CellValueUnion{typ: "Date", Date: value}
-}
-
-func NewCellValueUnionFromDateTime(value time.Time) *CellValueUnion {
-	return &CellValueUnion{typ: "DateTime", DateTime: value}
-}
-
-func NewCellValueUnionFromStringList(value []string) *CellValueUnion {
-	return &CellValueUnion{typ: "StringList", StringList: value}
-}
-
-func (c *CellValueUnion) UnmarshalJSON(data []byte) error {
-	var valueString string
-	if err := json.Unmarshal(data, &valueString); err == nil {
-		c.typ = "String"
-		c.String = valueString
-		return nil
-	}
-	var valueInteger int
-	if err := json.Unmarshal(data, &valueInteger); err == nil {
-		c.typ = "Integer"
-		c.Integer = valueInteger
-		return nil
-	}
-	var valueLong int64
-	if err := json.Unmarshal(data, &valueLong); err == nil {
-		c.typ = "Long"
-		c.Long = valueLong
-		return nil
-	}
-	var valueDouble float64
-	if err := json.Unmarshal(data, &valueDouble); err == nil {
-		c.typ = "Double"
-		c.Double = valueDouble
-		return nil
-	}
-	var valueBoolean bool
-	if err := json.Unmarshal(data, &valueBoolean); err == nil {
-		c.typ = "Boolean"
-		c.Boolean = valueBoolean
-		return nil
-	}
-	var valueDate *core.Date
-	if err := json.Unmarshal(data, &valueDate); err == nil {
-		c.typ = "Date"
-		c.Date = valueDate.Time()
-		return nil
-	}
-	var valueDateTime *core.DateTime
-	if err := json.Unmarshal(data, &valueDateTime); err == nil {
-		c.typ = "DateTime"
-		c.DateTime = valueDateTime.Time()
-		return nil
-	}
-	var valueStringList []string
-	if err := json.Unmarshal(data, &valueStringList); err == nil {
-		c.typ = "StringList"
-		c.StringList = valueStringList
-		return nil
-	}
-	return fmt.Errorf("%s cannot be deserialized as a %T", data, c)
-}
-
-func (c CellValueUnion) MarshalJSON() ([]byte, error) {
-	if c.typ == "String" || c.String != "" {
-		return json.Marshal(c.String)
-	}
-	if c.typ == "Integer" || c.Integer != 0 {
-		return json.Marshal(c.Integer)
-	}
-	if c.typ == "Long" || c.Long != 0 {
-		return json.Marshal(c.Long)
-	}
-	if c.typ == "Double" || c.Double != 0 {
-		return json.Marshal(c.Double)
-	}
-	if c.typ == "Boolean" || c.Boolean != false {
-		return json.Marshal(c.Boolean)
-	}
-	if c.typ == "Date" || !c.Date.IsZero() {
-		return json.Marshal(core.NewDate(c.Date))
-	}
-	if c.typ == "DateTime" || !c.DateTime.IsZero() {
-		return json.Marshal(core.NewDateTime(c.DateTime))
-	}
-	if c.typ == "StringList" || c.StringList != nil {
-		return json.Marshal(c.StringList)
-	}
-	return nil, fmt.Errorf("type %T does not include a non-empty union type", c)
-}
-
-type CellValueUnionVisitor interface {
-	VisitString(string) error
-	VisitInteger(int) error
-	VisitLong(int64) error
-	VisitDouble(float64) error
-	VisitBoolean(bool) error
-	VisitDate(time.Time) error
-	VisitDateTime(time.Time) error
-	VisitStringList([]string) error
-}
-
-func (c *CellValueUnion) Accept(visitor CellValueUnionVisitor) error {
-	if c.typ == "String" || c.String != "" {
-		return visitor.VisitString(c.String)
-	}
-	if c.typ == "Integer" || c.Integer != 0 {
-		return visitor.VisitInteger(c.Integer)
-	}
-	if c.typ == "Long" || c.Long != 0 {
-		return visitor.VisitLong(c.Long)
-	}
-	if c.typ == "Double" || c.Double != 0 {
-		return visitor.VisitDouble(c.Double)
-	}
-	if c.typ == "Boolean" || c.Boolean != false {
-		return visitor.VisitBoolean(c.Boolean)
-	}
-	if c.typ == "Date" || !c.Date.IsZero() {
-		return visitor.VisitDate(c.Date)
-	}
-	if c.typ == "DateTime" || !c.DateTime.IsZero() {
-		return visitor.VisitDateTime(c.DateTime)
-	}
-	if c.typ == "StringList" || c.StringList != nil {
-		return visitor.VisitStringList(c.StringList)
-	}
-	return fmt.Errorf("type %T does not include a non-empty union type", c)
-}
+type GetRecordIndicesResponse = []*RecordIndices
 
 type GetRecordsResponse struct {
 	Data *GetRecordsResponseData `json:"data,omitempty" url:"data,omitempty"`
@@ -271,4 +124,94 @@ func (g *GetRecordsResponse) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", g)
+}
+
+// A list of records with optional record counts
+type GetRecordsResponseData struct {
+	Success bool             `json:"success" url:"success"`
+	Records RecordsWithLinks `json:"records,omitempty" url:"records,omitempty"`
+	Counts  *RecordCounts    `json:"counts,omitempty" url:"counts,omitempty"`
+	// Deprecated, use `commitId` instead.
+	VersionId *VersionId `json:"versionId,omitempty" url:"versionId,omitempty"`
+	CommitId  *CommitId  `json:"commitId,omitempty" url:"commitId,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GetRecordsResponseData) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GetRecordsResponseData) UnmarshalJSON(data []byte) error {
+	type unmarshaler GetRecordsResponseData
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GetRecordsResponseData(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GetRecordsResponseData) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
+
+// A record index object
+type RecordIndices struct {
+	Id    string `json:"id" url:"id"`
+	Index int    `json:"index" url:"index"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (r *RecordIndices) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
+}
+
+func (r *RecordIndices) UnmarshalJSON(data []byte) error {
+	type unmarshaler RecordIndices
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*r = RecordIndices(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+
+	r._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (r *RecordIndices) String() string {
+	if len(r._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(r._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(r); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", r)
 }

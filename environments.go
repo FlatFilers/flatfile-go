@@ -6,6 +6,7 @@ import (
 	json "encoding/json"
 	fmt "fmt"
 	core "github.com/FlatFilers/flatfile-go/core"
+	time "time"
 )
 
 type GetEnvironmentEventTokenRequest struct {
@@ -19,6 +20,9 @@ type ListEnvironmentsRequest struct {
 	// Based on pageSize, which page of environments to return
 	PageNumber *int `json:"-" url:"pageNumber,omitempty"`
 }
+
+// Guide ID
+type GuideId = string
 
 type Environment struct {
 	Id        EnvironmentId `json:"id" url:"id"`
@@ -211,6 +215,447 @@ func (e *EnvironmentResponse) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", e)
+}
+
+// Create a guide
+type GuideCreateRequest struct {
+	Description   string                   `json:"description" url:"description"`
+	Title         string                   `json:"title" url:"title"`
+	Metadata      map[string]interface{}   `json:"metadata,omitempty" url:"metadata,omitempty"`
+	Slug          string                   `json:"slug" url:"slug"`
+	Versions      []*GuideVersionResource  `json:"versions,omitempty" url:"versions,omitempty"`
+	Blocks        []map[string]interface{} `json:"blocks,omitempty" url:"blocks,omitempty"`
+	EnvironmentId string                   `json:"environmentId" url:"environmentId"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GuideCreateRequest) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GuideCreateRequest) UnmarshalJSON(data []byte) error {
+	type unmarshaler GuideCreateRequest
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GuideCreateRequest(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GuideCreateRequest) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
+
+type GuideDeleteResponse struct {
+	Data *GuideDeleteResponseData `json:"data,omitempty" url:"data,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GuideDeleteResponse) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GuideDeleteResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler GuideDeleteResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GuideDeleteResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GuideDeleteResponse) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
+
+type GuideDeleteResponseData struct {
+	Success bool `json:"success" url:"success"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GuideDeleteResponseData) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GuideDeleteResponseData) UnmarshalJSON(data []byte) error {
+	type unmarshaler GuideDeleteResponseData
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GuideDeleteResponseData(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GuideDeleteResponseData) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
+
+type GuideDetailResponse struct {
+	Data *GuideResource `json:"data,omitempty" url:"data,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GuideDetailResponse) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GuideDetailResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler GuideDetailResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GuideDetailResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GuideDetailResponse) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
+
+type GuideListResponse struct {
+	Data []*GuideResource `json:"data,omitempty" url:"data,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GuideListResponse) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GuideListResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler GuideListResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GuideListResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GuideListResponse) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
+
+// A guide
+type GuideResource struct {
+	Id          GuideId                  `json:"id" url:"id"`
+	Description *string                  `json:"description,omitempty" url:"description,omitempty"`
+	Metadata    map[string]interface{}   `json:"metadata,omitempty" url:"metadata,omitempty"`
+	Slug        string                   `json:"slug" url:"slug"`
+	Title       string                   `json:"title" url:"title"`
+	Versions    []*GuideVersionResource  `json:"versions,omitempty" url:"versions,omitempty"`
+	Blocks      []map[string]interface{} `json:"blocks,omitempty" url:"blocks,omitempty"`
+	CreatedAt   time.Time                `json:"createdAt" url:"createdAt"`
+	UpdatedAt   time.Time                `json:"updatedAt" url:"updatedAt"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GuideResource) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GuideResource) UnmarshalJSON(data []byte) error {
+	type embed GuideResource
+	var unmarshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"createdAt"`
+		UpdatedAt *core.DateTime `json:"updatedAt"`
+	}{
+		embed: embed(*g),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*g = GuideResource(unmarshaler.embed)
+	g.CreatedAt = unmarshaler.CreatedAt.Time()
+	g.UpdatedAt = unmarshaler.UpdatedAt.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GuideResource) MarshalJSON() ([]byte, error) {
+	type embed GuideResource
+	var marshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"createdAt"`
+		UpdatedAt *core.DateTime `json:"updatedAt"`
+	}{
+		embed:     embed(*g),
+		CreatedAt: core.NewDateTime(g.CreatedAt),
+		UpdatedAt: core.NewDateTime(g.UpdatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (g *GuideResource) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
+
+// Update a guide
+type GuideUpdateRequest struct {
+	Description   *string                  `json:"description,omitempty" url:"description,omitempty"`
+	Title         *string                  `json:"title,omitempty" url:"title,omitempty"`
+	Metadata      map[string]interface{}   `json:"metadata,omitempty" url:"metadata,omitempty"`
+	Slug          *string                  `json:"slug,omitempty" url:"slug,omitempty"`
+	Versions      []*GuideVersionResource  `json:"versions,omitempty" url:"versions,omitempty"`
+	Blocks        []map[string]interface{} `json:"blocks,omitempty" url:"blocks,omitempty"`
+	EnvironmentId *string                  `json:"environmentId,omitempty" url:"environmentId,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GuideUpdateRequest) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GuideUpdateRequest) UnmarshalJSON(data []byte) error {
+	type unmarshaler GuideUpdateRequest
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GuideUpdateRequest(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GuideUpdateRequest) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
+
+// A version of a guide
+type GuideVersionResource struct {
+	Id        string    `json:"id" url:"id"`
+	Version   int       `json:"version" url:"version"`
+	Content   string    `json:"content" url:"content"`
+	CreatedAt time.Time `json:"createdAt" url:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt" url:"updatedAt"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GuideVersionResource) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GuideVersionResource) UnmarshalJSON(data []byte) error {
+	type embed GuideVersionResource
+	var unmarshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"createdAt"`
+		UpdatedAt *core.DateTime `json:"updatedAt"`
+	}{
+		embed: embed(*g),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*g = GuideVersionResource(unmarshaler.embed)
+	g.CreatedAt = unmarshaler.CreatedAt.Time()
+	g.UpdatedAt = unmarshaler.UpdatedAt.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GuideVersionResource) MarshalJSON() ([]byte, error) {
+	type embed GuideVersionResource
+	var marshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"createdAt"`
+		UpdatedAt *core.DateTime `json:"updatedAt"`
+	}{
+		embed:     embed(*g),
+		CreatedAt: core.NewDateTime(g.CreatedAt),
+		UpdatedAt: core.NewDateTime(g.UpdatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (g *GuideVersionResource) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
+
+type GuideVersionResponse struct {
+	Data *GuideVersionResource `json:"data,omitempty" url:"data,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GuideVersionResponse) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GuideVersionResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler GuideVersionResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GuideVersionResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GuideVersionResponse) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
 }
 
 type ListEnvironmentsResponse struct {

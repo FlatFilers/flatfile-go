@@ -6,6 +6,7 @@ import (
 	json "encoding/json"
 	fmt "fmt"
 	core "github.com/FlatFilers/flatfile-go/core"
+	time "time"
 )
 
 type GetFieldValuesRequest struct {
@@ -52,7 +53,7 @@ type GetRecordCountsRequest struct {
 type GetRecordsCsvRequest struct {
 	// Deprecated, use `sinceCommitId` instead.
 	VersionId *string `json:"-" url:"versionId,omitempty"`
-	// Returns records that were changed in that version in that version and only those records.
+	// Returns records that were changed in that version  in that version and only those records.
 	CommitId *CommitId `json:"-" url:"commitId,omitempty"`
 	// Deprecated, use `sinceCommitId` instead.
 	SinceVersionId *VersionId `json:"-" url:"sinceVersionId,omitempty"`
@@ -84,185 +85,70 @@ type ListSheetsRequest struct {
 	WorkbookId WorkbookId `json:"-" url:"workbookId"`
 }
 
-type Property struct {
-	Type          string
-	String        *StringProperty
-	Number        *NumberProperty
-	Boolean       *BooleanProperty
-	Date          *DateProperty
-	Enum          *EnumProperty
-	Reference     *ReferenceProperty
-	ReferenceList *ReferenceListProperty
-	StringList    *StringListProperty
-	EnumList      *EnumListProperty
+type CellValueWithCounts struct {
+	Valid    *bool                `json:"valid,omitempty" url:"valid,omitempty"`
+	Messages []*ValidationMessage `json:"messages,omitempty" url:"messages,omitempty"`
+	// Deprecated, use record level metadata instead.
+	Metadata  map[string]interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
+	Value     *CellValueUnion        `json:"value,omitempty" url:"value,omitempty"`
+	Layer     *string                `json:"layer,omitempty" url:"layer,omitempty"`
+	UpdatedAt *time.Time             `json:"updatedAt,omitempty" url:"updatedAt,omitempty"`
+	Counts    *RecordCounts          `json:"counts,omitempty" url:"counts,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
 }
 
-func NewPropertyFromString(value *StringProperty) *Property {
-	return &Property{Type: "string", String: value}
+func (c *CellValueWithCounts) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
 }
 
-func NewPropertyFromNumber(value *NumberProperty) *Property {
-	return &Property{Type: "number", Number: value}
-}
-
-func NewPropertyFromBoolean(value *BooleanProperty) *Property {
-	return &Property{Type: "boolean", Boolean: value}
-}
-
-func NewPropertyFromDate(value *DateProperty) *Property {
-	return &Property{Type: "date", Date: value}
-}
-
-func NewPropertyFromEnum(value *EnumProperty) *Property {
-	return &Property{Type: "enum", Enum: value}
-}
-
-func NewPropertyFromReference(value *ReferenceProperty) *Property {
-	return &Property{Type: "reference", Reference: value}
-}
-
-func NewPropertyFromReferenceList(value *ReferenceListProperty) *Property {
-	return &Property{Type: "reference-list", ReferenceList: value}
-}
-
-func NewPropertyFromStringList(value *StringListProperty) *Property {
-	return &Property{Type: "string-list", StringList: value}
-}
-
-func NewPropertyFromEnumList(value *EnumListProperty) *Property {
-	return &Property{Type: "enum-list", EnumList: value}
-}
-
-func (p *Property) UnmarshalJSON(data []byte) error {
-	var unmarshaler struct {
-		Type string `json:"type"`
+func (c *CellValueWithCounts) UnmarshalJSON(data []byte) error {
+	type embed CellValueWithCounts
+	var unmarshaler = struct {
+		embed
+		UpdatedAt *core.DateTime `json:"updatedAt,omitempty"`
+	}{
+		embed: embed(*c),
 	}
 	if err := json.Unmarshal(data, &unmarshaler); err != nil {
 		return err
 	}
-	p.Type = unmarshaler.Type
-	if unmarshaler.Type == "" {
-		return fmt.Errorf("%T did not include discriminant type", p)
+	*c = CellValueWithCounts(unmarshaler.embed)
+	c.UpdatedAt = unmarshaler.UpdatedAt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
 	}
-	switch unmarshaler.Type {
-	case "string":
-		value := new(StringProperty)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		p.String = value
-	case "number":
-		value := new(NumberProperty)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		p.Number = value
-	case "boolean":
-		value := new(BooleanProperty)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		p.Boolean = value
-	case "date":
-		value := new(DateProperty)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		p.Date = value
-	case "enum":
-		value := new(EnumProperty)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		p.Enum = value
-	case "reference":
-		value := new(ReferenceProperty)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		p.Reference = value
-	case "reference-list":
-		value := new(ReferenceListProperty)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		p.ReferenceList = value
-	case "string-list":
-		value := new(StringListProperty)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		p.StringList = value
-	case "enum-list":
-		value := new(EnumListProperty)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		p.EnumList = value
-	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = json.RawMessage(data)
 	return nil
 }
 
-func (p Property) MarshalJSON() ([]byte, error) {
-	switch p.Type {
-	default:
-		return nil, fmt.Errorf("invalid type %s in %T", p.Type, p)
-	case "string":
-		return core.MarshalJSONWithExtraProperty(p.String, "type", "string")
-	case "number":
-		return core.MarshalJSONWithExtraProperty(p.Number, "type", "number")
-	case "boolean":
-		return core.MarshalJSONWithExtraProperty(p.Boolean, "type", "boolean")
-	case "date":
-		return core.MarshalJSONWithExtraProperty(p.Date, "type", "date")
-	case "enum":
-		return core.MarshalJSONWithExtraProperty(p.Enum, "type", "enum")
-	case "reference":
-		return core.MarshalJSONWithExtraProperty(p.Reference, "type", "reference")
-	case "reference-list":
-		return core.MarshalJSONWithExtraProperty(p.ReferenceList, "type", "reference-list")
-	case "string-list":
-		return core.MarshalJSONWithExtraProperty(p.StringList, "type", "string-list")
-	case "enum-list":
-		return core.MarshalJSONWithExtraProperty(p.EnumList, "type", "enum-list")
+func (c *CellValueWithCounts) MarshalJSON() ([]byte, error) {
+	type embed CellValueWithCounts
+	var marshaler = struct {
+		embed
+		UpdatedAt *core.DateTime `json:"updatedAt,omitempty"`
+	}{
+		embed:     embed(*c),
+		UpdatedAt: core.NewOptionalDateTime(c.UpdatedAt),
 	}
+	return json.Marshal(marshaler)
 }
 
-type PropertyVisitor interface {
-	VisitString(*StringProperty) error
-	VisitNumber(*NumberProperty) error
-	VisitBoolean(*BooleanProperty) error
-	VisitDate(*DateProperty) error
-	VisitEnum(*EnumProperty) error
-	VisitReference(*ReferenceProperty) error
-	VisitReferenceList(*ReferenceListProperty) error
-	VisitStringList(*StringListProperty) error
-	VisitEnumList(*EnumListProperty) error
-}
-
-func (p *Property) Accept(visitor PropertyVisitor) error {
-	switch p.Type {
-	default:
-		return fmt.Errorf("invalid type %s in %T", p.Type, p)
-	case "string":
-		return visitor.VisitString(p.String)
-	case "number":
-		return visitor.VisitNumber(p.Number)
-	case "boolean":
-		return visitor.VisitBoolean(p.Boolean)
-	case "date":
-		return visitor.VisitDate(p.Date)
-	case "enum":
-		return visitor.VisitEnum(p.Enum)
-	case "reference":
-		return visitor.VisitReference(p.Reference)
-	case "reference-list":
-		return visitor.VisitReferenceList(p.ReferenceList)
-	case "string-list":
-		return visitor.VisitStringList(p.StringList)
-	case "enum-list":
-		return visitor.VisitEnumList(p.EnumList)
+func (c *CellValueWithCounts) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
 	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
 }
 
 type CellsResponse struct {
@@ -306,6 +192,9 @@ func (c *CellsResponse) String() string {
 	return fmt.Sprintf("%#v", c)
 }
 
+// Cell values grouped by field key
+type CellsResponseData = map[string][]*CellValueWithCounts
+
 // When true, excludes duplicate values
 type Distinct = bool
 
@@ -345,6 +234,48 @@ func (r *RecordCountsResponse) UnmarshalJSON(data []byte) error {
 }
 
 func (r *RecordCountsResponse) String() string {
+	if len(r._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(r._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(r); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", r)
+}
+
+type RecordCountsResponseData struct {
+	Counts  *RecordCounts `json:"counts,omitempty" url:"counts,omitempty"`
+	Success bool          `json:"success" url:"success"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (r *RecordCountsResponseData) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
+}
+
+func (r *RecordCountsResponseData) UnmarshalJSON(data []byte) error {
+	type unmarshaler RecordCountsResponseData
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*r = RecordCountsResponseData(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+
+	r._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (r *RecordCountsResponseData) String() string {
 	if len(r._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(r._rawJSON); err == nil {
 			return value

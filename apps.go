@@ -14,6 +14,91 @@ type GetConstraintsRequest struct {
 	IncludeBuiltins *bool `json:"-" url:"includeBuiltins,omitempty"`
 }
 
+// An app
+type App struct {
+	Id                 AppId       `json:"id" url:"id"`
+	Name               string      `json:"name" url:"name"`
+	Namespace          string      `json:"namespace" url:"namespace"`
+	Type               AppType     `json:"type" url:"type"`
+	Entity             string      `json:"entity" url:"entity"`
+	EntityPlural       string      `json:"entityPlural" url:"entityPlural"`
+	Icon               *string     `json:"icon,omitempty" url:"icon,omitempty"`
+	Metadata           interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
+	EnvironmentFilters interface{} `json:"environmentFilters,omitempty" url:"environmentFilters,omitempty"`
+	Blueprint          interface{} `json:"blueprint,omitempty" url:"blueprint,omitempty"`
+	CreatedAt          time.Time   `json:"createdAt" url:"createdAt"`
+	UpdatedAt          time.Time   `json:"updatedAt" url:"updatedAt"`
+	DeletedAt          *time.Time  `json:"deletedAt,omitempty" url:"deletedAt,omitempty"`
+	ActivatedAt        *time.Time  `json:"activatedAt,omitempty" url:"activatedAt,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *App) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *App) UnmarshalJSON(data []byte) error {
+	type embed App
+	var unmarshaler = struct {
+		embed
+		CreatedAt   *core.DateTime `json:"createdAt"`
+		UpdatedAt   *core.DateTime `json:"updatedAt"`
+		DeletedAt   *core.DateTime `json:"deletedAt,omitempty"`
+		ActivatedAt *core.DateTime `json:"activatedAt,omitempty"`
+	}{
+		embed: embed(*a),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*a = App(unmarshaler.embed)
+	a.CreatedAt = unmarshaler.CreatedAt.Time()
+	a.UpdatedAt = unmarshaler.UpdatedAt.Time()
+	a.DeletedAt = unmarshaler.DeletedAt.TimePtr()
+	a.ActivatedAt = unmarshaler.ActivatedAt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (a *App) MarshalJSON() ([]byte, error) {
+	type embed App
+	var marshaler = struct {
+		embed
+		CreatedAt   *core.DateTime `json:"createdAt"`
+		UpdatedAt   *core.DateTime `json:"updatedAt"`
+		DeletedAt   *core.DateTime `json:"deletedAt,omitempty"`
+		ActivatedAt *core.DateTime `json:"activatedAt,omitempty"`
+	}{
+		embed:       embed(*a),
+		CreatedAt:   core.NewDateTime(a.CreatedAt),
+		UpdatedAt:   core.NewDateTime(a.UpdatedAt),
+		DeletedAt:   core.NewOptionalDateTime(a.DeletedAt),
+		ActivatedAt: core.NewOptionalDateTime(a.ActivatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (a *App) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
 // Create an app
 type AppCreate struct {
 	Name               string      `json:"name" url:"name"`
@@ -173,6 +258,37 @@ func (a *AppResponse) String() string {
 	return fmt.Sprintf("%#v", a)
 }
 
+type AppType string
+
+const (
+	AppTypePortal    AppType = "PORTAL"
+	AppTypeProjects  AppType = "PROJECTS"
+	AppTypeMapping   AppType = "MAPPING"
+	AppTypeWorkbooks AppType = "WORKBOOKS"
+	AppTypeCustom    AppType = "CUSTOM"
+)
+
+func NewAppTypeFromString(s string) (AppType, error) {
+	switch s {
+	case "PORTAL":
+		return AppTypePortal, nil
+	case "PROJECTS":
+		return AppTypeProjects, nil
+	case "MAPPING":
+		return AppTypeMapping, nil
+	case "WORKBOOKS":
+		return AppTypeWorkbooks, nil
+	case "CUSTOM":
+		return AppTypeCustom, nil
+	}
+	var t AppType
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (a AppType) Ptr() *AppType {
+	return &a
+}
+
 type AppsResponse struct {
 	Data []*App `json:"data,omitempty" url:"data,omitempty"`
 
@@ -258,6 +374,77 @@ func (c *ConstraintCreate) String() string {
 	return fmt.Sprintf("%#v", c)
 }
 
+type ConstraintResource struct {
+	Id          ConstraintId `json:"id" url:"id"`
+	AppId       AppId        `json:"appId" url:"appId"`
+	Validator   string       `json:"validator" url:"validator"`
+	Description *string      `json:"description,omitempty" url:"description,omitempty"`
+	Function    *string      `json:"function,omitempty" url:"function,omitempty"`
+	Options     interface{}  `json:"options,omitempty" url:"options,omitempty"`
+	Label       *string      `json:"label,omitempty" url:"label,omitempty"`
+	CreatedAt   time.Time    `json:"createdAt" url:"createdAt"`
+	UpdatedAt   time.Time    `json:"updatedAt" url:"updatedAt"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *ConstraintResource) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *ConstraintResource) UnmarshalJSON(data []byte) error {
+	type embed ConstraintResource
+	var unmarshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"createdAt"`
+		UpdatedAt *core.DateTime `json:"updatedAt"`
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = ConstraintResource(unmarshaler.embed)
+	c.CreatedAt = unmarshaler.CreatedAt.Time()
+	c.UpdatedAt = unmarshaler.UpdatedAt.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *ConstraintResource) MarshalJSON() ([]byte, error) {
+	type embed ConstraintResource
+	var marshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"createdAt"`
+		UpdatedAt *core.DateTime `json:"updatedAt"`
+	}{
+		embed:     embed(*c),
+		CreatedAt: core.NewDateTime(c.CreatedAt),
+		UpdatedAt: core.NewDateTime(c.UpdatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (c *ConstraintResource) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
 type ConstraintResponse struct {
 	Data *ConstraintResource `json:"data,omitempty" url:"data,omitempty"`
 
@@ -332,6 +519,79 @@ func (c *ConstraintUpdate) UnmarshalJSON(data []byte) error {
 }
 
 func (c *ConstraintUpdate) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+type ConstraintVersionResource struct {
+	Id          ConstraintId `json:"id" url:"id"`
+	AppId       AppId        `json:"appId" url:"appId"`
+	Validator   string       `json:"validator" url:"validator"`
+	Description *string      `json:"description,omitempty" url:"description,omitempty"`
+	Function    *string      `json:"function,omitempty" url:"function,omitempty"`
+	Options     interface{}  `json:"options,omitempty" url:"options,omitempty"`
+	Label       *string      `json:"label,omitempty" url:"label,omitempty"`
+	CreatedAt   time.Time    `json:"createdAt" url:"createdAt"`
+	UpdatedAt   time.Time    `json:"updatedAt" url:"updatedAt"`
+	Version     int          `json:"version" url:"version"`
+	Prompt      *string      `json:"prompt,omitempty" url:"prompt,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *ConstraintVersionResource) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *ConstraintVersionResource) UnmarshalJSON(data []byte) error {
+	type embed ConstraintVersionResource
+	var unmarshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"createdAt"`
+		UpdatedAt *core.DateTime `json:"updatedAt"`
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = ConstraintVersionResource(unmarshaler.embed)
+	c.CreatedAt = unmarshaler.CreatedAt.Time()
+	c.UpdatedAt = unmarshaler.UpdatedAt.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *ConstraintVersionResource) MarshalJSON() ([]byte, error) {
+	type embed ConstraintVersionResource
+	var marshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"createdAt"`
+		UpdatedAt *core.DateTime `json:"updatedAt"`
+	}{
+		embed:     embed(*c),
+		CreatedAt: core.NewDateTime(c.CreatedAt),
+		UpdatedAt: core.NewDateTime(c.UpdatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (c *ConstraintVersionResource) String() string {
 	if len(c._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
 			return value
@@ -506,3 +766,6 @@ func (s *SuccessResponse) String() string {
 	}
 	return fmt.Sprintf("%#v", s)
 }
+
+// Constraint ID
+type ConstraintId = string

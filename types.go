@@ -9,82 +9,6 @@ import (
 	time "time"
 )
 
-// An account
-type Account struct {
-	Id                      AccountId              `json:"id" url:"id"`
-	Name                    string                 `json:"name" url:"name"`
-	Subdomain               *string                `json:"subdomain,omitempty" url:"subdomain,omitempty"`
-	VanityDomainDashboard   *string                `json:"vanityDomainDashboard,omitempty" url:"vanityDomainDashboard,omitempty"`
-	VanityDomainSpaces      *string                `json:"vanityDomainSpaces,omitempty" url:"vanityDomainSpaces,omitempty"`
-	EmbeddedDomainWhitelist []string               `json:"embeddedDomainWhitelist,omitempty" url:"embeddedDomainWhitelist,omitempty"`
-	CustomFromEmail         *string                `json:"customFromEmail,omitempty" url:"customFromEmail,omitempty"`
-	StripeCustomerId        *string                `json:"stripeCustomerId,omitempty" url:"stripeCustomerId,omitempty"`
-	Metadata                map[string]interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
-	CreatedAt               time.Time              `json:"createdAt" url:"createdAt"`
-	UpdatedAt               time.Time              `json:"updatedAt" url:"updatedAt"`
-	DefaultAppId            *AppId                 `json:"defaultAppId,omitempty" url:"defaultAppId,omitempty"`
-	Dashboard               *int                   `json:"dashboard,omitempty" url:"dashboard,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (a *Account) GetExtraProperties() map[string]interface{} {
-	return a.extraProperties
-}
-
-func (a *Account) UnmarshalJSON(data []byte) error {
-	type embed Account
-	var unmarshaler = struct {
-		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-		UpdatedAt *core.DateTime `json:"updatedAt"`
-	}{
-		embed: embed(*a),
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	*a = Account(unmarshaler.embed)
-	a.CreatedAt = unmarshaler.CreatedAt.Time()
-	a.UpdatedAt = unmarshaler.UpdatedAt.Time()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *a)
-	if err != nil {
-		return err
-	}
-	a.extraProperties = extraProperties
-
-	a._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (a *Account) MarshalJSON() ([]byte, error) {
-	type embed Account
-	var marshaler = struct {
-		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-		UpdatedAt *core.DateTime `json:"updatedAt"`
-	}{
-		embed:     embed(*a),
-		CreatedAt: core.NewDateTime(a.CreatedAt),
-		UpdatedAt: core.NewDateTime(a.UpdatedAt),
-	}
-	return json.Marshal(marshaler)
-}
-
-func (a *Account) String() string {
-	if len(a._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(a); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", a)
-}
-
 type Agent struct {
 	// The topics the agent should listen for
 	Topics []EventTopic `json:"topics,omitempty" url:"topics,omitempty"`
@@ -95,12 +19,14 @@ type Agent struct {
 	// The source map of the agent
 	SourceMap *string `json:"sourceMap,omitempty" url:"sourceMap,omitempty"`
 	// The slug of the agent
-	Slug          *string       `json:"slug,omitempty" url:"slug,omitempty"`
-	Id            AgentId       `json:"id" url:"id"`
-	CreatedAt     time.Time     `json:"createdAt" url:"createdAt"`
-	UpdatedAt     time.Time     `json:"updatedAt" url:"updatedAt"`
-	AccountId     AccountId     `json:"accountId" url:"accountId"`
-	EnvironmentId EnvironmentId `json:"environmentId" url:"environmentId"`
+	Slug *string `json:"slug,omitempty" url:"slug,omitempty"`
+	// Options for the agent
+	Options       map[string]interface{} `json:"options,omitempty" url:"options,omitempty"`
+	Id            AgentId                `json:"id" url:"id"`
+	CreatedAt     time.Time              `json:"createdAt" url:"createdAt"`
+	UpdatedAt     time.Time              `json:"updatedAt" url:"updatedAt"`
+	AccountId     AccountId              `json:"accountId" url:"accountId"`
+	EnvironmentId EnvironmentId          `json:"environmentId" url:"environmentId"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -174,6 +100,8 @@ type AgentConfig struct {
 	SourceMap *string `json:"sourceMap,omitempty" url:"sourceMap,omitempty"`
 	// The slug of the agent
 	Slug *string `json:"slug,omitempty" url:"slug,omitempty"`
+	// Options for the agent
+	Options map[string]interface{} `json:"options,omitempty" url:"options,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -302,84 +230,6 @@ func (a *AgentResponse) String() string {
 	return fmt.Sprintf("%#v", a)
 }
 
-type AgentVersion struct {
-	// The topics the agent should listen for
-	Topics []EventTopic `json:"topics,omitempty" url:"topics,omitempty"`
-	// The compiler of the agent
-	Compiler *Compiler `json:"compiler,omitempty" url:"compiler,omitempty"`
-	// The source of the agent
-	Source *string `json:"source,omitempty" url:"source,omitempty"`
-	// The source map of the agent
-	SourceMap *string `json:"sourceMap,omitempty" url:"sourceMap,omitempty"`
-	// The slug of the agent
-	Slug      *string        `json:"slug,omitempty" url:"slug,omitempty"`
-	Id        AgentVersionId `json:"id" url:"id"`
-	Version   int            `json:"version" url:"version"`
-	Origin    int            `json:"origin" url:"origin"`
-	CreatedAt time.Time      `json:"createdAt" url:"createdAt"`
-	UpdatedAt time.Time      `json:"updatedAt" url:"updatedAt"`
-	AgentId   AgentId        `json:"agent_id" url:"agent_id"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (a *AgentVersion) GetExtraProperties() map[string]interface{} {
-	return a.extraProperties
-}
-
-func (a *AgentVersion) UnmarshalJSON(data []byte) error {
-	type embed AgentVersion
-	var unmarshaler = struct {
-		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-		UpdatedAt *core.DateTime `json:"updatedAt"`
-	}{
-		embed: embed(*a),
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	*a = AgentVersion(unmarshaler.embed)
-	a.CreatedAt = unmarshaler.CreatedAt.Time()
-	a.UpdatedAt = unmarshaler.UpdatedAt.Time()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *a)
-	if err != nil {
-		return err
-	}
-	a.extraProperties = extraProperties
-
-	a._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (a *AgentVersion) MarshalJSON() ([]byte, error) {
-	type embed AgentVersion
-	var marshaler = struct {
-		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-		UpdatedAt *core.DateTime `json:"updatedAt"`
-	}{
-		embed:     embed(*a),
-		CreatedAt: core.NewDateTime(a.CreatedAt),
-		UpdatedAt: core.NewDateTime(a.UpdatedAt),
-	}
-	return json.Marshal(marshaler)
-}
-
-func (a *AgentVersion) String() string {
-	if len(a._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(a); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", a)
-}
-
 // The compiler of the agent
 type Compiler string
 
@@ -398,154 +248,6 @@ func NewCompilerFromString(s string) (Compiler, error) {
 
 func (c Compiler) Ptr() *Compiler {
 	return &c
-}
-
-// A log of an agent execution
-type DetailedAgentLog struct {
-	EventId EventId `json:"eventId" url:"eventId"`
-	// Whether the agent execution was successful
-	Success     bool      `json:"success" url:"success"`
-	CreatedAt   time.Time `json:"createdAt" url:"createdAt"`
-	CompletedAt time.Time `json:"completedAt" url:"completedAt"`
-	// The duration of the agent execution
-	Duration int `json:"duration" url:"duration"`
-	// The topics of the agent execution
-	Topic string `json:"topic" url:"topic"`
-	// The context of the agent execution
-	Context map[string]interface{} `json:"context,omitempty" url:"context,omitempty"`
-	// The log of the agent execution
-	Log *string `json:"log,omitempty" url:"log,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (d *DetailedAgentLog) GetExtraProperties() map[string]interface{} {
-	return d.extraProperties
-}
-
-func (d *DetailedAgentLog) UnmarshalJSON(data []byte) error {
-	type embed DetailedAgentLog
-	var unmarshaler = struct {
-		embed
-		CreatedAt   *core.DateTime `json:"createdAt"`
-		CompletedAt *core.DateTime `json:"completedAt"`
-	}{
-		embed: embed(*d),
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	*d = DetailedAgentLog(unmarshaler.embed)
-	d.CreatedAt = unmarshaler.CreatedAt.Time()
-	d.CompletedAt = unmarshaler.CompletedAt.Time()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *d)
-	if err != nil {
-		return err
-	}
-	d.extraProperties = extraProperties
-
-	d._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (d *DetailedAgentLog) MarshalJSON() ([]byte, error) {
-	type embed DetailedAgentLog
-	var marshaler = struct {
-		embed
-		CreatedAt   *core.DateTime `json:"createdAt"`
-		CompletedAt *core.DateTime `json:"completedAt"`
-	}{
-		embed:       embed(*d),
-		CreatedAt:   core.NewDateTime(d.CreatedAt),
-		CompletedAt: core.NewDateTime(d.CompletedAt),
-	}
-	return json.Marshal(marshaler)
-}
-
-func (d *DetailedAgentLog) String() string {
-	if len(d._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(d._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(d); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", d)
-}
-
-// An execution of an agent
-type Execution struct {
-	EventId EventId `json:"eventId" url:"eventId"`
-	// Whether the agent execution was successful
-	Success     bool      `json:"success" url:"success"`
-	CreatedAt   time.Time `json:"createdAt" url:"createdAt"`
-	CompletedAt time.Time `json:"completedAt" url:"completedAt"`
-	// The duration of the agent execution
-	Duration int `json:"duration" url:"duration"`
-	// The topics of the agent execution
-	Topic string `json:"topic" url:"topic"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (e *Execution) GetExtraProperties() map[string]interface{} {
-	return e.extraProperties
-}
-
-func (e *Execution) UnmarshalJSON(data []byte) error {
-	type embed Execution
-	var unmarshaler = struct {
-		embed
-		CreatedAt   *core.DateTime `json:"createdAt"`
-		CompletedAt *core.DateTime `json:"completedAt"`
-	}{
-		embed: embed(*e),
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	*e = Execution(unmarshaler.embed)
-	e.CreatedAt = unmarshaler.CreatedAt.Time()
-	e.CompletedAt = unmarshaler.CompletedAt.Time()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *e)
-	if err != nil {
-		return err
-	}
-	e.extraProperties = extraProperties
-
-	e._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (e *Execution) MarshalJSON() ([]byte, error) {
-	type embed Execution
-	var marshaler = struct {
-		embed
-		CreatedAt   *core.DateTime `json:"createdAt"`
-		CompletedAt *core.DateTime `json:"completedAt"`
-	}{
-		embed:       embed(*e),
-		CreatedAt:   core.NewDateTime(e.CreatedAt),
-		CompletedAt: core.NewDateTime(e.CompletedAt),
-	}
-	return json.Marshal(marshaler)
-}
-
-func (e *Execution) String() string {
-	if len(e._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(e); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", e)
 }
 
 type GetAgentLogsResponse struct {
@@ -629,377 +331,6 @@ func (l *ListAgentsResponse) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", l)
-}
-
-// An app
-type App struct {
-	Id                 AppId       `json:"id" url:"id"`
-	Name               string      `json:"name" url:"name"`
-	Namespace          string      `json:"namespace" url:"namespace"`
-	Type               AppType     `json:"type" url:"type"`
-	Entity             string      `json:"entity" url:"entity"`
-	EntityPlural       string      `json:"entityPlural" url:"entityPlural"`
-	Icon               *string     `json:"icon,omitempty" url:"icon,omitempty"`
-	Metadata           interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
-	EnvironmentFilters interface{} `json:"environmentFilters,omitempty" url:"environmentFilters,omitempty"`
-	Blueprint          interface{} `json:"blueprint,omitempty" url:"blueprint,omitempty"`
-	CreatedAt          time.Time   `json:"createdAt" url:"createdAt"`
-	UpdatedAt          time.Time   `json:"updatedAt" url:"updatedAt"`
-	DeletedAt          *time.Time  `json:"deletedAt,omitempty" url:"deletedAt,omitempty"`
-	ActivatedAt        *time.Time  `json:"activatedAt,omitempty" url:"activatedAt,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (a *App) GetExtraProperties() map[string]interface{} {
-	return a.extraProperties
-}
-
-func (a *App) UnmarshalJSON(data []byte) error {
-	type embed App
-	var unmarshaler = struct {
-		embed
-		CreatedAt   *core.DateTime `json:"createdAt"`
-		UpdatedAt   *core.DateTime `json:"updatedAt"`
-		DeletedAt   *core.DateTime `json:"deletedAt,omitempty"`
-		ActivatedAt *core.DateTime `json:"activatedAt,omitempty"`
-	}{
-		embed: embed(*a),
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	*a = App(unmarshaler.embed)
-	a.CreatedAt = unmarshaler.CreatedAt.Time()
-	a.UpdatedAt = unmarshaler.UpdatedAt.Time()
-	a.DeletedAt = unmarshaler.DeletedAt.TimePtr()
-	a.ActivatedAt = unmarshaler.ActivatedAt.TimePtr()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *a)
-	if err != nil {
-		return err
-	}
-	a.extraProperties = extraProperties
-
-	a._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (a *App) MarshalJSON() ([]byte, error) {
-	type embed App
-	var marshaler = struct {
-		embed
-		CreatedAt   *core.DateTime `json:"createdAt"`
-		UpdatedAt   *core.DateTime `json:"updatedAt"`
-		DeletedAt   *core.DateTime `json:"deletedAt,omitempty"`
-		ActivatedAt *core.DateTime `json:"activatedAt,omitempty"`
-	}{
-		embed:       embed(*a),
-		CreatedAt:   core.NewDateTime(a.CreatedAt),
-		UpdatedAt:   core.NewDateTime(a.UpdatedAt),
-		DeletedAt:   core.NewOptionalDateTime(a.DeletedAt),
-		ActivatedAt: core.NewOptionalDateTime(a.ActivatedAt),
-	}
-	return json.Marshal(marshaler)
-}
-
-func (a *App) String() string {
-	if len(a._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(a); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", a)
-}
-
-type AppType string
-
-const (
-	AppTypePortal    AppType = "PORTAL"
-	AppTypeProjects  AppType = "PROJECTS"
-	AppTypeMapping   AppType = "MAPPING"
-	AppTypeWorkbooks AppType = "WORKBOOKS"
-	AppTypeCustom    AppType = "CUSTOM"
-)
-
-func NewAppTypeFromString(s string) (AppType, error) {
-	switch s {
-	case "PORTAL":
-		return AppTypePortal, nil
-	case "PROJECTS":
-		return AppTypeProjects, nil
-	case "MAPPING":
-		return AppTypeMapping, nil
-	case "WORKBOOKS":
-		return AppTypeWorkbooks, nil
-	case "CUSTOM":
-		return AppTypeCustom, nil
-	}
-	var t AppType
-	return "", fmt.Errorf("%s is not a valid %T", s, t)
-}
-
-func (a AppType) Ptr() *AppType {
-	return &a
-}
-
-type ConstraintResource struct {
-	Id          ConstraintId `json:"id" url:"id"`
-	AppId       AppId        `json:"appId" url:"appId"`
-	Validator   string       `json:"validator" url:"validator"`
-	Description *string      `json:"description,omitempty" url:"description,omitempty"`
-	Function    *string      `json:"function,omitempty" url:"function,omitempty"`
-	Options     interface{}  `json:"options,omitempty" url:"options,omitempty"`
-	Label       *string      `json:"label,omitempty" url:"label,omitempty"`
-	CreatedAt   time.Time    `json:"createdAt" url:"createdAt"`
-	UpdatedAt   time.Time    `json:"updatedAt" url:"updatedAt"`
-	DeletedAt   *time.Time   `json:"deletedAt,omitempty" url:"deletedAt,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (c *ConstraintResource) GetExtraProperties() map[string]interface{} {
-	return c.extraProperties
-}
-
-func (c *ConstraintResource) UnmarshalJSON(data []byte) error {
-	type embed ConstraintResource
-	var unmarshaler = struct {
-		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-		UpdatedAt *core.DateTime `json:"updatedAt"`
-		DeletedAt *core.DateTime `json:"deletedAt,omitempty"`
-	}{
-		embed: embed(*c),
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	*c = ConstraintResource(unmarshaler.embed)
-	c.CreatedAt = unmarshaler.CreatedAt.Time()
-	c.UpdatedAt = unmarshaler.UpdatedAt.Time()
-	c.DeletedAt = unmarshaler.DeletedAt.TimePtr()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *c)
-	if err != nil {
-		return err
-	}
-	c.extraProperties = extraProperties
-
-	c._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (c *ConstraintResource) MarshalJSON() ([]byte, error) {
-	type embed ConstraintResource
-	var marshaler = struct {
-		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-		UpdatedAt *core.DateTime `json:"updatedAt"`
-		DeletedAt *core.DateTime `json:"deletedAt,omitempty"`
-	}{
-		embed:     embed(*c),
-		CreatedAt: core.NewDateTime(c.CreatedAt),
-		UpdatedAt: core.NewDateTime(c.UpdatedAt),
-		DeletedAt: core.NewOptionalDateTime(c.DeletedAt),
-	}
-	return json.Marshal(marshaler)
-}
-
-func (c *ConstraintResource) String() string {
-	if len(c._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(c); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", c)
-}
-
-type ConstraintVersionResource struct {
-	Id          ConstraintId `json:"id" url:"id"`
-	AppId       AppId        `json:"appId" url:"appId"`
-	Validator   string       `json:"validator" url:"validator"`
-	Description *string      `json:"description,omitempty" url:"description,omitempty"`
-	Function    *string      `json:"function,omitempty" url:"function,omitempty"`
-	Options     interface{}  `json:"options,omitempty" url:"options,omitempty"`
-	Label       *string      `json:"label,omitempty" url:"label,omitempty"`
-	CreatedAt   time.Time    `json:"createdAt" url:"createdAt"`
-	UpdatedAt   time.Time    `json:"updatedAt" url:"updatedAt"`
-	DeletedAt   *time.Time   `json:"deletedAt,omitempty" url:"deletedAt,omitempty"`
-	Version     int          `json:"version" url:"version"`
-	Prompt      *string      `json:"prompt,omitempty" url:"prompt,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (c *ConstraintVersionResource) GetExtraProperties() map[string]interface{} {
-	return c.extraProperties
-}
-
-func (c *ConstraintVersionResource) UnmarshalJSON(data []byte) error {
-	type embed ConstraintVersionResource
-	var unmarshaler = struct {
-		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-		UpdatedAt *core.DateTime `json:"updatedAt"`
-		DeletedAt *core.DateTime `json:"deletedAt,omitempty"`
-	}{
-		embed: embed(*c),
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	*c = ConstraintVersionResource(unmarshaler.embed)
-	c.CreatedAt = unmarshaler.CreatedAt.Time()
-	c.UpdatedAt = unmarshaler.UpdatedAt.Time()
-	c.DeletedAt = unmarshaler.DeletedAt.TimePtr()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *c)
-	if err != nil {
-		return err
-	}
-	c.extraProperties = extraProperties
-
-	c._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (c *ConstraintVersionResource) MarshalJSON() ([]byte, error) {
-	type embed ConstraintVersionResource
-	var marshaler = struct {
-		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-		UpdatedAt *core.DateTime `json:"updatedAt"`
-		DeletedAt *core.DateTime `json:"deletedAt,omitempty"`
-	}{
-		embed:     embed(*c),
-		CreatedAt: core.NewDateTime(c.CreatedAt),
-		UpdatedAt: core.NewDateTime(c.UpdatedAt),
-		DeletedAt: core.NewOptionalDateTime(c.DeletedAt),
-	}
-	return json.Marshal(marshaler)
-}
-
-func (c *ConstraintVersionResource) String() string {
-	if len(c._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(c); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", c)
-}
-
-type Prompt struct {
-	Id PromptId `json:"id" url:"id"`
-	// ID of the user/guest who created the prompt
-	CreatedById   string         `json:"createdById" url:"createdById"`
-	AccountId     AccountId      `json:"accountId" url:"accountId"`
-	EnvironmentId *EnvironmentId `json:"environmentId,omitempty" url:"environmentId,omitempty"`
-	SpaceId       *SpaceId       `json:"spaceId,omitempty" url:"spaceId,omitempty"`
-	// Type of prompt
-	PromptType PromptTypeEnum `json:"promptType" url:"promptType"`
-	// Text for prompts for AI Assist
-	Prompt    string     `json:"prompt" url:"prompt"`
-	CreatedAt time.Time  `json:"createdAt" url:"createdAt"`
-	UpdatedAt time.Time  `json:"updatedAt" url:"updatedAt"`
-	DeletedAt *time.Time `json:"deletedAt,omitempty" url:"deletedAt,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (p *Prompt) GetExtraProperties() map[string]interface{} {
-	return p.extraProperties
-}
-
-func (p *Prompt) UnmarshalJSON(data []byte) error {
-	type embed Prompt
-	var unmarshaler = struct {
-		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-		UpdatedAt *core.DateTime `json:"updatedAt"`
-		DeletedAt *core.DateTime `json:"deletedAt,omitempty"`
-	}{
-		embed: embed(*p),
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	*p = Prompt(unmarshaler.embed)
-	p.CreatedAt = unmarshaler.CreatedAt.Time()
-	p.UpdatedAt = unmarshaler.UpdatedAt.Time()
-	p.DeletedAt = unmarshaler.DeletedAt.TimePtr()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *p)
-	if err != nil {
-		return err
-	}
-	p.extraProperties = extraProperties
-
-	p._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (p *Prompt) MarshalJSON() ([]byte, error) {
-	type embed Prompt
-	var marshaler = struct {
-		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-		UpdatedAt *core.DateTime `json:"updatedAt"`
-		DeletedAt *core.DateTime `json:"deletedAt,omitempty"`
-	}{
-		embed:     embed(*p),
-		CreatedAt: core.NewDateTime(p.CreatedAt),
-		UpdatedAt: core.NewDateTime(p.UpdatedAt),
-		DeletedAt: core.NewOptionalDateTime(p.DeletedAt),
-	}
-	return json.Marshal(marshaler)
-}
-
-func (p *Prompt) String() string {
-	if len(p._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(p); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", p)
-}
-
-type PromptTypeEnum string
-
-const (
-	PromptTypeEnumAiAssist             PromptTypeEnum = "AI_ASSIST"
-	PromptTypeEnumConstraintGeneration PromptTypeEnum = "CONSTRAINT_GENERATION"
-)
-
-func NewPromptTypeEnumFromString(s string) (PromptTypeEnum, error) {
-	switch s {
-	case "AI_ASSIST":
-		return PromptTypeEnumAiAssist, nil
-	case "CONSTRAINT_GENERATION":
-		return PromptTypeEnumConstraintGeneration, nil
-	}
-	var t PromptTypeEnum
-	return "", fmt.Errorf("%s is not a valid %T", s, t)
-}
-
-func (p PromptTypeEnum) Ptr() *PromptTypeEnum {
-	return &p
 }
 
 // A commit version
@@ -1116,106 +447,6 @@ func (l *ListCommitsResponse) String() string {
 	return fmt.Sprintf("%#v", l)
 }
 
-type ApiAction struct {
-	// **This is deprecated. Use `operation` instead.**
-	Slug *string `json:"slug,omitempty" url:"slug,omitempty"`
-	// This will become the job operation that is triggered
-	Operation *string `json:"operation,omitempty" url:"operation,omitempty"`
-	// Foreground and toolbarBlocking action mode will prevent interacting with the resource until complete
-	Mode *ActionMode `json:"mode,omitempty" url:"mode,omitempty"`
-	// A tooltip that appears when hovering the action button
-	Tooltip  *string          `json:"tooltip,omitempty" url:"tooltip,omitempty"`
-	Messages []*ActionMessage `json:"messages,omitempty" url:"messages,omitempty"`
-	// **This is deprecated.**
-	Type *string `json:"type,omitempty" url:"type,omitempty"`
-	// The text that appears in the dialog after the action is clicked.
-	Description *string `json:"description,omitempty" url:"description,omitempty"`
-	// Determines if the action should happen on a regular cadence.
-	Schedule *ActionSchedule `json:"schedule,omitempty" url:"schedule,omitempty"`
-	// A primary action will be more visibly present, whether in Sheet or Workbook.
-	Primary *bool `json:"primary,omitempty" url:"primary,omitempty"`
-	// Whether to show a modal to confirm the action
-	Confirm *bool `json:"confirm,omitempty" url:"confirm,omitempty"`
-	// Icon will work on primary actions. It will only accept an already existing Flatfile design system icon.
-	Icon *string `json:"icon,omitempty" url:"icon,omitempty"`
-	// **This is deprecated. Use `constraints` instead.**
-	RequireAllValid *bool `json:"requireAllValid,omitempty" url:"requireAllValid,omitempty"`
-	// **This is deprecated. Use `constraints` instead.**
-	RequireSelection *bool `json:"requireSelection,omitempty" url:"requireSelection,omitempty"`
-	// Adds an input form for this action after it is clicked.
-	InputForm *InputForm `json:"inputForm,omitempty" url:"inputForm,omitempty"`
-	// A limitation or restriction on the action.
-	Constraints []*ActionConstraint `json:"constraints,omitempty" url:"constraints,omitempty"`
-	Mount       *ActionMount        `json:"mount,omitempty" url:"mount,omitempty"`
-	Guide       *Guide              `json:"guide,omitempty" url:"guide,omitempty"`
-	Guardrail   *Guardrail          `json:"guardrail,omitempty" url:"guardrail,omitempty"`
-	// The text on the Button itself
-	Label     string    `json:"label" url:"label"`
-	Id        ActionId  `json:"id" url:"id"`
-	TargetId  string    `json:"targetId" url:"targetId"`
-	UpdatedAt time.Time `json:"updatedAt" url:"updatedAt"`
-	CreatedAt time.Time `json:"createdAt" url:"createdAt"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (a *ApiAction) GetExtraProperties() map[string]interface{} {
-	return a.extraProperties
-}
-
-func (a *ApiAction) UnmarshalJSON(data []byte) error {
-	type embed ApiAction
-	var unmarshaler = struct {
-		embed
-		UpdatedAt *core.DateTime `json:"updatedAt"`
-		CreatedAt *core.DateTime `json:"createdAt"`
-	}{
-		embed: embed(*a),
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	*a = ApiAction(unmarshaler.embed)
-	a.UpdatedAt = unmarshaler.UpdatedAt.Time()
-	a.CreatedAt = unmarshaler.CreatedAt.Time()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *a)
-	if err != nil {
-		return err
-	}
-	a.extraProperties = extraProperties
-
-	a._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (a *ApiAction) MarshalJSON() ([]byte, error) {
-	type embed ApiAction
-	var marshaler = struct {
-		embed
-		UpdatedAt *core.DateTime `json:"updatedAt"`
-		CreatedAt *core.DateTime `json:"createdAt"`
-	}{
-		embed:     embed(*a),
-		UpdatedAt: core.NewDateTime(a.UpdatedAt),
-		CreatedAt: core.NewDateTime(a.CreatedAt),
-	}
-	return json.Marshal(marshaler)
-}
-
-func (a *ApiAction) String() string {
-	if len(a._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(a); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", a)
-}
-
 // Account ID
 type AccountId = string
 
@@ -1294,10 +525,11 @@ func (a *Action) String() string {
 }
 
 type ActionConstraint struct {
-	Type         string
-	HasAllValid  *ActionConstraintHasAllValid
-	HasSelection *ActionConstraintHasSelection
-	HasData      *ActionConstraintHasData
+	Type             string
+	HasAllValid      *ActionConstraintHasAllValid
+	HasSelection     *ActionConstraintHasSelection
+	HasData          *ActionConstraintHasData
+	HasColumnEnabled *ActionConstraintHasColumnEnabled
 }
 
 func NewActionConstraintFromHasAllValid(value *ActionConstraintHasAllValid) *ActionConstraint {
@@ -1310,6 +542,10 @@ func NewActionConstraintFromHasSelection(value *ActionConstraintHasSelection) *A
 
 func NewActionConstraintFromHasData(value *ActionConstraintHasData) *ActionConstraint {
 	return &ActionConstraint{Type: "hasData", HasData: value}
+}
+
+func NewActionConstraintFromHasColumnEnabled(value *ActionConstraintHasColumnEnabled) *ActionConstraint {
+	return &ActionConstraint{Type: "hasColumnEnabled", HasColumnEnabled: value}
 }
 
 func (a *ActionConstraint) UnmarshalJSON(data []byte) error {
@@ -1342,6 +578,12 @@ func (a *ActionConstraint) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		a.HasData = value
+	case "hasColumnEnabled":
+		value := new(ActionConstraintHasColumnEnabled)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		a.HasColumnEnabled = value
 	}
 	return nil
 }
@@ -1356,6 +598,8 @@ func (a ActionConstraint) MarshalJSON() ([]byte, error) {
 		return core.MarshalJSONWithExtraProperty(a.HasSelection, "type", "hasSelection")
 	case "hasData":
 		return core.MarshalJSONWithExtraProperty(a.HasData, "type", "hasData")
+	case "hasColumnEnabled":
+		return core.MarshalJSONWithExtraProperty(a.HasColumnEnabled, "type", "hasColumnEnabled")
 	}
 }
 
@@ -1363,6 +607,7 @@ type ActionConstraintVisitor interface {
 	VisitHasAllValid(*ActionConstraintHasAllValid) error
 	VisitHasSelection(*ActionConstraintHasSelection) error
 	VisitHasData(*ActionConstraintHasData) error
+	VisitHasColumnEnabled(*ActionConstraintHasColumnEnabled) error
 }
 
 func (a *ActionConstraint) Accept(visitor ActionConstraintVisitor) error {
@@ -1375,6 +620,8 @@ func (a *ActionConstraint) Accept(visitor ActionConstraintVisitor) error {
 		return visitor.VisitHasSelection(a.HasSelection)
 	case "hasData":
 		return visitor.VisitHasData(a.HasData)
+	case "hasColumnEnabled":
+		return visitor.VisitHasColumnEnabled(a.HasColumnEnabled)
 	}
 }
 
@@ -1409,6 +656,46 @@ func (a *ActionConstraintHasAllValid) UnmarshalJSON(data []byte) error {
 }
 
 func (a *ActionConstraintHasAllValid) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
+// This constraint requires the column to be enabled and not readonly before the action can be performed.
+type ActionConstraintHasColumnEnabled struct {
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *ActionConstraintHasColumnEnabled) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *ActionConstraintHasColumnEnabled) UnmarshalJSON(data []byte) error {
+	type unmarshaler ActionConstraintHasColumnEnabled
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = ActionConstraintHasColumnEnabled(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (a *ActionConstraintHasColumnEnabled) String() string {
 	if len(a._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
 			return value
@@ -1941,79 +1228,6 @@ func (a ActionSchedule) Ptr() *ActionSchedule {
 	return &a
 }
 
-type ActionUpdate struct {
-	// **This is deprecated. Use `operation` instead.**
-	Slug *string `json:"slug,omitempty" url:"slug,omitempty"`
-	// This will become the job operation that is triggered
-	Operation *string `json:"operation,omitempty" url:"operation,omitempty"`
-	// Foreground and toolbarBlocking action mode will prevent interacting with the resource until complete
-	Mode *ActionMode `json:"mode,omitempty" url:"mode,omitempty"`
-	// A tooltip that appears when hovering the action button
-	Tooltip  *string          `json:"tooltip,omitempty" url:"tooltip,omitempty"`
-	Messages []*ActionMessage `json:"messages,omitempty" url:"messages,omitempty"`
-	// **This is deprecated.**
-	Type *string `json:"type,omitempty" url:"type,omitempty"`
-	// The text that appears in the dialog after the action is clicked.
-	Description *string `json:"description,omitempty" url:"description,omitempty"`
-	// Determines if the action should happen on a regular cadence.
-	Schedule *ActionSchedule `json:"schedule,omitempty" url:"schedule,omitempty"`
-	// A primary action will be more visibly present, whether in Sheet or Workbook.
-	Primary *bool `json:"primary,omitempty" url:"primary,omitempty"`
-	// Whether to show a modal to confirm the action
-	Confirm *bool `json:"confirm,omitempty" url:"confirm,omitempty"`
-	// Icon will work on primary actions. It will only accept an already existing Flatfile design system icon.
-	Icon *string `json:"icon,omitempty" url:"icon,omitempty"`
-	// **This is deprecated. Use `constraints` instead.**
-	RequireAllValid *bool `json:"requireAllValid,omitempty" url:"requireAllValid,omitempty"`
-	// **This is deprecated. Use `constraints` instead.**
-	RequireSelection *bool `json:"requireSelection,omitempty" url:"requireSelection,omitempty"`
-	// Adds an input form for this action after it is clicked.
-	InputForm *InputForm `json:"inputForm,omitempty" url:"inputForm,omitempty"`
-	// A limitation or restriction on the action.
-	Constraints []*ActionConstraint `json:"constraints,omitempty" url:"constraints,omitempty"`
-	Mount       *ActionMount        `json:"mount,omitempty" url:"mount,omitempty"`
-	Guide       *Guide              `json:"guide,omitempty" url:"guide,omitempty"`
-	Guardrail   *Guardrail          `json:"guardrail,omitempty" url:"guardrail,omitempty"`
-	Label       *string             `json:"label,omitempty" url:"label,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (a *ActionUpdate) GetExtraProperties() map[string]interface{} {
-	return a.extraProperties
-}
-
-func (a *ActionUpdate) UnmarshalJSON(data []byte) error {
-	type unmarshaler ActionUpdate
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*a = ActionUpdate(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *a)
-	if err != nil {
-		return err
-	}
-	a.extraProperties = extraProperties
-
-	a._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (a *ActionUpdate) String() string {
-	if len(a._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(a); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", a)
-}
-
 type ActionWithoutLabel struct {
 	// **This is deprecated. Use `operation` instead.**
 	Slug *string `json:"slug,omitempty" url:"slug,omitempty"`
@@ -2086,14 +1300,85 @@ func (a *ActionWithoutLabel) String() string {
 	return fmt.Sprintf("%#v", a)
 }
 
+type ActorIdUnion struct {
+	UserId  UserId
+	AgentId AgentId
+	GuestId GuestId
+
+	typ string
+}
+
+func NewActorIdUnionFromUserId(value UserId) *ActorIdUnion {
+	return &ActorIdUnion{typ: "UserId", UserId: value}
+}
+
+func NewActorIdUnionFromAgentId(value AgentId) *ActorIdUnion {
+	return &ActorIdUnion{typ: "AgentId", AgentId: value}
+}
+
+func NewActorIdUnionFromGuestId(value GuestId) *ActorIdUnion {
+	return &ActorIdUnion{typ: "GuestId", GuestId: value}
+}
+
+func (a *ActorIdUnion) UnmarshalJSON(data []byte) error {
+	var valueUserId UserId
+	if err := json.Unmarshal(data, &valueUserId); err == nil {
+		a.typ = "UserId"
+		a.UserId = valueUserId
+		return nil
+	}
+	var valueAgentId AgentId
+	if err := json.Unmarshal(data, &valueAgentId); err == nil {
+		a.typ = "AgentId"
+		a.AgentId = valueAgentId
+		return nil
+	}
+	var valueGuestId GuestId
+	if err := json.Unmarshal(data, &valueGuestId); err == nil {
+		a.typ = "GuestId"
+		a.GuestId = valueGuestId
+		return nil
+	}
+	return fmt.Errorf("%s cannot be deserialized as a %T", data, a)
+}
+
+func (a ActorIdUnion) MarshalJSON() ([]byte, error) {
+	if a.typ == "UserId" || a.UserId != "" {
+		return json.Marshal(a.UserId)
+	}
+	if a.typ == "AgentId" || a.AgentId != "" {
+		return json.Marshal(a.AgentId)
+	}
+	if a.typ == "GuestId" || a.GuestId != "" {
+		return json.Marshal(a.GuestId)
+	}
+	return nil, fmt.Errorf("type %T does not include a non-empty union type", a)
+}
+
+type ActorIdUnionVisitor interface {
+	VisitUserId(UserId) error
+	VisitAgentId(AgentId) error
+	VisitGuestId(GuestId) error
+}
+
+func (a *ActorIdUnion) Accept(visitor ActorIdUnionVisitor) error {
+	if a.typ == "UserId" || a.UserId != "" {
+		return visitor.VisitUserId(a.UserId)
+	}
+	if a.typ == "AgentId" || a.AgentId != "" {
+		return visitor.VisitAgentId(a.AgentId)
+	}
+	if a.typ == "GuestId" || a.GuestId != "" {
+		return visitor.VisitGuestId(a.GuestId)
+	}
+	return fmt.Errorf("type %T does not include a non-empty union type", a)
+}
+
 // Actor Role ID
 type ActorRoleId = string
 
 // Agent ID
 type AgentId = string
-
-// Agent version ID
-type AgentVersionId = string
 
 // App ID
 type AppId = string
@@ -2101,8 +1386,11 @@ type AppId = string
 // Commit ID
 type CommitId = string
 
-// Constraint ID
-type ConstraintId = string
+// Data Clip ID
+type DataClipId = string
+
+// Document ID
+type DocumentId = string
 
 // Environment ID
 type EnvironmentId = string
@@ -2269,6 +1557,9 @@ func (g *Guardrail) String() string {
 	}
 	return fmt.Sprintf("%#v", g)
 }
+
+// Guest ID
+type GuestId = string
 
 type Guide struct {
 	// Markdown guidance for this action
@@ -2583,6 +1874,9 @@ func (i InputFormType) Ptr() *InputFormType {
 // A JSONPath string - https://www.rfc-editor.org/rfc/rfc9535
 type JsonPathString = string
 
+// Pipeline Job ID
+type JobId = string
+
 // Based on pageSize, which page of records to return
 type PageNumber = int
 
@@ -2636,8 +1930,8 @@ func (p *Pagination) String() string {
 	return fmt.Sprintf("%#v", p)
 }
 
-// Prompt ID
-type PromptId = string
+// Mapping Program ID
+type ProgramId = string
 
 // Record ID
 type RecordId = string
@@ -2653,6 +1947,9 @@ type SearchValue = string
 
 // Sheet ID
 type SheetId = string
+
+// Snapshot ID
+type SnapshotId = string
 
 // Sort direction - asc (ascending) or desc (descending)
 type SortDirection string
@@ -2769,9 +2066,6 @@ func (s *SuccessData) String() string {
 	return fmt.Sprintf("%#v", s)
 }
 
-// Boolean
-type SuccessQueryParameter = bool
-
 // User ID
 type UserId = string
 
@@ -2870,220 +2164,6 @@ func NewResolveTypeFromString(s string) (ResolveType, error) {
 
 func (r ResolveType) Ptr() *ResolveType {
 	return &r
-}
-
-// A data retention policy belonging to an environment
-type DataRetentionPolicy struct {
-	Type          DataRetentionPolicyEnum `json:"type" url:"type"`
-	Period        int                     `json:"period" url:"period"`
-	EnvironmentId EnvironmentId           `json:"environmentId" url:"environmentId"`
-	Id            DataRetentionPolicyId   `json:"id" url:"id"`
-	// Date the policy was created
-	CreatedAt time.Time `json:"createdAt" url:"createdAt"`
-	// Date the policy was last updated
-	UpdatedAt time.Time `json:"updatedAt" url:"updatedAt"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (d *DataRetentionPolicy) GetExtraProperties() map[string]interface{} {
-	return d.extraProperties
-}
-
-func (d *DataRetentionPolicy) UnmarshalJSON(data []byte) error {
-	type embed DataRetentionPolicy
-	var unmarshaler = struct {
-		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-		UpdatedAt *core.DateTime `json:"updatedAt"`
-	}{
-		embed: embed(*d),
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	*d = DataRetentionPolicy(unmarshaler.embed)
-	d.CreatedAt = unmarshaler.CreatedAt.Time()
-	d.UpdatedAt = unmarshaler.UpdatedAt.Time()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *d)
-	if err != nil {
-		return err
-	}
-	d.extraProperties = extraProperties
-
-	d._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (d *DataRetentionPolicy) MarshalJSON() ([]byte, error) {
-	type embed DataRetentionPolicy
-	var marshaler = struct {
-		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-		UpdatedAt *core.DateTime `json:"updatedAt"`
-	}{
-		embed:     embed(*d),
-		CreatedAt: core.NewDateTime(d.CreatedAt),
-		UpdatedAt: core.NewDateTime(d.UpdatedAt),
-	}
-	return json.Marshal(marshaler)
-}
-
-func (d *DataRetentionPolicy) String() string {
-	if len(d._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(d._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(d); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", d)
-}
-
-// The type of data retention policy on an environment
-type DataRetentionPolicyEnum string
-
-const (
-	DataRetentionPolicyEnumLastActivity DataRetentionPolicyEnum = "lastActivity"
-	DataRetentionPolicyEnumSinceCreated DataRetentionPolicyEnum = "sinceCreated"
-)
-
-func NewDataRetentionPolicyEnumFromString(s string) (DataRetentionPolicyEnum, error) {
-	switch s {
-	case "lastActivity":
-		return DataRetentionPolicyEnumLastActivity, nil
-	case "sinceCreated":
-		return DataRetentionPolicyEnumSinceCreated, nil
-	}
-	var t DataRetentionPolicyEnum
-	return "", fmt.Errorf("%s is not a valid %T", s, t)
-}
-
-func (d DataRetentionPolicyEnum) Ptr() *DataRetentionPolicyEnum {
-	return &d
-}
-
-// A document (markdown components) belong to a space
-type Document struct {
-	Title string `json:"title" url:"title"`
-	Body  string `json:"body" url:"body"`
-	// Certain treatments will cause your Document to look or behave differently.
-	Treatments    []string       `json:"treatments,omitempty" url:"treatments,omitempty"`
-	Actions       []*Action      `json:"actions,omitempty" url:"actions,omitempty"`
-	Id            DocumentId     `json:"id" url:"id"`
-	SpaceId       *SpaceId       `json:"spaceId,omitempty" url:"spaceId,omitempty"`
-	EnvironmentId *EnvironmentId `json:"environmentId,omitempty" url:"environmentId,omitempty"`
-	// Date the document was created
-	CreatedAt time.Time `json:"createdAt" url:"createdAt"`
-	// Date the document was last updated
-	UpdatedAt time.Time `json:"updatedAt" url:"updatedAt"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (d *Document) GetExtraProperties() map[string]interface{} {
-	return d.extraProperties
-}
-
-func (d *Document) UnmarshalJSON(data []byte) error {
-	type embed Document
-	var unmarshaler = struct {
-		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-		UpdatedAt *core.DateTime `json:"updatedAt"`
-	}{
-		embed: embed(*d),
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	*d = Document(unmarshaler.embed)
-	d.CreatedAt = unmarshaler.CreatedAt.Time()
-	d.UpdatedAt = unmarshaler.UpdatedAt.Time()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *d)
-	if err != nil {
-		return err
-	}
-	d.extraProperties = extraProperties
-
-	d._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (d *Document) MarshalJSON() ([]byte, error) {
-	type embed Document
-	var marshaler = struct {
-		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-		UpdatedAt *core.DateTime `json:"updatedAt"`
-	}{
-		embed:     embed(*d),
-		CreatedAt: core.NewDateTime(d.CreatedAt),
-		UpdatedAt: core.NewDateTime(d.UpdatedAt),
-	}
-	return json.Marshal(marshaler)
-}
-
-func (d *Document) String() string {
-	if len(d._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(d._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(d); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", d)
-}
-
-// An entitlement belonging to a resource
-type Entitlement struct {
-	// Short name for the entitlement
-	Key string `json:"key" url:"key"`
-	// Contains conditions or limits for an entitlement
-	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (e *Entitlement) GetExtraProperties() map[string]interface{} {
-	return e.extraProperties
-}
-
-func (e *Entitlement) UnmarshalJSON(data []byte) error {
-	type unmarshaler Entitlement
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*e = Entitlement(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *e)
-	if err != nil {
-		return err
-	}
-	e.extraProperties = extraProperties
-
-	e._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (e *Entitlement) String() string {
-	if len(e._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(e); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", e)
 }
 
 // The type of authentication to use for guests
@@ -3283,63 +2363,67 @@ func (d Domain) Ptr() *Domain {
 
 // An event that tracks an activity within an environment
 type Event struct {
-	Topic                  string
-	AgentCreated           *GenericEvent
-	AgentUpdated           *GenericEvent
-	AgentDeleted           *GenericEvent
-	SpaceCreated           *GenericEvent
-	SpaceUpdated           *GenericEvent
-	SpaceDeleted           *GenericEvent
-	SpaceArchived          *GenericEvent
-	SpaceExpired           *GenericEvent
-	SpaceGuestAdded        *GenericEvent
-	SpaceGuestRemoved      *GenericEvent
-	DocumentCreated        *GenericEvent
-	DocumentUpdated        *GenericEvent
-	DocumentDeleted        *GenericEvent
-	WorkbookCreated        *GenericEvent
-	WorkbookUpdated        *GenericEvent
-	WorkbookDeleted        *GenericEvent
-	WorkbookExpired        *GenericEvent
-	SheetCreated           *GenericEvent
-	SheetUpdated           *GenericEvent
-	SheetDeleted           *GenericEvent
-	SheetCountsUpdated     *GenericEvent
-	SnapshotCreated        *GenericEvent
-	RecordsCreated         *GenericEvent
-	RecordsUpdated         *GenericEvent
-	RecordsDeleted         *GenericEvent
-	FileCreated            *GenericEvent
-	FileUpdated            *GenericEvent
-	FileDeleted            *GenericEvent
-	FileExpired            *GenericEvent
-	JobCreated             *GenericEvent
-	JobUpdated             *GenericEvent
-	JobDeleted             *GenericEvent
-	JobFailed              *GenericEvent
-	JobCompleted           *GenericEvent
-	JobReady               *GenericEvent
-	JobScheduled           *GenericEvent
-	JobOutcomeAcknowledged *GenericEvent
-	JobPartsCompleted      *GenericEvent
-	ProgramCreated         *GenericEvent
-	ProgramUpdated         *GenericEvent
-	CommitCreated          *GenericEvent
-	CommitUpdated          *GenericEvent
-	CommitCompleted        *GenericEvent
-	SecretCreated          *GenericEvent
-	SecretUpdated          *GenericEvent
-	SecretDeleted          *GenericEvent
-	LayerCreated           *GenericEvent
-	EnvironmentCreated     *GenericEvent
-	EnvironmentUpdated     *GenericEvent
-	EnvironmentDeleted     *GenericEvent
-	ActionCreated          *GenericEvent
-	ActionUpdated          *GenericEvent
-	ActionDeleted          *GenericEvent
-	DataClipCreated        *GenericEvent
-	DataClipUpdated        *GenericEvent
-	DataClipDeleted        *GenericEvent
+	Topic                        string
+	AgentCreated                 *GenericEvent
+	AgentUpdated                 *GenericEvent
+	AgentDeleted                 *GenericEvent
+	SpaceCreated                 *GenericEvent
+	SpaceUpdated                 *GenericEvent
+	SpaceDeleted                 *GenericEvent
+	SpaceArchived                *GenericEvent
+	SpaceExpired                 *GenericEvent
+	SpaceGuestAdded              *GenericEvent
+	SpaceGuestRemoved            *GenericEvent
+	DocumentCreated              *GenericEvent
+	DocumentUpdated              *GenericEvent
+	DocumentDeleted              *GenericEvent
+	WorkbookCreated              *GenericEvent
+	WorkbookUpdated              *GenericEvent
+	WorkbookDeleted              *GenericEvent
+	WorkbookExpired              *GenericEvent
+	SheetCreated                 *GenericEvent
+	SheetUpdated                 *GenericEvent
+	SheetDeleted                 *GenericEvent
+	SheetCountsUpdated           *GenericEvent
+	SnapshotCreated              *GenericEvent
+	RecordsCreated               *GenericEvent
+	RecordsUpdated               *GenericEvent
+	RecordsDeleted               *GenericEvent
+	FileCreated                  *GenericEvent
+	FileUpdated                  *GenericEvent
+	FileDeleted                  *GenericEvent
+	FileExpired                  *GenericEvent
+	JobCreated                   *GenericEvent
+	JobUpdated                   *GenericEvent
+	JobDeleted                   *GenericEvent
+	JobFailed                    *GenericEvent
+	JobCompleted                 *GenericEvent
+	JobReady                     *GenericEvent
+	JobScheduled                 *GenericEvent
+	JobOutcomeAcknowledged       *GenericEvent
+	JobPartsCompleted            *GenericEvent
+	ProgramCreated               *GenericEvent
+	ProgramUpdated               *GenericEvent
+	CommitCreated                *GenericEvent
+	CommitUpdated                *GenericEvent
+	CommitCompleted              *GenericEvent
+	SecretCreated                *GenericEvent
+	SecretUpdated                *GenericEvent
+	SecretDeleted                *GenericEvent
+	LayerCreated                 *GenericEvent
+	EnvironmentCreated           *GenericEvent
+	EnvironmentUpdated           *GenericEvent
+	EnvironmentDeleted           *GenericEvent
+	ActionCreated                *GenericEvent
+	ActionUpdated                *GenericEvent
+	ActionDeleted                *GenericEvent
+	DataClipCreated              *GenericEvent
+	DataClipUpdated              *GenericEvent
+	DataClipDeleted              *GenericEvent
+	DataClipCollaboratorUpdated  *GenericEvent
+	DataClipResolutionsCreated   *GenericEvent
+	DataClipResolutionsUpdated   *GenericEvent
+	DataClipResolutionsRefreshed *GenericEvent
 }
 
 func NewEventFromAgentCreated(value *GenericEvent) *Event {
@@ -3564,6 +2648,22 @@ func NewEventFromDataClipUpdated(value *GenericEvent) *Event {
 
 func NewEventFromDataClipDeleted(value *GenericEvent) *Event {
 	return &Event{Topic: "data-clip:deleted", DataClipDeleted: value}
+}
+
+func NewEventFromDataClipCollaboratorUpdated(value *GenericEvent) *Event {
+	return &Event{Topic: "data-clip:collaborator-updated", DataClipCollaboratorUpdated: value}
+}
+
+func NewEventFromDataClipResolutionsCreated(value *GenericEvent) *Event {
+	return &Event{Topic: "data-clip:resolutions-created", DataClipResolutionsCreated: value}
+}
+
+func NewEventFromDataClipResolutionsUpdated(value *GenericEvent) *Event {
+	return &Event{Topic: "data-clip:resolutions-updated", DataClipResolutionsUpdated: value}
+}
+
+func NewEventFromDataClipResolutionsRefreshed(value *GenericEvent) *Event {
+	return &Event{Topic: "data-clip:resolutions-refreshed", DataClipResolutionsRefreshed: value}
 }
 
 func (e *Event) UnmarshalJSON(data []byte) error {
@@ -3914,6 +3014,30 @@ func (e *Event) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		e.DataClipDeleted = value
+	case "data-clip:collaborator-updated":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.DataClipCollaboratorUpdated = value
+	case "data-clip:resolutions-created":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.DataClipResolutionsCreated = value
+	case "data-clip:resolutions-updated":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.DataClipResolutionsUpdated = value
+	case "data-clip:resolutions-refreshed":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.DataClipResolutionsRefreshed = value
 	}
 	return nil
 }
@@ -4034,6 +3158,14 @@ func (e Event) MarshalJSON() ([]byte, error) {
 		return core.MarshalJSONWithExtraProperty(e.DataClipUpdated, "topic", "data-clip:updated")
 	case "data-clip:deleted":
 		return core.MarshalJSONWithExtraProperty(e.DataClipDeleted, "topic", "data-clip:deleted")
+	case "data-clip:collaborator-updated":
+		return core.MarshalJSONWithExtraProperty(e.DataClipCollaboratorUpdated, "topic", "data-clip:collaborator-updated")
+	case "data-clip:resolutions-created":
+		return core.MarshalJSONWithExtraProperty(e.DataClipResolutionsCreated, "topic", "data-clip:resolutions-created")
+	case "data-clip:resolutions-updated":
+		return core.MarshalJSONWithExtraProperty(e.DataClipResolutionsUpdated, "topic", "data-clip:resolutions-updated")
+	case "data-clip:resolutions-refreshed":
+		return core.MarshalJSONWithExtraProperty(e.DataClipResolutionsRefreshed, "topic", "data-clip:resolutions-refreshed")
 	}
 }
 
@@ -4094,6 +3226,10 @@ type EventVisitor interface {
 	VisitDataClipCreated(*GenericEvent) error
 	VisitDataClipUpdated(*GenericEvent) error
 	VisitDataClipDeleted(*GenericEvent) error
+	VisitDataClipCollaboratorUpdated(*GenericEvent) error
+	VisitDataClipResolutionsCreated(*GenericEvent) error
+	VisitDataClipResolutionsUpdated(*GenericEvent) error
+	VisitDataClipResolutionsRefreshed(*GenericEvent) error
 }
 
 func (e *Event) Accept(visitor EventVisitor) error {
@@ -4212,6 +3348,14 @@ func (e *Event) Accept(visitor EventVisitor) error {
 		return visitor.VisitDataClipUpdated(e.DataClipUpdated)
 	case "data-clip:deleted":
 		return visitor.VisitDataClipDeleted(e.DataClipDeleted)
+	case "data-clip:collaborator-updated":
+		return visitor.VisitDataClipCollaboratorUpdated(e.DataClipCollaboratorUpdated)
+	case "data-clip:resolutions-created":
+		return visitor.VisitDataClipResolutionsCreated(e.DataClipResolutionsCreated)
+	case "data-clip:resolutions-updated":
+		return visitor.VisitDataClipResolutionsUpdated(e.DataClipResolutionsUpdated)
+	case "data-clip:resolutions-refreshed":
+		return visitor.VisitDataClipResolutionsRefreshed(e.DataClipResolutionsRefreshed)
 	}
 }
 
@@ -4363,6 +3507,218 @@ func (e *EventResponse) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", e)
+}
+
+// The topic of the event
+type EventTopic string
+
+const (
+	EventTopicAgentCreated                 EventTopic = "agent:created"
+	EventTopicAgentUpdated                 EventTopic = "agent:updated"
+	EventTopicAgentDeleted                 EventTopic = "agent:deleted"
+	EventTopicSpaceCreated                 EventTopic = "space:created"
+	EventTopicSpaceUpdated                 EventTopic = "space:updated"
+	EventTopicSpaceDeleted                 EventTopic = "space:deleted"
+	EventTopicSpaceArchived                EventTopic = "space:archived"
+	EventTopicSpaceUnarchived              EventTopic = "space:unarchived"
+	EventTopicSpaceExpired                 EventTopic = "space:expired"
+	EventTopicSpaceGuestAdded              EventTopic = "space:guestAdded"
+	EventTopicSpaceGuestRemoved            EventTopic = "space:guestRemoved"
+	EventTopicDocumentCreated              EventTopic = "document:created"
+	EventTopicDocumentUpdated              EventTopic = "document:updated"
+	EventTopicDocumentDeleted              EventTopic = "document:deleted"
+	EventTopicWorkbookCreated              EventTopic = "workbook:created"
+	EventTopicWorkbookUpdated              EventTopic = "workbook:updated"
+	EventTopicWorkbookDeleted              EventTopic = "workbook:deleted"
+	EventTopicWorkbookExpired              EventTopic = "workbook:expired"
+	EventTopicSheetCreated                 EventTopic = "sheet:created"
+	EventTopicSheetUpdated                 EventTopic = "sheet:updated"
+	EventTopicSheetDeleted                 EventTopic = "sheet:deleted"
+	EventTopicSheetCountsUpdated           EventTopic = "sheet:counts-updated"
+	EventTopicSnapshotCreated              EventTopic = "snapshot:created"
+	EventTopicRecordsCreated               EventTopic = "records:created"
+	EventTopicRecordsUpdated               EventTopic = "records:updated"
+	EventTopicRecordsDeleted               EventTopic = "records:deleted"
+	EventTopicFileCreated                  EventTopic = "file:created"
+	EventTopicFileUpdated                  EventTopic = "file:updated"
+	EventTopicFileDeleted                  EventTopic = "file:deleted"
+	EventTopicFileExpired                  EventTopic = "file:expired"
+	EventTopicJobCreated                   EventTopic = "job:created"
+	EventTopicJobUpdated                   EventTopic = "job:updated"
+	EventTopicJobDeleted                   EventTopic = "job:deleted"
+	EventTopicJobCompleted                 EventTopic = "job:completed"
+	EventTopicJobReady                     EventTopic = "job:ready"
+	EventTopicJobScheduled                 EventTopic = "job:scheduled"
+	EventTopicJobOutcomeAcknowledged       EventTopic = "job:outcome-acknowledged"
+	EventTopicJobPartsCompleted            EventTopic = "job:parts-completed"
+	EventTopicJobFailed                    EventTopic = "job:failed"
+	EventTopicProgramCreated               EventTopic = "program:created"
+	EventTopicProgramUpdated               EventTopic = "program:updated"
+	EventTopicCommitCreated                EventTopic = "commit:created"
+	EventTopicCommitUpdated                EventTopic = "commit:updated"
+	EventTopicCommitCompleted              EventTopic = "commit:completed"
+	EventTopicLayerCreated                 EventTopic = "layer:created"
+	EventTopicSecretCreated                EventTopic = "secret:created"
+	EventTopicSecretUpdated                EventTopic = "secret:updated"
+	EventTopicSecretDeleted                EventTopic = "secret:deleted"
+	EventTopicCron5Minutes                 EventTopic = "cron:5-minutes"
+	EventTopicCronHourly                   EventTopic = "cron:hourly"
+	EventTopicCronDaily                    EventTopic = "cron:daily"
+	EventTopicCronWeekly                   EventTopic = "cron:weekly"
+	EventTopicEnvironmentCreated           EventTopic = "environment:created"
+	EventTopicEnvironmentUpdated           EventTopic = "environment:updated"
+	EventTopicEnvironmentDeleted           EventTopic = "environment:deleted"
+	EventTopicActionCreated                EventTopic = "action:created"
+	EventTopicActionUpdated                EventTopic = "action:updated"
+	EventTopicActionDeleted                EventTopic = "action:deleted"
+	EventTopicDataClipCreated              EventTopic = "data-clip:created"
+	EventTopicDataClipUpdated              EventTopic = "data-clip:updated"
+	EventTopicDataClipDeleted              EventTopic = "data-clip:deleted"
+	EventTopicDataClipCollaboratorUpdated  EventTopic = "data-clip:collaborator-updated"
+	EventTopicDataClipResolutionsCreated   EventTopic = "data-clip:resolutions-created"
+	EventTopicDataClipResolutionsUpdated   EventTopic = "data-clip:resolutions-updated"
+	EventTopicDataClipResolutionsRefreshed EventTopic = "data-clip:resolutions-refreshed"
+)
+
+func NewEventTopicFromString(s string) (EventTopic, error) {
+	switch s {
+	case "agent:created":
+		return EventTopicAgentCreated, nil
+	case "agent:updated":
+		return EventTopicAgentUpdated, nil
+	case "agent:deleted":
+		return EventTopicAgentDeleted, nil
+	case "space:created":
+		return EventTopicSpaceCreated, nil
+	case "space:updated":
+		return EventTopicSpaceUpdated, nil
+	case "space:deleted":
+		return EventTopicSpaceDeleted, nil
+	case "space:archived":
+		return EventTopicSpaceArchived, nil
+	case "space:unarchived":
+		return EventTopicSpaceUnarchived, nil
+	case "space:expired":
+		return EventTopicSpaceExpired, nil
+	case "space:guestAdded":
+		return EventTopicSpaceGuestAdded, nil
+	case "space:guestRemoved":
+		return EventTopicSpaceGuestRemoved, nil
+	case "document:created":
+		return EventTopicDocumentCreated, nil
+	case "document:updated":
+		return EventTopicDocumentUpdated, nil
+	case "document:deleted":
+		return EventTopicDocumentDeleted, nil
+	case "workbook:created":
+		return EventTopicWorkbookCreated, nil
+	case "workbook:updated":
+		return EventTopicWorkbookUpdated, nil
+	case "workbook:deleted":
+		return EventTopicWorkbookDeleted, nil
+	case "workbook:expired":
+		return EventTopicWorkbookExpired, nil
+	case "sheet:created":
+		return EventTopicSheetCreated, nil
+	case "sheet:updated":
+		return EventTopicSheetUpdated, nil
+	case "sheet:deleted":
+		return EventTopicSheetDeleted, nil
+	case "sheet:counts-updated":
+		return EventTopicSheetCountsUpdated, nil
+	case "snapshot:created":
+		return EventTopicSnapshotCreated, nil
+	case "records:created":
+		return EventTopicRecordsCreated, nil
+	case "records:updated":
+		return EventTopicRecordsUpdated, nil
+	case "records:deleted":
+		return EventTopicRecordsDeleted, nil
+	case "file:created":
+		return EventTopicFileCreated, nil
+	case "file:updated":
+		return EventTopicFileUpdated, nil
+	case "file:deleted":
+		return EventTopicFileDeleted, nil
+	case "file:expired":
+		return EventTopicFileExpired, nil
+	case "job:created":
+		return EventTopicJobCreated, nil
+	case "job:updated":
+		return EventTopicJobUpdated, nil
+	case "job:deleted":
+		return EventTopicJobDeleted, nil
+	case "job:completed":
+		return EventTopicJobCompleted, nil
+	case "job:ready":
+		return EventTopicJobReady, nil
+	case "job:scheduled":
+		return EventTopicJobScheduled, nil
+	case "job:outcome-acknowledged":
+		return EventTopicJobOutcomeAcknowledged, nil
+	case "job:parts-completed":
+		return EventTopicJobPartsCompleted, nil
+	case "job:failed":
+		return EventTopicJobFailed, nil
+	case "program:created":
+		return EventTopicProgramCreated, nil
+	case "program:updated":
+		return EventTopicProgramUpdated, nil
+	case "commit:created":
+		return EventTopicCommitCreated, nil
+	case "commit:updated":
+		return EventTopicCommitUpdated, nil
+	case "commit:completed":
+		return EventTopicCommitCompleted, nil
+	case "layer:created":
+		return EventTopicLayerCreated, nil
+	case "secret:created":
+		return EventTopicSecretCreated, nil
+	case "secret:updated":
+		return EventTopicSecretUpdated, nil
+	case "secret:deleted":
+		return EventTopicSecretDeleted, nil
+	case "cron:5-minutes":
+		return EventTopicCron5Minutes, nil
+	case "cron:hourly":
+		return EventTopicCronHourly, nil
+	case "cron:daily":
+		return EventTopicCronDaily, nil
+	case "cron:weekly":
+		return EventTopicCronWeekly, nil
+	case "environment:created":
+		return EventTopicEnvironmentCreated, nil
+	case "environment:updated":
+		return EventTopicEnvironmentUpdated, nil
+	case "environment:deleted":
+		return EventTopicEnvironmentDeleted, nil
+	case "action:created":
+		return EventTopicActionCreated, nil
+	case "action:updated":
+		return EventTopicActionUpdated, nil
+	case "action:deleted":
+		return EventTopicActionDeleted, nil
+	case "data-clip:created":
+		return EventTopicDataClipCreated, nil
+	case "data-clip:updated":
+		return EventTopicDataClipUpdated, nil
+	case "data-clip:deleted":
+		return EventTopicDataClipDeleted, nil
+	case "data-clip:collaborator-updated":
+		return EventTopicDataClipCollaboratorUpdated, nil
+	case "data-clip:resolutions-created":
+		return EventTopicDataClipResolutionsCreated, nil
+	case "data-clip:resolutions-updated":
+		return EventTopicDataClipResolutionsUpdated, nil
+	case "data-clip:resolutions-refreshed":
+		return EventTopicDataClipResolutionsRefreshed, nil
+	}
+	var t EventTopic
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (e EventTopic) Ptr() *EventTopic {
+	return &e
 }
 
 type GenericEvent struct {
@@ -4587,3309 +3943,6 @@ func (p *Progress) String() string {
 
 // Sheet Slug
 type SheetSlug = string
-
-// Any uploaded file of any type
-type File struct {
-	Id FileId `json:"id" url:"id"`
-	// Original filename
-	Name string `json:"name" url:"name"`
-	// Extension of the file
-	Ext string `json:"ext" url:"ext"`
-	// MIME Type of the file
-	Mimetype string `json:"mimetype" url:"mimetype"`
-	// Text encoding of the file
-	Encoding string `json:"encoding" url:"encoding"`
-	// Status of the file
-	Status ModelFileStatusEnum `json:"status" url:"status"`
-	// The storage mode of file
-	Mode *Mode `json:"mode,omitempty" url:"mode,omitempty"`
-	// Size of file in bytes
-	Size int `json:"size" url:"size"`
-	// Number of bytes that have been uploaded so far (useful for progress tracking)
-	BytesReceived int `json:"bytesReceived" url:"bytesReceived"`
-	// Date the file was created
-	CreatedAt time.Time `json:"createdAt" url:"createdAt"`
-	// Date the file was last updated
-	UpdatedAt time.Time `json:"updatedAt" url:"updatedAt"`
-	// Date the file was expired
-	ExpiredAt  *time.Time  `json:"expiredAt,omitempty" url:"expiredAt,omitempty"`
-	SpaceId    SpaceId     `json:"spaceId" url:"spaceId"`
-	WorkbookId *WorkbookId `json:"workbookId,omitempty" url:"workbookId,omitempty"`
-	SheetId    *SheetId    `json:"sheetId,omitempty" url:"sheetId,omitempty"`
-	Actions    []*Action   `json:"actions,omitempty" url:"actions,omitempty"`
-	Origin     *FileOrigin `json:"origin,omitempty" url:"origin,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (f *File) GetExtraProperties() map[string]interface{} {
-	return f.extraProperties
-}
-
-func (f *File) UnmarshalJSON(data []byte) error {
-	type embed File
-	var unmarshaler = struct {
-		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-		UpdatedAt *core.DateTime `json:"updatedAt"`
-		ExpiredAt *core.DateTime `json:"expiredAt,omitempty"`
-	}{
-		embed: embed(*f),
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	*f = File(unmarshaler.embed)
-	f.CreatedAt = unmarshaler.CreatedAt.Time()
-	f.UpdatedAt = unmarshaler.UpdatedAt.Time()
-	f.ExpiredAt = unmarshaler.ExpiredAt.TimePtr()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *f)
-	if err != nil {
-		return err
-	}
-	f.extraProperties = extraProperties
-
-	f._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (f *File) MarshalJSON() ([]byte, error) {
-	type embed File
-	var marshaler = struct {
-		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-		UpdatedAt *core.DateTime `json:"updatedAt"`
-		ExpiredAt *core.DateTime `json:"expiredAt,omitempty"`
-	}{
-		embed:     embed(*f),
-		CreatedAt: core.NewDateTime(f.CreatedAt),
-		UpdatedAt: core.NewDateTime(f.UpdatedAt),
-		ExpiredAt: core.NewOptionalDateTime(f.ExpiredAt),
-	}
-	return json.Marshal(marshaler)
-}
-
-func (f *File) String() string {
-	if len(f._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(f._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(f); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", f)
-}
-
-type Guest struct {
-	EnvironmentId EnvironmentId `json:"environmentId" url:"environmentId"`
-	Email         string        `json:"email" url:"email"`
-	Name          string        `json:"name" url:"name"`
-	Spaces        []*GuestSpace `json:"spaces,omitempty" url:"spaces,omitempty"`
-	Id            GuestId       `json:"id" url:"id"`
-	// Date the guest object was created
-	CreatedAt time.Time `json:"createdAt" url:"createdAt"`
-	// Date the guest object was last updated
-	UpdatedAt time.Time `json:"updatedAt" url:"updatedAt"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (g *Guest) GetExtraProperties() map[string]interface{} {
-	return g.extraProperties
-}
-
-func (g *Guest) UnmarshalJSON(data []byte) error {
-	type embed Guest
-	var unmarshaler = struct {
-		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-		UpdatedAt *core.DateTime `json:"updatedAt"`
-	}{
-		embed: embed(*g),
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	*g = Guest(unmarshaler.embed)
-	g.CreatedAt = unmarshaler.CreatedAt.Time()
-	g.UpdatedAt = unmarshaler.UpdatedAt.Time()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *g)
-	if err != nil {
-		return err
-	}
-	g.extraProperties = extraProperties
-
-	g._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (g *Guest) MarshalJSON() ([]byte, error) {
-	type embed Guest
-	var marshaler = struct {
-		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-		UpdatedAt *core.DateTime `json:"updatedAt"`
-	}{
-		embed:     embed(*g),
-		CreatedAt: core.NewDateTime(g.CreatedAt),
-		UpdatedAt: core.NewDateTime(g.UpdatedAt),
-	}
-	return json.Marshal(marshaler)
-}
-
-func (g *Guest) String() string {
-	if len(g._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(g); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", g)
-}
-
-type GuestSpace struct {
-	Id           SpaceId          `json:"id" url:"id"`
-	Workbooks    []*GuestWorkbook `json:"workbooks,omitempty" url:"workbooks,omitempty"`
-	LastAccessed *time.Time       `json:"lastAccessed,omitempty" url:"lastAccessed,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (g *GuestSpace) GetExtraProperties() map[string]interface{} {
-	return g.extraProperties
-}
-
-func (g *GuestSpace) UnmarshalJSON(data []byte) error {
-	type embed GuestSpace
-	var unmarshaler = struct {
-		embed
-		LastAccessed *core.DateTime `json:"lastAccessed,omitempty"`
-	}{
-		embed: embed(*g),
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	*g = GuestSpace(unmarshaler.embed)
-	g.LastAccessed = unmarshaler.LastAccessed.TimePtr()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *g)
-	if err != nil {
-		return err
-	}
-	g.extraProperties = extraProperties
-
-	g._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (g *GuestSpace) MarshalJSON() ([]byte, error) {
-	type embed GuestSpace
-	var marshaler = struct {
-		embed
-		LastAccessed *core.DateTime `json:"lastAccessed,omitempty"`
-	}{
-		embed:        embed(*g),
-		LastAccessed: core.NewOptionalDateTime(g.LastAccessed),
-	}
-	return json.Marshal(marshaler)
-}
-
-func (g *GuestSpace) String() string {
-	if len(g._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(g); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", g)
-}
-
-type GuestToken struct {
-	// The token used to authenticate the guest
-	Token string `json:"token" url:"token"`
-	Valid bool   `json:"valid" url:"valid"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (g *GuestToken) GetExtraProperties() map[string]interface{} {
-	return g.extraProperties
-}
-
-func (g *GuestToken) UnmarshalJSON(data []byte) error {
-	type unmarshaler GuestToken
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*g = GuestToken(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *g)
-	if err != nil {
-		return err
-	}
-	g.extraProperties = extraProperties
-
-	g._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (g *GuestToken) String() string {
-	if len(g._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(g); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", g)
-}
-
-type GuestWorkbook struct {
-	Id WorkbookId `json:"id" url:"id"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (g *GuestWorkbook) GetExtraProperties() map[string]interface{} {
-	return g.extraProperties
-}
-
-func (g *GuestWorkbook) UnmarshalJSON(data []byte) error {
-	type unmarshaler GuestWorkbook
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*g = GuestWorkbook(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *g)
-	if err != nil {
-		return err
-	}
-	g.extraProperties = extraProperties
-
-	g._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (g *GuestWorkbook) String() string {
-	if len(g._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(g); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", g)
-}
-
-type AiGenerateBlueprintConstraintsJobConfig struct {
-	SpaceId    SpaceId    `json:"spaceId" url:"spaceId"`
-	WorkbookId WorkbookId `json:"workbookId" url:"workbookId"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (a *AiGenerateBlueprintConstraintsJobConfig) GetExtraProperties() map[string]interface{} {
-	return a.extraProperties
-}
-
-func (a *AiGenerateBlueprintConstraintsJobConfig) UnmarshalJSON(data []byte) error {
-	type unmarshaler AiGenerateBlueprintConstraintsJobConfig
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*a = AiGenerateBlueprintConstraintsJobConfig(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *a)
-	if err != nil {
-		return err
-	}
-	a.extraProperties = extraProperties
-
-	a._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (a *AiGenerateBlueprintConstraintsJobConfig) String() string {
-	if len(a._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(a); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", a)
-}
-
-type AiGenerateBlueprintJobConfig struct {
-	SpaceId SpaceId `json:"spaceId" url:"spaceId"`
-	AppId   AppId   `json:"appId" url:"appId"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (a *AiGenerateBlueprintJobConfig) GetExtraProperties() map[string]interface{} {
-	return a.extraProperties
-}
-
-func (a *AiGenerateBlueprintJobConfig) UnmarshalJSON(data []byte) error {
-	type unmarshaler AiGenerateBlueprintJobConfig
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*a = AiGenerateBlueprintJobConfig(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *a)
-	if err != nil {
-		return err
-	}
-	a.extraProperties = extraProperties
-
-	a._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (a *AiGenerateBlueprintJobConfig) String() string {
-	if len(a._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(a); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", a)
-}
-
-type AiGenerateConstraintJobConfig struct {
-	SpaceId     SpaceId             `json:"spaceId" url:"spaceId"`
-	Constraints []*StoredConstraint `json:"constraints,omitempty" url:"constraints,omitempty"`
-	// A description of what the constraint to be generated should do
-	Description *string `json:"description,omitempty" url:"description,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (a *AiGenerateConstraintJobConfig) GetExtraProperties() map[string]interface{} {
-	return a.extraProperties
-}
-
-func (a *AiGenerateConstraintJobConfig) UnmarshalJSON(data []byte) error {
-	type unmarshaler AiGenerateConstraintJobConfig
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*a = AiGenerateConstraintJobConfig(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *a)
-	if err != nil {
-		return err
-	}
-	a.extraProperties = extraProperties
-
-	a._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (a *AiGenerateConstraintJobConfig) String() string {
-	if len(a._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(a); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", a)
-}
-
-type AiGenerateSampleDataJobConfig struct {
-	SpaceId SpaceId `json:"spaceId" url:"spaceId"`
-	AppId   AppId   `json:"appId" url:"appId"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (a *AiGenerateSampleDataJobConfig) GetExtraProperties() map[string]interface{} {
-	return a.extraProperties
-}
-
-func (a *AiGenerateSampleDataJobConfig) UnmarshalJSON(data []byte) error {
-	type unmarshaler AiGenerateSampleDataJobConfig
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*a = AiGenerateSampleDataJobConfig(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *a)
-	if err != nil {
-		return err
-	}
-	a.extraProperties = extraProperties
-
-	a._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (a *AiGenerateSampleDataJobConfig) String() string {
-	if len(a._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(a); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", a)
-}
-
-// Configuration for AI-powered rule creation jobs that generate or replace field constraints
-type AiRuleCreationJobConfig struct {
-	// The natural language description of the rule to be created
-	Prompt string `json:"prompt" url:"prompt"`
-	// The ID of the sheet containing the field to create/update the rule for
-	SheetId SheetId `json:"sheetId" url:"sheetId"`
-	// The key of the field to create/update the rule for
-	FieldKey string `json:"fieldKey" url:"fieldKey"`
-	// To edit an existing rule, provide the validator of the constraint on the field and that constraint will be replaced.
-	Validator *string `json:"validator,omitempty" url:"validator,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (a *AiRuleCreationJobConfig) GetExtraProperties() map[string]interface{} {
-	return a.extraProperties
-}
-
-func (a *AiRuleCreationJobConfig) UnmarshalJSON(data []byte) error {
-	type unmarshaler AiRuleCreationJobConfig
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*a = AiRuleCreationJobConfig(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *a)
-	if err != nil {
-		return err
-	}
-	a.extraProperties = extraProperties
-
-	a._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (a *AiRuleCreationJobConfig) String() string {
-	if len(a._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(a); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", a)
-}
-
-type AppAutobuildDeployJobConfig struct {
-	SpaceId SpaceId `json:"spaceId" url:"spaceId"`
-	AppId   AppId   `json:"appId" url:"appId"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (a *AppAutobuildDeployJobConfig) GetExtraProperties() map[string]interface{} {
-	return a.extraProperties
-}
-
-func (a *AppAutobuildDeployJobConfig) UnmarshalJSON(data []byte) error {
-	type unmarshaler AppAutobuildDeployJobConfig
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*a = AppAutobuildDeployJobConfig(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *a)
-	if err != nil {
-		return err
-	}
-	a.extraProperties = extraProperties
-
-	a._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (a *AppAutobuildDeployJobConfig) String() string {
-	if len(a._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(a); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", a)
-}
-
-type CategoryMapping struct {
-	// The source value to map from
-	SourceValue *EnumValue `json:"sourceValue,omitempty" url:"sourceValue,omitempty"`
-	// The destination value to map to
-	DestinationValue *EnumValue `json:"destinationValue,omitempty" url:"destinationValue,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (c *CategoryMapping) GetExtraProperties() map[string]interface{} {
-	return c.extraProperties
-}
-
-func (c *CategoryMapping) UnmarshalJSON(data []byte) error {
-	type unmarshaler CategoryMapping
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*c = CategoryMapping(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *c)
-	if err != nil {
-		return err
-	}
-	c.extraProperties = extraProperties
-
-	c._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (c *CategoryMapping) String() string {
-	if len(c._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(c); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", c)
-}
-
-type Certainty string
-
-const (
-	CertaintyAbsolute Certainty = "absolute"
-	CertaintyStrong   Certainty = "strong"
-	CertaintyModerate Certainty = "moderate"
-	CertaintyWeak     Certainty = "weak"
-)
-
-func NewCertaintyFromString(s string) (Certainty, error) {
-	switch s {
-	case "absolute":
-		return CertaintyAbsolute, nil
-	case "strong":
-		return CertaintyStrong, nil
-	case "moderate":
-		return CertaintyModerate, nil
-	case "weak":
-		return CertaintyWeak, nil
-	}
-	var t Certainty
-	return "", fmt.Errorf("%s is not a valid %T", s, t)
-}
-
-func (c Certainty) Ptr() *Certainty {
-	return &c
-}
-
-type CollectionJobSubject struct {
-	Resource string                 `json:"resource" url:"resource"`
-	Params   map[string]interface{} `json:"params,omitempty" url:"params,omitempty"`
-	Query    map[string]interface{} `json:"query,omitempty" url:"query,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (c *CollectionJobSubject) GetExtraProperties() map[string]interface{} {
-	return c.extraProperties
-}
-
-func (c *CollectionJobSubject) UnmarshalJSON(data []byte) error {
-	type unmarshaler CollectionJobSubject
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*c = CollectionJobSubject(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *c)
-	if err != nil {
-		return err
-	}
-	c.extraProperties = extraProperties
-
-	c._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (c *CollectionJobSubject) String() string {
-	if len(c._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(c); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", c)
-}
-
-// The configuration for a delete job
-type DeleteRecordsJobConfig struct {
-	// Options to filter records (default=none)
-	Filter *Filter `json:"filter,omitempty" url:"filter,omitempty"`
-	// Use this to narrow the valid/error filter results to a specific field (Requires filter to be set)
-	FilterField *FilterField `json:"filterField,omitempty" url:"filterField,omitempty"`
-	SearchValue *SearchValue `json:"searchValue,omitempty" url:"searchValue,omitempty"`
-	SearchField *SearchField `json:"searchField,omitempty" url:"searchField,omitempty"`
-	// FFQL query to filter records
-	Q     *string `json:"q,omitempty" url:"q,omitempty"`
-	Sheet SheetId `json:"sheet" url:"sheet"`
-	// List of record ids to exclude from deletion
-	Exceptions []RecordId `json:"exceptions,omitempty" url:"exceptions,omitempty"`
-	// If specified, a snapshot will be generated with this label
-	SnapshotLabel *string `json:"snapshotLabel,omitempty" url:"snapshotLabel,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (d *DeleteRecordsJobConfig) GetExtraProperties() map[string]interface{} {
-	return d.extraProperties
-}
-
-func (d *DeleteRecordsJobConfig) UnmarshalJSON(data []byte) error {
-	type unmarshaler DeleteRecordsJobConfig
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*d = DeleteRecordsJobConfig(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *d)
-	if err != nil {
-		return err
-	}
-	d.extraProperties = extraProperties
-
-	d._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (d *DeleteRecordsJobConfig) String() string {
-	if len(d._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(d._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(d); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", d)
-}
-
-type DestinationField struct {
-	// The description of the destination field
-	DestinationField *Property `json:"destinationField,omitempty" url:"destinationField,omitempty"`
-	// A list of preview values of the data in the destination field
-	Preview []string `json:"preview,omitempty" url:"preview,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (d *DestinationField) GetExtraProperties() map[string]interface{} {
-	return d.extraProperties
-}
-
-func (d *DestinationField) UnmarshalJSON(data []byte) error {
-	type unmarshaler DestinationField
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*d = DestinationField(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *d)
-	if err != nil {
-		return err
-	}
-	d.extraProperties = extraProperties
-
-	d._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (d *DestinationField) String() string {
-	if len(d._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(d._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(d); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", d)
-}
-
-// The driver to use for extracting data from the file
-type Driver string
-
-const (
-	DriverCsv Driver = "csv"
-)
-
-func NewDriverFromString(s string) (Driver, error) {
-	switch s {
-	case "csv":
-		return DriverCsv, nil
-	}
-	var t Driver
-	return "", fmt.Errorf("%s is not a valid %T", s, t)
-}
-
-func (d Driver) Ptr() *Driver {
-	return &d
-}
-
-type Edge struct {
-	// The description of the source field
-	SourceField *Property `json:"sourceField,omitempty" url:"sourceField,omitempty"`
-	// The description of the destination field
-	DestinationField *Property `json:"destinationField,omitempty" url:"destinationField,omitempty"`
-	// A list of preview values of the data in the destination field
-	Preview []string `json:"preview,omitempty" url:"preview,omitempty"`
-	// Only available if one or more of the destination fields is of type enum. Provides category mapping.
-	EnumDetails *EnumDetails `json:"enumDetails,omitempty" url:"enumDetails,omitempty"`
-	// Metadata about the edge
-	Metadata *Metadata `json:"metadata,omitempty" url:"metadata,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (e *Edge) GetExtraProperties() map[string]interface{} {
-	return e.extraProperties
-}
-
-func (e *Edge) UnmarshalJSON(data []byte) error {
-	type unmarshaler Edge
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*e = Edge(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *e)
-	if err != nil {
-		return err
-	}
-	e.extraProperties = extraProperties
-
-	e._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (e *Edge) String() string {
-	if len(e._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(e); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", e)
-}
-
-type EmptyObject struct {
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (e *EmptyObject) GetExtraProperties() map[string]interface{} {
-	return e.extraProperties
-}
-
-func (e *EmptyObject) UnmarshalJSON(data []byte) error {
-	type unmarshaler EmptyObject
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*e = EmptyObject(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *e)
-	if err != nil {
-		return err
-	}
-	e.extraProperties = extraProperties
-
-	e._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (e *EmptyObject) String() string {
-	if len(e._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(e); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", e)
-}
-
-// Only available if one or more of the destination fields is of type enum. Provides category mapping.
-type EnumDetails struct {
-	// The mapping of source values to destination values
-	Mapping []*CategoryMapping `json:"mapping,omitempty" url:"mapping,omitempty"`
-	// A list of source values that are not mapped from
-	UnusedSourceValues []*EnumValue `json:"unusedSourceValues,omitempty" url:"unusedSourceValues,omitempty"`
-	// A list of destination values that are not mapped to
-	UnusedDestinationValues []*EnumValue `json:"unusedDestinationValues,omitempty" url:"unusedDestinationValues,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (e *EnumDetails) GetExtraProperties() map[string]interface{} {
-	return e.extraProperties
-}
-
-func (e *EnumDetails) UnmarshalJSON(data []byte) error {
-	type unmarshaler EnumDetails
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*e = EnumDetails(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *e)
-	if err != nil {
-		return err
-	}
-	e.extraProperties = extraProperties
-
-	e._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (e *EnumDetails) String() string {
-	if len(e._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(e); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", e)
-}
-
-type EnumValue struct {
-	String  string
-	Integer int
-	Boolean bool
-
-	typ string
-}
-
-func NewEnumValueFromString(value string) *EnumValue {
-	return &EnumValue{typ: "String", String: value}
-}
-
-func NewEnumValueFromInteger(value int) *EnumValue {
-	return &EnumValue{typ: "Integer", Integer: value}
-}
-
-func NewEnumValueFromBoolean(value bool) *EnumValue {
-	return &EnumValue{typ: "Boolean", Boolean: value}
-}
-
-func (e *EnumValue) UnmarshalJSON(data []byte) error {
-	var valueString string
-	if err := json.Unmarshal(data, &valueString); err == nil {
-		e.typ = "String"
-		e.String = valueString
-		return nil
-	}
-	var valueInteger int
-	if err := json.Unmarshal(data, &valueInteger); err == nil {
-		e.typ = "Integer"
-		e.Integer = valueInteger
-		return nil
-	}
-	var valueBoolean bool
-	if err := json.Unmarshal(data, &valueBoolean); err == nil {
-		e.typ = "Boolean"
-		e.Boolean = valueBoolean
-		return nil
-	}
-	return fmt.Errorf("%s cannot be deserialized as a %T", data, e)
-}
-
-func (e EnumValue) MarshalJSON() ([]byte, error) {
-	if e.typ == "String" || e.String != "" {
-		return json.Marshal(e.String)
-	}
-	if e.typ == "Integer" || e.Integer != 0 {
-		return json.Marshal(e.Integer)
-	}
-	if e.typ == "Boolean" || e.Boolean != false {
-		return json.Marshal(e.Boolean)
-	}
-	return nil, fmt.Errorf("type %T does not include a non-empty union type", e)
-}
-
-type EnumValueVisitor interface {
-	VisitString(string) error
-	VisitInteger(int) error
-	VisitBoolean(bool) error
-}
-
-func (e *EnumValue) Accept(visitor EnumValueVisitor) error {
-	if e.typ == "String" || e.String != "" {
-		return visitor.VisitString(e.String)
-	}
-	if e.typ == "Integer" || e.Integer != 0 {
-		return visitor.VisitInteger(e.Integer)
-	}
-	if e.typ == "Boolean" || e.Boolean != false {
-		return visitor.VisitBoolean(e.Boolean)
-	}
-	return fmt.Errorf("type %T does not include a non-empty union type", e)
-}
-
-type ExportJobConfig struct {
-	Options *ExportOptions `json:"options,omitempty" url:"options,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (e *ExportJobConfig) GetExtraProperties() map[string]interface{} {
-	return e.extraProperties
-}
-
-func (e *ExportJobConfig) UnmarshalJSON(data []byte) error {
-	type unmarshaler ExportJobConfig
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*e = ExportJobConfig(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *e)
-	if err != nil {
-		return err
-	}
-	e.extraProperties = extraProperties
-
-	e._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (e *ExportJobConfig) String() string {
-	if len(e._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(e); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", e)
-}
-
-type ExportOptions struct {
-	// Deprecated, use `commitId` instead
-	VersionId *VersionId `json:"versionId,omitempty" url:"versionId,omitempty"`
-	// If provided, the snapshot version of the workbook will be used for the export
-	CommitId *CommitId `json:"commitId,omitempty" url:"commitId,omitempty"`
-	// The field to sort the records on
-	SortField *SortField `json:"sortField,omitempty" url:"sortField,omitempty"`
-	// The direction to sort the records
-	SortDirection *SortDirection `json:"sortDirection,omitempty" url:"sortDirection,omitempty"`
-	// The filter to apply to the records
-	Filter *Filter `json:"filter,omitempty" url:"filter,omitempty"`
-	// The field to filter on
-	FilterField *FilterField `json:"filterField,omitempty" url:"filterField,omitempty"`
-	// The value to search for
-	SearchValue *SearchValue `json:"searchValue,omitempty" url:"searchValue,omitempty"`
-	// The field to search for the search value in
-	SearchField *SearchField `json:"searchField,omitempty" url:"searchField,omitempty"`
-	// The FFQL query to filter records
-	Q *string `json:"q,omitempty" url:"q,omitempty"`
-	// The Record Ids param (ids) is a list of record ids that can be passed to several record endpoints allowing the user to identify specific records to INCLUDE in the query, or specific records to EXCLUDE, depending on whether or not filters are being applied. When passing a query param that filters the record dataset, such as 'searchValue', or a 'filter' of 'valid' | 'error' | 'all', the 'ids' param will EXCLUDE those records from the filtered results. For basic queries that do not filter the dataset, passing record ids in the 'ids' param will limit the dataset to INCLUDE just those specific records
-	Ids []RecordId `json:"ids,omitempty" url:"ids,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (e *ExportOptions) GetExtraProperties() map[string]interface{} {
-	return e.extraProperties
-}
-
-func (e *ExportOptions) UnmarshalJSON(data []byte) error {
-	type unmarshaler ExportOptions
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*e = ExportOptions(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *e)
-	if err != nil {
-		return err
-	}
-	e.extraProperties = extraProperties
-
-	e._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (e *ExportOptions) String() string {
-	if len(e._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(e); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", e)
-}
-
-type FileJobConfig struct {
-	// The driver to use for extracting data from the file
-	Driver Driver `json:"driver" url:"driver"`
-	// The options to use for extracting data from the file
-	Options map[string]interface{} `json:"options,omitempty" url:"options,omitempty"`
-	// The row number of the header row detected at extraction time
-	DetectedHeaderRow *int `json:"detectedHeaderRow,omitempty" url:"detectedHeaderRow,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (f *FileJobConfig) GetExtraProperties() map[string]interface{} {
-	return f.extraProperties
-}
-
-func (f *FileJobConfig) UnmarshalJSON(data []byte) error {
-	type unmarshaler FileJobConfig
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*f = FileJobConfig(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *f)
-	if err != nil {
-		return err
-	}
-	f.extraProperties = extraProperties
-
-	f._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (f *FileJobConfig) String() string {
-	if len(f._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(f._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(f); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", f)
-}
-
-type FindAndReplaceJobConfig struct {
-	// The filter to apply to the records
-	Filter *Filter `json:"filter,omitempty" url:"filter,omitempty"`
-	// The field to filter on
-	FilterField *FilterField `json:"filterField,omitempty" url:"filterField,omitempty"`
-	// The value to search for
-	SearchValue *SearchValue `json:"searchValue,omitempty" url:"searchValue,omitempty"`
-	// The field to search for the search value in
-	SearchField *SearchField `json:"searchField,omitempty" url:"searchField,omitempty"`
-	// The FFQL query to filter records
-	Q *string `json:"q,omitempty" url:"q,omitempty"`
-	// The Record Ids param (ids) is a list of record ids that can be passed to several record endpoints allowing the user to identify specific records to INCLUDE in the query, or specific records to EXCLUDE, depending on whether or not filters are being applied. When passing a query param that filters the record dataset, such as 'searchValue', or a 'filter' of 'valid' | 'error' | 'all', the 'ids' param will EXCLUDE those records from the filtered results. For basic queries that do not filter the dataset, passing record ids in the 'ids' param will limit the dataset to INCLUDE just those specific records
-	Ids []RecordId `json:"ids,omitempty" url:"ids,omitempty"`
-	// A value to find for a given field in a sheet. Wrap the value in "" for exact match
-	Find *CellValueUnion `json:"find,omitempty" url:"find,omitempty"`
-	// The value to replace found values with
-	Replace *CellValueUnion `json:"replace,omitempty" url:"replace,omitempty"`
-	// A unique key used to identify a field in a sheet
-	FieldKey string `json:"fieldKey" url:"fieldKey"`
-	// If specified, a snapshot will be generated with this label
-	SnapshotLabel *string `json:"snapshotLabel,omitempty" url:"snapshotLabel,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (f *FindAndReplaceJobConfig) GetExtraProperties() map[string]interface{} {
-	return f.extraProperties
-}
-
-func (f *FindAndReplaceJobConfig) UnmarshalJSON(data []byte) error {
-	type unmarshaler FindAndReplaceJobConfig
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*f = FindAndReplaceJobConfig(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *f)
-	if err != nil {
-		return err
-	}
-	f.extraProperties = extraProperties
-
-	f._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (f *FindAndReplaceJobConfig) String() string {
-	if len(f._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(f._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(f); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", f)
-}
-
-// A single unit of work that will execute asynchronously
-type Job struct {
-	// The type of job
-	Type JobType `json:"type" url:"type"`
-	// the type of operation to perform on the data. For example, "export".
-	Operation   string           `json:"operation" url:"operation"`
-	Source      JobSource        `json:"source" url:"source"`
-	Destination *JobDestination  `json:"destination,omitempty" url:"destination,omitempty"`
-	Config      *JobUpdateConfig `json:"config,omitempty" url:"config,omitempty"`
-	// the type of trigger to use for this job
-	Trigger *Trigger `json:"trigger,omitempty" url:"trigger,omitempty"`
-	// the status of the job
-	Status *JobStatus `json:"status,omitempty" url:"status,omitempty"`
-	// the progress of the job. Whole number between 0 and 100
-	Progress *int    `json:"progress,omitempty" url:"progress,omitempty"`
-	FileId   *FileId `json:"fileId,omitempty" url:"fileId,omitempty"`
-	// the mode of the job
-	Mode *JobMode `json:"mode,omitempty" url:"mode,omitempty"`
-	// Input parameters for this job type.
-	Input map[string]interface{} `json:"input,omitempty" url:"input,omitempty"`
-	// Subject parameters for this job type.
-	Subject *JobSubject `json:"subject,omitempty" url:"subject,omitempty"`
-	// Outcome summary of job.
-	Outcome map[string]interface{} `json:"outcome,omitempty" url:"outcome,omitempty"`
-	// Current status of job in text
-	Info *string `json:"info,omitempty" url:"info,omitempty"`
-	// Indicates if Flatfile is managing the control flow of this job or if it is being manually tracked.
-	Managed *bool `json:"managed,omitempty" url:"managed,omitempty"`
-	// The id of the environment this job belongs to
-	EnvironmentId *EnvironmentId `json:"environmentId,omitempty" url:"environmentId,omitempty"`
-	// The part number of this job
-	Part *int `json:"part,omitempty" url:"part,omitempty"`
-	// The data for this part of the job
-	PartData map[string]interface{} `json:"partData,omitempty" url:"partData,omitempty"`
-	// The execution mode for this part of the job
-	PartExecution *JobPartExecution `json:"partExecution,omitempty" url:"partExecution,omitempty"`
-	// The id of the parent job
-	ParentId *JobId `json:"parentId,omitempty" url:"parentId,omitempty"`
-	// The ids of the jobs that must complete before this job can start
-	PredecessorIds []JobId `json:"predecessorIds,omitempty" url:"predecessorIds,omitempty"`
-	// Additional metadata for the job
-	Metadata map[string]interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
-	Id       JobId                  `json:"id" url:"id"`
-	// Date the item was created
-	CreatedAt time.Time `json:"createdAt" url:"createdAt"`
-	// Date the item was last updated
-	UpdatedAt time.Time `json:"updatedAt" url:"updatedAt"`
-	// the time that the job started at
-	StartedAt *time.Time `json:"startedAt,omitempty" url:"startedAt,omitempty"`
-	// the time that the job finished at
-	FinishedAt *time.Time `json:"finishedAt,omitempty" url:"finishedAt,omitempty"`
-	// the time that the job's outcome has been acknowledged by a user
-	OutcomeAcknowledgedAt *time.Time `json:"outcomeAcknowledgedAt,omitempty" url:"outcomeAcknowledgedAt,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (j *Job) GetExtraProperties() map[string]interface{} {
-	return j.extraProperties
-}
-
-func (j *Job) UnmarshalJSON(data []byte) error {
-	type embed Job
-	var unmarshaler = struct {
-		embed
-		CreatedAt             *core.DateTime `json:"createdAt"`
-		UpdatedAt             *core.DateTime `json:"updatedAt"`
-		StartedAt             *core.DateTime `json:"startedAt,omitempty"`
-		FinishedAt            *core.DateTime `json:"finishedAt,omitempty"`
-		OutcomeAcknowledgedAt *core.DateTime `json:"outcomeAcknowledgedAt,omitempty"`
-	}{
-		embed: embed(*j),
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	*j = Job(unmarshaler.embed)
-	j.CreatedAt = unmarshaler.CreatedAt.Time()
-	j.UpdatedAt = unmarshaler.UpdatedAt.Time()
-	j.StartedAt = unmarshaler.StartedAt.TimePtr()
-	j.FinishedAt = unmarshaler.FinishedAt.TimePtr()
-	j.OutcomeAcknowledgedAt = unmarshaler.OutcomeAcknowledgedAt.TimePtr()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *j)
-	if err != nil {
-		return err
-	}
-	j.extraProperties = extraProperties
-
-	j._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (j *Job) MarshalJSON() ([]byte, error) {
-	type embed Job
-	var marshaler = struct {
-		embed
-		CreatedAt             *core.DateTime `json:"createdAt"`
-		UpdatedAt             *core.DateTime `json:"updatedAt"`
-		StartedAt             *core.DateTime `json:"startedAt,omitempty"`
-		FinishedAt            *core.DateTime `json:"finishedAt,omitempty"`
-		OutcomeAcknowledgedAt *core.DateTime `json:"outcomeAcknowledgedAt,omitempty"`
-	}{
-		embed:                 embed(*j),
-		CreatedAt:             core.NewDateTime(j.CreatedAt),
-		UpdatedAt:             core.NewDateTime(j.UpdatedAt),
-		StartedAt:             core.NewOptionalDateTime(j.StartedAt),
-		FinishedAt:            core.NewOptionalDateTime(j.FinishedAt),
-		OutcomeAcknowledgedAt: core.NewOptionalDateTime(j.OutcomeAcknowledgedAt),
-	}
-	return json.Marshal(marshaler)
-}
-
-func (j *Job) String() string {
-	if len(j._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(j); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", j)
-}
-
-// The id of the workbook where extracted file data will be sent
-type JobDestination = WorkbookId
-
-// The execution plan for a job, for example, for a map job, the execution plan is the mapping of the source sheet to the destination sheet.
-type JobExecutionPlan struct {
-	FieldMapping              []*Edge             `json:"fieldMapping,omitempty" url:"fieldMapping,omitempty"`
-	UnmappedSourceFields      []*SourceField      `json:"unmappedSourceFields,omitempty" url:"unmappedSourceFields,omitempty"`
-	UnmappedDestinationFields []*DestinationField `json:"unmappedDestinationFields,omitempty" url:"unmappedDestinationFields,omitempty"`
-	ProgramId                 *string             `json:"programId,omitempty" url:"programId,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (j *JobExecutionPlan) GetExtraProperties() map[string]interface{} {
-	return j.extraProperties
-}
-
-func (j *JobExecutionPlan) UnmarshalJSON(data []byte) error {
-	type unmarshaler JobExecutionPlan
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*j = JobExecutionPlan(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *j)
-	if err != nil {
-		return err
-	}
-	j.extraProperties = extraProperties
-
-	j._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (j *JobExecutionPlan) String() string {
-	if len(j._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(j); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", j)
-}
-
-// The execution plan for a job, for example, for a map job, the execution plan is the mapping of the source sheet to the destination sheet.
-type JobExecutionPlanConfig struct {
-	FieldMapping              []*Edge             `json:"fieldMapping,omitempty" url:"fieldMapping,omitempty"`
-	UnmappedSourceFields      []*SourceField      `json:"unmappedSourceFields,omitempty" url:"unmappedSourceFields,omitempty"`
-	UnmappedDestinationFields []*DestinationField `json:"unmappedDestinationFields,omitempty" url:"unmappedDestinationFields,omitempty"`
-	ProgramId                 *string             `json:"programId,omitempty" url:"programId,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (j *JobExecutionPlanConfig) GetExtraProperties() map[string]interface{} {
-	return j.extraProperties
-}
-
-func (j *JobExecutionPlanConfig) UnmarshalJSON(data []byte) error {
-	type unmarshaler JobExecutionPlanConfig
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*j = JobExecutionPlanConfig(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *j)
-	if err != nil {
-		return err
-	}
-	j.extraProperties = extraProperties
-
-	j._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (j *JobExecutionPlanConfig) String() string {
-	if len(j._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(j); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", j)
-}
-
-// the mode of the job
-type JobMode string
-
-const (
-	JobModeForeground      JobMode = "foreground"
-	JobModeBackground      JobMode = "background"
-	JobModeToolbarBlocking JobMode = "toolbarBlocking"
-)
-
-func NewJobModeFromString(s string) (JobMode, error) {
-	switch s {
-	case "foreground":
-		return JobModeForeground, nil
-	case "background":
-		return JobModeBackground, nil
-	case "toolbarBlocking":
-		return JobModeToolbarBlocking, nil
-	}
-	var t JobMode
-	return "", fmt.Errorf("%s is not a valid %T", s, t)
-}
-
-func (j JobMode) Ptr() *JobMode {
-	return &j
-}
-
-// Outcome summary of a job
-type JobOutcome struct {
-	Acknowledge       *bool              `json:"acknowledge,omitempty" url:"acknowledge,omitempty"`
-	Trigger           *JobOutcomeTrigger `json:"trigger,omitempty" url:"trigger,omitempty"`
-	ButtonText        *string            `json:"buttonText,omitempty" url:"buttonText,omitempty"`
-	Next              *JobOutcomeNext    `json:"next,omitempty" url:"next,omitempty"`
-	Heading           *string            `json:"heading,omitempty" url:"heading,omitempty"`
-	Message           *string            `json:"message,omitempty" url:"message,omitempty"`
-	HideDefaultButton *bool              `json:"hideDefaultButton,omitempty" url:"hideDefaultButton,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (j *JobOutcome) GetExtraProperties() map[string]interface{} {
-	return j.extraProperties
-}
-
-func (j *JobOutcome) UnmarshalJSON(data []byte) error {
-	type unmarshaler JobOutcome
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*j = JobOutcome(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *j)
-	if err != nil {
-		return err
-	}
-	j.extraProperties = extraProperties
-
-	j._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (j *JobOutcome) String() string {
-	if len(j._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(j); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", j)
-}
-
-type JobOutcomeNext struct {
-	Type     string
-	Id       *JobOutcomeNextId
-	Url      *JobOutcomeNextUrl
-	Download *JobOutcomeNextDownload
-	Files    *JobOutcomeNextFiles
-	Wait     *JobOutcomeNextWait
-	Snapshot *JobOutcomeNextSnapshot
-	Retry    *JobOutcomeNextRetry
-	View     *JobOutcomeNextView
-}
-
-func NewJobOutcomeNextFromId(value *JobOutcomeNextId) *JobOutcomeNext {
-	return &JobOutcomeNext{Type: "id", Id: value}
-}
-
-func NewJobOutcomeNextFromUrl(value *JobOutcomeNextUrl) *JobOutcomeNext {
-	return &JobOutcomeNext{Type: "url", Url: value}
-}
-
-func NewJobOutcomeNextFromDownload(value *JobOutcomeNextDownload) *JobOutcomeNext {
-	return &JobOutcomeNext{Type: "download", Download: value}
-}
-
-func NewJobOutcomeNextFromFiles(value *JobOutcomeNextFiles) *JobOutcomeNext {
-	return &JobOutcomeNext{Type: "files", Files: value}
-}
-
-func NewJobOutcomeNextFromWait(value *JobOutcomeNextWait) *JobOutcomeNext {
-	return &JobOutcomeNext{Type: "wait", Wait: value}
-}
-
-func NewJobOutcomeNextFromSnapshot(value *JobOutcomeNextSnapshot) *JobOutcomeNext {
-	return &JobOutcomeNext{Type: "snapshot", Snapshot: value}
-}
-
-func NewJobOutcomeNextFromRetry(value *JobOutcomeNextRetry) *JobOutcomeNext {
-	return &JobOutcomeNext{Type: "retry", Retry: value}
-}
-
-func NewJobOutcomeNextFromView(value *JobOutcomeNextView) *JobOutcomeNext {
-	return &JobOutcomeNext{Type: "view", View: value}
-}
-
-func (j *JobOutcomeNext) UnmarshalJSON(data []byte) error {
-	var unmarshaler struct {
-		Type string `json:"type"`
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	j.Type = unmarshaler.Type
-	if unmarshaler.Type == "" {
-		return fmt.Errorf("%T did not include discriminant type", j)
-	}
-	switch unmarshaler.Type {
-	case "id":
-		value := new(JobOutcomeNextId)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		j.Id = value
-	case "url":
-		value := new(JobOutcomeNextUrl)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		j.Url = value
-	case "download":
-		value := new(JobOutcomeNextDownload)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		j.Download = value
-	case "files":
-		value := new(JobOutcomeNextFiles)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		j.Files = value
-	case "wait":
-		value := new(JobOutcomeNextWait)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		j.Wait = value
-	case "snapshot":
-		value := new(JobOutcomeNextSnapshot)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		j.Snapshot = value
-	case "retry":
-		value := new(JobOutcomeNextRetry)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		j.Retry = value
-	case "view":
-		value := new(JobOutcomeNextView)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		j.View = value
-	}
-	return nil
-}
-
-func (j JobOutcomeNext) MarshalJSON() ([]byte, error) {
-	switch j.Type {
-	default:
-		return nil, fmt.Errorf("invalid type %s in %T", j.Type, j)
-	case "id":
-		return core.MarshalJSONWithExtraProperty(j.Id, "type", "id")
-	case "url":
-		return core.MarshalJSONWithExtraProperty(j.Url, "type", "url")
-	case "download":
-		return core.MarshalJSONWithExtraProperty(j.Download, "type", "download")
-	case "files":
-		return core.MarshalJSONWithExtraProperty(j.Files, "type", "files")
-	case "wait":
-		return core.MarshalJSONWithExtraProperty(j.Wait, "type", "wait")
-	case "snapshot":
-		return core.MarshalJSONWithExtraProperty(j.Snapshot, "type", "snapshot")
-	case "retry":
-		return core.MarshalJSONWithExtraProperty(j.Retry, "type", "retry")
-	case "view":
-		return core.MarshalJSONWithExtraProperty(j.View, "type", "view")
-	}
-}
-
-type JobOutcomeNextVisitor interface {
-	VisitId(*JobOutcomeNextId) error
-	VisitUrl(*JobOutcomeNextUrl) error
-	VisitDownload(*JobOutcomeNextDownload) error
-	VisitFiles(*JobOutcomeNextFiles) error
-	VisitWait(*JobOutcomeNextWait) error
-	VisitSnapshot(*JobOutcomeNextSnapshot) error
-	VisitRetry(*JobOutcomeNextRetry) error
-	VisitView(*JobOutcomeNextView) error
-}
-
-func (j *JobOutcomeNext) Accept(visitor JobOutcomeNextVisitor) error {
-	switch j.Type {
-	default:
-		return fmt.Errorf("invalid type %s in %T", j.Type, j)
-	case "id":
-		return visitor.VisitId(j.Id)
-	case "url":
-		return visitor.VisitUrl(j.Url)
-	case "download":
-		return visitor.VisitDownload(j.Download)
-	case "files":
-		return visitor.VisitFiles(j.Files)
-	case "wait":
-		return visitor.VisitWait(j.Wait)
-	case "snapshot":
-		return visitor.VisitSnapshot(j.Snapshot)
-	case "retry":
-		return visitor.VisitRetry(j.Retry)
-	case "view":
-		return visitor.VisitView(j.View)
-	}
-}
-
-type JobOutcomeNextDownload struct {
-	Url      string  `json:"url" url:"url"`
-	Label    *string `json:"label,omitempty" url:"label,omitempty"`
-	FileName *string `json:"fileName,omitempty" url:"fileName,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (j *JobOutcomeNextDownload) GetExtraProperties() map[string]interface{} {
-	return j.extraProperties
-}
-
-func (j *JobOutcomeNextDownload) UnmarshalJSON(data []byte) error {
-	type unmarshaler JobOutcomeNextDownload
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*j = JobOutcomeNextDownload(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *j)
-	if err != nil {
-		return err
-	}
-	j.extraProperties = extraProperties
-
-	j._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (j *JobOutcomeNextDownload) String() string {
-	if len(j._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(j); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", j)
-}
-
-type JobOutcomeNextFileObject struct {
-	FileId string  `json:"fileId" url:"fileId"`
-	Label  *string `json:"label,omitempty" url:"label,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (j *JobOutcomeNextFileObject) GetExtraProperties() map[string]interface{} {
-	return j.extraProperties
-}
-
-func (j *JobOutcomeNextFileObject) UnmarshalJSON(data []byte) error {
-	type unmarshaler JobOutcomeNextFileObject
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*j = JobOutcomeNextFileObject(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *j)
-	if err != nil {
-		return err
-	}
-	j.extraProperties = extraProperties
-
-	j._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (j *JobOutcomeNextFileObject) String() string {
-	if len(j._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(j); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", j)
-}
-
-type JobOutcomeNextFiles struct {
-	Files []*JobOutcomeNextFileObject `json:"files,omitempty" url:"files,omitempty"`
-	Label *string                     `json:"label,omitempty" url:"label,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (j *JobOutcomeNextFiles) GetExtraProperties() map[string]interface{} {
-	return j.extraProperties
-}
-
-func (j *JobOutcomeNextFiles) UnmarshalJSON(data []byte) error {
-	type unmarshaler JobOutcomeNextFiles
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*j = JobOutcomeNextFiles(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *j)
-	if err != nil {
-		return err
-	}
-	j.extraProperties = extraProperties
-
-	j._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (j *JobOutcomeNextFiles) String() string {
-	if len(j._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(j); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", j)
-}
-
-type JobOutcomeNextId struct {
-	Id    string  `json:"id" url:"id"`
-	Label *string `json:"label,omitempty" url:"label,omitempty"`
-	Path  *string `json:"path,omitempty" url:"path,omitempty"`
-	Query *string `json:"query,omitempty" url:"query,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (j *JobOutcomeNextId) GetExtraProperties() map[string]interface{} {
-	return j.extraProperties
-}
-
-func (j *JobOutcomeNextId) UnmarshalJSON(data []byte) error {
-	type unmarshaler JobOutcomeNextId
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*j = JobOutcomeNextId(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *j)
-	if err != nil {
-		return err
-	}
-	j.extraProperties = extraProperties
-
-	j._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (j *JobOutcomeNextId) String() string {
-	if len(j._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(j); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", j)
-}
-
-type JobOutcomeNextRetry struct {
-	Label *string `json:"label,omitempty" url:"label,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (j *JobOutcomeNextRetry) GetExtraProperties() map[string]interface{} {
-	return j.extraProperties
-}
-
-func (j *JobOutcomeNextRetry) UnmarshalJSON(data []byte) error {
-	type unmarshaler JobOutcomeNextRetry
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*j = JobOutcomeNextRetry(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *j)
-	if err != nil {
-		return err
-	}
-	j.extraProperties = extraProperties
-
-	j._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (j *JobOutcomeNextRetry) String() string {
-	if len(j._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(j); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", j)
-}
-
-type JobOutcomeNextSnapshot struct {
-	SnapshotId string `json:"snapshotId" url:"snapshotId"`
-	SheetId    string `json:"sheetId" url:"sheetId"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (j *JobOutcomeNextSnapshot) GetExtraProperties() map[string]interface{} {
-	return j.extraProperties
-}
-
-func (j *JobOutcomeNextSnapshot) UnmarshalJSON(data []byte) error {
-	type unmarshaler JobOutcomeNextSnapshot
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*j = JobOutcomeNextSnapshot(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *j)
-	if err != nil {
-		return err
-	}
-	j.extraProperties = extraProperties
-
-	j._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (j *JobOutcomeNextSnapshot) String() string {
-	if len(j._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(j); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", j)
-}
-
-type JobOutcomeNextUrl struct {
-	Url   string  `json:"url" url:"url"`
-	Label *string `json:"label,omitempty" url:"label,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (j *JobOutcomeNextUrl) GetExtraProperties() map[string]interface{} {
-	return j.extraProperties
-}
-
-func (j *JobOutcomeNextUrl) UnmarshalJSON(data []byte) error {
-	type unmarshaler JobOutcomeNextUrl
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*j = JobOutcomeNextUrl(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *j)
-	if err != nil {
-		return err
-	}
-	j.extraProperties = extraProperties
-
-	j._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (j *JobOutcomeNextUrl) String() string {
-	if len(j._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(j); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", j)
-}
-
-type JobOutcomeNextView struct {
-	SheetId string `json:"sheetId" url:"sheetId"`
-	// An array of field keys from the sheet
-	HiddenColumns []string `json:"hiddenColumns,omitempty" url:"hiddenColumns,omitempty"`
-	Label         *string  `json:"label,omitempty" url:"label,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (j *JobOutcomeNextView) GetExtraProperties() map[string]interface{} {
-	return j.extraProperties
-}
-
-func (j *JobOutcomeNextView) UnmarshalJSON(data []byte) error {
-	type unmarshaler JobOutcomeNextView
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*j = JobOutcomeNextView(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *j)
-	if err != nil {
-		return err
-	}
-	j.extraProperties = extraProperties
-
-	j._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (j *JobOutcomeNextView) String() string {
-	if len(j._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(j); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", j)
-}
-
-type JobOutcomeNextWait struct {
-	Fade     *bool `json:"fade,omitempty" url:"fade,omitempty"`
-	Confetti *bool `json:"confetti,omitempty" url:"confetti,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (j *JobOutcomeNextWait) GetExtraProperties() map[string]interface{} {
-	return j.extraProperties
-}
-
-func (j *JobOutcomeNextWait) UnmarshalJSON(data []byte) error {
-	type unmarshaler JobOutcomeNextWait
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*j = JobOutcomeNextWait(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *j)
-	if err != nil {
-		return err
-	}
-	j.extraProperties = extraProperties
-
-	j._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (j *JobOutcomeNextWait) String() string {
-	if len(j._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(j); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", j)
-}
-
-type JobOutcomeTrigger struct {
-	JobOutcomeTriggerType    JobOutcomeTriggerType
-	JobOutcomeTriggerDetails *JobOutcomeTriggerDetails
-
-	typ string
-}
-
-func NewJobOutcomeTriggerFromJobOutcomeTriggerType(value JobOutcomeTriggerType) *JobOutcomeTrigger {
-	return &JobOutcomeTrigger{typ: "JobOutcomeTriggerType", JobOutcomeTriggerType: value}
-}
-
-func NewJobOutcomeTriggerFromJobOutcomeTriggerDetails(value *JobOutcomeTriggerDetails) *JobOutcomeTrigger {
-	return &JobOutcomeTrigger{typ: "JobOutcomeTriggerDetails", JobOutcomeTriggerDetails: value}
-}
-
-func (j *JobOutcomeTrigger) UnmarshalJSON(data []byte) error {
-	var valueJobOutcomeTriggerType JobOutcomeTriggerType
-	if err := json.Unmarshal(data, &valueJobOutcomeTriggerType); err == nil {
-		j.typ = "JobOutcomeTriggerType"
-		j.JobOutcomeTriggerType = valueJobOutcomeTriggerType
-		return nil
-	}
-	valueJobOutcomeTriggerDetails := new(JobOutcomeTriggerDetails)
-	if err := json.Unmarshal(data, &valueJobOutcomeTriggerDetails); err == nil {
-		j.typ = "JobOutcomeTriggerDetails"
-		j.JobOutcomeTriggerDetails = valueJobOutcomeTriggerDetails
-		return nil
-	}
-	return fmt.Errorf("%s cannot be deserialized as a %T", data, j)
-}
-
-func (j JobOutcomeTrigger) MarshalJSON() ([]byte, error) {
-	if j.typ == "JobOutcomeTriggerType" || j.JobOutcomeTriggerType != "" {
-		return json.Marshal(j.JobOutcomeTriggerType)
-	}
-	if j.typ == "JobOutcomeTriggerDetails" || j.JobOutcomeTriggerDetails != nil {
-		return json.Marshal(j.JobOutcomeTriggerDetails)
-	}
-	return nil, fmt.Errorf("type %T does not include a non-empty union type", j)
-}
-
-type JobOutcomeTriggerVisitor interface {
-	VisitJobOutcomeTriggerType(JobOutcomeTriggerType) error
-	VisitJobOutcomeTriggerDetails(*JobOutcomeTriggerDetails) error
-}
-
-func (j *JobOutcomeTrigger) Accept(visitor JobOutcomeTriggerVisitor) error {
-	if j.typ == "JobOutcomeTriggerType" || j.JobOutcomeTriggerType != "" {
-		return visitor.VisitJobOutcomeTriggerType(j.JobOutcomeTriggerType)
-	}
-	if j.typ == "JobOutcomeTriggerDetails" || j.JobOutcomeTriggerDetails != nil {
-		return visitor.VisitJobOutcomeTriggerDetails(j.JobOutcomeTriggerDetails)
-	}
-	return fmt.Errorf("type %T does not include a non-empty union type", j)
-}
-
-// For whom the job outcome's next effect should be triggered automatically
-type JobOutcomeTriggerAudience string
-
-const (
-	JobOutcomeTriggerAudienceOriginator JobOutcomeTriggerAudience = "originator"
-	JobOutcomeTriggerAudienceAll        JobOutcomeTriggerAudience = "all"
-)
-
-func NewJobOutcomeTriggerAudienceFromString(s string) (JobOutcomeTriggerAudience, error) {
-	switch s {
-	case "originator":
-		return JobOutcomeTriggerAudienceOriginator, nil
-	case "all":
-		return JobOutcomeTriggerAudienceAll, nil
-	}
-	var t JobOutcomeTriggerAudience
-	return "", fmt.Errorf("%s is not a valid %T", s, t)
-}
-
-func (j JobOutcomeTriggerAudience) Ptr() *JobOutcomeTriggerAudience {
-	return &j
-}
-
-// Details about the trigger for the job outcome
-type JobOutcomeTriggerDetails struct {
-	Type     JobOutcomeTriggerType      `json:"type" url:"type"`
-	Audience *JobOutcomeTriggerAudience `json:"audience,omitempty" url:"audience,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (j *JobOutcomeTriggerDetails) GetExtraProperties() map[string]interface{} {
-	return j.extraProperties
-}
-
-func (j *JobOutcomeTriggerDetails) UnmarshalJSON(data []byte) error {
-	type unmarshaler JobOutcomeTriggerDetails
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*j = JobOutcomeTriggerDetails(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *j)
-	if err != nil {
-		return err
-	}
-	j.extraProperties = extraProperties
-
-	j._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (j *JobOutcomeTriggerDetails) String() string {
-	if len(j._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(j); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", j)
-}
-
-// Whether a job outcome's effect should be triggered automatically
-type JobOutcomeTriggerType string
-
-const (
-	JobOutcomeTriggerTypeManual          JobOutcomeTriggerType = "manual"
-	JobOutcomeTriggerTypeAutomatic       JobOutcomeTriggerType = "automatic"
-	JobOutcomeTriggerTypeAutomaticSilent JobOutcomeTriggerType = "automatic_silent"
-)
-
-func NewJobOutcomeTriggerTypeFromString(s string) (JobOutcomeTriggerType, error) {
-	switch s {
-	case "manual":
-		return JobOutcomeTriggerTypeManual, nil
-	case "automatic":
-		return JobOutcomeTriggerTypeAutomatic, nil
-	case "automatic_silent":
-		return JobOutcomeTriggerTypeAutomaticSilent, nil
-	}
-	var t JobOutcomeTriggerType
-	return "", fmt.Errorf("%s is not a valid %T", s, t)
-}
-
-func (j JobOutcomeTriggerType) Ptr() *JobOutcomeTriggerType {
-	return &j
-}
-
-type JobPartExecution string
-
-const (
-	JobPartExecutionSequential JobPartExecution = "sequential"
-	JobPartExecutionParallel   JobPartExecution = "parallel"
-)
-
-func NewJobPartExecutionFromString(s string) (JobPartExecution, error) {
-	switch s {
-	case "sequential":
-		return JobPartExecutionSequential, nil
-	case "parallel":
-		return JobPartExecutionParallel, nil
-	}
-	var t JobPartExecution
-	return "", fmt.Errorf("%s is not a valid %T", s, t)
-}
-
-func (j JobPartExecution) Ptr() *JobPartExecution {
-	return &j
-}
-
-// Info about the number of parts to create
-type JobParts struct {
-	Integer       int
-	JobPartsArray JobPartsArray
-
-	typ string
-}
-
-func NewJobPartsFromInteger(value int) *JobParts {
-	return &JobParts{typ: "Integer", Integer: value}
-}
-
-func NewJobPartsFromJobPartsArray(value JobPartsArray) *JobParts {
-	return &JobParts{typ: "JobPartsArray", JobPartsArray: value}
-}
-
-func (j *JobParts) UnmarshalJSON(data []byte) error {
-	var valueInteger int
-	if err := json.Unmarshal(data, &valueInteger); err == nil {
-		j.typ = "Integer"
-		j.Integer = valueInteger
-		return nil
-	}
-	var valueJobPartsArray JobPartsArray
-	if err := json.Unmarshal(data, &valueJobPartsArray); err == nil {
-		j.typ = "JobPartsArray"
-		j.JobPartsArray = valueJobPartsArray
-		return nil
-	}
-	return fmt.Errorf("%s cannot be deserialized as a %T", data, j)
-}
-
-func (j JobParts) MarshalJSON() ([]byte, error) {
-	if j.typ == "Integer" || j.Integer != 0 {
-		return json.Marshal(j.Integer)
-	}
-	if j.typ == "JobPartsArray" || j.JobPartsArray != nil {
-		return json.Marshal(j.JobPartsArray)
-	}
-	return nil, fmt.Errorf("type %T does not include a non-empty union type", j)
-}
-
-type JobPartsVisitor interface {
-	VisitInteger(int) error
-	VisitJobPartsArray(JobPartsArray) error
-}
-
-func (j *JobParts) Accept(visitor JobPartsVisitor) error {
-	if j.typ == "Integer" || j.Integer != 0 {
-		return visitor.VisitInteger(j.Integer)
-	}
-	if j.typ == "JobPartsArray" || j.JobPartsArray != nil {
-		return visitor.VisitJobPartsArray(j.JobPartsArray)
-	}
-	return fmt.Errorf("type %T does not include a non-empty union type", j)
-}
-
-// Data for each of the job parts
-type JobPartsArray = []map[string]interface{}
-
-// The job/plan tuple that contains the full plan and the jobs status
-type JobPlan struct {
-	Job  *Job              `json:"job,omitempty" url:"job,omitempty"`
-	Plan *JobExecutionPlan `json:"plan,omitempty" url:"plan,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (j *JobPlan) GetExtraProperties() map[string]interface{} {
-	return j.extraProperties
-}
-
-func (j *JobPlan) UnmarshalJSON(data []byte) error {
-	type unmarshaler JobPlan
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*j = JobPlan(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *j)
-	if err != nil {
-		return err
-	}
-	j.extraProperties = extraProperties
-
-	j._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (j *JobPlan) String() string {
-	if len(j._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(j); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", j)
-}
-
-// The id of a file, workbook, sheet, or app
-type JobSource = string
-
-// the status of the job
-type JobStatus string
-
-const (
-	JobStatusCreated   JobStatus = "created"
-	JobStatusPlanning  JobStatus = "planning"
-	JobStatusScheduled JobStatus = "scheduled"
-	JobStatusReady     JobStatus = "ready"
-	JobStatusExecuting JobStatus = "executing"
-	JobStatusComplete  JobStatus = "complete"
-	JobStatusFailed    JobStatus = "failed"
-	JobStatusCanceled  JobStatus = "canceled"
-	JobStatusWaiting   JobStatus = "waiting"
-)
-
-func NewJobStatusFromString(s string) (JobStatus, error) {
-	switch s {
-	case "created":
-		return JobStatusCreated, nil
-	case "planning":
-		return JobStatusPlanning, nil
-	case "scheduled":
-		return JobStatusScheduled, nil
-	case "ready":
-		return JobStatusReady, nil
-	case "executing":
-		return JobStatusExecuting, nil
-	case "complete":
-		return JobStatusComplete, nil
-	case "failed":
-		return JobStatusFailed, nil
-	case "canceled":
-		return JobStatusCanceled, nil
-	case "waiting":
-		return JobStatusWaiting, nil
-	}
-	var t JobStatus
-	return "", fmt.Errorf("%s is not a valid %T", s, t)
-}
-
-func (j JobStatus) Ptr() *JobStatus {
-	return &j
-}
-
-// Subject parameters for this job type
-type JobSubject struct {
-	Type       string
-	Resource   *ResourceJobSubject
-	Collection *CollectionJobSubject
-}
-
-func NewJobSubjectFromResource(value *ResourceJobSubject) *JobSubject {
-	return &JobSubject{Type: "resource", Resource: value}
-}
-
-func NewJobSubjectFromCollection(value *CollectionJobSubject) *JobSubject {
-	return &JobSubject{Type: "collection", Collection: value}
-}
-
-func (j *JobSubject) UnmarshalJSON(data []byte) error {
-	var unmarshaler struct {
-		Type string `json:"type"`
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	j.Type = unmarshaler.Type
-	if unmarshaler.Type == "" {
-		return fmt.Errorf("%T did not include discriminant type", j)
-	}
-	switch unmarshaler.Type {
-	case "resource":
-		value := new(ResourceJobSubject)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		j.Resource = value
-	case "collection":
-		value := new(CollectionJobSubject)
-		if err := json.Unmarshal(data, &value); err != nil {
-			return err
-		}
-		j.Collection = value
-	}
-	return nil
-}
-
-func (j JobSubject) MarshalJSON() ([]byte, error) {
-	switch j.Type {
-	default:
-		return nil, fmt.Errorf("invalid type %s in %T", j.Type, j)
-	case "resource":
-		return core.MarshalJSONWithExtraProperty(j.Resource, "type", "resource")
-	case "collection":
-		return core.MarshalJSONWithExtraProperty(j.Collection, "type", "collection")
-	}
-}
-
-type JobSubjectVisitor interface {
-	VisitResource(*ResourceJobSubject) error
-	VisitCollection(*CollectionJobSubject) error
-}
-
-func (j *JobSubject) Accept(visitor JobSubjectVisitor) error {
-	switch j.Type {
-	default:
-		return fmt.Errorf("invalid type %s in %T", j.Type, j)
-	case "resource":
-		return visitor.VisitResource(j.Resource)
-	case "collection":
-		return visitor.VisitCollection(j.Collection)
-	}
-}
-
-// The type of job
-type JobType string
-
-const (
-	JobTypeFile     JobType = "file"
-	JobTypeWorkbook JobType = "workbook"
-	JobTypeSheet    JobType = "sheet"
-	JobTypeSpace    JobType = "space"
-	JobTypeDocument JobType = "document"
-	JobTypeApp      JobType = "app"
-)
-
-func NewJobTypeFromString(s string) (JobType, error) {
-	switch s {
-	case "file":
-		return JobTypeFile, nil
-	case "workbook":
-		return JobTypeWorkbook, nil
-	case "sheet":
-		return JobTypeSheet, nil
-	case "space":
-		return JobTypeSpace, nil
-	case "document":
-		return JobTypeDocument, nil
-	case "app":
-		return JobTypeApp, nil
-	}
-	var t JobType
-	return "", fmt.Errorf("%s is not a valid %T", s, t)
-}
-
-func (j JobType) Ptr() *JobType {
-	return &j
-}
-
-type JobUpdateConfig struct {
-	DeleteRecordsJobConfig                  *DeleteRecordsJobConfig
-	FileJobConfig                           *FileJobConfig
-	PipelineJobConfig                       *PipelineJobConfig
-	ExportJobConfig                         *ExportJobConfig
-	MutateJobConfig                         *MutateJobConfig
-	FindAndReplaceJobConfig                 *FindAndReplaceJobConfig
-	MappingProgramJobConfig                 *MappingProgramJobConfig
-	AiGenerateBlueprintJobConfig            *AiGenerateBlueprintJobConfig
-	AppAutobuildDeployJobConfig             *AppAutobuildDeployJobConfig
-	AiGenerateSampleDataJobConfig           *AiGenerateSampleDataJobConfig
-	AiGenerateBlueprintConstraintsJobConfig *AiGenerateBlueprintConstraintsJobConfig
-	AiGenerateConstraintJobConfig           *AiGenerateConstraintJobConfig
-	AiRuleCreationJobConfig                 *AiRuleCreationJobConfig
-	EmptyObject                             *EmptyObject
-
-	typ string
-}
-
-func NewJobUpdateConfigFromDeleteRecordsJobConfig(value *DeleteRecordsJobConfig) *JobUpdateConfig {
-	return &JobUpdateConfig{typ: "DeleteRecordsJobConfig", DeleteRecordsJobConfig: value}
-}
-
-func NewJobUpdateConfigFromFileJobConfig(value *FileJobConfig) *JobUpdateConfig {
-	return &JobUpdateConfig{typ: "FileJobConfig", FileJobConfig: value}
-}
-
-func NewJobUpdateConfigFromPipelineJobConfig(value *PipelineJobConfig) *JobUpdateConfig {
-	return &JobUpdateConfig{typ: "PipelineJobConfig", PipelineJobConfig: value}
-}
-
-func NewJobUpdateConfigFromExportJobConfig(value *ExportJobConfig) *JobUpdateConfig {
-	return &JobUpdateConfig{typ: "ExportJobConfig", ExportJobConfig: value}
-}
-
-func NewJobUpdateConfigFromMutateJobConfig(value *MutateJobConfig) *JobUpdateConfig {
-	return &JobUpdateConfig{typ: "MutateJobConfig", MutateJobConfig: value}
-}
-
-func NewJobUpdateConfigFromFindAndReplaceJobConfig(value *FindAndReplaceJobConfig) *JobUpdateConfig {
-	return &JobUpdateConfig{typ: "FindAndReplaceJobConfig", FindAndReplaceJobConfig: value}
-}
-
-func NewJobUpdateConfigFromMappingProgramJobConfig(value *MappingProgramJobConfig) *JobUpdateConfig {
-	return &JobUpdateConfig{typ: "MappingProgramJobConfig", MappingProgramJobConfig: value}
-}
-
-func NewJobUpdateConfigFromAiGenerateBlueprintJobConfig(value *AiGenerateBlueprintJobConfig) *JobUpdateConfig {
-	return &JobUpdateConfig{typ: "AiGenerateBlueprintJobConfig", AiGenerateBlueprintJobConfig: value}
-}
-
-func NewJobUpdateConfigFromAppAutobuildDeployJobConfig(value *AppAutobuildDeployJobConfig) *JobUpdateConfig {
-	return &JobUpdateConfig{typ: "AppAutobuildDeployJobConfig", AppAutobuildDeployJobConfig: value}
-}
-
-func NewJobUpdateConfigFromAiGenerateSampleDataJobConfig(value *AiGenerateSampleDataJobConfig) *JobUpdateConfig {
-	return &JobUpdateConfig{typ: "AiGenerateSampleDataJobConfig", AiGenerateSampleDataJobConfig: value}
-}
-
-func NewJobUpdateConfigFromAiGenerateBlueprintConstraintsJobConfig(value *AiGenerateBlueprintConstraintsJobConfig) *JobUpdateConfig {
-	return &JobUpdateConfig{typ: "AiGenerateBlueprintConstraintsJobConfig", AiGenerateBlueprintConstraintsJobConfig: value}
-}
-
-func NewJobUpdateConfigFromAiGenerateConstraintJobConfig(value *AiGenerateConstraintJobConfig) *JobUpdateConfig {
-	return &JobUpdateConfig{typ: "AiGenerateConstraintJobConfig", AiGenerateConstraintJobConfig: value}
-}
-
-func NewJobUpdateConfigFromAiRuleCreationJobConfig(value *AiRuleCreationJobConfig) *JobUpdateConfig {
-	return &JobUpdateConfig{typ: "AiRuleCreationJobConfig", AiRuleCreationJobConfig: value}
-}
-
-func NewJobUpdateConfigFromEmptyObject(value *EmptyObject) *JobUpdateConfig {
-	return &JobUpdateConfig{typ: "EmptyObject", EmptyObject: value}
-}
-
-func (j *JobUpdateConfig) UnmarshalJSON(data []byte) error {
-	valueDeleteRecordsJobConfig := new(DeleteRecordsJobConfig)
-	if err := json.Unmarshal(data, &valueDeleteRecordsJobConfig); err == nil {
-		j.typ = "DeleteRecordsJobConfig"
-		j.DeleteRecordsJobConfig = valueDeleteRecordsJobConfig
-		return nil
-	}
-	valueFileJobConfig := new(FileJobConfig)
-	if err := json.Unmarshal(data, &valueFileJobConfig); err == nil {
-		j.typ = "FileJobConfig"
-		j.FileJobConfig = valueFileJobConfig
-		return nil
-	}
-	valuePipelineJobConfig := new(PipelineJobConfig)
-	if err := json.Unmarshal(data, &valuePipelineJobConfig); err == nil {
-		j.typ = "PipelineJobConfig"
-		j.PipelineJobConfig = valuePipelineJobConfig
-		return nil
-	}
-	valueExportJobConfig := new(ExportJobConfig)
-	if err := json.Unmarshal(data, &valueExportJobConfig); err == nil {
-		j.typ = "ExportJobConfig"
-		j.ExportJobConfig = valueExportJobConfig
-		return nil
-	}
-	valueMutateJobConfig := new(MutateJobConfig)
-	if err := json.Unmarshal(data, &valueMutateJobConfig); err == nil {
-		j.typ = "MutateJobConfig"
-		j.MutateJobConfig = valueMutateJobConfig
-		return nil
-	}
-	valueFindAndReplaceJobConfig := new(FindAndReplaceJobConfig)
-	if err := json.Unmarshal(data, &valueFindAndReplaceJobConfig); err == nil {
-		j.typ = "FindAndReplaceJobConfig"
-		j.FindAndReplaceJobConfig = valueFindAndReplaceJobConfig
-		return nil
-	}
-	valueMappingProgramJobConfig := new(MappingProgramJobConfig)
-	if err := json.Unmarshal(data, &valueMappingProgramJobConfig); err == nil {
-		j.typ = "MappingProgramJobConfig"
-		j.MappingProgramJobConfig = valueMappingProgramJobConfig
-		return nil
-	}
-	valueAiGenerateBlueprintJobConfig := new(AiGenerateBlueprintJobConfig)
-	if err := json.Unmarshal(data, &valueAiGenerateBlueprintJobConfig); err == nil {
-		j.typ = "AiGenerateBlueprintJobConfig"
-		j.AiGenerateBlueprintJobConfig = valueAiGenerateBlueprintJobConfig
-		return nil
-	}
-	valueAppAutobuildDeployJobConfig := new(AppAutobuildDeployJobConfig)
-	if err := json.Unmarshal(data, &valueAppAutobuildDeployJobConfig); err == nil {
-		j.typ = "AppAutobuildDeployJobConfig"
-		j.AppAutobuildDeployJobConfig = valueAppAutobuildDeployJobConfig
-		return nil
-	}
-	valueAiGenerateSampleDataJobConfig := new(AiGenerateSampleDataJobConfig)
-	if err := json.Unmarshal(data, &valueAiGenerateSampleDataJobConfig); err == nil {
-		j.typ = "AiGenerateSampleDataJobConfig"
-		j.AiGenerateSampleDataJobConfig = valueAiGenerateSampleDataJobConfig
-		return nil
-	}
-	valueAiGenerateBlueprintConstraintsJobConfig := new(AiGenerateBlueprintConstraintsJobConfig)
-	if err := json.Unmarshal(data, &valueAiGenerateBlueprintConstraintsJobConfig); err == nil {
-		j.typ = "AiGenerateBlueprintConstraintsJobConfig"
-		j.AiGenerateBlueprintConstraintsJobConfig = valueAiGenerateBlueprintConstraintsJobConfig
-		return nil
-	}
-	valueAiGenerateConstraintJobConfig := new(AiGenerateConstraintJobConfig)
-	if err := json.Unmarshal(data, &valueAiGenerateConstraintJobConfig); err == nil {
-		j.typ = "AiGenerateConstraintJobConfig"
-		j.AiGenerateConstraintJobConfig = valueAiGenerateConstraintJobConfig
-		return nil
-	}
-	valueAiRuleCreationJobConfig := new(AiRuleCreationJobConfig)
-	if err := json.Unmarshal(data, &valueAiRuleCreationJobConfig); err == nil {
-		j.typ = "AiRuleCreationJobConfig"
-		j.AiRuleCreationJobConfig = valueAiRuleCreationJobConfig
-		return nil
-	}
-	valueEmptyObject := new(EmptyObject)
-	if err := json.Unmarshal(data, &valueEmptyObject); err == nil {
-		j.typ = "EmptyObject"
-		j.EmptyObject = valueEmptyObject
-		return nil
-	}
-	return fmt.Errorf("%s cannot be deserialized as a %T", data, j)
-}
-
-func (j JobUpdateConfig) MarshalJSON() ([]byte, error) {
-	if j.typ == "DeleteRecordsJobConfig" || j.DeleteRecordsJobConfig != nil {
-		return json.Marshal(j.DeleteRecordsJobConfig)
-	}
-	if j.typ == "FileJobConfig" || j.FileJobConfig != nil {
-		return json.Marshal(j.FileJobConfig)
-	}
-	if j.typ == "PipelineJobConfig" || j.PipelineJobConfig != nil {
-		return json.Marshal(j.PipelineJobConfig)
-	}
-	if j.typ == "ExportJobConfig" || j.ExportJobConfig != nil {
-		return json.Marshal(j.ExportJobConfig)
-	}
-	if j.typ == "MutateJobConfig" || j.MutateJobConfig != nil {
-		return json.Marshal(j.MutateJobConfig)
-	}
-	if j.typ == "FindAndReplaceJobConfig" || j.FindAndReplaceJobConfig != nil {
-		return json.Marshal(j.FindAndReplaceJobConfig)
-	}
-	if j.typ == "MappingProgramJobConfig" || j.MappingProgramJobConfig != nil {
-		return json.Marshal(j.MappingProgramJobConfig)
-	}
-	if j.typ == "AiGenerateBlueprintJobConfig" || j.AiGenerateBlueprintJobConfig != nil {
-		return json.Marshal(j.AiGenerateBlueprintJobConfig)
-	}
-	if j.typ == "AppAutobuildDeployJobConfig" || j.AppAutobuildDeployJobConfig != nil {
-		return json.Marshal(j.AppAutobuildDeployJobConfig)
-	}
-	if j.typ == "AiGenerateSampleDataJobConfig" || j.AiGenerateSampleDataJobConfig != nil {
-		return json.Marshal(j.AiGenerateSampleDataJobConfig)
-	}
-	if j.typ == "AiGenerateBlueprintConstraintsJobConfig" || j.AiGenerateBlueprintConstraintsJobConfig != nil {
-		return json.Marshal(j.AiGenerateBlueprintConstraintsJobConfig)
-	}
-	if j.typ == "AiGenerateConstraintJobConfig" || j.AiGenerateConstraintJobConfig != nil {
-		return json.Marshal(j.AiGenerateConstraintJobConfig)
-	}
-	if j.typ == "AiRuleCreationJobConfig" || j.AiRuleCreationJobConfig != nil {
-		return json.Marshal(j.AiRuleCreationJobConfig)
-	}
-	if j.typ == "EmptyObject" || j.EmptyObject != nil {
-		return json.Marshal(j.EmptyObject)
-	}
-	return nil, fmt.Errorf("type %T does not include a non-empty union type", j)
-}
-
-type JobUpdateConfigVisitor interface {
-	VisitDeleteRecordsJobConfig(*DeleteRecordsJobConfig) error
-	VisitFileJobConfig(*FileJobConfig) error
-	VisitPipelineJobConfig(*PipelineJobConfig) error
-	VisitExportJobConfig(*ExportJobConfig) error
-	VisitMutateJobConfig(*MutateJobConfig) error
-	VisitFindAndReplaceJobConfig(*FindAndReplaceJobConfig) error
-	VisitMappingProgramJobConfig(*MappingProgramJobConfig) error
-	VisitAiGenerateBlueprintJobConfig(*AiGenerateBlueprintJobConfig) error
-	VisitAppAutobuildDeployJobConfig(*AppAutobuildDeployJobConfig) error
-	VisitAiGenerateSampleDataJobConfig(*AiGenerateSampleDataJobConfig) error
-	VisitAiGenerateBlueprintConstraintsJobConfig(*AiGenerateBlueprintConstraintsJobConfig) error
-	VisitAiGenerateConstraintJobConfig(*AiGenerateConstraintJobConfig) error
-	VisitAiRuleCreationJobConfig(*AiRuleCreationJobConfig) error
-	VisitEmptyObject(*EmptyObject) error
-}
-
-func (j *JobUpdateConfig) Accept(visitor JobUpdateConfigVisitor) error {
-	if j.typ == "DeleteRecordsJobConfig" || j.DeleteRecordsJobConfig != nil {
-		return visitor.VisitDeleteRecordsJobConfig(j.DeleteRecordsJobConfig)
-	}
-	if j.typ == "FileJobConfig" || j.FileJobConfig != nil {
-		return visitor.VisitFileJobConfig(j.FileJobConfig)
-	}
-	if j.typ == "PipelineJobConfig" || j.PipelineJobConfig != nil {
-		return visitor.VisitPipelineJobConfig(j.PipelineJobConfig)
-	}
-	if j.typ == "ExportJobConfig" || j.ExportJobConfig != nil {
-		return visitor.VisitExportJobConfig(j.ExportJobConfig)
-	}
-	if j.typ == "MutateJobConfig" || j.MutateJobConfig != nil {
-		return visitor.VisitMutateJobConfig(j.MutateJobConfig)
-	}
-	if j.typ == "FindAndReplaceJobConfig" || j.FindAndReplaceJobConfig != nil {
-		return visitor.VisitFindAndReplaceJobConfig(j.FindAndReplaceJobConfig)
-	}
-	if j.typ == "MappingProgramJobConfig" || j.MappingProgramJobConfig != nil {
-		return visitor.VisitMappingProgramJobConfig(j.MappingProgramJobConfig)
-	}
-	if j.typ == "AiGenerateBlueprintJobConfig" || j.AiGenerateBlueprintJobConfig != nil {
-		return visitor.VisitAiGenerateBlueprintJobConfig(j.AiGenerateBlueprintJobConfig)
-	}
-	if j.typ == "AppAutobuildDeployJobConfig" || j.AppAutobuildDeployJobConfig != nil {
-		return visitor.VisitAppAutobuildDeployJobConfig(j.AppAutobuildDeployJobConfig)
-	}
-	if j.typ == "AiGenerateSampleDataJobConfig" || j.AiGenerateSampleDataJobConfig != nil {
-		return visitor.VisitAiGenerateSampleDataJobConfig(j.AiGenerateSampleDataJobConfig)
-	}
-	if j.typ == "AiGenerateBlueprintConstraintsJobConfig" || j.AiGenerateBlueprintConstraintsJobConfig != nil {
-		return visitor.VisitAiGenerateBlueprintConstraintsJobConfig(j.AiGenerateBlueprintConstraintsJobConfig)
-	}
-	if j.typ == "AiGenerateConstraintJobConfig" || j.AiGenerateConstraintJobConfig != nil {
-		return visitor.VisitAiGenerateConstraintJobConfig(j.AiGenerateConstraintJobConfig)
-	}
-	if j.typ == "AiRuleCreationJobConfig" || j.AiRuleCreationJobConfig != nil {
-		return visitor.VisitAiRuleCreationJobConfig(j.AiRuleCreationJobConfig)
-	}
-	if j.typ == "EmptyObject" || j.EmptyObject != nil {
-		return visitor.VisitEmptyObject(j.EmptyObject)
-	}
-	return fmt.Errorf("type %T does not include a non-empty union type", j)
-}
-
-type MappingProgramJobConfig struct {
-	SourceSheetId      SheetId                  `json:"sourceSheetId" url:"sourceSheetId"`
-	DestinationSheetId SheetId                  `json:"destinationSheetId" url:"destinationSheetId"`
-	MappingRules       []map[string]interface{} `json:"mappingRules,omitempty" url:"mappingRules,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (m *MappingProgramJobConfig) GetExtraProperties() map[string]interface{} {
-	return m.extraProperties
-}
-
-func (m *MappingProgramJobConfig) UnmarshalJSON(data []byte) error {
-	type unmarshaler MappingProgramJobConfig
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*m = MappingProgramJobConfig(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *m)
-	if err != nil {
-		return err
-	}
-	m.extraProperties = extraProperties
-
-	m._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (m *MappingProgramJobConfig) String() string {
-	if len(m._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(m._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(m); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", m)
-}
-
-type Metadata struct {
-	Certainty  *Certainty `json:"certainty,omitempty" url:"certainty,omitempty"`
-	Confidence *float64   `json:"confidence,omitempty" url:"confidence,omitempty"`
-	Source     *string    `json:"source,omitempty" url:"source,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (m *Metadata) GetExtraProperties() map[string]interface{} {
-	return m.extraProperties
-}
-
-func (m *Metadata) UnmarshalJSON(data []byte) error {
-	type unmarshaler Metadata
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*m = Metadata(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *m)
-	if err != nil {
-		return err
-	}
-	m.extraProperties = extraProperties
-
-	m._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (m *Metadata) String() string {
-	if len(m._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(m._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(m); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", m)
-}
-
-type PipelineJobConfig struct {
-	SourceSheetId      SheetId `json:"sourceSheetId" url:"sourceSheetId"`
-	DestinationSheetId SheetId `json:"destinationSheetId" url:"destinationSheetId"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (p *PipelineJobConfig) GetExtraProperties() map[string]interface{} {
-	return p.extraProperties
-}
-
-func (p *PipelineJobConfig) UnmarshalJSON(data []byte) error {
-	type unmarshaler PipelineJobConfig
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*p = PipelineJobConfig(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *p)
-	if err != nil {
-		return err
-	}
-	p.extraProperties = extraProperties
-
-	p._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (p *PipelineJobConfig) String() string {
-	if len(p._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(p); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", p)
-}
-
-type ResourceJobSubject struct {
-	Id string `json:"id" url:"id"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (r *ResourceJobSubject) GetExtraProperties() map[string]interface{} {
-	return r.extraProperties
-}
-
-func (r *ResourceJobSubject) UnmarshalJSON(data []byte) error {
-	type unmarshaler ResourceJobSubject
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*r = ResourceJobSubject(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *r)
-	if err != nil {
-		return err
-	}
-	r.extraProperties = extraProperties
-
-	r._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (r *ResourceJobSubject) String() string {
-	if len(r._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(r._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(r); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", r)
-}
-
-type SourceField struct {
-	// The description of the source field
-	SourceField *Property `json:"sourceField,omitempty" url:"sourceField,omitempty"`
-	// A list of preview values of the data in the source field
-	Preview []string `json:"preview,omitempty" url:"preview,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (s *SourceField) GetExtraProperties() map[string]interface{} {
-	return s.extraProperties
-}
-
-func (s *SourceField) UnmarshalJSON(data []byte) error {
-	type unmarshaler SourceField
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*s = SourceField(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *s)
-	if err != nil {
-		return err
-	}
-	s.extraProperties = extraProperties
-
-	s._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (s *SourceField) String() string {
-	if len(s._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(s); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", s)
-}
-
-// The type of trigger to use for this job
-type Trigger string
-
-const (
-	TriggerManual    Trigger = "manual"
-	TriggerImmediate Trigger = "immediate"
-)
-
-func NewTriggerFromString(s string) (Trigger, error) {
-	switch s {
-	case "manual":
-		return TriggerManual, nil
-	case "immediate":
-		return TriggerImmediate, nil
-	}
-	var t Trigger
-	return "", fmt.Errorf("%s is not a valid %T", s, t)
-}
-
-func (t Trigger) Ptr() *Trigger {
-	return &t
-}
-
-type MappingRule struct {
-	// Name of the mapping rule
-	Name   string      `json:"name" url:"name"`
-	Type   string      `json:"type" url:"type"`
-	Config interface{} `json:"config,omitempty" url:"config,omitempty"`
-	// Time the mapping rule was last updated
-	AcceptedAt *time.Time `json:"acceptedAt,omitempty" url:"acceptedAt,omitempty"`
-	// User ID of the contributor of the mapping rule
-	AcceptedBy *UserId `json:"acceptedBy,omitempty" url:"acceptedBy,omitempty"`
-	// Metadata of the mapping rule
-	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
-	// ID of the mapping rule
-	Id MappingId `json:"id" url:"id"`
-	// Confidence of the mapping rule
-	Confidence *int `json:"confidence,omitempty" url:"confidence,omitempty"`
-	// User ID of the user who suggested the mapping rule
-	CreatedBy *UserId `json:"createdBy,omitempty" url:"createdBy,omitempty"`
-	// Time the mapping rule was created
-	CreatedAt time.Time `json:"createdAt" url:"createdAt"`
-	// Time the mapping rule was last updated
-	UpdatedAt time.Time `json:"updatedAt" url:"updatedAt"`
-	// Time the mapping rule was deleted
-	DeletedAt *time.Time `json:"deletedAt,omitempty" url:"deletedAt,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (m *MappingRule) GetExtraProperties() map[string]interface{} {
-	return m.extraProperties
-}
-
-func (m *MappingRule) UnmarshalJSON(data []byte) error {
-	type embed MappingRule
-	var unmarshaler = struct {
-		embed
-		AcceptedAt *core.DateTime `json:"acceptedAt,omitempty"`
-		CreatedAt  *core.DateTime `json:"createdAt"`
-		UpdatedAt  *core.DateTime `json:"updatedAt"`
-		DeletedAt  *core.DateTime `json:"deletedAt,omitempty"`
-	}{
-		embed: embed(*m),
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	*m = MappingRule(unmarshaler.embed)
-	m.AcceptedAt = unmarshaler.AcceptedAt.TimePtr()
-	m.CreatedAt = unmarshaler.CreatedAt.Time()
-	m.UpdatedAt = unmarshaler.UpdatedAt.Time()
-	m.DeletedAt = unmarshaler.DeletedAt.TimePtr()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *m)
-	if err != nil {
-		return err
-	}
-	m.extraProperties = extraProperties
-
-	m._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (m *MappingRule) MarshalJSON() ([]byte, error) {
-	type embed MappingRule
-	var marshaler = struct {
-		embed
-		AcceptedAt *core.DateTime `json:"acceptedAt,omitempty"`
-		CreatedAt  *core.DateTime `json:"createdAt"`
-		UpdatedAt  *core.DateTime `json:"updatedAt"`
-		DeletedAt  *core.DateTime `json:"deletedAt,omitempty"`
-	}{
-		embed:      embed(*m),
-		AcceptedAt: core.NewOptionalDateTime(m.AcceptedAt),
-		CreatedAt:  core.NewDateTime(m.CreatedAt),
-		UpdatedAt:  core.NewDateTime(m.UpdatedAt),
-		DeletedAt:  core.NewOptionalDateTime(m.DeletedAt),
-	}
-	return json.Marshal(marshaler)
-}
-
-func (m *MappingRule) String() string {
-	if len(m._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(m._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(m); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", m)
-}
-
-type MappingRuleOrConfig struct {
-	// Name of the mapping rule
-	Name   string      `json:"name" url:"name"`
-	Type   string      `json:"type" url:"type"`
-	Config interface{} `json:"config,omitempty" url:"config,omitempty"`
-	// Time the mapping rule was last updated
-	AcceptedAt *time.Time `json:"acceptedAt,omitempty" url:"acceptedAt,omitempty"`
-	// User ID of the contributor of the mapping rule
-	AcceptedBy *UserId `json:"acceptedBy,omitempty" url:"acceptedBy,omitempty"`
-	// Metadata of the mapping rule
-	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
-	// ID of the mapping rule
-	Id *MappingId `json:"id,omitempty" url:"id,omitempty"`
-	// Confidence of the mapping rule
-	Confidence *int `json:"confidence,omitempty" url:"confidence,omitempty"`
-	// User ID of the creator of the mapping rule
-	CreatedBy *UserId `json:"createdBy,omitempty" url:"createdBy,omitempty"`
-	// Time the mapping rule was created
-	CreatedAt *time.Time `json:"createdAt,omitempty" url:"createdAt,omitempty"`
-	// Time the mapping rule was last updated
-	UpdatedAt *time.Time `json:"updatedAt,omitempty" url:"updatedAt,omitempty"`
-	// Time the mapping rule was deleted
-	DeletedAt *time.Time `json:"deletedAt,omitempty" url:"deletedAt,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (m *MappingRuleOrConfig) GetExtraProperties() map[string]interface{} {
-	return m.extraProperties
-}
-
-func (m *MappingRuleOrConfig) UnmarshalJSON(data []byte) error {
-	type embed MappingRuleOrConfig
-	var unmarshaler = struct {
-		embed
-		AcceptedAt *core.DateTime `json:"acceptedAt,omitempty"`
-		CreatedAt  *core.DateTime `json:"createdAt,omitempty"`
-		UpdatedAt  *core.DateTime `json:"updatedAt,omitempty"`
-		DeletedAt  *core.DateTime `json:"deletedAt,omitempty"`
-	}{
-		embed: embed(*m),
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	*m = MappingRuleOrConfig(unmarshaler.embed)
-	m.AcceptedAt = unmarshaler.AcceptedAt.TimePtr()
-	m.CreatedAt = unmarshaler.CreatedAt.TimePtr()
-	m.UpdatedAt = unmarshaler.UpdatedAt.TimePtr()
-	m.DeletedAt = unmarshaler.DeletedAt.TimePtr()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *m)
-	if err != nil {
-		return err
-	}
-	m.extraProperties = extraProperties
-
-	m._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (m *MappingRuleOrConfig) MarshalJSON() ([]byte, error) {
-	type embed MappingRuleOrConfig
-	var marshaler = struct {
-		embed
-		AcceptedAt *core.DateTime `json:"acceptedAt,omitempty"`
-		CreatedAt  *core.DateTime `json:"createdAt,omitempty"`
-		UpdatedAt  *core.DateTime `json:"updatedAt,omitempty"`
-		DeletedAt  *core.DateTime `json:"deletedAt,omitempty"`
-	}{
-		embed:      embed(*m),
-		AcceptedAt: core.NewOptionalDateTime(m.AcceptedAt),
-		CreatedAt:  core.NewOptionalDateTime(m.CreatedAt),
-		UpdatedAt:  core.NewOptionalDateTime(m.UpdatedAt),
-		DeletedAt:  core.NewOptionalDateTime(m.DeletedAt),
-	}
-	return json.Marshal(marshaler)
-}
-
-func (m *MappingRuleOrConfig) String() string {
-	if len(m._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(m._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(m); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", m)
-}
-
-type Program struct {
-	// Mapping rules
-	Rules []*MappingRuleOrConfig `json:"rules,omitempty" url:"rules,omitempty"`
-	// If this program was saved, this is the ID of the program
-	Id *string `json:"id,omitempty" url:"id,omitempty"`
-	// Namespace of the program
-	Namespace *string `json:"namespace,omitempty" url:"namespace,omitempty"`
-	// Family ID of the program, if it belongs to a family
-	FamilyId *FamilyId `json:"familyId,omitempty" url:"familyId,omitempty"`
-	// If this program was saved, this is the time it was created
-	CreatedAt *time.Time `json:"createdAt,omitempty" url:"createdAt,omitempty"`
-	// If this program was saved, this is the user ID of the creator
-	CreatedBy *UserId `json:"createdBy,omitempty" url:"createdBy,omitempty"`
-	// Source keys
-	SourceKeys []string `json:"sourceKeys,omitempty" url:"sourceKeys,omitempty"`
-	// Destination keys
-	DestinationKeys []string `json:"destinationKeys,omitempty" url:"destinationKeys,omitempty"`
-	// Summary of the mapping rules
-	Summary *ProgramSummary `json:"summary,omitempty" url:"summary,omitempty"`
-	// If this program was saved, this token allows you to modify the program
-	AccessToken *string `json:"accessToken,omitempty" url:"accessToken,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (p *Program) GetExtraProperties() map[string]interface{} {
-	return p.extraProperties
-}
-
-func (p *Program) UnmarshalJSON(data []byte) error {
-	type embed Program
-	var unmarshaler = struct {
-		embed
-		CreatedAt *core.DateTime `json:"createdAt,omitempty"`
-	}{
-		embed: embed(*p),
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	*p = Program(unmarshaler.embed)
-	p.CreatedAt = unmarshaler.CreatedAt.TimePtr()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *p)
-	if err != nil {
-		return err
-	}
-	p.extraProperties = extraProperties
-
-	p._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (p *Program) MarshalJSON() ([]byte, error) {
-	type embed Program
-	var marshaler = struct {
-		embed
-		CreatedAt *core.DateTime `json:"createdAt,omitempty"`
-	}{
-		embed:     embed(*p),
-		CreatedAt: core.NewOptionalDateTime(p.CreatedAt),
-	}
-	return json.Marshal(marshaler)
-}
-
-func (p *Program) String() string {
-	if len(p._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(p); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", p)
-}
-
-type ProgramSummary struct {
-	// Total number of mapping rules
-	TotalRuleCount int `json:"totalRuleCount" url:"totalRuleCount"`
-	// Number of mapping rules added
-	AddedRuleCount int `json:"addedRuleCount" url:"addedRuleCount"`
-	// Number of mapping rules deleted
-	DeletedRuleCount int `json:"deletedRuleCount" url:"deletedRuleCount"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (p *ProgramSummary) GetExtraProperties() map[string]interface{} {
-	return p.extraProperties
-}
-
-func (p *ProgramSummary) UnmarshalJSON(data []byte) error {
-	type unmarshaler ProgramSummary
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*p = ProgramSummary(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *p)
-	if err != nil {
-		return err
-	}
-	p.extraProperties = extraProperties
-
-	p._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (p *ProgramSummary) String() string {
-	if len(p._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(p); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", p)
-}
 
 type ArrayableProperty struct {
 	// Will allow multiple values and store as an array
@@ -8401,6 +4454,8 @@ type EnumPropertyConfig struct {
 	// Permit the user to create new options for this specific field.
 	AllowCustom *bool                 `json:"allowCustom,omitempty" url:"allowCustom,omitempty"`
 	Options     []*EnumPropertyOption `json:"options,omitempty" url:"options,omitempty"`
+	// Sort the options by the value of this property. Defaults to `label`.
+	SortBy *EnumPropertySortBy `json:"sortBy,omitempty" url:"sortBy,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -8441,7 +4496,7 @@ func (e *EnumPropertyConfig) String() string {
 }
 
 type EnumPropertyOption struct {
-	// A visual label for this option, defaults to value if not provided
+	// A visual label for this option
 	Label *string `json:"label,omitempty" url:"label,omitempty"`
 	// A short description for this option
 	Description *string `json:"description,omitempty" url:"description,omitempty"`
@@ -8455,6 +4510,8 @@ type EnumPropertyOption struct {
 	Value interface{} `json:"value,omitempty" url:"value,omitempty"`
 	// Alternative names to match this enum option to
 	AlternativeNames []string `json:"alternativeNames,omitempty" url:"alternativeNames,omitempty"`
+	// The order of this option in the list. SortBy must be set to `ordinal` to use this.
+	Ordinal *int `json:"ordinal,omitempty" url:"ordinal,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -8492,6 +4549,31 @@ func (e *EnumPropertyOption) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", e)
+}
+
+type EnumPropertySortBy string
+
+const (
+	EnumPropertySortByLabel   EnumPropertySortBy = "label"
+	EnumPropertySortByValue   EnumPropertySortBy = "value"
+	EnumPropertySortByOrdinal EnumPropertySortBy = "ordinal"
+)
+
+func NewEnumPropertySortByFromString(s string) (EnumPropertySortBy, error) {
+	switch s {
+	case "label":
+		return EnumPropertySortByLabel, nil
+	case "value":
+		return EnumPropertySortByValue, nil
+	case "ordinal":
+		return EnumPropertySortByOrdinal, nil
+	}
+	var t EnumPropertySortBy
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (e EnumPropertySortBy) Ptr() *EnumPropertySortBy {
+	return &e
 }
 
 type ExternalConstraint struct {
@@ -8710,6 +4792,187 @@ func (n *NumberProperty) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", n)
+}
+
+type Property struct {
+	Type          string
+	String        *StringProperty
+	Number        *NumberProperty
+	Boolean       *BooleanProperty
+	Date          *DateProperty
+	Enum          *EnumProperty
+	Reference     *ReferenceProperty
+	ReferenceList *ReferenceListProperty
+	StringList    *StringListProperty
+	EnumList      *EnumListProperty
+}
+
+func NewPropertyFromString(value *StringProperty) *Property {
+	return &Property{Type: "string", String: value}
+}
+
+func NewPropertyFromNumber(value *NumberProperty) *Property {
+	return &Property{Type: "number", Number: value}
+}
+
+func NewPropertyFromBoolean(value *BooleanProperty) *Property {
+	return &Property{Type: "boolean", Boolean: value}
+}
+
+func NewPropertyFromDate(value *DateProperty) *Property {
+	return &Property{Type: "date", Date: value}
+}
+
+func NewPropertyFromEnum(value *EnumProperty) *Property {
+	return &Property{Type: "enum", Enum: value}
+}
+
+func NewPropertyFromReference(value *ReferenceProperty) *Property {
+	return &Property{Type: "reference", Reference: value}
+}
+
+func NewPropertyFromReferenceList(value *ReferenceListProperty) *Property {
+	return &Property{Type: "reference-list", ReferenceList: value}
+}
+
+func NewPropertyFromStringList(value *StringListProperty) *Property {
+	return &Property{Type: "string-list", StringList: value}
+}
+
+func NewPropertyFromEnumList(value *EnumListProperty) *Property {
+	return &Property{Type: "enum-list", EnumList: value}
+}
+
+func (p *Property) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	p.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", p)
+	}
+	switch unmarshaler.Type {
+	case "string":
+		value := new(StringProperty)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.String = value
+	case "number":
+		value := new(NumberProperty)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.Number = value
+	case "boolean":
+		value := new(BooleanProperty)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.Boolean = value
+	case "date":
+		value := new(DateProperty)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.Date = value
+	case "enum":
+		value := new(EnumProperty)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.Enum = value
+	case "reference":
+		value := new(ReferenceProperty)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.Reference = value
+	case "reference-list":
+		value := new(ReferenceListProperty)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.ReferenceList = value
+	case "string-list":
+		value := new(StringListProperty)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.StringList = value
+	case "enum-list":
+		value := new(EnumListProperty)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		p.EnumList = value
+	}
+	return nil
+}
+
+func (p Property) MarshalJSON() ([]byte, error) {
+	switch p.Type {
+	default:
+		return nil, fmt.Errorf("invalid type %s in %T", p.Type, p)
+	case "string":
+		return core.MarshalJSONWithExtraProperty(p.String, "type", "string")
+	case "number":
+		return core.MarshalJSONWithExtraProperty(p.Number, "type", "number")
+	case "boolean":
+		return core.MarshalJSONWithExtraProperty(p.Boolean, "type", "boolean")
+	case "date":
+		return core.MarshalJSONWithExtraProperty(p.Date, "type", "date")
+	case "enum":
+		return core.MarshalJSONWithExtraProperty(p.Enum, "type", "enum")
+	case "reference":
+		return core.MarshalJSONWithExtraProperty(p.Reference, "type", "reference")
+	case "reference-list":
+		return core.MarshalJSONWithExtraProperty(p.ReferenceList, "type", "reference-list")
+	case "string-list":
+		return core.MarshalJSONWithExtraProperty(p.StringList, "type", "string-list")
+	case "enum-list":
+		return core.MarshalJSONWithExtraProperty(p.EnumList, "type", "enum-list")
+	}
+}
+
+type PropertyVisitor interface {
+	VisitString(*StringProperty) error
+	VisitNumber(*NumberProperty) error
+	VisitBoolean(*BooleanProperty) error
+	VisitDate(*DateProperty) error
+	VisitEnum(*EnumProperty) error
+	VisitReference(*ReferenceProperty) error
+	VisitReferenceList(*ReferenceListProperty) error
+	VisitStringList(*StringListProperty) error
+	VisitEnumList(*EnumListProperty) error
+}
+
+func (p *Property) Accept(visitor PropertyVisitor) error {
+	switch p.Type {
+	default:
+		return fmt.Errorf("invalid type %s in %T", p.Type, p)
+	case "string":
+		return visitor.VisitString(p.String)
+	case "number":
+		return visitor.VisitNumber(p.Number)
+	case "boolean":
+		return visitor.VisitBoolean(p.Boolean)
+	case "date":
+		return visitor.VisitDate(p.Date)
+	case "enum":
+		return visitor.VisitEnum(p.Enum)
+	case "reference":
+		return visitor.VisitReference(p.Reference)
+	case "reference-list":
+		return visitor.VisitReferenceList(p.ReferenceList)
+	case "string-list":
+		return visitor.VisitStringList(p.StringList)
+	case "enum-list":
+		return visitor.VisitEnumList(p.EnumList)
+	}
 }
 
 // Defines an array of values referenced from another sheet. Links should be established automatically by the matching engine or similar upon an evaluation of unique or similar columns between datasets.
@@ -8949,9 +5212,11 @@ type StoredConstraint struct {
 	Validator string `json:"validator" url:"validator"`
 	// The version of the stored constraint to use. (Defaults to version 1.)
 	Version *int `json:"version,omitempty" url:"version,omitempty"`
-	// A short description of what this constraint configuration does, example - values between 1 and 100
-	Description *string     `json:"description,omitempty" url:"description,omitempty"`
-	Config      interface{} `json:"config,omitempty" url:"config,omitempty"`
+	// A full description of what this constraint configuration does
+	Description *string `json:"description,omitempty" url:"description,omitempty"`
+	// A short description of what this constraint constraint should do, example - values between 1 and 100
+	Label  *string     `json:"label,omitempty" url:"label,omitempty"`
+	Config interface{} `json:"config,omitempty" url:"config,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -9372,6 +5637,170 @@ func (c *CellValue) String() string {
 	return fmt.Sprintf("%#v", c)
 }
 
+type CellValueUnion struct {
+	String     string
+	Integer    int
+	Long       int64
+	Double     float64
+	Boolean    bool
+	Date       time.Time
+	DateTime   time.Time
+	StringList []string
+
+	typ string
+}
+
+func NewCellValueUnionFromString(value string) *CellValueUnion {
+	return &CellValueUnion{typ: "String", String: value}
+}
+
+func NewCellValueUnionFromInteger(value int) *CellValueUnion {
+	return &CellValueUnion{typ: "Integer", Integer: value}
+}
+
+func NewCellValueUnionFromLong(value int64) *CellValueUnion {
+	return &CellValueUnion{typ: "Long", Long: value}
+}
+
+func NewCellValueUnionFromDouble(value float64) *CellValueUnion {
+	return &CellValueUnion{typ: "Double", Double: value}
+}
+
+func NewCellValueUnionFromBoolean(value bool) *CellValueUnion {
+	return &CellValueUnion{typ: "Boolean", Boolean: value}
+}
+
+func NewCellValueUnionFromDate(value time.Time) *CellValueUnion {
+	return &CellValueUnion{typ: "Date", Date: value}
+}
+
+func NewCellValueUnionFromDateTime(value time.Time) *CellValueUnion {
+	return &CellValueUnion{typ: "DateTime", DateTime: value}
+}
+
+func NewCellValueUnionFromStringList(value []string) *CellValueUnion {
+	return &CellValueUnion{typ: "StringList", StringList: value}
+}
+
+func (c *CellValueUnion) UnmarshalJSON(data []byte) error {
+	var valueString string
+	if err := json.Unmarshal(data, &valueString); err == nil {
+		c.typ = "String"
+		c.String = valueString
+		return nil
+	}
+	var valueInteger int
+	if err := json.Unmarshal(data, &valueInteger); err == nil {
+		c.typ = "Integer"
+		c.Integer = valueInteger
+		return nil
+	}
+	var valueLong int64
+	if err := json.Unmarshal(data, &valueLong); err == nil {
+		c.typ = "Long"
+		c.Long = valueLong
+		return nil
+	}
+	var valueDouble float64
+	if err := json.Unmarshal(data, &valueDouble); err == nil {
+		c.typ = "Double"
+		c.Double = valueDouble
+		return nil
+	}
+	var valueBoolean bool
+	if err := json.Unmarshal(data, &valueBoolean); err == nil {
+		c.typ = "Boolean"
+		c.Boolean = valueBoolean
+		return nil
+	}
+	var valueDate *core.Date
+	if err := json.Unmarshal(data, &valueDate); err == nil {
+		c.typ = "Date"
+		c.Date = valueDate.Time()
+		return nil
+	}
+	var valueDateTime *core.DateTime
+	if err := json.Unmarshal(data, &valueDateTime); err == nil {
+		c.typ = "DateTime"
+		c.DateTime = valueDateTime.Time()
+		return nil
+	}
+	var valueStringList []string
+	if err := json.Unmarshal(data, &valueStringList); err == nil {
+		c.typ = "StringList"
+		c.StringList = valueStringList
+		return nil
+	}
+	return fmt.Errorf("%s cannot be deserialized as a %T", data, c)
+}
+
+func (c CellValueUnion) MarshalJSON() ([]byte, error) {
+	if c.typ == "String" || c.String != "" {
+		return json.Marshal(c.String)
+	}
+	if c.typ == "Integer" || c.Integer != 0 {
+		return json.Marshal(c.Integer)
+	}
+	if c.typ == "Long" || c.Long != 0 {
+		return json.Marshal(c.Long)
+	}
+	if c.typ == "Double" || c.Double != 0 {
+		return json.Marshal(c.Double)
+	}
+	if c.typ == "Boolean" || c.Boolean != false {
+		return json.Marshal(c.Boolean)
+	}
+	if c.typ == "Date" || !c.Date.IsZero() {
+		return json.Marshal(core.NewDate(c.Date))
+	}
+	if c.typ == "DateTime" || !c.DateTime.IsZero() {
+		return json.Marshal(core.NewDateTime(c.DateTime))
+	}
+	if c.typ == "StringList" || c.StringList != nil {
+		return json.Marshal(c.StringList)
+	}
+	return nil, fmt.Errorf("type %T does not include a non-empty union type", c)
+}
+
+type CellValueUnionVisitor interface {
+	VisitString(string) error
+	VisitInteger(int) error
+	VisitLong(int64) error
+	VisitDouble(float64) error
+	VisitBoolean(bool) error
+	VisitDate(time.Time) error
+	VisitDateTime(time.Time) error
+	VisitStringList([]string) error
+}
+
+func (c *CellValueUnion) Accept(visitor CellValueUnionVisitor) error {
+	if c.typ == "String" || c.String != "" {
+		return visitor.VisitString(c.String)
+	}
+	if c.typ == "Integer" || c.Integer != 0 {
+		return visitor.VisitInteger(c.Integer)
+	}
+	if c.typ == "Long" || c.Long != 0 {
+		return visitor.VisitLong(c.Long)
+	}
+	if c.typ == "Double" || c.Double != 0 {
+		return visitor.VisitDouble(c.Double)
+	}
+	if c.typ == "Boolean" || c.Boolean != false {
+		return visitor.VisitBoolean(c.Boolean)
+	}
+	if c.typ == "Date" || !c.Date.IsZero() {
+		return visitor.VisitDate(c.Date)
+	}
+	if c.typ == "DateTime" || !c.DateTime.IsZero() {
+		return visitor.VisitDateTime(c.DateTime)
+	}
+	if c.typ == "StringList" || c.StringList != nil {
+		return visitor.VisitStringList(c.StringList)
+	}
+	return fmt.Errorf("type %T does not include a non-empty union type", c)
+}
+
 type CellValueWithLinks struct {
 	Valid    *bool                `json:"valid,omitempty" url:"valid,omitempty"`
 	Messages []*ValidationMessage `json:"messages,omitempty" url:"messages,omitempty"`
@@ -9645,53 +6074,6 @@ func (f *FieldRecordCounts) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", f)
-}
-
-// A list of records with optional record counts
-type GetRecordsResponseData struct {
-	Success bool             `json:"success" url:"success"`
-	Records RecordsWithLinks `json:"records,omitempty" url:"records,omitempty"`
-	Counts  *RecordCounts    `json:"counts,omitempty" url:"counts,omitempty"`
-	// Deprecated, use `commitId` instead.
-	VersionId *VersionId `json:"versionId,omitempty" url:"versionId,omitempty"`
-	CommitId  *CommitId  `json:"commitId,omitempty" url:"commitId,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (g *GetRecordsResponseData) GetExtraProperties() map[string]interface{} {
-	return g.extraProperties
-}
-
-func (g *GetRecordsResponseData) UnmarshalJSON(data []byte) error {
-	type unmarshaler GetRecordsResponseData
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*g = GetRecordsResponseData(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *g)
-	if err != nil {
-		return err
-	}
-	g.extraProperties = extraProperties
-
-	g._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (g *GetRecordsResponseData) String() string {
-	if len(g._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(g); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", g)
 }
 
 // A single row of data in a Sheet
@@ -10472,201 +6854,6 @@ func (r *ResourceIdUnion) Accept(visitor ResourceIdUnionVisitor) error {
 	return fmt.Errorf("type %T does not include a non-empty union type", r)
 }
 
-type RoleResponse struct {
-	Id        RoleId    `json:"id" url:"id"`
-	Name      string    `json:"name" url:"name"`
-	AccountId AccountId `json:"accountId" url:"accountId"`
-	CreatedAt time.Time `json:"createdAt" url:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt" url:"updatedAt"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (r *RoleResponse) GetExtraProperties() map[string]interface{} {
-	return r.extraProperties
-}
-
-func (r *RoleResponse) UnmarshalJSON(data []byte) error {
-	type embed RoleResponse
-	var unmarshaler = struct {
-		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-		UpdatedAt *core.DateTime `json:"updatedAt"`
-	}{
-		embed: embed(*r),
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	*r = RoleResponse(unmarshaler.embed)
-	r.CreatedAt = unmarshaler.CreatedAt.Time()
-	r.UpdatedAt = unmarshaler.UpdatedAt.Time()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *r)
-	if err != nil {
-		return err
-	}
-	r.extraProperties = extraProperties
-
-	r._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (r *RoleResponse) MarshalJSON() ([]byte, error) {
-	type embed RoleResponse
-	var marshaler = struct {
-		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-		UpdatedAt *core.DateTime `json:"updatedAt"`
-	}{
-		embed:     embed(*r),
-		CreatedAt: core.NewDateTime(r.CreatedAt),
-		UpdatedAt: core.NewDateTime(r.UpdatedAt),
-	}
-	return json.Marshal(marshaler)
-}
-
-func (r *RoleResponse) String() string {
-	if len(r._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(r._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(r); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", r)
-}
-
-// The value of a secret
-type Secret struct {
-	// The reference name for a secret.
-	Name SecretName `json:"name" url:"name"`
-	// The secret value. This is hidden in the UI.
-	Value SecretValue `json:"value" url:"value"`
-	// The Environment of the secret.
-	EnvironmentId *EnvironmentId `json:"environmentId,omitempty" url:"environmentId,omitempty"`
-	// The Space of the secret.
-	SpaceId *SpaceId `json:"spaceId,omitempty" url:"spaceId,omitempty"`
-	// The Actor of the secret.
-	ActorId *ActorIdUnion `json:"actorId,omitempty" url:"actorId,omitempty"`
-	// The ID of the secret.
-	Id SecretId `json:"id" url:"id"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (s *Secret) GetExtraProperties() map[string]interface{} {
-	return s.extraProperties
-}
-
-func (s *Secret) UnmarshalJSON(data []byte) error {
-	type unmarshaler Secret
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*s = Secret(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *s)
-	if err != nil {
-		return err
-	}
-	s.extraProperties = extraProperties
-
-	s._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (s *Secret) String() string {
-	if len(s._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(s); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", s)
-}
-
-// The name of a secret. Minimum 1 character, maximum 1024
-type SecretName = string
-
-// The value of a secret. Minimum 1 character, maximum 1024
-type SecretValue = string
-
-type CellValueWithCounts struct {
-	Valid    *bool                `json:"valid,omitempty" url:"valid,omitempty"`
-	Messages []*ValidationMessage `json:"messages,omitempty" url:"messages,omitempty"`
-	// Deprecated, use record level metadata instead.
-	Metadata  map[string]interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
-	Value     *CellValueUnion        `json:"value,omitempty" url:"value,omitempty"`
-	Layer     *string                `json:"layer,omitempty" url:"layer,omitempty"`
-	UpdatedAt *time.Time             `json:"updatedAt,omitempty" url:"updatedAt,omitempty"`
-	Counts    *RecordCounts          `json:"counts,omitempty" url:"counts,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (c *CellValueWithCounts) GetExtraProperties() map[string]interface{} {
-	return c.extraProperties
-}
-
-func (c *CellValueWithCounts) UnmarshalJSON(data []byte) error {
-	type embed CellValueWithCounts
-	var unmarshaler = struct {
-		embed
-		UpdatedAt *core.DateTime `json:"updatedAt,omitempty"`
-	}{
-		embed: embed(*c),
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	*c = CellValueWithCounts(unmarshaler.embed)
-	c.UpdatedAt = unmarshaler.UpdatedAt.TimePtr()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *c)
-	if err != nil {
-		return err
-	}
-	c.extraProperties = extraProperties
-
-	c._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (c *CellValueWithCounts) MarshalJSON() ([]byte, error) {
-	type embed CellValueWithCounts
-	var marshaler = struct {
-		embed
-		UpdatedAt *core.DateTime `json:"updatedAt,omitempty"`
-	}{
-		embed:     embed(*c),
-		UpdatedAt: core.NewOptionalDateTime(c.UpdatedAt),
-	}
-	return json.Marshal(marshaler)
-}
-
-func (c *CellValueWithCounts) String() string {
-	if len(c._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(c); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", c)
-}
-
-// Cell values grouped by field key
-type CellsResponseData = map[string][]*CellValueWithCounts
-
 type CompositeUniqueConstraint struct {
 	// The name of the constraint
 	Name string `json:"name" url:"name"`
@@ -10821,48 +7008,6 @@ func (l *ListSheetsResponse) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", l)
-}
-
-type RecordCountsResponseData struct {
-	Counts  *RecordCounts `json:"counts,omitempty" url:"counts,omitempty"`
-	Success bool          `json:"success" url:"success"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (r *RecordCountsResponseData) GetExtraProperties() map[string]interface{} {
-	return r.extraProperties
-}
-
-func (r *RecordCountsResponseData) UnmarshalJSON(data []byte) error {
-	type unmarshaler RecordCountsResponseData
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*r = RecordCountsResponseData(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *r)
-	if err != nil {
-		return err
-	}
-	r.extraProperties = extraProperties
-
-	r._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (r *RecordCountsResponseData) String() string {
-	if len(r._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(r._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(r); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", r)
 }
 
 // A place to store tabular data
@@ -11050,159 +7195,6 @@ func (s *SheetConfig) String() string {
 	return fmt.Sprintf("%#v", s)
 }
 
-type SheetConfigOrUpdate struct {
-	// The name of your Sheet as it will appear to your end users.
-	Name *string `json:"name,omitempty" url:"name,omitempty"`
-	// A sentence or two describing the purpose of your Sheet.
-	Description *string `json:"description,omitempty" url:"description,omitempty"`
-	// A unique identifier for your Sheet. **Required when updating a Workbook.**
-	Slug *string `json:"slug,omitempty" url:"slug,omitempty"`
-	// A boolean specifying whether or not this sheet is read only. Read only sheets are not editable by end users.
-	Readonly *bool `json:"readonly,omitempty" url:"readonly,omitempty"`
-	// Allow end users to add fields during mapping.
-	AllowAdditionalFields *bool `json:"allowAdditionalFields,omitempty" url:"allowAdditionalFields,omitempty"`
-	// The minimum confidence required to automatically map a field
-	MappingConfidenceThreshold *float64 `json:"mappingConfidenceThreshold,omitempty" url:"mappingConfidenceThreshold,omitempty"`
-	// Control Sheet-level access for all users.
-	Access []SheetAccess `json:"access,omitempty" url:"access,omitempty"`
-	// Where you define your Sheet’s data schema.
-	Fields []*Property `json:"fields,omitempty" url:"fields,omitempty"`
-	// An array of actions that end users can perform on this Sheet.
-	Actions []*Action `json:"actions,omitempty" url:"actions,omitempty"`
-	// The ID of the Sheet.
-	Id *SheetId `json:"id,omitempty" url:"id,omitempty"`
-	// The ID of the Workbook.
-	WorkbookId *WorkbookId `json:"workbookId,omitempty" url:"workbookId,omitempty"`
-	// Describes shape of data as well as behavior.
-	Config *SheetConfig `json:"config,omitempty" url:"config,omitempty"`
-	// Useful for any contextual metadata regarding the sheet. Store any valid json
-	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
-	// The scoped namespace of the Sheet.
-	Namespace *string `json:"namespace,omitempty" url:"namespace,omitempty"`
-	// Date the sheet was last updated
-	UpdatedAt *time.Time `json:"updatedAt,omitempty" url:"updatedAt,omitempty"`
-	// Date the sheet was created
-	CreatedAt *time.Time `json:"createdAt,omitempty" url:"createdAt,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (s *SheetConfigOrUpdate) GetExtraProperties() map[string]interface{} {
-	return s.extraProperties
-}
-
-func (s *SheetConfigOrUpdate) UnmarshalJSON(data []byte) error {
-	type embed SheetConfigOrUpdate
-	var unmarshaler = struct {
-		embed
-		UpdatedAt *core.DateTime `json:"updatedAt,omitempty"`
-		CreatedAt *core.DateTime `json:"createdAt,omitempty"`
-	}{
-		embed: embed(*s),
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	*s = SheetConfigOrUpdate(unmarshaler.embed)
-	s.UpdatedAt = unmarshaler.UpdatedAt.TimePtr()
-	s.CreatedAt = unmarshaler.CreatedAt.TimePtr()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *s)
-	if err != nil {
-		return err
-	}
-	s.extraProperties = extraProperties
-
-	s._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (s *SheetConfigOrUpdate) MarshalJSON() ([]byte, error) {
-	type embed SheetConfigOrUpdate
-	var marshaler = struct {
-		embed
-		UpdatedAt *core.DateTime `json:"updatedAt,omitempty"`
-		CreatedAt *core.DateTime `json:"createdAt,omitempty"`
-	}{
-		embed:     embed(*s),
-		UpdatedAt: core.NewOptionalDateTime(s.UpdatedAt),
-		CreatedAt: core.NewOptionalDateTime(s.CreatedAt),
-	}
-	return json.Marshal(marshaler)
-}
-
-func (s *SheetConfigOrUpdate) String() string {
-	if len(s._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(s); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", s)
-}
-
-// Changes to make to an existing sheet config
-type SheetConfigUpdate struct {
-	// The name of your Sheet as it will appear to your end users.
-	Name *string `json:"name,omitempty" url:"name,omitempty"`
-	// A sentence or two describing the purpose of your Sheet.
-	Description *string `json:"description,omitempty" url:"description,omitempty"`
-	// A unique identifier for your Sheet. **Required when updating a Workbook.**
-	Slug *string `json:"slug,omitempty" url:"slug,omitempty"`
-	// A boolean specifying whether or not this sheet is read only. Read only sheets are not editable by end users.
-	Readonly *bool `json:"readonly,omitempty" url:"readonly,omitempty"`
-	// Allow end users to add fields during mapping.
-	AllowAdditionalFields *bool `json:"allowAdditionalFields,omitempty" url:"allowAdditionalFields,omitempty"`
-	// The minimum confidence required to automatically map a field
-	MappingConfidenceThreshold *float64 `json:"mappingConfidenceThreshold,omitempty" url:"mappingConfidenceThreshold,omitempty"`
-	// Control Sheet-level access for all users.
-	Access []SheetAccess `json:"access,omitempty" url:"access,omitempty"`
-	// Where you define your Sheet’s data schema.
-	Fields []*Property `json:"fields,omitempty" url:"fields,omitempty"`
-	// An array of actions that end users can perform on this Sheet.
-	Actions []*Action `json:"actions,omitempty" url:"actions,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (s *SheetConfigUpdate) GetExtraProperties() map[string]interface{} {
-	return s.extraProperties
-}
-
-func (s *SheetConfigUpdate) UnmarshalJSON(data []byte) error {
-	type unmarshaler SheetConfigUpdate
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*s = SheetConfigUpdate(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *s)
-	if err != nil {
-		return err
-	}
-	s.extraProperties = extraProperties
-
-	s._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (s *SheetConfigUpdate) String() string {
-	if len(s._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(s); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", s)
-}
-
 type SheetConstraint struct {
 	Type     string
 	Unique   *CompositeUniqueConstraint
@@ -11270,271 +7262,6 @@ func (s *SheetConstraint) Accept(visitor SheetConstraintVisitor) error {
 	case "external":
 		return visitor.VisitExternal(s.External)
 	}
-}
-
-// Changes to make to an existing sheet
-type SheetUpdate struct {
-	// The ID of the Sheet.
-	Id *SheetId `json:"id,omitempty" url:"id,omitempty"`
-	// The ID of the Workbook.
-	WorkbookId *WorkbookId `json:"workbookId,omitempty" url:"workbookId,omitempty"`
-	// Describes shape of data as well as behavior.
-	Config *SheetConfig `json:"config,omitempty" url:"config,omitempty"`
-	// Useful for any contextual metadata regarding the sheet. Store any valid json
-	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
-	// The scoped namespace of the Sheet.
-	Namespace *string `json:"namespace,omitempty" url:"namespace,omitempty"`
-	// Date the sheet was last updated
-	UpdatedAt *time.Time `json:"updatedAt,omitempty" url:"updatedAt,omitempty"`
-	// Date the sheet was created
-	CreatedAt *time.Time `json:"createdAt,omitempty" url:"createdAt,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (s *SheetUpdate) GetExtraProperties() map[string]interface{} {
-	return s.extraProperties
-}
-
-func (s *SheetUpdate) UnmarshalJSON(data []byte) error {
-	type embed SheetUpdate
-	var unmarshaler = struct {
-		embed
-		UpdatedAt *core.DateTime `json:"updatedAt,omitempty"`
-		CreatedAt *core.DateTime `json:"createdAt,omitempty"`
-	}{
-		embed: embed(*s),
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	*s = SheetUpdate(unmarshaler.embed)
-	s.UpdatedAt = unmarshaler.UpdatedAt.TimePtr()
-	s.CreatedAt = unmarshaler.CreatedAt.TimePtr()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *s)
-	if err != nil {
-		return err
-	}
-	s.extraProperties = extraProperties
-
-	s._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (s *SheetUpdate) MarshalJSON() ([]byte, error) {
-	type embed SheetUpdate
-	var marshaler = struct {
-		embed
-		UpdatedAt *core.DateTime `json:"updatedAt,omitempty"`
-		CreatedAt *core.DateTime `json:"createdAt,omitempty"`
-	}{
-		embed:     embed(*s),
-		UpdatedAt: core.NewOptionalDateTime(s.UpdatedAt),
-		CreatedAt: core.NewOptionalDateTime(s.CreatedAt),
-	}
-	return json.Marshal(marshaler)
-}
-
-func (s *SheetUpdate) String() string {
-	if len(s._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(s); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", s)
-}
-
-type SchemaDiffData = map[string]SchemaDiffEnum
-
-type SchemaDiffEnum string
-
-const (
-	SchemaDiffEnumAdded     SchemaDiffEnum = "added"
-	SchemaDiffEnumRemoved   SchemaDiffEnum = "removed"
-	SchemaDiffEnumUnchanged SchemaDiffEnum = "unchanged"
-)
-
-func NewSchemaDiffEnumFromString(s string) (SchemaDiffEnum, error) {
-	switch s {
-	case "added":
-		return SchemaDiffEnumAdded, nil
-	case "removed":
-		return SchemaDiffEnumRemoved, nil
-	case "unchanged":
-		return SchemaDiffEnumUnchanged, nil
-	}
-	var t SchemaDiffEnum
-	return "", fmt.Errorf("%s is not a valid %T", s, t)
-}
-
-func (s SchemaDiffEnum) Ptr() *SchemaDiffEnum {
-	return &s
-}
-
-type SchemaDiffRecord = SchemaDiffData
-
-type Snapshot struct {
-	// The ID of the Snapshot.
-	Id SnapshotId `json:"id" url:"id"`
-	// The ID of the Sheet.
-	SheetId SheetId `json:"sheetId" url:"sheetId"`
-	// The title of the Snapshot.
-	Label *string `json:"label,omitempty" url:"label,omitempty"`
-	// A summary of the Snapshot. This field is only available on the single get snapshot endpoint. It is not available for the list snapshots endpoint.
-	Summary *SnapshotSummary `json:"summary,omitempty" url:"summary,omitempty"`
-	// The time the Snapshot was created.
-	CreatedAt time.Time `json:"createdAt" url:"createdAt"`
-	// The actor who created the Snapshot.
-	CreatedBy UserId `json:"createdBy" url:"createdBy"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (s *Snapshot) GetExtraProperties() map[string]interface{} {
-	return s.extraProperties
-}
-
-func (s *Snapshot) UnmarshalJSON(data []byte) error {
-	type embed Snapshot
-	var unmarshaler = struct {
-		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-	}{
-		embed: embed(*s),
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	*s = Snapshot(unmarshaler.embed)
-	s.CreatedAt = unmarshaler.CreatedAt.Time()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *s)
-	if err != nil {
-		return err
-	}
-	s.extraProperties = extraProperties
-
-	s._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (s *Snapshot) MarshalJSON() ([]byte, error) {
-	type embed Snapshot
-	var marshaler = struct {
-		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-	}{
-		embed:     embed(*s),
-		CreatedAt: core.NewDateTime(s.CreatedAt),
-	}
-	return json.Marshal(marshaler)
-}
-
-func (s *Snapshot) String() string {
-	if len(s._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(s); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", s)
-}
-
-type SnapshotSummary struct {
-	CreatedSince *SummarySection `json:"createdSince,omitempty" url:"createdSince,omitempty"`
-	UpdatedSince *SummarySection `json:"updatedSince,omitempty" url:"updatedSince,omitempty"`
-	DeletedSince *SummarySection `json:"deletedSince,omitempty" url:"deletedSince,omitempty"`
-	// The schema diff between the snapshot and the current sheet schema.
-	SchemaDiff SchemaDiffRecord `json:"schemaDiff,omitempty" url:"schemaDiff,omitempty"`
-	// The sheet configuration at the time of the snapshot.
-	Config *SheetConfig `json:"config,omitempty" url:"config,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (s *SnapshotSummary) GetExtraProperties() map[string]interface{} {
-	return s.extraProperties
-}
-
-func (s *SnapshotSummary) UnmarshalJSON(data []byte) error {
-	type unmarshaler SnapshotSummary
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*s = SnapshotSummary(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *s)
-	if err != nil {
-		return err
-	}
-	s.extraProperties = extraProperties
-
-	s._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (s *SnapshotSummary) String() string {
-	if len(s._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(s); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", s)
-}
-
-type SummarySection struct {
-	Total   int            `json:"total" url:"total"`
-	ByField map[string]int `json:"byField,omitempty" url:"byField,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (s *SummarySection) GetExtraProperties() map[string]interface{} {
-	return s.extraProperties
-}
-
-func (s *SummarySection) UnmarshalJSON(data []byte) error {
-	type unmarshaler SummarySection
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*s = SummarySection(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *s)
-	if err != nil {
-		return err
-	}
-	s.extraProperties = extraProperties
-
-	s._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (s *SummarySection) String() string {
-	if len(s._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(s); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", s)
 }
 
 // Properties used to allow users to connect to the event bus
@@ -11627,213 +7354,6 @@ func (e *EventTokenResponse) String() string {
 	return fmt.Sprintf("%#v", e)
 }
 
-type InternalSpaceConfigBase struct {
-	SpaceConfigId *SpaceConfigId `json:"spaceConfigId,omitempty" url:"spaceConfigId,omitempty"`
-	EnvironmentId *EnvironmentId `json:"environmentId,omitempty" url:"environmentId,omitempty"`
-	// The ID of the primary workbook for the space. This should not be included in create space requests.
-	PrimaryWorkbookId *WorkbookId `json:"primaryWorkbookId,omitempty" url:"primaryWorkbookId,omitempty"`
-	// Metadata for the space
-	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
-	// The Space settings.
-	Settings         *SpaceSettings `json:"settings,omitempty" url:"settings,omitempty"`
-	Actions          []*Action      `json:"actions,omitempty" url:"actions,omitempty"`
-	Access           []SpaceAccess  `json:"access,omitempty" url:"access,omitempty"`
-	AutoConfigure    *bool          `json:"autoConfigure,omitempty" url:"autoConfigure,omitempty"`
-	Namespace        *string        `json:"namespace,omitempty" url:"namespace,omitempty"`
-	Labels           []string       `json:"labels,omitempty" url:"labels,omitempty"`
-	TranslationsPath *string        `json:"translationsPath,omitempty" url:"translationsPath,omitempty"`
-	LanguageOverride *string        `json:"languageOverride,omitempty" url:"languageOverride,omitempty"`
-	// Date when space was archived
-	ArchivedAt *time.Time `json:"archivedAt,omitempty" url:"archivedAt,omitempty"`
-	// The ID of the App that space is associated with
-	AppId *AppId `json:"appId,omitempty" url:"appId,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (i *InternalSpaceConfigBase) GetExtraProperties() map[string]interface{} {
-	return i.extraProperties
-}
-
-func (i *InternalSpaceConfigBase) UnmarshalJSON(data []byte) error {
-	type embed InternalSpaceConfigBase
-	var unmarshaler = struct {
-		embed
-		ArchivedAt *core.DateTime `json:"archivedAt,omitempty"`
-	}{
-		embed: embed(*i),
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	*i = InternalSpaceConfigBase(unmarshaler.embed)
-	i.ArchivedAt = unmarshaler.ArchivedAt.TimePtr()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *i)
-	if err != nil {
-		return err
-	}
-	i.extraProperties = extraProperties
-
-	i._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (i *InternalSpaceConfigBase) MarshalJSON() ([]byte, error) {
-	type embed InternalSpaceConfigBase
-	var marshaler = struct {
-		embed
-		ArchivedAt *core.DateTime `json:"archivedAt,omitempty"`
-	}{
-		embed:      embed(*i),
-		ArchivedAt: core.NewOptionalDateTime(i.ArchivedAt),
-	}
-	return json.Marshal(marshaler)
-}
-
-func (i *InternalSpaceConfigBase) String() string {
-	if len(i._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(i._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(i); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", i)
-}
-
-// A place to store your workbooks
-type Space struct {
-	SpaceConfigId *SpaceConfigId `json:"spaceConfigId,omitempty" url:"spaceConfigId,omitempty"`
-	EnvironmentId *EnvironmentId `json:"environmentId,omitempty" url:"environmentId,omitempty"`
-	// The ID of the primary workbook for the space. This should not be included in create space requests.
-	PrimaryWorkbookId *WorkbookId `json:"primaryWorkbookId,omitempty" url:"primaryWorkbookId,omitempty"`
-	// Metadata for the space
-	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
-	// The Space settings.
-	Settings         *SpaceSettings `json:"settings,omitempty" url:"settings,omitempty"`
-	Actions          []*Action      `json:"actions,omitempty" url:"actions,omitempty"`
-	Access           []SpaceAccess  `json:"access,omitempty" url:"access,omitempty"`
-	AutoConfigure    *bool          `json:"autoConfigure,omitempty" url:"autoConfigure,omitempty"`
-	Namespace        *string        `json:"namespace,omitempty" url:"namespace,omitempty"`
-	Labels           []string       `json:"labels,omitempty" url:"labels,omitempty"`
-	TranslationsPath *string        `json:"translationsPath,omitempty" url:"translationsPath,omitempty"`
-	LanguageOverride *string        `json:"languageOverride,omitempty" url:"languageOverride,omitempty"`
-	// Date when space was archived
-	ArchivedAt *time.Time `json:"archivedAt,omitempty" url:"archivedAt,omitempty"`
-	// The ID of the App that space is associated with
-	AppId *AppId  `json:"appId,omitempty" url:"appId,omitempty"`
-	Id    SpaceId `json:"id" url:"id"`
-	// Amount of workbooks in the space
-	WorkbooksCount *int `json:"workbooksCount,omitempty" url:"workbooksCount,omitempty"`
-	// Amount of files in the space
-	FilesCount      *int    `json:"filesCount,omitempty" url:"filesCount,omitempty"`
-	CreatedByUserId *UserId `json:"createdByUserId,omitempty" url:"createdByUserId,omitempty"`
-	// User name who created space
-	CreatedByUserName *string `json:"createdByUserName,omitempty" url:"createdByUserName,omitempty"`
-	// Date when space was created
-	CreatedAt time.Time `json:"createdAt" url:"createdAt"`
-	// Date when space was updated
-	UpdatedAt time.Time `json:"updatedAt" url:"updatedAt"`
-	// Date when space was expired
-	ExpiredAt *time.Time `json:"expiredAt,omitempty" url:"expiredAt,omitempty"`
-	// This date marks the most recent activity within the space, tracking actions to the second. Activities include creating or updating records in a sheet, uploading files, or modifying a workbook's configuration.
-	LastActivityAt *time.Time `json:"lastActivityAt,omitempty" url:"lastActivityAt,omitempty"`
-	// Guest link to the space
-	GuestLink *string `json:"guestLink,omitempty" url:"guestLink,omitempty"`
-	// The name of the space
-	Name string `json:"name" url:"name"`
-	// The display order
-	DisplayOrder *int `json:"displayOrder,omitempty" url:"displayOrder,omitempty"`
-	// Access token for the space
-	AccessToken *string `json:"accessToken,omitempty" url:"accessToken,omitempty"`
-	// Flag for collaborative (project) spaces
-	IsCollaborative *bool `json:"isCollaborative,omitempty" url:"isCollaborative,omitempty"`
-	// Size information for the space
-	Size *SpaceSize `json:"size,omitempty" url:"size,omitempty"`
-	// Date when the space was upgraded
-	UpgradedAt *time.Time `json:"upgradedAt,omitempty" url:"upgradedAt,omitempty"`
-	// Type of guest authentication
-	GuestAuthentication []GuestAuthenticationEnum `json:"guestAuthentication,omitempty" url:"guestAuthentication,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (s *Space) GetExtraProperties() map[string]interface{} {
-	return s.extraProperties
-}
-
-func (s *Space) UnmarshalJSON(data []byte) error {
-	type embed Space
-	var unmarshaler = struct {
-		embed
-		ArchivedAt     *core.DateTime `json:"archivedAt,omitempty"`
-		CreatedAt      *core.DateTime `json:"createdAt"`
-		UpdatedAt      *core.DateTime `json:"updatedAt"`
-		ExpiredAt      *core.DateTime `json:"expiredAt,omitempty"`
-		LastActivityAt *core.DateTime `json:"lastActivityAt,omitempty"`
-		UpgradedAt     *core.DateTime `json:"upgradedAt,omitempty"`
-	}{
-		embed: embed(*s),
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	*s = Space(unmarshaler.embed)
-	s.ArchivedAt = unmarshaler.ArchivedAt.TimePtr()
-	s.CreatedAt = unmarshaler.CreatedAt.Time()
-	s.UpdatedAt = unmarshaler.UpdatedAt.Time()
-	s.ExpiredAt = unmarshaler.ExpiredAt.TimePtr()
-	s.LastActivityAt = unmarshaler.LastActivityAt.TimePtr()
-	s.UpgradedAt = unmarshaler.UpgradedAt.TimePtr()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *s)
-	if err != nil {
-		return err
-	}
-	s.extraProperties = extraProperties
-
-	s._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (s *Space) MarshalJSON() ([]byte, error) {
-	type embed Space
-	var marshaler = struct {
-		embed
-		ArchivedAt     *core.DateTime `json:"archivedAt,omitempty"`
-		CreatedAt      *core.DateTime `json:"createdAt"`
-		UpdatedAt      *core.DateTime `json:"updatedAt"`
-		ExpiredAt      *core.DateTime `json:"expiredAt,omitempty"`
-		LastActivityAt *core.DateTime `json:"lastActivityAt,omitempty"`
-		UpgradedAt     *core.DateTime `json:"upgradedAt,omitempty"`
-	}{
-		embed:          embed(*s),
-		ArchivedAt:     core.NewOptionalDateTime(s.ArchivedAt),
-		CreatedAt:      core.NewDateTime(s.CreatedAt),
-		UpdatedAt:      core.NewDateTime(s.UpdatedAt),
-		ExpiredAt:      core.NewOptionalDateTime(s.ExpiredAt),
-		LastActivityAt: core.NewOptionalDateTime(s.LastActivityAt),
-		UpgradedAt:     core.NewOptionalDateTime(s.UpgradedAt),
-	}
-	return json.Marshal(marshaler)
-}
-
-func (s *Space) String() string {
-	if len(s._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(s); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", s)
-}
-
 type SpaceAccess string
 
 const (
@@ -11854,137 +7374,6 @@ func NewSpaceAccessFromString(s string) (SpaceAccess, error) {
 
 func (s SpaceAccess) Ptr() *SpaceAccess {
 	return &s
-}
-
-// Settings for a space
-type SpaceSettings struct {
-	// The sidebar configuration for the space. (This will eventually replace metadata.sidebarconfig)
-	SidebarConfig *SpaceSidebarConfig `json:"sidebarConfig,omitempty" url:"sidebarConfig,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (s *SpaceSettings) GetExtraProperties() map[string]interface{} {
-	return s.extraProperties
-}
-
-func (s *SpaceSettings) UnmarshalJSON(data []byte) error {
-	type unmarshaler SpaceSettings
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*s = SpaceSettings(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *s)
-	if err != nil {
-		return err
-	}
-	s.extraProperties = extraProperties
-
-	s._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (s *SpaceSettings) String() string {
-	if len(s._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(s); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", s)
-}
-
-type SpaceSidebarConfig struct {
-	// Used to set the order of workbooks in the sidebar. This will not affect workbooks that are pinned and workbooks that are not specified here will be sorted alphabetically.
-	WorkbookSidebarOrder []WorkbookId `json:"workbookSidebarOrder,omitempty" url:"workbookSidebarOrder,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (s *SpaceSidebarConfig) GetExtraProperties() map[string]interface{} {
-	return s.extraProperties
-}
-
-func (s *SpaceSidebarConfig) UnmarshalJSON(data []byte) error {
-	type unmarshaler SpaceSidebarConfig
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*s = SpaceSidebarConfig(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *s)
-	if err != nil {
-		return err
-	}
-	s.extraProperties = extraProperties
-
-	s._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (s *SpaceSidebarConfig) String() string {
-	if len(s._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(s); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", s)
-}
-
-// The size of a space
-type SpaceSize struct {
-	Name     string `json:"name" url:"name"`
-	Id       string `json:"id" url:"id"`
-	NumUsers int    `json:"numUsers" url:"numUsers"`
-	Pdv      int    `json:"pdv" url:"pdv"`
-	NumFiles int    `json:"numFiles" url:"numFiles"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (s *SpaceSize) GetExtraProperties() map[string]interface{} {
-	return s.extraProperties
-}
-
-func (s *SpaceSize) UnmarshalJSON(data []byte) error {
-	type unmarshaler SpaceSize
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*s = SpaceSize(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *s)
-	if err != nil {
-		return err
-	}
-	s.extraProperties = extraProperties
-
-	s._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (s *SpaceSize) String() string {
-	if len(s._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(s); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", s)
 }
 
 // Configurations for the user
@@ -12065,6 +7454,50 @@ func (u *User) String() string {
 	return fmt.Sprintf("%#v", u)
 }
 
+// Properties used to create a new user
+type UserConfig struct {
+	Email     string    `json:"email" url:"email"`
+	Name      string    `json:"name" url:"name"`
+	AccountId AccountId `json:"accountId" url:"accountId"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (u *UserConfig) GetExtraProperties() map[string]interface{} {
+	return u.extraProperties
+}
+
+func (u *UserConfig) UnmarshalJSON(data []byte) error {
+	type unmarshaler UserConfig
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*u = UserConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *u)
+	if err != nil {
+		return err
+	}
+	u.extraProperties = extraProperties
+
+	u._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (u *UserConfig) String() string {
+	if len(u._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(u._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(u); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", u)
+}
+
 type UserResponse struct {
 	Data *User `json:"data,omitempty" url:"data,omitempty"`
 
@@ -12095,84 +7528,6 @@ func (u *UserResponse) UnmarshalJSON(data []byte) error {
 }
 
 func (u *UserResponse) String() string {
-	if len(u._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(u._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(u); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", u)
-}
-
-type UserWithRoles struct {
-	Email      string                 `json:"email" url:"email"`
-	Name       string                 `json:"name" url:"name"`
-	AccountId  AccountId              `json:"accountId" url:"accountId"`
-	Id         UserId                 `json:"id" url:"id"`
-	Idp        string                 `json:"idp" url:"idp"`
-	IdpRef     *string                `json:"idpRef,omitempty" url:"idpRef,omitempty"`
-	Metadata   map[string]interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
-	CreatedAt  time.Time              `json:"createdAt" url:"createdAt"`
-	UpdatedAt  time.Time              `json:"updatedAt" url:"updatedAt"`
-	LastSeenAt *time.Time             `json:"lastSeenAt,omitempty" url:"lastSeenAt,omitempty"`
-	Dashboard  *int                   `json:"dashboard,omitempty" url:"dashboard,omitempty"`
-	ActorRoles []*ActorRoleResponse   `json:"actorRoles,omitempty" url:"actorRoles,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (u *UserWithRoles) GetExtraProperties() map[string]interface{} {
-	return u.extraProperties
-}
-
-func (u *UserWithRoles) UnmarshalJSON(data []byte) error {
-	type embed UserWithRoles
-	var unmarshaler = struct {
-		embed
-		CreatedAt  *core.DateTime `json:"createdAt"`
-		UpdatedAt  *core.DateTime `json:"updatedAt"`
-		LastSeenAt *core.DateTime `json:"lastSeenAt,omitempty"`
-	}{
-		embed: embed(*u),
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	*u = UserWithRoles(unmarshaler.embed)
-	u.CreatedAt = unmarshaler.CreatedAt.Time()
-	u.UpdatedAt = unmarshaler.UpdatedAt.Time()
-	u.LastSeenAt = unmarshaler.LastSeenAt.TimePtr()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *u)
-	if err != nil {
-		return err
-	}
-	u.extraProperties = extraProperties
-
-	u._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (u *UserWithRoles) MarshalJSON() ([]byte, error) {
-	type embed UserWithRoles
-	var marshaler = struct {
-		embed
-		CreatedAt  *core.DateTime `json:"createdAt"`
-		UpdatedAt  *core.DateTime `json:"updatedAt"`
-		LastSeenAt *core.DateTime `json:"lastSeenAt,omitempty"`
-	}{
-		embed:      embed(*u),
-		CreatedAt:  core.NewDateTime(u.CreatedAt),
-		UpdatedAt:  core.NewDateTime(u.UpdatedAt),
-		LastSeenAt: core.NewOptionalDateTime(u.LastSeenAt),
-	}
-	return json.Marshal(marshaler)
-}
-
-func (u *UserWithRoles) String() string {
 	if len(u._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(u._rawJSON); err == nil {
 			return value
@@ -12264,291 +7619,4 @@ func (v *VersionResponse) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", v)
-}
-
-// A view
-type View struct {
-	// The ID of the view
-	Id ViewId `json:"id" url:"id"`
-	// The associated sheet ID of the view
-	SheetId SheetId `json:"sheetId" url:"sheetId"`
-	// The name of the view
-	Name string `json:"name" url:"name"`
-	// The view filters of the view
-	Config *ViewConfig `json:"config,omitempty" url:"config,omitempty"`
-	// ID of the actor who created the view
-	CreatedBy string `json:"createdBy" url:"createdBy"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (v *View) GetExtraProperties() map[string]interface{} {
-	return v.extraProperties
-}
-
-func (v *View) UnmarshalJSON(data []byte) error {
-	type unmarshaler View
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*v = View(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *v)
-	if err != nil {
-		return err
-	}
-	v.extraProperties = extraProperties
-
-	v._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (v *View) String() string {
-	if len(v._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(v._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(v); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", v)
-}
-
-// The configuration of a view. Filters, sorting, and search query.
-type ViewConfig struct {
-	// Deprecated, use `commitId` instead.
-	VersionId *VersionId `json:"versionId,omitempty" url:"versionId,omitempty"`
-	CommitId  *CommitId  `json:"commitId,omitempty" url:"commitId,omitempty"`
-	// Deprecated, use `sinceCommitId` instead.
-	SinceVersionId *VersionId     `json:"sinceVersionId,omitempty" url:"sinceVersionId,omitempty"`
-	SinceCommitId  *CommitId      `json:"sinceCommitId,omitempty" url:"sinceCommitId,omitempty"`
-	SortField      *SortField     `json:"sortField,omitempty" url:"sortField,omitempty"`
-	SortDirection  *SortDirection `json:"sortDirection,omitempty" url:"sortDirection,omitempty"`
-	Filter         *Filter        `json:"filter,omitempty" url:"filter,omitempty"`
-	// Name of field by which to filter records
-	FilterField *FilterField `json:"filterField,omitempty" url:"filterField,omitempty"`
-	SearchValue *SearchValue `json:"searchValue,omitempty" url:"searchValue,omitempty"`
-	SearchField *SearchField `json:"searchField,omitempty" url:"searchField,omitempty"`
-	// The Record Ids param (ids) is a list of record ids that can be passed to several record endpoints allowing the user to identify specific records to INCLUDE in the query, or specific records to EXCLUDE, depending on whether or not filters are being applied. When passing a query param that filters the record dataset, such as 'searchValue', or a 'filter' of 'valid' | 'error' | 'all', the 'ids' param will EXCLUDE those records from the filtered results. For basic queries that do not filter the dataset, passing record ids in the 'ids' param will limit the dataset to INCLUDE just those specific records. Maximum of 100 allowed.
-	Ids []RecordId `json:"ids,omitempty" url:"ids,omitempty"`
-	// Number of records to return in a page (default 10,000)
-	PageSize *int `json:"pageSize,omitempty" url:"pageSize,omitempty"`
-	// Based on pageSize, which page of records to return (Note - numbers start at 1)
-	PageNumber *int `json:"pageNumber,omitempty" url:"pageNumber,omitempty"`
-	// **DEPRECATED** Use GET /sheets/:sheetId/counts
-	IncludeCounts *bool `json:"includeCounts,omitempty" url:"includeCounts,omitempty"`
-	// The length of the record result set, returned as counts.total
-	IncludeLength *bool `json:"includeLength,omitempty" url:"includeLength,omitempty"`
-	// If true, linked records will be included in the results. Defaults to false.
-	IncludeLinks *bool `json:"includeLinks,omitempty" url:"includeLinks,omitempty"`
-	// Include error messages, defaults to false.
-	IncludeMessages *bool `json:"includeMessages,omitempty" url:"includeMessages,omitempty"`
-	// if "for" is provided, the query parameters will be pulled from the event payload
-	For *EventId `json:"for,omitempty" url:"for,omitempty"`
-	// An FFQL query used to filter the result set
-	Q *string `json:"q,omitempty" url:"q,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (v *ViewConfig) GetExtraProperties() map[string]interface{} {
-	return v.extraProperties
-}
-
-func (v *ViewConfig) UnmarshalJSON(data []byte) error {
-	type unmarshaler ViewConfig
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*v = ViewConfig(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *v)
-	if err != nil {
-		return err
-	}
-	v.extraProperties = extraProperties
-
-	v._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (v *ViewConfig) String() string {
-	if len(v._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(v._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(v); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", v)
-}
-
-// A collection of one or more sheets
-type Workbook struct {
-	// ID of the Workbook.
-	Id WorkbookId `json:"id" url:"id"`
-	// Name of the Workbook.
-	Name *string `json:"name,omitempty" url:"name,omitempty"`
-	// Associated Space ID of the Workbook.
-	SpaceId SpaceId `json:"spaceId" url:"spaceId"`
-	// Associated Environment ID of the Workbook.
-	EnvironmentId EnvironmentId `json:"environmentId" url:"environmentId"`
-	// A list of Sheets associated with the Workbook.
-	Sheets []*Sheet `json:"sheets,omitempty" url:"sheets,omitempty"`
-	// A list of labels for the Workbook.
-	Labels []string `json:"labels,omitempty" url:"labels,omitempty"`
-	// A list of Actions associated with the Workbook.
-	Actions []*Action `json:"actions,omitempty" url:"actions,omitempty"`
-	// The Workbook settings.
-	Settings *WorkbookConfigSettings `json:"settings,omitempty" url:"settings,omitempty"`
-	// Metadata for the workbook
-	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
-	// Treatments for the workbook
-	Treatments []WorkbookTreatments `json:"treatments,omitempty" url:"treatments,omitempty"`
-	Namespace  *string              `json:"namespace,omitempty" url:"namespace,omitempty"`
-	// Date the workbook was last updated
-	UpdatedAt time.Time `json:"updatedAt" url:"updatedAt"`
-	// Date the workbook was created
-	CreatedAt time.Time `json:"createdAt" url:"createdAt"`
-	// Date the workbook was created
-	ExpiredAt *time.Time `json:"expiredAt,omitempty" url:"expiredAt,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (w *Workbook) GetExtraProperties() map[string]interface{} {
-	return w.extraProperties
-}
-
-func (w *Workbook) UnmarshalJSON(data []byte) error {
-	type embed Workbook
-	var unmarshaler = struct {
-		embed
-		UpdatedAt *core.DateTime `json:"updatedAt"`
-		CreatedAt *core.DateTime `json:"createdAt"`
-		ExpiredAt *core.DateTime `json:"expiredAt,omitempty"`
-	}{
-		embed: embed(*w),
-	}
-	if err := json.Unmarshal(data, &unmarshaler); err != nil {
-		return err
-	}
-	*w = Workbook(unmarshaler.embed)
-	w.UpdatedAt = unmarshaler.UpdatedAt.Time()
-	w.CreatedAt = unmarshaler.CreatedAt.Time()
-	w.ExpiredAt = unmarshaler.ExpiredAt.TimePtr()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *w)
-	if err != nil {
-		return err
-	}
-	w.extraProperties = extraProperties
-
-	w._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (w *Workbook) MarshalJSON() ([]byte, error) {
-	type embed Workbook
-	var marshaler = struct {
-		embed
-		UpdatedAt *core.DateTime `json:"updatedAt"`
-		CreatedAt *core.DateTime `json:"createdAt"`
-		ExpiredAt *core.DateTime `json:"expiredAt,omitempty"`
-	}{
-		embed:     embed(*w),
-		UpdatedAt: core.NewDateTime(w.UpdatedAt),
-		CreatedAt: core.NewDateTime(w.CreatedAt),
-		ExpiredAt: core.NewOptionalDateTime(w.ExpiredAt),
-	}
-	return json.Marshal(marshaler)
-}
-
-func (w *Workbook) String() string {
-	if len(w._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(w._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(w); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", w)
-}
-
-// Settings for a workbook
-type WorkbookConfigSettings struct {
-	// Whether to track changes for this workbook. Defaults to false. Tracking changes on a workbook allows for disabling workbook and sheet actions while data in the workbook is still being processed. You must run a recordHook listener if you enable this feature.
-	TrackChanges *bool `json:"trackChanges,omitempty" url:"trackChanges,omitempty"`
-	// When noMappingRedirect is set to true, dragging a file into a sheet will not redirect to the mapping screen. Defaults to false.
-	NoMappingRedirect *bool `json:"noMappingRedirect,omitempty" url:"noMappingRedirect,omitempty"`
-	// Used to set the order of sheets in the sidebar. Sheets that are not specified will be shown after those listed.
-	SheetSidebarOrder []SheetId `json:"sheetSidebarOrder,omitempty" url:"sheetSidebarOrder,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (w *WorkbookConfigSettings) GetExtraProperties() map[string]interface{} {
-	return w.extraProperties
-}
-
-func (w *WorkbookConfigSettings) UnmarshalJSON(data []byte) error {
-	type unmarshaler WorkbookConfigSettings
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*w = WorkbookConfigSettings(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *w)
-	if err != nil {
-		return err
-	}
-	w.extraProperties = extraProperties
-
-	w._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (w *WorkbookConfigSettings) String() string {
-	if len(w._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(w._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(w); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", w)
-}
-
-// Available treatments for a workbook
-type WorkbookTreatments string
-
-const (
-	WorkbookTreatmentsExtractedFromSource WorkbookTreatments = "EXTRACTED_FROM_SOURCE"
-	WorkbookTreatmentsSmallData           WorkbookTreatments = "SMALL_DATA"
-)
-
-func NewWorkbookTreatmentsFromString(s string) (WorkbookTreatments, error) {
-	switch s {
-	case "EXTRACTED_FROM_SOURCE":
-		return WorkbookTreatmentsExtractedFromSource, nil
-	case "SMALL_DATA":
-		return WorkbookTreatmentsSmallData, nil
-	}
-	var t WorkbookTreatments
-	return "", fmt.Errorf("%s is not a valid %T", s, t)
-}
-
-func (w WorkbookTreatments) Ptr() *WorkbookTreatments {
-	return &w
 }

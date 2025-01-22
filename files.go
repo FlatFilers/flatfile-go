@@ -6,6 +6,7 @@ import (
 	json "encoding/json"
 	fmt "fmt"
 	core "github.com/FlatFilers/flatfile-go/core"
+	time "time"
 )
 
 type ListFilesRequest struct {
@@ -16,6 +17,101 @@ type ListFilesRequest struct {
 	PageNumber *int `json:"-" url:"pageNumber,omitempty"`
 	// The storage mode of file to fetch, defaults to "import"
 	Mode *Mode `json:"-" url:"mode,omitempty"`
+}
+
+// Any uploaded file of any type
+type File struct {
+	Id FileId `json:"id" url:"id"`
+	// Original filename
+	Name string `json:"name" url:"name"`
+	// Extension of the file
+	Ext string `json:"ext" url:"ext"`
+	// MIME Type of the file
+	Mimetype string `json:"mimetype" url:"mimetype"`
+	// Text encoding of the file
+	Encoding string `json:"encoding" url:"encoding"`
+	// Status of the file
+	Status ModelFileStatusEnum `json:"status" url:"status"`
+	// The storage mode of file
+	Mode *Mode `json:"mode,omitempty" url:"mode,omitempty"`
+	// Size of file in bytes
+	Size int `json:"size" url:"size"`
+	// Number of bytes that have been uploaded so far (useful for progress tracking)
+	BytesReceived int `json:"bytesReceived" url:"bytesReceived"`
+	// Date the file was created
+	CreatedAt time.Time `json:"createdAt" url:"createdAt"`
+	// Date the file was last updated
+	UpdatedAt time.Time `json:"updatedAt" url:"updatedAt"`
+	// Date the file was expired
+	ExpiredAt  *time.Time  `json:"expiredAt,omitempty" url:"expiredAt,omitempty"`
+	SpaceId    SpaceId     `json:"spaceId" url:"spaceId"`
+	WorkbookId *WorkbookId `json:"workbookId,omitempty" url:"workbookId,omitempty"`
+	SheetId    *SheetId    `json:"sheetId,omitempty" url:"sheetId,omitempty"`
+	Actions    []*Action   `json:"actions,omitempty" url:"actions,omitempty"`
+	Origin     *FileOrigin `json:"origin,omitempty" url:"origin,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (f *File) GetExtraProperties() map[string]interface{} {
+	return f.extraProperties
+}
+
+func (f *File) UnmarshalJSON(data []byte) error {
+	type embed File
+	var unmarshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"createdAt"`
+		UpdatedAt *core.DateTime `json:"updatedAt"`
+		ExpiredAt *core.DateTime `json:"expiredAt,omitempty"`
+	}{
+		embed: embed(*f),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*f = File(unmarshaler.embed)
+	f.CreatedAt = unmarshaler.CreatedAt.Time()
+	f.UpdatedAt = unmarshaler.UpdatedAt.Time()
+	f.ExpiredAt = unmarshaler.ExpiredAt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *f)
+	if err != nil {
+		return err
+	}
+	f.extraProperties = extraProperties
+
+	f._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (f *File) MarshalJSON() ([]byte, error) {
+	type embed File
+	var marshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"createdAt"`
+		UpdatedAt *core.DateTime `json:"updatedAt"`
+		ExpiredAt *core.DateTime `json:"expiredAt,omitempty"`
+	}{
+		embed:     embed(*f),
+		CreatedAt: core.NewDateTime(f.CreatedAt),
+		UpdatedAt: core.NewDateTime(f.UpdatedAt),
+		ExpiredAt: core.NewOptionalDateTime(f.ExpiredAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (f *File) String() string {
+	if len(f._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(f._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(f); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", f)
 }
 
 type FileOrigin string

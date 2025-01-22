@@ -6,6 +6,7 @@ import (
 	json "encoding/json"
 	fmt "fmt"
 	core "github.com/FlatFilers/flatfile-go/core"
+	time "time"
 )
 
 type GetGuestTokenRequest struct {
@@ -19,9 +20,6 @@ type ListGuestsRequest struct {
 	// Email of guest to return
 	Email *string `json:"-" url:"email,omitempty"`
 }
-
-// Guest ID
-type GuestId = string
 
 type CreateGuestResponse struct {
 	Data []*Guest `json:"data,omitempty" url:"data,omitempty"`
@@ -62,6 +60,77 @@ func (c *CreateGuestResponse) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", c)
+}
+
+type Guest struct {
+	EnvironmentId EnvironmentId `json:"environmentId" url:"environmentId"`
+	Email         string        `json:"email" url:"email"`
+	Name          string        `json:"name" url:"name"`
+	Spaces        []*GuestSpace `json:"spaces,omitempty" url:"spaces,omitempty"`
+	Id            GuestId       `json:"id" url:"id"`
+	// Date the guest object was created
+	CreatedAt time.Time `json:"createdAt" url:"createdAt"`
+	// Date the guest object was last updated
+	UpdatedAt time.Time `json:"updatedAt" url:"updatedAt"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *Guest) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *Guest) UnmarshalJSON(data []byte) error {
+	type embed Guest
+	var unmarshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"createdAt"`
+		UpdatedAt *core.DateTime `json:"updatedAt"`
+	}{
+		embed: embed(*g),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*g = Guest(unmarshaler.embed)
+	g.CreatedAt = unmarshaler.CreatedAt.Time()
+	g.UpdatedAt = unmarshaler.UpdatedAt.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *Guest) MarshalJSON() ([]byte, error) {
+	type embed Guest
+	var marshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"createdAt"`
+		UpdatedAt *core.DateTime `json:"updatedAt"`
+	}{
+		embed:     embed(*g),
+		CreatedAt: core.NewDateTime(g.CreatedAt),
+		UpdatedAt: core.NewDateTime(g.UpdatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (g *Guest) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
 }
 
 // Configurations for the guests
@@ -195,6 +264,110 @@ func (g *GuestResponse) String() string {
 	return fmt.Sprintf("%#v", g)
 }
 
+type GuestSpace struct {
+	Id           SpaceId          `json:"id" url:"id"`
+	Workbooks    []*GuestWorkbook `json:"workbooks,omitempty" url:"workbooks,omitempty"`
+	LastAccessed *time.Time       `json:"lastAccessed,omitempty" url:"lastAccessed,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GuestSpace) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GuestSpace) UnmarshalJSON(data []byte) error {
+	type embed GuestSpace
+	var unmarshaler = struct {
+		embed
+		LastAccessed *core.DateTime `json:"lastAccessed,omitempty"`
+	}{
+		embed: embed(*g),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*g = GuestSpace(unmarshaler.embed)
+	g.LastAccessed = unmarshaler.LastAccessed.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GuestSpace) MarshalJSON() ([]byte, error) {
+	type embed GuestSpace
+	var marshaler = struct {
+		embed
+		LastAccessed *core.DateTime `json:"lastAccessed,omitempty"`
+	}{
+		embed:        embed(*g),
+		LastAccessed: core.NewOptionalDateTime(g.LastAccessed),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (g *GuestSpace) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
+
+type GuestToken struct {
+	// The token used to authenticate the guest
+	Token string `json:"token" url:"token"`
+	Valid bool   `json:"valid" url:"valid"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GuestToken) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GuestToken) UnmarshalJSON(data []byte) error {
+	type unmarshaler GuestToken
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GuestToken(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GuestToken) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
+
 type GuestTokenResponse struct {
 	Data *GuestToken `json:"data,omitempty" url:"data,omitempty"`
 
@@ -225,6 +398,47 @@ func (g *GuestTokenResponse) UnmarshalJSON(data []byte) error {
 }
 
 func (g *GuestTokenResponse) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
+
+type GuestWorkbook struct {
+	Id WorkbookId `json:"id" url:"id"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GuestWorkbook) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GuestWorkbook) UnmarshalJSON(data []byte) error {
+	type unmarshaler GuestWorkbook
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GuestWorkbook(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GuestWorkbook) String() string {
 	if len(g._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
 			return value

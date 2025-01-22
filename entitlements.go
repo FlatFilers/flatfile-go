@@ -13,6 +13,51 @@ type ListEntitlementsRequest struct {
 	ResourceId string `json:"-" url:"resourceId"`
 }
 
+// An entitlement belonging to a resource
+type Entitlement struct {
+	// Short name for the entitlement
+	Key string `json:"key" url:"key"`
+	// Contains conditions or limits for an entitlement
+	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *Entitlement) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *Entitlement) UnmarshalJSON(data []byte) error {
+	type unmarshaler Entitlement
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = Entitlement(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
+	e._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (e *Entitlement) String() string {
+	if len(e._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
 type ListEntitlementsResponse struct {
 	Data []*Entitlement `json:"data,omitempty" url:"data,omitempty"`
 

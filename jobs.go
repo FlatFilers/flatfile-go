@@ -30,8 +30,1087 @@ type ListJobsRequest struct {
 	ExcludeChildJobs *bool `json:"-" url:"excludeChildJobs,omitempty"`
 }
 
-// Pipeline Job ID
-type JobId = string
+// The configuration for an add records to DataClip job
+type AddRecordsToDataClipJobConfig struct {
+	DataClipId DataClipId `json:"dataClipId" url:"dataClipId"`
+	SheetId    SheetId    `json:"sheetId" url:"sheetId"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AddRecordsToDataClipJobConfig) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AddRecordsToDataClipJobConfig) UnmarshalJSON(data []byte) error {
+	type unmarshaler AddRecordsToDataClipJobConfig
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AddRecordsToDataClipJobConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (a *AddRecordsToDataClipJobConfig) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
+type AiGenerateBlueprintConstraintsJobConfig struct {
+	SpaceId    SpaceId    `json:"spaceId" url:"spaceId"`
+	WorkbookId WorkbookId `json:"workbookId" url:"workbookId"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AiGenerateBlueprintConstraintsJobConfig) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AiGenerateBlueprintConstraintsJobConfig) UnmarshalJSON(data []byte) error {
+	type unmarshaler AiGenerateBlueprintConstraintsJobConfig
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AiGenerateBlueprintConstraintsJobConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (a *AiGenerateBlueprintConstraintsJobConfig) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
+type AiGenerateBlueprintJobConfig struct {
+	SpaceId SpaceId `json:"spaceId" url:"spaceId"`
+	AppId   AppId   `json:"appId" url:"appId"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AiGenerateBlueprintJobConfig) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AiGenerateBlueprintJobConfig) UnmarshalJSON(data []byte) error {
+	type unmarshaler AiGenerateBlueprintJobConfig
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AiGenerateBlueprintJobConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (a *AiGenerateBlueprintJobConfig) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
+type AiGenerateConstraintJobConfig struct {
+	SpaceId     SpaceId             `json:"spaceId" url:"spaceId"`
+	Constraints []*StoredConstraint `json:"constraints,omitempty" url:"constraints,omitempty"`
+	// A description of what the constraint to be generated should do
+	Description *string `json:"description,omitempty" url:"description,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AiGenerateConstraintJobConfig) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AiGenerateConstraintJobConfig) UnmarshalJSON(data []byte) error {
+	type unmarshaler AiGenerateConstraintJobConfig
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AiGenerateConstraintJobConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (a *AiGenerateConstraintJobConfig) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
+type AiGenerateSampleDataJobConfig struct {
+	SpaceId SpaceId `json:"spaceId" url:"spaceId"`
+	AppId   AppId   `json:"appId" url:"appId"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AiGenerateSampleDataJobConfig) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AiGenerateSampleDataJobConfig) UnmarshalJSON(data []byte) error {
+	type unmarshaler AiGenerateSampleDataJobConfig
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AiGenerateSampleDataJobConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (a *AiGenerateSampleDataJobConfig) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
+// Configuration for AI-powered rule creation jobs that generate or replace field constraints
+type AiRuleCreationJobConfig struct {
+	// Display name for the rule to be created
+	Label *string `json:"label,omitempty" url:"label,omitempty"`
+	// The natural language description of the rule to be created
+	Prompt string `json:"prompt" url:"prompt"`
+	// The ID of the sheet containing the field to create/update the rule for
+	SheetId SheetId `json:"sheetId" url:"sheetId"`
+	// The key of the field to create/update the rule for
+	FieldKey string `json:"fieldKey" url:"fieldKey"`
+	// To edit an existing rule, provide the index of the constraint in the constraints array for the field and that constraint will be replaced.
+	Index *int `json:"index,omitempty" url:"index,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AiRuleCreationJobConfig) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AiRuleCreationJobConfig) UnmarshalJSON(data []byte) error {
+	type unmarshaler AiRuleCreationJobConfig
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AiRuleCreationJobConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (a *AiRuleCreationJobConfig) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
+type AppAutobuildDeployJobConfig struct {
+	SpaceId SpaceId `json:"spaceId" url:"spaceId"`
+	AppId   AppId   `json:"appId" url:"appId"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *AppAutobuildDeployJobConfig) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AppAutobuildDeployJobConfig) UnmarshalJSON(data []byte) error {
+	type unmarshaler AppAutobuildDeployJobConfig
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AppAutobuildDeployJobConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (a *AppAutobuildDeployJobConfig) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
+type CategoryMapping struct {
+	// The source value to map from
+	SourceValue *EnumValue `json:"sourceValue,omitempty" url:"sourceValue,omitempty"`
+	// The destination value to map to
+	DestinationValue *EnumValue `json:"destinationValue,omitempty" url:"destinationValue,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CategoryMapping) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CategoryMapping) UnmarshalJSON(data []byte) error {
+	type unmarshaler CategoryMapping
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CategoryMapping(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CategoryMapping) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+type Certainty string
+
+const (
+	CertaintyAbsolute Certainty = "absolute"
+	CertaintyStrong   Certainty = "strong"
+	CertaintyModerate Certainty = "moderate"
+	CertaintyWeak     Certainty = "weak"
+)
+
+func NewCertaintyFromString(s string) (Certainty, error) {
+	switch s {
+	case "absolute":
+		return CertaintyAbsolute, nil
+	case "strong":
+		return CertaintyStrong, nil
+	case "moderate":
+		return CertaintyModerate, nil
+	case "weak":
+		return CertaintyWeak, nil
+	}
+	var t Certainty
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (c Certainty) Ptr() *Certainty {
+	return &c
+}
+
+type CollectionJobSubject struct {
+	Resource string                 `json:"resource" url:"resource"`
+	Params   map[string]interface{} `json:"params,omitempty" url:"params,omitempty"`
+	Query    map[string]interface{} `json:"query,omitempty" url:"query,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *CollectionJobSubject) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CollectionJobSubject) UnmarshalJSON(data []byte) error {
+	type unmarshaler CollectionJobSubject
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CollectionJobSubject(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CollectionJobSubject) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+// The configuration for a delete job
+type DeleteRecordsJobConfig struct {
+	// Options to filter records (default=none)
+	Filter *Filter `json:"filter,omitempty" url:"filter,omitempty"`
+	// Use this to narrow the valid/error filter results to a specific field (Requires filter to be set)
+	FilterField *FilterField `json:"filterField,omitempty" url:"filterField,omitempty"`
+	SearchValue *SearchValue `json:"searchValue,omitempty" url:"searchValue,omitempty"`
+	SearchField *SearchField `json:"searchField,omitempty" url:"searchField,omitempty"`
+	// FFQL query to filter records
+	Q     *string `json:"q,omitempty" url:"q,omitempty"`
+	Sheet SheetId `json:"sheet" url:"sheet"`
+	// List of record ids to exclude from deletion
+	Exceptions []RecordId `json:"exceptions,omitempty" url:"exceptions,omitempty"`
+	// If specified, a snapshot will be generated with this label
+	SnapshotLabel *string `json:"snapshotLabel,omitempty" url:"snapshotLabel,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (d *DeleteRecordsJobConfig) GetExtraProperties() map[string]interface{} {
+	return d.extraProperties
+}
+
+func (d *DeleteRecordsJobConfig) UnmarshalJSON(data []byte) error {
+	type unmarshaler DeleteRecordsJobConfig
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*d = DeleteRecordsJobConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *d)
+	if err != nil {
+		return err
+	}
+	d.extraProperties = extraProperties
+
+	d._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (d *DeleteRecordsJobConfig) String() string {
+	if len(d._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(d._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(d); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", d)
+}
+
+type DestinationField struct {
+	// The description of the destination field
+	DestinationField *Property `json:"destinationField,omitempty" url:"destinationField,omitempty"`
+	// A list of preview values of the data in the destination field
+	Preview []string `json:"preview,omitempty" url:"preview,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (d *DestinationField) GetExtraProperties() map[string]interface{} {
+	return d.extraProperties
+}
+
+func (d *DestinationField) UnmarshalJSON(data []byte) error {
+	type unmarshaler DestinationField
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*d = DestinationField(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *d)
+	if err != nil {
+		return err
+	}
+	d.extraProperties = extraProperties
+
+	d._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (d *DestinationField) String() string {
+	if len(d._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(d._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(d); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", d)
+}
+
+// The driver to use for extracting data from the file
+type Driver string
+
+const (
+	DriverCsv Driver = "csv"
+)
+
+func NewDriverFromString(s string) (Driver, error) {
+	switch s {
+	case "csv":
+		return DriverCsv, nil
+	}
+	var t Driver
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (d Driver) Ptr() *Driver {
+	return &d
+}
+
+type Edge struct {
+	// The description of the source field
+	SourceField *Property `json:"sourceField,omitempty" url:"sourceField,omitempty"`
+	// The description of the destination field
+	DestinationField *Property `json:"destinationField,omitempty" url:"destinationField,omitempty"`
+	// A list of preview values of the data in the destination field
+	Preview []string `json:"preview,omitempty" url:"preview,omitempty"`
+	// Only available if one or more of the destination fields is of type enum. Provides category mapping.
+	EnumDetails *EnumDetails `json:"enumDetails,omitempty" url:"enumDetails,omitempty"`
+	// Metadata about the edge
+	Metadata *Metadata `json:"metadata,omitempty" url:"metadata,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *Edge) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *Edge) UnmarshalJSON(data []byte) error {
+	type unmarshaler Edge
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = Edge(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
+	e._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (e *Edge) String() string {
+	if len(e._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
+type EmptyObject struct {
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *EmptyObject) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *EmptyObject) UnmarshalJSON(data []byte) error {
+	type unmarshaler EmptyObject
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = EmptyObject(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
+	e._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (e *EmptyObject) String() string {
+	if len(e._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
+// Only available if one or more of the destination fields is of type enum. Provides category mapping.
+type EnumDetails struct {
+	// The mapping of source values to destination values
+	Mapping []*CategoryMapping `json:"mapping,omitempty" url:"mapping,omitempty"`
+	// A list of source values that are not mapped from
+	UnusedSourceValues []*EnumValue `json:"unusedSourceValues,omitempty" url:"unusedSourceValues,omitempty"`
+	// A list of destination values that are not mapped to
+	UnusedDestinationValues []*EnumValue `json:"unusedDestinationValues,omitempty" url:"unusedDestinationValues,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *EnumDetails) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *EnumDetails) UnmarshalJSON(data []byte) error {
+	type unmarshaler EnumDetails
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = EnumDetails(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
+	e._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (e *EnumDetails) String() string {
+	if len(e._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
+type EnumValue struct {
+	String  string
+	Integer int
+	Boolean bool
+
+	typ string
+}
+
+func NewEnumValueFromString(value string) *EnumValue {
+	return &EnumValue{typ: "String", String: value}
+}
+
+func NewEnumValueFromInteger(value int) *EnumValue {
+	return &EnumValue{typ: "Integer", Integer: value}
+}
+
+func NewEnumValueFromBoolean(value bool) *EnumValue {
+	return &EnumValue{typ: "Boolean", Boolean: value}
+}
+
+func (e *EnumValue) UnmarshalJSON(data []byte) error {
+	var valueString string
+	if err := json.Unmarshal(data, &valueString); err == nil {
+		e.typ = "String"
+		e.String = valueString
+		return nil
+	}
+	var valueInteger int
+	if err := json.Unmarshal(data, &valueInteger); err == nil {
+		e.typ = "Integer"
+		e.Integer = valueInteger
+		return nil
+	}
+	var valueBoolean bool
+	if err := json.Unmarshal(data, &valueBoolean); err == nil {
+		e.typ = "Boolean"
+		e.Boolean = valueBoolean
+		return nil
+	}
+	return fmt.Errorf("%s cannot be deserialized as a %T", data, e)
+}
+
+func (e EnumValue) MarshalJSON() ([]byte, error) {
+	if e.typ == "String" || e.String != "" {
+		return json.Marshal(e.String)
+	}
+	if e.typ == "Integer" || e.Integer != 0 {
+		return json.Marshal(e.Integer)
+	}
+	if e.typ == "Boolean" || e.Boolean != false {
+		return json.Marshal(e.Boolean)
+	}
+	return nil, fmt.Errorf("type %T does not include a non-empty union type", e)
+}
+
+type EnumValueVisitor interface {
+	VisitString(string) error
+	VisitInteger(int) error
+	VisitBoolean(bool) error
+}
+
+func (e *EnumValue) Accept(visitor EnumValueVisitor) error {
+	if e.typ == "String" || e.String != "" {
+		return visitor.VisitString(e.String)
+	}
+	if e.typ == "Integer" || e.Integer != 0 {
+		return visitor.VisitInteger(e.Integer)
+	}
+	if e.typ == "Boolean" || e.Boolean != false {
+		return visitor.VisitBoolean(e.Boolean)
+	}
+	return fmt.Errorf("type %T does not include a non-empty union type", e)
+}
+
+type ExportJobConfig struct {
+	Options *ExportOptions `json:"options,omitempty" url:"options,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *ExportJobConfig) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *ExportJobConfig) UnmarshalJSON(data []byte) error {
+	type unmarshaler ExportJobConfig
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = ExportJobConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
+	e._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (e *ExportJobConfig) String() string {
+	if len(e._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
+type ExportOptions struct {
+	// Deprecated, use `commitId` instead
+	VersionId *VersionId `json:"versionId,omitempty" url:"versionId,omitempty"`
+	// If provided, the snapshot version of the workbook will be used for the export
+	CommitId *CommitId `json:"commitId,omitempty" url:"commitId,omitempty"`
+	// The field to sort the records on
+	SortField *SortField `json:"sortField,omitempty" url:"sortField,omitempty"`
+	// The direction to sort the records
+	SortDirection *SortDirection `json:"sortDirection,omitempty" url:"sortDirection,omitempty"`
+	// The filter to apply to the records
+	Filter *Filter `json:"filter,omitempty" url:"filter,omitempty"`
+	// The field to filter on
+	FilterField *FilterField `json:"filterField,omitempty" url:"filterField,omitempty"`
+	// The value to search for
+	SearchValue *SearchValue `json:"searchValue,omitempty" url:"searchValue,omitempty"`
+	// The field to search for the search value in
+	SearchField *SearchField `json:"searchField,omitempty" url:"searchField,omitempty"`
+	// The FFQL query to filter records
+	Q *string `json:"q,omitempty" url:"q,omitempty"`
+	// The Record Ids param (ids) is a list of record ids that can be passed to several record endpoints allowing the user to identify specific records to INCLUDE in the query, or specific records to EXCLUDE, depending on whether or not filters are being applied. When passing a query param that filters the record dataset, such as 'searchValue', or a 'filter' of 'valid' | 'error' | 'all', the 'ids' param will EXCLUDE those records from the filtered results. For basic queries that do not filter the dataset, passing record ids in the 'ids' param will limit the dataset to INCLUDE just those specific records
+	Ids []RecordId `json:"ids,omitempty" url:"ids,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (e *ExportOptions) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *ExportOptions) UnmarshalJSON(data []byte) error {
+	type unmarshaler ExportOptions
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = ExportOptions(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+
+	e._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (e *ExportOptions) String() string {
+	if len(e._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
+type FileJobConfig struct {
+	// The driver to use for extracting data from the file
+	Driver Driver `json:"driver" url:"driver"`
+	// The options to use for extracting data from the file
+	Options map[string]interface{} `json:"options,omitempty" url:"options,omitempty"`
+	// The row number of the header row detected at extraction time
+	DetectedHeaderRow *int `json:"detectedHeaderRow,omitempty" url:"detectedHeaderRow,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (f *FileJobConfig) GetExtraProperties() map[string]interface{} {
+	return f.extraProperties
+}
+
+func (f *FileJobConfig) UnmarshalJSON(data []byte) error {
+	type unmarshaler FileJobConfig
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*f = FileJobConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *f)
+	if err != nil {
+		return err
+	}
+	f.extraProperties = extraProperties
+
+	f._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (f *FileJobConfig) String() string {
+	if len(f._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(f._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(f); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", f)
+}
+
+type FindAndReplaceJobConfig struct {
+	// The filter to apply to the records
+	Filter *Filter `json:"filter,omitempty" url:"filter,omitempty"`
+	// The field to filter on
+	FilterField *FilterField `json:"filterField,omitempty" url:"filterField,omitempty"`
+	// The value to search for
+	SearchValue *SearchValue `json:"searchValue,omitempty" url:"searchValue,omitempty"`
+	// The field to search for the search value in
+	SearchField *SearchField `json:"searchField,omitempty" url:"searchField,omitempty"`
+	// The FFQL query to filter records
+	Q *string `json:"q,omitempty" url:"q,omitempty"`
+	// The Record Ids param (ids) is a list of record ids that can be passed to several record endpoints allowing the user to identify specific records to INCLUDE in the query, or specific records to EXCLUDE, depending on whether or not filters are being applied. When passing a query param that filters the record dataset, such as 'searchValue', or a 'filter' of 'valid' | 'error' | 'all', the 'ids' param will EXCLUDE those records from the filtered results. For basic queries that do not filter the dataset, passing record ids in the 'ids' param will limit the dataset to INCLUDE just those specific records
+	Ids []RecordId `json:"ids,omitempty" url:"ids,omitempty"`
+	// A value to find for a given field in a sheet. Wrap the value in "" for exact match
+	Find *CellValueUnion `json:"find,omitempty" url:"find,omitempty"`
+	// The value to replace found values with
+	Replace *CellValueUnion `json:"replace,omitempty" url:"replace,omitempty"`
+	// A unique key used to identify a field in a sheet
+	FieldKey string `json:"fieldKey" url:"fieldKey"`
+	// If specified, a snapshot will be generated with this label
+	SnapshotLabel *string `json:"snapshotLabel,omitempty" url:"snapshotLabel,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (f *FindAndReplaceJobConfig) GetExtraProperties() map[string]interface{} {
+	return f.extraProperties
+}
+
+func (f *FindAndReplaceJobConfig) UnmarshalJSON(data []byte) error {
+	type unmarshaler FindAndReplaceJobConfig
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*f = FindAndReplaceJobConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *f)
+	if err != nil {
+		return err
+	}
+	f.extraProperties = extraProperties
+
+	f._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (f *FindAndReplaceJobConfig) String() string {
+	if len(f._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(f._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(f); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", f)
+}
+
+// A single unit of work that will execute asynchronously
+type Job struct {
+	// The type of job
+	Type JobType `json:"type" url:"type"`
+	// the type of operation to perform on the data. For example, "export".
+	Operation   string           `json:"operation" url:"operation"`
+	Source      JobSource        `json:"source" url:"source"`
+	Destination *JobDestination  `json:"destination,omitempty" url:"destination,omitempty"`
+	Config      *JobUpdateConfig `json:"config,omitempty" url:"config,omitempty"`
+	// the type of trigger to use for this job
+	Trigger *Trigger `json:"trigger,omitempty" url:"trigger,omitempty"`
+	// the status of the job
+	Status *JobStatus `json:"status,omitempty" url:"status,omitempty"`
+	// the progress of the job. Whole number between 0 and 100
+	Progress *int    `json:"progress,omitempty" url:"progress,omitempty"`
+	FileId   *FileId `json:"fileId,omitempty" url:"fileId,omitempty"`
+	// the mode of the job
+	Mode *JobMode `json:"mode,omitempty" url:"mode,omitempty"`
+	// Input parameters for this job type.
+	Input map[string]interface{} `json:"input,omitempty" url:"input,omitempty"`
+	// Subject parameters for this job type.
+	Subject *JobSubject `json:"subject,omitempty" url:"subject,omitempty"`
+	// Outcome summary of job.
+	Outcome map[string]interface{} `json:"outcome,omitempty" url:"outcome,omitempty"`
+	// Current status of job in text
+	Info *string `json:"info,omitempty" url:"info,omitempty"`
+	// Indicates if Flatfile is managing the control flow of this job or if it is being manually tracked.
+	Managed *bool `json:"managed,omitempty" url:"managed,omitempty"`
+	// The id of the environment this job belongs to
+	EnvironmentId *EnvironmentId `json:"environmentId,omitempty" url:"environmentId,omitempty"`
+	// The part number of this job
+	Part *int `json:"part,omitempty" url:"part,omitempty"`
+	// The data for this part of the job
+	PartData map[string]interface{} `json:"partData,omitempty" url:"partData,omitempty"`
+	// The execution mode for this part of the job
+	PartExecution *JobPartExecution `json:"partExecution,omitempty" url:"partExecution,omitempty"`
+	// The id of the parent job
+	ParentId *JobId `json:"parentId,omitempty" url:"parentId,omitempty"`
+	// The ids of the jobs that must complete before this job can start
+	PredecessorIds []JobId `json:"predecessorIds,omitempty" url:"predecessorIds,omitempty"`
+	// Additional metadata for the job
+	Metadata map[string]interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
+	Id       JobId                  `json:"id" url:"id"`
+	// Date the item was created
+	CreatedAt time.Time `json:"createdAt" url:"createdAt"`
+	// Date the item was last updated
+	UpdatedAt time.Time `json:"updatedAt" url:"updatedAt"`
+	// the time that the job started at
+	StartedAt *time.Time `json:"startedAt,omitempty" url:"startedAt,omitempty"`
+	// the time that the job finished at
+	FinishedAt *time.Time `json:"finishedAt,omitempty" url:"finishedAt,omitempty"`
+	// the time that the job's outcome has been acknowledged by a user
+	OutcomeAcknowledgedAt *time.Time `json:"outcomeAcknowledgedAt,omitempty" url:"outcomeAcknowledgedAt,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (j *Job) GetExtraProperties() map[string]interface{} {
+	return j.extraProperties
+}
+
+func (j *Job) UnmarshalJSON(data []byte) error {
+	type embed Job
+	var unmarshaler = struct {
+		embed
+		CreatedAt             *core.DateTime `json:"createdAt"`
+		UpdatedAt             *core.DateTime `json:"updatedAt"`
+		StartedAt             *core.DateTime `json:"startedAt,omitempty"`
+		FinishedAt            *core.DateTime `json:"finishedAt,omitempty"`
+		OutcomeAcknowledgedAt *core.DateTime `json:"outcomeAcknowledgedAt,omitempty"`
+	}{
+		embed: embed(*j),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*j = Job(unmarshaler.embed)
+	j.CreatedAt = unmarshaler.CreatedAt.Time()
+	j.UpdatedAt = unmarshaler.UpdatedAt.Time()
+	j.StartedAt = unmarshaler.StartedAt.TimePtr()
+	j.FinishedAt = unmarshaler.FinishedAt.TimePtr()
+	j.OutcomeAcknowledgedAt = unmarshaler.OutcomeAcknowledgedAt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	if err != nil {
+		return err
+	}
+	j.extraProperties = extraProperties
+
+	j._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (j *Job) MarshalJSON() ([]byte, error) {
+	type embed Job
+	var marshaler = struct {
+		embed
+		CreatedAt             *core.DateTime `json:"createdAt"`
+		UpdatedAt             *core.DateTime `json:"updatedAt"`
+		StartedAt             *core.DateTime `json:"startedAt,omitempty"`
+		FinishedAt            *core.DateTime `json:"finishedAt,omitempty"`
+		OutcomeAcknowledgedAt *core.DateTime `json:"outcomeAcknowledgedAt,omitempty"`
+	}{
+		embed:                 embed(*j),
+		CreatedAt:             core.NewDateTime(j.CreatedAt),
+		UpdatedAt:             core.NewDateTime(j.UpdatedAt),
+		StartedAt:             core.NewOptionalDateTime(j.StartedAt),
+		FinishedAt:            core.NewOptionalDateTime(j.FinishedAt),
+		OutcomeAcknowledgedAt: core.NewOptionalDateTime(j.OutcomeAcknowledgedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (j *Job) String() string {
+	if len(j._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(j); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", j)
+}
 
 // Details about the user who acknowledged the job
 type JobAckDetails struct {
@@ -262,6 +1341,99 @@ func (j *JobConfig) String() string {
 	return fmt.Sprintf("%#v", j)
 }
 
+// The id of the workbook where extracted file data will be sent
+type JobDestination = WorkbookId
+
+// The execution plan for a job, for example, for a map job, the execution plan is the mapping of the source sheet to the destination sheet.
+type JobExecutionPlan struct {
+	FieldMapping              []*Edge             `json:"fieldMapping,omitempty" url:"fieldMapping,omitempty"`
+	UnmappedSourceFields      []*SourceField      `json:"unmappedSourceFields,omitempty" url:"unmappedSourceFields,omitempty"`
+	UnmappedDestinationFields []*DestinationField `json:"unmappedDestinationFields,omitempty" url:"unmappedDestinationFields,omitempty"`
+	ProgramId                 *string             `json:"programId,omitempty" url:"programId,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (j *JobExecutionPlan) GetExtraProperties() map[string]interface{} {
+	return j.extraProperties
+}
+
+func (j *JobExecutionPlan) UnmarshalJSON(data []byte) error {
+	type unmarshaler JobExecutionPlan
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*j = JobExecutionPlan(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	if err != nil {
+		return err
+	}
+	j.extraProperties = extraProperties
+
+	j._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (j *JobExecutionPlan) String() string {
+	if len(j._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(j); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", j)
+}
+
+// The execution plan for a job, for example, for a map job, the execution plan is the mapping of the source sheet to the destination sheet.
+type JobExecutionPlanConfig struct {
+	FieldMapping              []*Edge             `json:"fieldMapping,omitempty" url:"fieldMapping,omitempty"`
+	UnmappedSourceFields      []*SourceField      `json:"unmappedSourceFields,omitempty" url:"unmappedSourceFields,omitempty"`
+	UnmappedDestinationFields []*DestinationField `json:"unmappedDestinationFields,omitempty" url:"unmappedDestinationFields,omitempty"`
+	ProgramId                 *string             `json:"programId,omitempty" url:"programId,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (j *JobExecutionPlanConfig) GetExtraProperties() map[string]interface{} {
+	return j.extraProperties
+}
+
+func (j *JobExecutionPlanConfig) UnmarshalJSON(data []byte) error {
+	type unmarshaler JobExecutionPlanConfig
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*j = JobExecutionPlanConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	if err != nil {
+		return err
+	}
+	j.extraProperties = extraProperties
+
+	j._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (j *JobExecutionPlanConfig) String() string {
+	if len(j._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(j); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", j)
+}
+
 type JobExecutionPlanConfigRequest struct {
 	FieldMapping              []*Edge             `json:"fieldMapping,omitempty" url:"fieldMapping,omitempty"`
 	UnmappedSourceFields      []*SourceField      `json:"unmappedSourceFields,omitempty" url:"unmappedSourceFields,omitempty"`
@@ -343,6 +1515,900 @@ func (j *JobExecutionPlanRequest) UnmarshalJSON(data []byte) error {
 }
 
 func (j *JobExecutionPlanRequest) String() string {
+	if len(j._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(j); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", j)
+}
+
+// the mode of the job
+type JobMode string
+
+const (
+	JobModeForeground      JobMode = "foreground"
+	JobModeBackground      JobMode = "background"
+	JobModeToolbarBlocking JobMode = "toolbarBlocking"
+)
+
+func NewJobModeFromString(s string) (JobMode, error) {
+	switch s {
+	case "foreground":
+		return JobModeForeground, nil
+	case "background":
+		return JobModeBackground, nil
+	case "toolbarBlocking":
+		return JobModeToolbarBlocking, nil
+	}
+	var t JobMode
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (j JobMode) Ptr() *JobMode {
+	return &j
+}
+
+// Outcome summary of a job
+type JobOutcome struct {
+	Acknowledge       *bool              `json:"acknowledge,omitempty" url:"acknowledge,omitempty"`
+	Trigger           *JobOutcomeTrigger `json:"trigger,omitempty" url:"trigger,omitempty"`
+	ButtonText        *string            `json:"buttonText,omitempty" url:"buttonText,omitempty"`
+	Next              *JobOutcomeNext    `json:"next,omitempty" url:"next,omitempty"`
+	Heading           *string            `json:"heading,omitempty" url:"heading,omitempty"`
+	Message           *string            `json:"message,omitempty" url:"message,omitempty"`
+	HideDefaultButton *bool              `json:"hideDefaultButton,omitempty" url:"hideDefaultButton,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (j *JobOutcome) GetExtraProperties() map[string]interface{} {
+	return j.extraProperties
+}
+
+func (j *JobOutcome) UnmarshalJSON(data []byte) error {
+	type unmarshaler JobOutcome
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*j = JobOutcome(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	if err != nil {
+		return err
+	}
+	j.extraProperties = extraProperties
+
+	j._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (j *JobOutcome) String() string {
+	if len(j._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(j); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", j)
+}
+
+type JobOutcomeNext struct {
+	Type     string
+	Id       *JobOutcomeNextId
+	Url      *JobOutcomeNextUrl
+	Download *JobOutcomeNextDownload
+	Files    *JobOutcomeNextFiles
+	Wait     *JobOutcomeNextWait
+	Snapshot *JobOutcomeNextSnapshot
+	Retry    *JobOutcomeNextRetry
+	View     *JobOutcomeNextView
+}
+
+func NewJobOutcomeNextFromId(value *JobOutcomeNextId) *JobOutcomeNext {
+	return &JobOutcomeNext{Type: "id", Id: value}
+}
+
+func NewJobOutcomeNextFromUrl(value *JobOutcomeNextUrl) *JobOutcomeNext {
+	return &JobOutcomeNext{Type: "url", Url: value}
+}
+
+func NewJobOutcomeNextFromDownload(value *JobOutcomeNextDownload) *JobOutcomeNext {
+	return &JobOutcomeNext{Type: "download", Download: value}
+}
+
+func NewJobOutcomeNextFromFiles(value *JobOutcomeNextFiles) *JobOutcomeNext {
+	return &JobOutcomeNext{Type: "files", Files: value}
+}
+
+func NewJobOutcomeNextFromWait(value *JobOutcomeNextWait) *JobOutcomeNext {
+	return &JobOutcomeNext{Type: "wait", Wait: value}
+}
+
+func NewJobOutcomeNextFromSnapshot(value *JobOutcomeNextSnapshot) *JobOutcomeNext {
+	return &JobOutcomeNext{Type: "snapshot", Snapshot: value}
+}
+
+func NewJobOutcomeNextFromRetry(value *JobOutcomeNextRetry) *JobOutcomeNext {
+	return &JobOutcomeNext{Type: "retry", Retry: value}
+}
+
+func NewJobOutcomeNextFromView(value *JobOutcomeNextView) *JobOutcomeNext {
+	return &JobOutcomeNext{Type: "view", View: value}
+}
+
+func (j *JobOutcomeNext) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	j.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", j)
+	}
+	switch unmarshaler.Type {
+	case "id":
+		value := new(JobOutcomeNextId)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		j.Id = value
+	case "url":
+		value := new(JobOutcomeNextUrl)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		j.Url = value
+	case "download":
+		value := new(JobOutcomeNextDownload)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		j.Download = value
+	case "files":
+		value := new(JobOutcomeNextFiles)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		j.Files = value
+	case "wait":
+		value := new(JobOutcomeNextWait)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		j.Wait = value
+	case "snapshot":
+		value := new(JobOutcomeNextSnapshot)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		j.Snapshot = value
+	case "retry":
+		value := new(JobOutcomeNextRetry)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		j.Retry = value
+	case "view":
+		value := new(JobOutcomeNextView)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		j.View = value
+	}
+	return nil
+}
+
+func (j JobOutcomeNext) MarshalJSON() ([]byte, error) {
+	switch j.Type {
+	default:
+		return nil, fmt.Errorf("invalid type %s in %T", j.Type, j)
+	case "id":
+		return core.MarshalJSONWithExtraProperty(j.Id, "type", "id")
+	case "url":
+		return core.MarshalJSONWithExtraProperty(j.Url, "type", "url")
+	case "download":
+		return core.MarshalJSONWithExtraProperty(j.Download, "type", "download")
+	case "files":
+		return core.MarshalJSONWithExtraProperty(j.Files, "type", "files")
+	case "wait":
+		return core.MarshalJSONWithExtraProperty(j.Wait, "type", "wait")
+	case "snapshot":
+		return core.MarshalJSONWithExtraProperty(j.Snapshot, "type", "snapshot")
+	case "retry":
+		return core.MarshalJSONWithExtraProperty(j.Retry, "type", "retry")
+	case "view":
+		return core.MarshalJSONWithExtraProperty(j.View, "type", "view")
+	}
+}
+
+type JobOutcomeNextVisitor interface {
+	VisitId(*JobOutcomeNextId) error
+	VisitUrl(*JobOutcomeNextUrl) error
+	VisitDownload(*JobOutcomeNextDownload) error
+	VisitFiles(*JobOutcomeNextFiles) error
+	VisitWait(*JobOutcomeNextWait) error
+	VisitSnapshot(*JobOutcomeNextSnapshot) error
+	VisitRetry(*JobOutcomeNextRetry) error
+	VisitView(*JobOutcomeNextView) error
+}
+
+func (j *JobOutcomeNext) Accept(visitor JobOutcomeNextVisitor) error {
+	switch j.Type {
+	default:
+		return fmt.Errorf("invalid type %s in %T", j.Type, j)
+	case "id":
+		return visitor.VisitId(j.Id)
+	case "url":
+		return visitor.VisitUrl(j.Url)
+	case "download":
+		return visitor.VisitDownload(j.Download)
+	case "files":
+		return visitor.VisitFiles(j.Files)
+	case "wait":
+		return visitor.VisitWait(j.Wait)
+	case "snapshot":
+		return visitor.VisitSnapshot(j.Snapshot)
+	case "retry":
+		return visitor.VisitRetry(j.Retry)
+	case "view":
+		return visitor.VisitView(j.View)
+	}
+}
+
+type JobOutcomeNextDownload struct {
+	Url      string  `json:"url" url:"url"`
+	Label    *string `json:"label,omitempty" url:"label,omitempty"`
+	FileName *string `json:"fileName,omitempty" url:"fileName,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (j *JobOutcomeNextDownload) GetExtraProperties() map[string]interface{} {
+	return j.extraProperties
+}
+
+func (j *JobOutcomeNextDownload) UnmarshalJSON(data []byte) error {
+	type unmarshaler JobOutcomeNextDownload
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*j = JobOutcomeNextDownload(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	if err != nil {
+		return err
+	}
+	j.extraProperties = extraProperties
+
+	j._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (j *JobOutcomeNextDownload) String() string {
+	if len(j._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(j); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", j)
+}
+
+type JobOutcomeNextFileObject struct {
+	FileId string  `json:"fileId" url:"fileId"`
+	Label  *string `json:"label,omitempty" url:"label,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (j *JobOutcomeNextFileObject) GetExtraProperties() map[string]interface{} {
+	return j.extraProperties
+}
+
+func (j *JobOutcomeNextFileObject) UnmarshalJSON(data []byte) error {
+	type unmarshaler JobOutcomeNextFileObject
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*j = JobOutcomeNextFileObject(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	if err != nil {
+		return err
+	}
+	j.extraProperties = extraProperties
+
+	j._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (j *JobOutcomeNextFileObject) String() string {
+	if len(j._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(j); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", j)
+}
+
+type JobOutcomeNextFiles struct {
+	Files []*JobOutcomeNextFileObject `json:"files,omitempty" url:"files,omitempty"`
+	Label *string                     `json:"label,omitempty" url:"label,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (j *JobOutcomeNextFiles) GetExtraProperties() map[string]interface{} {
+	return j.extraProperties
+}
+
+func (j *JobOutcomeNextFiles) UnmarshalJSON(data []byte) error {
+	type unmarshaler JobOutcomeNextFiles
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*j = JobOutcomeNextFiles(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	if err != nil {
+		return err
+	}
+	j.extraProperties = extraProperties
+
+	j._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (j *JobOutcomeNextFiles) String() string {
+	if len(j._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(j); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", j)
+}
+
+type JobOutcomeNextId struct {
+	Id    string  `json:"id" url:"id"`
+	Label *string `json:"label,omitempty" url:"label,omitempty"`
+	Path  *string `json:"path,omitempty" url:"path,omitempty"`
+	Query *string `json:"query,omitempty" url:"query,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (j *JobOutcomeNextId) GetExtraProperties() map[string]interface{} {
+	return j.extraProperties
+}
+
+func (j *JobOutcomeNextId) UnmarshalJSON(data []byte) error {
+	type unmarshaler JobOutcomeNextId
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*j = JobOutcomeNextId(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	if err != nil {
+		return err
+	}
+	j.extraProperties = extraProperties
+
+	j._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (j *JobOutcomeNextId) String() string {
+	if len(j._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(j); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", j)
+}
+
+type JobOutcomeNextRetry struct {
+	Label *string `json:"label,omitempty" url:"label,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (j *JobOutcomeNextRetry) GetExtraProperties() map[string]interface{} {
+	return j.extraProperties
+}
+
+func (j *JobOutcomeNextRetry) UnmarshalJSON(data []byte) error {
+	type unmarshaler JobOutcomeNextRetry
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*j = JobOutcomeNextRetry(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	if err != nil {
+		return err
+	}
+	j.extraProperties = extraProperties
+
+	j._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (j *JobOutcomeNextRetry) String() string {
+	if len(j._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(j); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", j)
+}
+
+type JobOutcomeNextSnapshot struct {
+	SnapshotId string `json:"snapshotId" url:"snapshotId"`
+	SheetId    string `json:"sheetId" url:"sheetId"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (j *JobOutcomeNextSnapshot) GetExtraProperties() map[string]interface{} {
+	return j.extraProperties
+}
+
+func (j *JobOutcomeNextSnapshot) UnmarshalJSON(data []byte) error {
+	type unmarshaler JobOutcomeNextSnapshot
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*j = JobOutcomeNextSnapshot(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	if err != nil {
+		return err
+	}
+	j.extraProperties = extraProperties
+
+	j._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (j *JobOutcomeNextSnapshot) String() string {
+	if len(j._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(j); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", j)
+}
+
+type JobOutcomeNextUrl struct {
+	Url   string  `json:"url" url:"url"`
+	Label *string `json:"label,omitempty" url:"label,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (j *JobOutcomeNextUrl) GetExtraProperties() map[string]interface{} {
+	return j.extraProperties
+}
+
+func (j *JobOutcomeNextUrl) UnmarshalJSON(data []byte) error {
+	type unmarshaler JobOutcomeNextUrl
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*j = JobOutcomeNextUrl(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	if err != nil {
+		return err
+	}
+	j.extraProperties = extraProperties
+
+	j._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (j *JobOutcomeNextUrl) String() string {
+	if len(j._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(j); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", j)
+}
+
+type JobOutcomeNextView struct {
+	SheetId string `json:"sheetId" url:"sheetId"`
+	// An array of field keys from the sheet
+	HiddenColumns []string `json:"hiddenColumns,omitempty" url:"hiddenColumns,omitempty"`
+	Label         *string  `json:"label,omitempty" url:"label,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (j *JobOutcomeNextView) GetExtraProperties() map[string]interface{} {
+	return j.extraProperties
+}
+
+func (j *JobOutcomeNextView) UnmarshalJSON(data []byte) error {
+	type unmarshaler JobOutcomeNextView
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*j = JobOutcomeNextView(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	if err != nil {
+		return err
+	}
+	j.extraProperties = extraProperties
+
+	j._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (j *JobOutcomeNextView) String() string {
+	if len(j._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(j); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", j)
+}
+
+type JobOutcomeNextWait struct {
+	Fade     *bool `json:"fade,omitempty" url:"fade,omitempty"`
+	Confetti *bool `json:"confetti,omitempty" url:"confetti,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (j *JobOutcomeNextWait) GetExtraProperties() map[string]interface{} {
+	return j.extraProperties
+}
+
+func (j *JobOutcomeNextWait) UnmarshalJSON(data []byte) error {
+	type unmarshaler JobOutcomeNextWait
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*j = JobOutcomeNextWait(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	if err != nil {
+		return err
+	}
+	j.extraProperties = extraProperties
+
+	j._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (j *JobOutcomeNextWait) String() string {
+	if len(j._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(j); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", j)
+}
+
+type JobOutcomeTrigger struct {
+	JobOutcomeTriggerType    JobOutcomeTriggerType
+	JobOutcomeTriggerDetails *JobOutcomeTriggerDetails
+
+	typ string
+}
+
+func NewJobOutcomeTriggerFromJobOutcomeTriggerType(value JobOutcomeTriggerType) *JobOutcomeTrigger {
+	return &JobOutcomeTrigger{typ: "JobOutcomeTriggerType", JobOutcomeTriggerType: value}
+}
+
+func NewJobOutcomeTriggerFromJobOutcomeTriggerDetails(value *JobOutcomeTriggerDetails) *JobOutcomeTrigger {
+	return &JobOutcomeTrigger{typ: "JobOutcomeTriggerDetails", JobOutcomeTriggerDetails: value}
+}
+
+func (j *JobOutcomeTrigger) UnmarshalJSON(data []byte) error {
+	var valueJobOutcomeTriggerType JobOutcomeTriggerType
+	if err := json.Unmarshal(data, &valueJobOutcomeTriggerType); err == nil {
+		j.typ = "JobOutcomeTriggerType"
+		j.JobOutcomeTriggerType = valueJobOutcomeTriggerType
+		return nil
+	}
+	valueJobOutcomeTriggerDetails := new(JobOutcomeTriggerDetails)
+	if err := json.Unmarshal(data, &valueJobOutcomeTriggerDetails); err == nil {
+		j.typ = "JobOutcomeTriggerDetails"
+		j.JobOutcomeTriggerDetails = valueJobOutcomeTriggerDetails
+		return nil
+	}
+	return fmt.Errorf("%s cannot be deserialized as a %T", data, j)
+}
+
+func (j JobOutcomeTrigger) MarshalJSON() ([]byte, error) {
+	if j.typ == "JobOutcomeTriggerType" || j.JobOutcomeTriggerType != "" {
+		return json.Marshal(j.JobOutcomeTriggerType)
+	}
+	if j.typ == "JobOutcomeTriggerDetails" || j.JobOutcomeTriggerDetails != nil {
+		return json.Marshal(j.JobOutcomeTriggerDetails)
+	}
+	return nil, fmt.Errorf("type %T does not include a non-empty union type", j)
+}
+
+type JobOutcomeTriggerVisitor interface {
+	VisitJobOutcomeTriggerType(JobOutcomeTriggerType) error
+	VisitJobOutcomeTriggerDetails(*JobOutcomeTriggerDetails) error
+}
+
+func (j *JobOutcomeTrigger) Accept(visitor JobOutcomeTriggerVisitor) error {
+	if j.typ == "JobOutcomeTriggerType" || j.JobOutcomeTriggerType != "" {
+		return visitor.VisitJobOutcomeTriggerType(j.JobOutcomeTriggerType)
+	}
+	if j.typ == "JobOutcomeTriggerDetails" || j.JobOutcomeTriggerDetails != nil {
+		return visitor.VisitJobOutcomeTriggerDetails(j.JobOutcomeTriggerDetails)
+	}
+	return fmt.Errorf("type %T does not include a non-empty union type", j)
+}
+
+// For whom the job outcome's next effect should be triggered automatically
+type JobOutcomeTriggerAudience string
+
+const (
+	JobOutcomeTriggerAudienceOriginator JobOutcomeTriggerAudience = "originator"
+	JobOutcomeTriggerAudienceAll        JobOutcomeTriggerAudience = "all"
+)
+
+func NewJobOutcomeTriggerAudienceFromString(s string) (JobOutcomeTriggerAudience, error) {
+	switch s {
+	case "originator":
+		return JobOutcomeTriggerAudienceOriginator, nil
+	case "all":
+		return JobOutcomeTriggerAudienceAll, nil
+	}
+	var t JobOutcomeTriggerAudience
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (j JobOutcomeTriggerAudience) Ptr() *JobOutcomeTriggerAudience {
+	return &j
+}
+
+// Details about the trigger for the job outcome
+type JobOutcomeTriggerDetails struct {
+	Type     JobOutcomeTriggerType      `json:"type" url:"type"`
+	Audience *JobOutcomeTriggerAudience `json:"audience,omitempty" url:"audience,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (j *JobOutcomeTriggerDetails) GetExtraProperties() map[string]interface{} {
+	return j.extraProperties
+}
+
+func (j *JobOutcomeTriggerDetails) UnmarshalJSON(data []byte) error {
+	type unmarshaler JobOutcomeTriggerDetails
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*j = JobOutcomeTriggerDetails(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	if err != nil {
+		return err
+	}
+	j.extraProperties = extraProperties
+
+	j._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (j *JobOutcomeTriggerDetails) String() string {
+	if len(j._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(j); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", j)
+}
+
+// Whether a job outcome's effect should be triggered automatically
+type JobOutcomeTriggerType string
+
+const (
+	JobOutcomeTriggerTypeManual          JobOutcomeTriggerType = "manual"
+	JobOutcomeTriggerTypeAutomatic       JobOutcomeTriggerType = "automatic"
+	JobOutcomeTriggerTypeAutomaticSilent JobOutcomeTriggerType = "automatic_silent"
+)
+
+func NewJobOutcomeTriggerTypeFromString(s string) (JobOutcomeTriggerType, error) {
+	switch s {
+	case "manual":
+		return JobOutcomeTriggerTypeManual, nil
+	case "automatic":
+		return JobOutcomeTriggerTypeAutomatic, nil
+	case "automatic_silent":
+		return JobOutcomeTriggerTypeAutomaticSilent, nil
+	}
+	var t JobOutcomeTriggerType
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (j JobOutcomeTriggerType) Ptr() *JobOutcomeTriggerType {
+	return &j
+}
+
+type JobPartExecution string
+
+const (
+	JobPartExecutionSequential JobPartExecution = "sequential"
+	JobPartExecutionParallel   JobPartExecution = "parallel"
+)
+
+func NewJobPartExecutionFromString(s string) (JobPartExecution, error) {
+	switch s {
+	case "sequential":
+		return JobPartExecutionSequential, nil
+	case "parallel":
+		return JobPartExecutionParallel, nil
+	}
+	var t JobPartExecution
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (j JobPartExecution) Ptr() *JobPartExecution {
+	return &j
+}
+
+// Info about the number of parts to create
+type JobParts struct {
+	Integer       int
+	JobPartsArray JobPartsArray
+
+	typ string
+}
+
+func NewJobPartsFromInteger(value int) *JobParts {
+	return &JobParts{typ: "Integer", Integer: value}
+}
+
+func NewJobPartsFromJobPartsArray(value JobPartsArray) *JobParts {
+	return &JobParts{typ: "JobPartsArray", JobPartsArray: value}
+}
+
+func (j *JobParts) UnmarshalJSON(data []byte) error {
+	var valueInteger int
+	if err := json.Unmarshal(data, &valueInteger); err == nil {
+		j.typ = "Integer"
+		j.Integer = valueInteger
+		return nil
+	}
+	var valueJobPartsArray JobPartsArray
+	if err := json.Unmarshal(data, &valueJobPartsArray); err == nil {
+		j.typ = "JobPartsArray"
+		j.JobPartsArray = valueJobPartsArray
+		return nil
+	}
+	return fmt.Errorf("%s cannot be deserialized as a %T", data, j)
+}
+
+func (j JobParts) MarshalJSON() ([]byte, error) {
+	if j.typ == "Integer" || j.Integer != 0 {
+		return json.Marshal(j.Integer)
+	}
+	if j.typ == "JobPartsArray" || j.JobPartsArray != nil {
+		return json.Marshal(j.JobPartsArray)
+	}
+	return nil, fmt.Errorf("type %T does not include a non-empty union type", j)
+}
+
+type JobPartsVisitor interface {
+	VisitInteger(int) error
+	VisitJobPartsArray(JobPartsArray) error
+}
+
+func (j *JobParts) Accept(visitor JobPartsVisitor) error {
+	if j.typ == "Integer" || j.Integer != 0 {
+		return visitor.VisitInteger(j.Integer)
+	}
+	if j.typ == "JobPartsArray" || j.JobPartsArray != nil {
+		return visitor.VisitJobPartsArray(j.JobPartsArray)
+	}
+	return fmt.Errorf("type %T does not include a non-empty union type", j)
+}
+
+// Data for each of the job parts
+type JobPartsArray = []map[string]interface{}
+
+// The job/plan tuple that contains the full plan and the jobs status
+type JobPlan struct {
+	Job  *Job              `json:"job,omitempty" url:"job,omitempty"`
+	Plan *JobExecutionPlan `json:"plan,omitempty" url:"plan,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (j *JobPlan) GetExtraProperties() map[string]interface{} {
+	return j.extraProperties
+}
+
+func (j *JobPlan) UnmarshalJSON(data []byte) error {
+	type unmarshaler JobPlan
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*j = JobPlan(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	if err != nil {
+		return err
+	}
+	j.extraProperties = extraProperties
+
+	j._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (j *JobPlan) String() string {
 	if len(j._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
 			return value
@@ -436,6 +2502,9 @@ func (j *JobResponse) String() string {
 	return fmt.Sprintf("%#v", j)
 }
 
+// The id of a file, workbook, sheet, or app
+type JobSource = string
+
 // Info about the reason the job was split
 type JobSplitDetails struct {
 	Parts         *JobParts `json:"parts,omitempty" url:"parts,omitempty"`
@@ -479,6 +2548,155 @@ func (j *JobSplitDetails) String() string {
 	return fmt.Sprintf("%#v", j)
 }
 
+// the status of the job
+type JobStatus string
+
+const (
+	JobStatusCreated   JobStatus = "created"
+	JobStatusPlanning  JobStatus = "planning"
+	JobStatusScheduled JobStatus = "scheduled"
+	JobStatusReady     JobStatus = "ready"
+	JobStatusExecuting JobStatus = "executing"
+	JobStatusComplete  JobStatus = "complete"
+	JobStatusFailed    JobStatus = "failed"
+	JobStatusCanceled  JobStatus = "canceled"
+	JobStatusWaiting   JobStatus = "waiting"
+)
+
+func NewJobStatusFromString(s string) (JobStatus, error) {
+	switch s {
+	case "created":
+		return JobStatusCreated, nil
+	case "planning":
+		return JobStatusPlanning, nil
+	case "scheduled":
+		return JobStatusScheduled, nil
+	case "ready":
+		return JobStatusReady, nil
+	case "executing":
+		return JobStatusExecuting, nil
+	case "complete":
+		return JobStatusComplete, nil
+	case "failed":
+		return JobStatusFailed, nil
+	case "canceled":
+		return JobStatusCanceled, nil
+	case "waiting":
+		return JobStatusWaiting, nil
+	}
+	var t JobStatus
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (j JobStatus) Ptr() *JobStatus {
+	return &j
+}
+
+// Subject parameters for this job type
+type JobSubject struct {
+	Type       string
+	Resource   *ResourceJobSubject
+	Collection *CollectionJobSubject
+}
+
+func NewJobSubjectFromResource(value *ResourceJobSubject) *JobSubject {
+	return &JobSubject{Type: "resource", Resource: value}
+}
+
+func NewJobSubjectFromCollection(value *CollectionJobSubject) *JobSubject {
+	return &JobSubject{Type: "collection", Collection: value}
+}
+
+func (j *JobSubject) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	j.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", j)
+	}
+	switch unmarshaler.Type {
+	case "resource":
+		value := new(ResourceJobSubject)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		j.Resource = value
+	case "collection":
+		value := new(CollectionJobSubject)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		j.Collection = value
+	}
+	return nil
+}
+
+func (j JobSubject) MarshalJSON() ([]byte, error) {
+	switch j.Type {
+	default:
+		return nil, fmt.Errorf("invalid type %s in %T", j.Type, j)
+	case "resource":
+		return core.MarshalJSONWithExtraProperty(j.Resource, "type", "resource")
+	case "collection":
+		return core.MarshalJSONWithExtraProperty(j.Collection, "type", "collection")
+	}
+}
+
+type JobSubjectVisitor interface {
+	VisitResource(*ResourceJobSubject) error
+	VisitCollection(*CollectionJobSubject) error
+}
+
+func (j *JobSubject) Accept(visitor JobSubjectVisitor) error {
+	switch j.Type {
+	default:
+		return fmt.Errorf("invalid type %s in %T", j.Type, j)
+	case "resource":
+		return visitor.VisitResource(j.Resource)
+	case "collection":
+		return visitor.VisitCollection(j.Collection)
+	}
+}
+
+// The type of job
+type JobType string
+
+const (
+	JobTypeFile     JobType = "file"
+	JobTypeWorkbook JobType = "workbook"
+	JobTypeSheet    JobType = "sheet"
+	JobTypeSpace    JobType = "space"
+	JobTypeDocument JobType = "document"
+	JobTypeApp      JobType = "app"
+)
+
+func NewJobTypeFromString(s string) (JobType, error) {
+	switch s {
+	case "file":
+		return JobTypeFile, nil
+	case "workbook":
+		return JobTypeWorkbook, nil
+	case "sheet":
+		return JobTypeSheet, nil
+	case "space":
+		return JobTypeSpace, nil
+	case "document":
+		return JobTypeDocument, nil
+	case "app":
+		return JobTypeApp, nil
+	}
+	var t JobType
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (j JobType) Ptr() *JobType {
+	return &j
+}
+
 // A single unit of work that will be executed
 type JobUpdate struct {
 	Config *JobUpdateConfig `json:"config,omitempty" url:"config,omitempty"`
@@ -490,6 +2708,8 @@ type JobUpdate struct {
 	OutcomeAcknowledgedAt *time.Time `json:"outcomeAcknowledgedAt,omitempty" url:"outcomeAcknowledgedAt,omitempty"`
 	// Current status of job in text
 	Info *string `json:"info,omitempty" url:"info,omitempty"`
+	// Additional metadata for the job
+	Metadata map[string]interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -547,6 +2767,314 @@ func (j *JobUpdate) String() string {
 	return fmt.Sprintf("%#v", j)
 }
 
+type JobUpdateConfig struct {
+	DeleteRecordsJobConfig                  *DeleteRecordsJobConfig
+	FileJobConfig                           *FileJobConfig
+	PipelineJobConfig                       *PipelineJobConfig
+	ExportJobConfig                         *ExportJobConfig
+	MutateJobConfig                         *MutateJobConfig
+	FindAndReplaceJobConfig                 *FindAndReplaceJobConfig
+	MappingProgramJobConfig                 *MappingProgramJobConfig
+	AiGenerateBlueprintJobConfig            *AiGenerateBlueprintJobConfig
+	AppAutobuildDeployJobConfig             *AppAutobuildDeployJobConfig
+	AiGenerateSampleDataJobConfig           *AiGenerateSampleDataJobConfig
+	AiGenerateBlueprintConstraintsJobConfig *AiGenerateBlueprintConstraintsJobConfig
+	AiGenerateConstraintJobConfig           *AiGenerateConstraintJobConfig
+	AiRuleCreationJobConfig                 *AiRuleCreationJobConfig
+	EmptyObject                             *EmptyObject
+	AddRecordsToDataClipJobConfig           *AddRecordsToDataClipJobConfig
+	UpdateDataClipResolutionsJobConfig      *UpdateDataClipResolutionsJobConfig
+
+	typ string
+}
+
+func NewJobUpdateConfigFromDeleteRecordsJobConfig(value *DeleteRecordsJobConfig) *JobUpdateConfig {
+	return &JobUpdateConfig{typ: "DeleteRecordsJobConfig", DeleteRecordsJobConfig: value}
+}
+
+func NewJobUpdateConfigFromFileJobConfig(value *FileJobConfig) *JobUpdateConfig {
+	return &JobUpdateConfig{typ: "FileJobConfig", FileJobConfig: value}
+}
+
+func NewJobUpdateConfigFromPipelineJobConfig(value *PipelineJobConfig) *JobUpdateConfig {
+	return &JobUpdateConfig{typ: "PipelineJobConfig", PipelineJobConfig: value}
+}
+
+func NewJobUpdateConfigFromExportJobConfig(value *ExportJobConfig) *JobUpdateConfig {
+	return &JobUpdateConfig{typ: "ExportJobConfig", ExportJobConfig: value}
+}
+
+func NewJobUpdateConfigFromMutateJobConfig(value *MutateJobConfig) *JobUpdateConfig {
+	return &JobUpdateConfig{typ: "MutateJobConfig", MutateJobConfig: value}
+}
+
+func NewJobUpdateConfigFromFindAndReplaceJobConfig(value *FindAndReplaceJobConfig) *JobUpdateConfig {
+	return &JobUpdateConfig{typ: "FindAndReplaceJobConfig", FindAndReplaceJobConfig: value}
+}
+
+func NewJobUpdateConfigFromMappingProgramJobConfig(value *MappingProgramJobConfig) *JobUpdateConfig {
+	return &JobUpdateConfig{typ: "MappingProgramJobConfig", MappingProgramJobConfig: value}
+}
+
+func NewJobUpdateConfigFromAiGenerateBlueprintJobConfig(value *AiGenerateBlueprintJobConfig) *JobUpdateConfig {
+	return &JobUpdateConfig{typ: "AiGenerateBlueprintJobConfig", AiGenerateBlueprintJobConfig: value}
+}
+
+func NewJobUpdateConfigFromAppAutobuildDeployJobConfig(value *AppAutobuildDeployJobConfig) *JobUpdateConfig {
+	return &JobUpdateConfig{typ: "AppAutobuildDeployJobConfig", AppAutobuildDeployJobConfig: value}
+}
+
+func NewJobUpdateConfigFromAiGenerateSampleDataJobConfig(value *AiGenerateSampleDataJobConfig) *JobUpdateConfig {
+	return &JobUpdateConfig{typ: "AiGenerateSampleDataJobConfig", AiGenerateSampleDataJobConfig: value}
+}
+
+func NewJobUpdateConfigFromAiGenerateBlueprintConstraintsJobConfig(value *AiGenerateBlueprintConstraintsJobConfig) *JobUpdateConfig {
+	return &JobUpdateConfig{typ: "AiGenerateBlueprintConstraintsJobConfig", AiGenerateBlueprintConstraintsJobConfig: value}
+}
+
+func NewJobUpdateConfigFromAiGenerateConstraintJobConfig(value *AiGenerateConstraintJobConfig) *JobUpdateConfig {
+	return &JobUpdateConfig{typ: "AiGenerateConstraintJobConfig", AiGenerateConstraintJobConfig: value}
+}
+
+func NewJobUpdateConfigFromAiRuleCreationJobConfig(value *AiRuleCreationJobConfig) *JobUpdateConfig {
+	return &JobUpdateConfig{typ: "AiRuleCreationJobConfig", AiRuleCreationJobConfig: value}
+}
+
+func NewJobUpdateConfigFromEmptyObject(value *EmptyObject) *JobUpdateConfig {
+	return &JobUpdateConfig{typ: "EmptyObject", EmptyObject: value}
+}
+
+func NewJobUpdateConfigFromAddRecordsToDataClipJobConfig(value *AddRecordsToDataClipJobConfig) *JobUpdateConfig {
+	return &JobUpdateConfig{typ: "AddRecordsToDataClipJobConfig", AddRecordsToDataClipJobConfig: value}
+}
+
+func NewJobUpdateConfigFromUpdateDataClipResolutionsJobConfig(value *UpdateDataClipResolutionsJobConfig) *JobUpdateConfig {
+	return &JobUpdateConfig{typ: "UpdateDataClipResolutionsJobConfig", UpdateDataClipResolutionsJobConfig: value}
+}
+
+func (j *JobUpdateConfig) UnmarshalJSON(data []byte) error {
+	valueDeleteRecordsJobConfig := new(DeleteRecordsJobConfig)
+	if err := json.Unmarshal(data, &valueDeleteRecordsJobConfig); err == nil {
+		j.typ = "DeleteRecordsJobConfig"
+		j.DeleteRecordsJobConfig = valueDeleteRecordsJobConfig
+		return nil
+	}
+	valueFileJobConfig := new(FileJobConfig)
+	if err := json.Unmarshal(data, &valueFileJobConfig); err == nil {
+		j.typ = "FileJobConfig"
+		j.FileJobConfig = valueFileJobConfig
+		return nil
+	}
+	valuePipelineJobConfig := new(PipelineJobConfig)
+	if err := json.Unmarshal(data, &valuePipelineJobConfig); err == nil {
+		j.typ = "PipelineJobConfig"
+		j.PipelineJobConfig = valuePipelineJobConfig
+		return nil
+	}
+	valueExportJobConfig := new(ExportJobConfig)
+	if err := json.Unmarshal(data, &valueExportJobConfig); err == nil {
+		j.typ = "ExportJobConfig"
+		j.ExportJobConfig = valueExportJobConfig
+		return nil
+	}
+	valueMutateJobConfig := new(MutateJobConfig)
+	if err := json.Unmarshal(data, &valueMutateJobConfig); err == nil {
+		j.typ = "MutateJobConfig"
+		j.MutateJobConfig = valueMutateJobConfig
+		return nil
+	}
+	valueFindAndReplaceJobConfig := new(FindAndReplaceJobConfig)
+	if err := json.Unmarshal(data, &valueFindAndReplaceJobConfig); err == nil {
+		j.typ = "FindAndReplaceJobConfig"
+		j.FindAndReplaceJobConfig = valueFindAndReplaceJobConfig
+		return nil
+	}
+	valueMappingProgramJobConfig := new(MappingProgramJobConfig)
+	if err := json.Unmarshal(data, &valueMappingProgramJobConfig); err == nil {
+		j.typ = "MappingProgramJobConfig"
+		j.MappingProgramJobConfig = valueMappingProgramJobConfig
+		return nil
+	}
+	valueAiGenerateBlueprintJobConfig := new(AiGenerateBlueprintJobConfig)
+	if err := json.Unmarshal(data, &valueAiGenerateBlueprintJobConfig); err == nil {
+		j.typ = "AiGenerateBlueprintJobConfig"
+		j.AiGenerateBlueprintJobConfig = valueAiGenerateBlueprintJobConfig
+		return nil
+	}
+	valueAppAutobuildDeployJobConfig := new(AppAutobuildDeployJobConfig)
+	if err := json.Unmarshal(data, &valueAppAutobuildDeployJobConfig); err == nil {
+		j.typ = "AppAutobuildDeployJobConfig"
+		j.AppAutobuildDeployJobConfig = valueAppAutobuildDeployJobConfig
+		return nil
+	}
+	valueAiGenerateSampleDataJobConfig := new(AiGenerateSampleDataJobConfig)
+	if err := json.Unmarshal(data, &valueAiGenerateSampleDataJobConfig); err == nil {
+		j.typ = "AiGenerateSampleDataJobConfig"
+		j.AiGenerateSampleDataJobConfig = valueAiGenerateSampleDataJobConfig
+		return nil
+	}
+	valueAiGenerateBlueprintConstraintsJobConfig := new(AiGenerateBlueprintConstraintsJobConfig)
+	if err := json.Unmarshal(data, &valueAiGenerateBlueprintConstraintsJobConfig); err == nil {
+		j.typ = "AiGenerateBlueprintConstraintsJobConfig"
+		j.AiGenerateBlueprintConstraintsJobConfig = valueAiGenerateBlueprintConstraintsJobConfig
+		return nil
+	}
+	valueAiGenerateConstraintJobConfig := new(AiGenerateConstraintJobConfig)
+	if err := json.Unmarshal(data, &valueAiGenerateConstraintJobConfig); err == nil {
+		j.typ = "AiGenerateConstraintJobConfig"
+		j.AiGenerateConstraintJobConfig = valueAiGenerateConstraintJobConfig
+		return nil
+	}
+	valueAiRuleCreationJobConfig := new(AiRuleCreationJobConfig)
+	if err := json.Unmarshal(data, &valueAiRuleCreationJobConfig); err == nil {
+		j.typ = "AiRuleCreationJobConfig"
+		j.AiRuleCreationJobConfig = valueAiRuleCreationJobConfig
+		return nil
+	}
+	valueEmptyObject := new(EmptyObject)
+	if err := json.Unmarshal(data, &valueEmptyObject); err == nil {
+		j.typ = "EmptyObject"
+		j.EmptyObject = valueEmptyObject
+		return nil
+	}
+	valueAddRecordsToDataClipJobConfig := new(AddRecordsToDataClipJobConfig)
+	if err := json.Unmarshal(data, &valueAddRecordsToDataClipJobConfig); err == nil {
+		j.typ = "AddRecordsToDataClipJobConfig"
+		j.AddRecordsToDataClipJobConfig = valueAddRecordsToDataClipJobConfig
+		return nil
+	}
+	valueUpdateDataClipResolutionsJobConfig := new(UpdateDataClipResolutionsJobConfig)
+	if err := json.Unmarshal(data, &valueUpdateDataClipResolutionsJobConfig); err == nil {
+		j.typ = "UpdateDataClipResolutionsJobConfig"
+		j.UpdateDataClipResolutionsJobConfig = valueUpdateDataClipResolutionsJobConfig
+		return nil
+	}
+	return fmt.Errorf("%s cannot be deserialized as a %T", data, j)
+}
+
+func (j JobUpdateConfig) MarshalJSON() ([]byte, error) {
+	if j.typ == "DeleteRecordsJobConfig" || j.DeleteRecordsJobConfig != nil {
+		return json.Marshal(j.DeleteRecordsJobConfig)
+	}
+	if j.typ == "FileJobConfig" || j.FileJobConfig != nil {
+		return json.Marshal(j.FileJobConfig)
+	}
+	if j.typ == "PipelineJobConfig" || j.PipelineJobConfig != nil {
+		return json.Marshal(j.PipelineJobConfig)
+	}
+	if j.typ == "ExportJobConfig" || j.ExportJobConfig != nil {
+		return json.Marshal(j.ExportJobConfig)
+	}
+	if j.typ == "MutateJobConfig" || j.MutateJobConfig != nil {
+		return json.Marshal(j.MutateJobConfig)
+	}
+	if j.typ == "FindAndReplaceJobConfig" || j.FindAndReplaceJobConfig != nil {
+		return json.Marshal(j.FindAndReplaceJobConfig)
+	}
+	if j.typ == "MappingProgramJobConfig" || j.MappingProgramJobConfig != nil {
+		return json.Marshal(j.MappingProgramJobConfig)
+	}
+	if j.typ == "AiGenerateBlueprintJobConfig" || j.AiGenerateBlueprintJobConfig != nil {
+		return json.Marshal(j.AiGenerateBlueprintJobConfig)
+	}
+	if j.typ == "AppAutobuildDeployJobConfig" || j.AppAutobuildDeployJobConfig != nil {
+		return json.Marshal(j.AppAutobuildDeployJobConfig)
+	}
+	if j.typ == "AiGenerateSampleDataJobConfig" || j.AiGenerateSampleDataJobConfig != nil {
+		return json.Marshal(j.AiGenerateSampleDataJobConfig)
+	}
+	if j.typ == "AiGenerateBlueprintConstraintsJobConfig" || j.AiGenerateBlueprintConstraintsJobConfig != nil {
+		return json.Marshal(j.AiGenerateBlueprintConstraintsJobConfig)
+	}
+	if j.typ == "AiGenerateConstraintJobConfig" || j.AiGenerateConstraintJobConfig != nil {
+		return json.Marshal(j.AiGenerateConstraintJobConfig)
+	}
+	if j.typ == "AiRuleCreationJobConfig" || j.AiRuleCreationJobConfig != nil {
+		return json.Marshal(j.AiRuleCreationJobConfig)
+	}
+	if j.typ == "EmptyObject" || j.EmptyObject != nil {
+		return json.Marshal(j.EmptyObject)
+	}
+	if j.typ == "AddRecordsToDataClipJobConfig" || j.AddRecordsToDataClipJobConfig != nil {
+		return json.Marshal(j.AddRecordsToDataClipJobConfig)
+	}
+	if j.typ == "UpdateDataClipResolutionsJobConfig" || j.UpdateDataClipResolutionsJobConfig != nil {
+		return json.Marshal(j.UpdateDataClipResolutionsJobConfig)
+	}
+	return nil, fmt.Errorf("type %T does not include a non-empty union type", j)
+}
+
+type JobUpdateConfigVisitor interface {
+	VisitDeleteRecordsJobConfig(*DeleteRecordsJobConfig) error
+	VisitFileJobConfig(*FileJobConfig) error
+	VisitPipelineJobConfig(*PipelineJobConfig) error
+	VisitExportJobConfig(*ExportJobConfig) error
+	VisitMutateJobConfig(*MutateJobConfig) error
+	VisitFindAndReplaceJobConfig(*FindAndReplaceJobConfig) error
+	VisitMappingProgramJobConfig(*MappingProgramJobConfig) error
+	VisitAiGenerateBlueprintJobConfig(*AiGenerateBlueprintJobConfig) error
+	VisitAppAutobuildDeployJobConfig(*AppAutobuildDeployJobConfig) error
+	VisitAiGenerateSampleDataJobConfig(*AiGenerateSampleDataJobConfig) error
+	VisitAiGenerateBlueprintConstraintsJobConfig(*AiGenerateBlueprintConstraintsJobConfig) error
+	VisitAiGenerateConstraintJobConfig(*AiGenerateConstraintJobConfig) error
+	VisitAiRuleCreationJobConfig(*AiRuleCreationJobConfig) error
+	VisitEmptyObject(*EmptyObject) error
+	VisitAddRecordsToDataClipJobConfig(*AddRecordsToDataClipJobConfig) error
+	VisitUpdateDataClipResolutionsJobConfig(*UpdateDataClipResolutionsJobConfig) error
+}
+
+func (j *JobUpdateConfig) Accept(visitor JobUpdateConfigVisitor) error {
+	if j.typ == "DeleteRecordsJobConfig" || j.DeleteRecordsJobConfig != nil {
+		return visitor.VisitDeleteRecordsJobConfig(j.DeleteRecordsJobConfig)
+	}
+	if j.typ == "FileJobConfig" || j.FileJobConfig != nil {
+		return visitor.VisitFileJobConfig(j.FileJobConfig)
+	}
+	if j.typ == "PipelineJobConfig" || j.PipelineJobConfig != nil {
+		return visitor.VisitPipelineJobConfig(j.PipelineJobConfig)
+	}
+	if j.typ == "ExportJobConfig" || j.ExportJobConfig != nil {
+		return visitor.VisitExportJobConfig(j.ExportJobConfig)
+	}
+	if j.typ == "MutateJobConfig" || j.MutateJobConfig != nil {
+		return visitor.VisitMutateJobConfig(j.MutateJobConfig)
+	}
+	if j.typ == "FindAndReplaceJobConfig" || j.FindAndReplaceJobConfig != nil {
+		return visitor.VisitFindAndReplaceJobConfig(j.FindAndReplaceJobConfig)
+	}
+	if j.typ == "MappingProgramJobConfig" || j.MappingProgramJobConfig != nil {
+		return visitor.VisitMappingProgramJobConfig(j.MappingProgramJobConfig)
+	}
+	if j.typ == "AiGenerateBlueprintJobConfig" || j.AiGenerateBlueprintJobConfig != nil {
+		return visitor.VisitAiGenerateBlueprintJobConfig(j.AiGenerateBlueprintJobConfig)
+	}
+	if j.typ == "AppAutobuildDeployJobConfig" || j.AppAutobuildDeployJobConfig != nil {
+		return visitor.VisitAppAutobuildDeployJobConfig(j.AppAutobuildDeployJobConfig)
+	}
+	if j.typ == "AiGenerateSampleDataJobConfig" || j.AiGenerateSampleDataJobConfig != nil {
+		return visitor.VisitAiGenerateSampleDataJobConfig(j.AiGenerateSampleDataJobConfig)
+	}
+	if j.typ == "AiGenerateBlueprintConstraintsJobConfig" || j.AiGenerateBlueprintConstraintsJobConfig != nil {
+		return visitor.VisitAiGenerateBlueprintConstraintsJobConfig(j.AiGenerateBlueprintConstraintsJobConfig)
+	}
+	if j.typ == "AiGenerateConstraintJobConfig" || j.AiGenerateConstraintJobConfig != nil {
+		return visitor.VisitAiGenerateConstraintJobConfig(j.AiGenerateConstraintJobConfig)
+	}
+	if j.typ == "AiRuleCreationJobConfig" || j.AiRuleCreationJobConfig != nil {
+		return visitor.VisitAiRuleCreationJobConfig(j.AiRuleCreationJobConfig)
+	}
+	if j.typ == "EmptyObject" || j.EmptyObject != nil {
+		return visitor.VisitEmptyObject(j.EmptyObject)
+	}
+	if j.typ == "AddRecordsToDataClipJobConfig" || j.AddRecordsToDataClipJobConfig != nil {
+		return visitor.VisitAddRecordsToDataClipJobConfig(j.AddRecordsToDataClipJobConfig)
+	}
+	if j.typ == "UpdateDataClipResolutionsJobConfig" || j.UpdateDataClipResolutionsJobConfig != nil {
+		return visitor.VisitUpdateDataClipResolutionsJobConfig(j.UpdateDataClipResolutionsJobConfig)
+	}
+	return fmt.Errorf("type %T does not include a non-empty union type", j)
+}
+
 type ListJobsResponse struct {
 	Pagination *Pagination `json:"pagination,omitempty" url:"pagination,omitempty"`
 	Data       []*Job      `json:"data,omitempty" url:"data,omitempty"`
@@ -587,6 +3115,93 @@ func (l *ListJobsResponse) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", l)
+}
+
+type MappingProgramJobConfig struct {
+	SourceSheetId      SheetId                  `json:"sourceSheetId" url:"sourceSheetId"`
+	DestinationSheetId SheetId                  `json:"destinationSheetId" url:"destinationSheetId"`
+	MappingRules       []map[string]interface{} `json:"mappingRules,omitempty" url:"mappingRules,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (m *MappingProgramJobConfig) GetExtraProperties() map[string]interface{} {
+	return m.extraProperties
+}
+
+func (m *MappingProgramJobConfig) UnmarshalJSON(data []byte) error {
+	type unmarshaler MappingProgramJobConfig
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*m = MappingProgramJobConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *m)
+	if err != nil {
+		return err
+	}
+	m.extraProperties = extraProperties
+
+	m._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (m *MappingProgramJobConfig) String() string {
+	if len(m._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(m._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(m); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", m)
+}
+
+type Metadata struct {
+	Certainty         *Certainty `json:"certainty,omitempty" url:"certainty,omitempty"`
+	Confidence        *float64   `json:"confidence,omitempty" url:"confidence,omitempty"`
+	Source            *string    `json:"source,omitempty" url:"source,omitempty"`
+	DetectedDelimiter *string    `json:"detectedDelimiter,omitempty" url:"detectedDelimiter,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (m *Metadata) GetExtraProperties() map[string]interface{} {
+	return m.extraProperties
+}
+
+func (m *Metadata) UnmarshalJSON(data []byte) error {
+	type unmarshaler Metadata
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*m = Metadata(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *m)
+	if err != nil {
+		return err
+	}
+	m.extraProperties = extraProperties
+
+	m._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (m *Metadata) String() string {
+	if len(m._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(m._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(m); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", m)
 }
 
 type MutateJobConfig struct {
@@ -643,4 +3258,204 @@ func (m *MutateJobConfig) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", m)
+}
+
+type PipelineJobConfig struct {
+	SourceSheetId      SheetId `json:"sourceSheetId" url:"sourceSheetId"`
+	DestinationSheetId SheetId `json:"destinationSheetId" url:"destinationSheetId"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *PipelineJobConfig) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *PipelineJobConfig) UnmarshalJSON(data []byte) error {
+	type unmarshaler PipelineJobConfig
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = PipelineJobConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
+	p._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (p *PipelineJobConfig) String() string {
+	if len(p._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
+}
+
+type ResourceJobSubject struct {
+	Id string `json:"id" url:"id"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (r *ResourceJobSubject) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
+}
+
+func (r *ResourceJobSubject) UnmarshalJSON(data []byte) error {
+	type unmarshaler ResourceJobSubject
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*r = ResourceJobSubject(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+
+	r._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (r *ResourceJobSubject) String() string {
+	if len(r._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(r._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(r); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", r)
+}
+
+type SourceField struct {
+	// The description of the source field
+	SourceField *Property `json:"sourceField,omitempty" url:"sourceField,omitempty"`
+	// A list of preview values of the data in the source field
+	Preview []string `json:"preview,omitempty" url:"preview,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SourceField) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SourceField) UnmarshalJSON(data []byte) error {
+	type unmarshaler SourceField
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SourceField(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *SourceField) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
+// The type of trigger to use for this job
+type Trigger string
+
+const (
+	TriggerManual    Trigger = "manual"
+	TriggerImmediate Trigger = "immediate"
+)
+
+func NewTriggerFromString(s string) (Trigger, error) {
+	switch s {
+	case "manual":
+		return TriggerManual, nil
+	case "immediate":
+		return TriggerImmediate, nil
+	}
+	var t Trigger
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (t Trigger) Ptr() *Trigger {
+	return &t
+}
+
+// Configuration for a data clip resolution job
+type UpdateDataClipResolutionsJobConfig struct {
+	// The ID of the data clip to resolve
+	ClipId DataClipId `json:"clipId" url:"clipId"`
+	// The ID of the sheet that contains the data clip
+	ClippedSheetId SheetId   `json:"clippedSheetId" url:"clippedSheetId"`
+	ResolveTo      ResolveTo `json:"resolveTo" url:"resolveTo"`
+	// Optional. If provided, only this column will be resolved.
+	ColumnField string `json:"columnField" url:"columnField"`
+	// Optional. If provided, this value in the column will be replaced with the resolution target.
+	ColumnValue string `json:"columnValue" url:"columnValue"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (u *UpdateDataClipResolutionsJobConfig) GetExtraProperties() map[string]interface{} {
+	return u.extraProperties
+}
+
+func (u *UpdateDataClipResolutionsJobConfig) UnmarshalJSON(data []byte) error {
+	type unmarshaler UpdateDataClipResolutionsJobConfig
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*u = UpdateDataClipResolutionsJobConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *u)
+	if err != nil {
+		return err
+	}
+	u.extraProperties = extraProperties
+
+	u._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (u *UpdateDataClipResolutionsJobConfig) String() string {
+	if len(u._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(u._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(u); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", u)
 }

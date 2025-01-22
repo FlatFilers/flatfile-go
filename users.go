@@ -6,6 +6,7 @@ import (
 	json "encoding/json"
 	fmt "fmt"
 	core "github.com/FlatFilers/flatfile-go/core"
+	time "time"
 )
 
 type ListUsersRequest struct {
@@ -109,50 +110,6 @@ func (l ListUsersSortField) Ptr() *ListUsersSortField {
 }
 
 // Properties used to create a new user
-type UserConfig struct {
-	Email     string    `json:"email" url:"email"`
-	Name      string    `json:"name" url:"name"`
-	AccountId AccountId `json:"accountId" url:"accountId"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (u *UserConfig) GetExtraProperties() map[string]interface{} {
-	return u.extraProperties
-}
-
-func (u *UserConfig) UnmarshalJSON(data []byte) error {
-	type unmarshaler UserConfig
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*u = UserConfig(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *u)
-	if err != nil {
-		return err
-	}
-	u.extraProperties = extraProperties
-
-	u._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (u *UserConfig) String() string {
-	if len(u._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(u._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(u); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", u)
-}
-
-// Properties used to create a new user
 type UserCreateAndInviteRequest struct {
 	Email      string                    `json:"email" url:"email"`
 	Name       string                    `json:"name" url:"name"`
@@ -185,6 +142,84 @@ func (u *UserCreateAndInviteRequest) UnmarshalJSON(data []byte) error {
 }
 
 func (u *UserCreateAndInviteRequest) String() string {
+	if len(u._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(u._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(u); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", u)
+}
+
+type UserWithRoles struct {
+	Email      string                 `json:"email" url:"email"`
+	Name       string                 `json:"name" url:"name"`
+	AccountId  AccountId              `json:"accountId" url:"accountId"`
+	Id         UserId                 `json:"id" url:"id"`
+	Idp        string                 `json:"idp" url:"idp"`
+	IdpRef     *string                `json:"idpRef,omitempty" url:"idpRef,omitempty"`
+	Metadata   map[string]interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
+	CreatedAt  time.Time              `json:"createdAt" url:"createdAt"`
+	UpdatedAt  time.Time              `json:"updatedAt" url:"updatedAt"`
+	LastSeenAt *time.Time             `json:"lastSeenAt,omitempty" url:"lastSeenAt,omitempty"`
+	Dashboard  *int                   `json:"dashboard,omitempty" url:"dashboard,omitempty"`
+	ActorRoles []*ActorRoleResponse   `json:"actorRoles,omitempty" url:"actorRoles,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (u *UserWithRoles) GetExtraProperties() map[string]interface{} {
+	return u.extraProperties
+}
+
+func (u *UserWithRoles) UnmarshalJSON(data []byte) error {
+	type embed UserWithRoles
+	var unmarshaler = struct {
+		embed
+		CreatedAt  *core.DateTime `json:"createdAt"`
+		UpdatedAt  *core.DateTime `json:"updatedAt"`
+		LastSeenAt *core.DateTime `json:"lastSeenAt,omitempty"`
+	}{
+		embed: embed(*u),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*u = UserWithRoles(unmarshaler.embed)
+	u.CreatedAt = unmarshaler.CreatedAt.Time()
+	u.UpdatedAt = unmarshaler.UpdatedAt.Time()
+	u.LastSeenAt = unmarshaler.LastSeenAt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *u)
+	if err != nil {
+		return err
+	}
+	u.extraProperties = extraProperties
+
+	u._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (u *UserWithRoles) MarshalJSON() ([]byte, error) {
+	type embed UserWithRoles
+	var marshaler = struct {
+		embed
+		CreatedAt  *core.DateTime `json:"createdAt"`
+		UpdatedAt  *core.DateTime `json:"updatedAt"`
+		LastSeenAt *core.DateTime `json:"lastSeenAt,omitempty"`
+	}{
+		embed:      embed(*u),
+		CreatedAt:  core.NewDateTime(u.CreatedAt),
+		UpdatedAt:  core.NewDateTime(u.UpdatedAt),
+		LastSeenAt: core.NewOptionalDateTime(u.LastSeenAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (u *UserWithRoles) String() string {
 	if len(u._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(u._rawJSON); err == nil {
 			return value

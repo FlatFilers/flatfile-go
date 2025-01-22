@@ -6,6 +6,7 @@ import (
 	json "encoding/json"
 	fmt "fmt"
 	core "github.com/FlatFilers/flatfile-go/core"
+	time "time"
 )
 
 type ListPromptsRequest struct {
@@ -15,6 +16,85 @@ type ListPromptsRequest struct {
 	PageSize *int `json:"-" url:"pageSize,omitempty"`
 	// Based on pageSize, which page of prompts to return
 	PageNumber *int `json:"-" url:"pageNumber,omitempty"`
+}
+
+type Prompt struct {
+	Id PromptId `json:"id" url:"id"`
+	// ID of the user/guest who created the prompt
+	CreatedById   string         `json:"createdById" url:"createdById"`
+	AccountId     AccountId      `json:"accountId" url:"accountId"`
+	EnvironmentId *EnvironmentId `json:"environmentId,omitempty" url:"environmentId,omitempty"`
+	SpaceId       *SpaceId       `json:"spaceId,omitempty" url:"spaceId,omitempty"`
+	// Type of prompt
+	PromptType PromptTypeEnum `json:"promptType" url:"promptType"`
+	// Text for prompts for AI Assist
+	Prompt    string     `json:"prompt" url:"prompt"`
+	CreatedAt time.Time  `json:"createdAt" url:"createdAt"`
+	UpdatedAt time.Time  `json:"updatedAt" url:"updatedAt"`
+	DeletedAt *time.Time `json:"deletedAt,omitempty" url:"deletedAt,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *Prompt) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *Prompt) UnmarshalJSON(data []byte) error {
+	type embed Prompt
+	var unmarshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"createdAt"`
+		UpdatedAt *core.DateTime `json:"updatedAt"`
+		DeletedAt *core.DateTime `json:"deletedAt,omitempty"`
+	}{
+		embed: embed(*p),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*p = Prompt(unmarshaler.embed)
+	p.CreatedAt = unmarshaler.CreatedAt.Time()
+	p.UpdatedAt = unmarshaler.UpdatedAt.Time()
+	p.DeletedAt = unmarshaler.DeletedAt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
+	p._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (p *Prompt) MarshalJSON() ([]byte, error) {
+	type embed Prompt
+	var marshaler = struct {
+		embed
+		CreatedAt *core.DateTime `json:"createdAt"`
+		UpdatedAt *core.DateTime `json:"updatedAt"`
+		DeletedAt *core.DateTime `json:"deletedAt,omitempty"`
+	}{
+		embed:     embed(*p),
+		CreatedAt: core.NewDateTime(p.CreatedAt),
+		UpdatedAt: core.NewDateTime(p.UpdatedAt),
+		DeletedAt: core.NewOptionalDateTime(p.DeletedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (p *Prompt) String() string {
+	if len(p._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
 }
 
 // Create a prompts
@@ -146,6 +226,28 @@ func (p *PromptResponse) String() string {
 	return fmt.Sprintf("%#v", p)
 }
 
+type PromptTypeEnum string
+
+const (
+	PromptTypeEnumAiAssist             PromptTypeEnum = "AI_ASSIST"
+	PromptTypeEnumConstraintGeneration PromptTypeEnum = "CONSTRAINT_GENERATION"
+)
+
+func NewPromptTypeEnumFromString(s string) (PromptTypeEnum, error) {
+	switch s {
+	case "AI_ASSIST":
+		return PromptTypeEnumAiAssist, nil
+	case "CONSTRAINT_GENERATION":
+		return PromptTypeEnumConstraintGeneration, nil
+	}
+	var t PromptTypeEnum
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (p PromptTypeEnum) Ptr() *PromptTypeEnum {
+	return &p
+}
+
 type PromptTypeQueryEnum string
 
 const (
@@ -212,3 +314,6 @@ func (p *PromptsResponse) String() string {
 	}
 	return fmt.Sprintf("%#v", p)
 }
+
+// Prompt ID
+type PromptId = string

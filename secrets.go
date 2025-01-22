@@ -17,82 +17,67 @@ type ListSecrets struct {
 	ActorId *ActorIdUnion `json:"-" url:"actorId,omitempty"`
 }
 
-type ActorIdUnion struct {
-	UserId  UserId
-	AgentId AgentId
-	GuestId GuestId
-
-	typ string
-}
-
-func NewActorIdUnionFromUserId(value UserId) *ActorIdUnion {
-	return &ActorIdUnion{typ: "UserId", UserId: value}
-}
-
-func NewActorIdUnionFromAgentId(value AgentId) *ActorIdUnion {
-	return &ActorIdUnion{typ: "AgentId", AgentId: value}
-}
-
-func NewActorIdUnionFromGuestId(value GuestId) *ActorIdUnion {
-	return &ActorIdUnion{typ: "GuestId", GuestId: value}
-}
-
-func (a *ActorIdUnion) UnmarshalJSON(data []byte) error {
-	var valueUserId UserId
-	if err := json.Unmarshal(data, &valueUserId); err == nil {
-		a.typ = "UserId"
-		a.UserId = valueUserId
-		return nil
-	}
-	var valueAgentId AgentId
-	if err := json.Unmarshal(data, &valueAgentId); err == nil {
-		a.typ = "AgentId"
-		a.AgentId = valueAgentId
-		return nil
-	}
-	var valueGuestId GuestId
-	if err := json.Unmarshal(data, &valueGuestId); err == nil {
-		a.typ = "GuestId"
-		a.GuestId = valueGuestId
-		return nil
-	}
-	return fmt.Errorf("%s cannot be deserialized as a %T", data, a)
-}
-
-func (a ActorIdUnion) MarshalJSON() ([]byte, error) {
-	if a.typ == "UserId" || a.UserId != "" {
-		return json.Marshal(a.UserId)
-	}
-	if a.typ == "AgentId" || a.AgentId != "" {
-		return json.Marshal(a.AgentId)
-	}
-	if a.typ == "GuestId" || a.GuestId != "" {
-		return json.Marshal(a.GuestId)
-	}
-	return nil, fmt.Errorf("type %T does not include a non-empty union type", a)
-}
-
-type ActorIdUnionVisitor interface {
-	VisitUserId(UserId) error
-	VisitAgentId(AgentId) error
-	VisitGuestId(GuestId) error
-}
-
-func (a *ActorIdUnion) Accept(visitor ActorIdUnionVisitor) error {
-	if a.typ == "UserId" || a.UserId != "" {
-		return visitor.VisitUserId(a.UserId)
-	}
-	if a.typ == "AgentId" || a.AgentId != "" {
-		return visitor.VisitAgentId(a.AgentId)
-	}
-	if a.typ == "GuestId" || a.GuestId != "" {
-		return visitor.VisitGuestId(a.GuestId)
-	}
-	return fmt.Errorf("type %T does not include a non-empty union type", a)
-}
-
 // Secret ID
 type SecretId = string
+
+// The value of a secret
+type Secret struct {
+	// The reference name for a secret.
+	Name SecretName `json:"name" url:"name"`
+	// The secret value. This is hidden in the UI.
+	Value SecretValue `json:"value" url:"value"`
+	// The Environment of the secret.
+	EnvironmentId *EnvironmentId `json:"environmentId,omitempty" url:"environmentId,omitempty"`
+	// The Space of the secret.
+	SpaceId *SpaceId `json:"spaceId,omitempty" url:"spaceId,omitempty"`
+	// The Actor of the secret.
+	ActorId *ActorIdUnion `json:"actorId,omitempty" url:"actorId,omitempty"`
+	// The ID of the secret.
+	Id SecretId `json:"id" url:"id"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *Secret) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *Secret) UnmarshalJSON(data []byte) error {
+	type unmarshaler Secret
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = Secret(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *Secret) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
+// The name of a secret. Minimum 1 character, maximum 1024
+type SecretName = string
+
+// The value of a secret. Minimum 1 character, maximum 1024
+type SecretValue = string
 
 type SecretsResponse struct {
 	Data []*Secret `json:"data,omitempty" url:"data,omitempty"`

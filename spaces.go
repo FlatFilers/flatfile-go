@@ -14,6 +14,11 @@ type DeleteSpacesRequest struct {
 	SpaceIds []SpaceId `json:"-" url:"spaceIds"`
 }
 
+type GetGuidanceRequest struct {
+	// Include the guide with the guidance
+	Guide *string `json:"-" url:"guide,omitempty"`
+}
+
 type ListSpacesRequest struct {
 	// The ID of the environment.
 	EnvironmentId *EnvironmentId `json:"-" url:"environmentId,omitempty"`
@@ -33,207 +38,17 @@ type ListSpacesRequest struct {
 	SortDirection *SortDirection `json:"-" url:"sortDirection,omitempty"`
 	// Flag for collaborative (project) spaces
 	IsCollaborative *bool `json:"-" url:"isCollaborative,omitempty"`
+	// Flag for app templates
+	IsAppTemplate *bool `json:"-" url:"isAppTemplate,omitempty"`
 }
 
-// The topic of the event
-type EventTopic string
-
-const (
-	EventTopicAgentCreated           EventTopic = "agent:created"
-	EventTopicAgentUpdated           EventTopic = "agent:updated"
-	EventTopicAgentDeleted           EventTopic = "agent:deleted"
-	EventTopicSpaceCreated           EventTopic = "space:created"
-	EventTopicSpaceUpdated           EventTopic = "space:updated"
-	EventTopicSpaceDeleted           EventTopic = "space:deleted"
-	EventTopicSpaceArchived          EventTopic = "space:archived"
-	EventTopicSpaceUnarchived        EventTopic = "space:unarchived"
-	EventTopicSpaceExpired           EventTopic = "space:expired"
-	EventTopicSpaceGuestAdded        EventTopic = "space:guestAdded"
-	EventTopicSpaceGuestRemoved      EventTopic = "space:guestRemoved"
-	EventTopicDocumentCreated        EventTopic = "document:created"
-	EventTopicDocumentUpdated        EventTopic = "document:updated"
-	EventTopicDocumentDeleted        EventTopic = "document:deleted"
-	EventTopicWorkbookCreated        EventTopic = "workbook:created"
-	EventTopicWorkbookUpdated        EventTopic = "workbook:updated"
-	EventTopicWorkbookDeleted        EventTopic = "workbook:deleted"
-	EventTopicWorkbookExpired        EventTopic = "workbook:expired"
-	EventTopicSheetCreated           EventTopic = "sheet:created"
-	EventTopicSheetUpdated           EventTopic = "sheet:updated"
-	EventTopicSheetDeleted           EventTopic = "sheet:deleted"
-	EventTopicSheetCountsUpdated     EventTopic = "sheet:counts-updated"
-	EventTopicSnapshotCreated        EventTopic = "snapshot:created"
-	EventTopicRecordsCreated         EventTopic = "records:created"
-	EventTopicRecordsUpdated         EventTopic = "records:updated"
-	EventTopicRecordsDeleted         EventTopic = "records:deleted"
-	EventTopicFileCreated            EventTopic = "file:created"
-	EventTopicFileUpdated            EventTopic = "file:updated"
-	EventTopicFileDeleted            EventTopic = "file:deleted"
-	EventTopicFileExpired            EventTopic = "file:expired"
-	EventTopicJobCreated             EventTopic = "job:created"
-	EventTopicJobUpdated             EventTopic = "job:updated"
-	EventTopicJobDeleted             EventTopic = "job:deleted"
-	EventTopicJobCompleted           EventTopic = "job:completed"
-	EventTopicJobReady               EventTopic = "job:ready"
-	EventTopicJobScheduled           EventTopic = "job:scheduled"
-	EventTopicJobOutcomeAcknowledged EventTopic = "job:outcome-acknowledged"
-	EventTopicJobPartsCompleted      EventTopic = "job:parts-completed"
-	EventTopicJobFailed              EventTopic = "job:failed"
-	EventTopicProgramCreated         EventTopic = "program:created"
-	EventTopicProgramUpdated         EventTopic = "program:updated"
-	EventTopicCommitCreated          EventTopic = "commit:created"
-	EventTopicCommitUpdated          EventTopic = "commit:updated"
-	EventTopicCommitCompleted        EventTopic = "commit:completed"
-	EventTopicLayerCreated           EventTopic = "layer:created"
-	EventTopicSecretCreated          EventTopic = "secret:created"
-	EventTopicSecretUpdated          EventTopic = "secret:updated"
-	EventTopicSecretDeleted          EventTopic = "secret:deleted"
-	EventTopicCron5Minutes           EventTopic = "cron:5-minutes"
-	EventTopicCronHourly             EventTopic = "cron:hourly"
-	EventTopicCronDaily              EventTopic = "cron:daily"
-	EventTopicCronWeekly             EventTopic = "cron:weekly"
-	EventTopicEnvironmentCreated     EventTopic = "environment:created"
-	EventTopicEnvironmentUpdated     EventTopic = "environment:updated"
-	EventTopicEnvironmentDeleted     EventTopic = "environment:deleted"
-	EventTopicActionCreated          EventTopic = "action:created"
-	EventTopicActionUpdated          EventTopic = "action:updated"
-	EventTopicActionDeleted          EventTopic = "action:deleted"
-	EventTopicDataClipCreated        EventTopic = "data-clip:created"
-	EventTopicDataClipUpdated        EventTopic = "data-clip:updated"
-	EventTopicDataClipDeleted        EventTopic = "data-clip:deleted"
-)
-
-func NewEventTopicFromString(s string) (EventTopic, error) {
-	switch s {
-	case "agent:created":
-		return EventTopicAgentCreated, nil
-	case "agent:updated":
-		return EventTopicAgentUpdated, nil
-	case "agent:deleted":
-		return EventTopicAgentDeleted, nil
-	case "space:created":
-		return EventTopicSpaceCreated, nil
-	case "space:updated":
-		return EventTopicSpaceUpdated, nil
-	case "space:deleted":
-		return EventTopicSpaceDeleted, nil
-	case "space:archived":
-		return EventTopicSpaceArchived, nil
-	case "space:unarchived":
-		return EventTopicSpaceUnarchived, nil
-	case "space:expired":
-		return EventTopicSpaceExpired, nil
-	case "space:guestAdded":
-		return EventTopicSpaceGuestAdded, nil
-	case "space:guestRemoved":
-		return EventTopicSpaceGuestRemoved, nil
-	case "document:created":
-		return EventTopicDocumentCreated, nil
-	case "document:updated":
-		return EventTopicDocumentUpdated, nil
-	case "document:deleted":
-		return EventTopicDocumentDeleted, nil
-	case "workbook:created":
-		return EventTopicWorkbookCreated, nil
-	case "workbook:updated":
-		return EventTopicWorkbookUpdated, nil
-	case "workbook:deleted":
-		return EventTopicWorkbookDeleted, nil
-	case "workbook:expired":
-		return EventTopicWorkbookExpired, nil
-	case "sheet:created":
-		return EventTopicSheetCreated, nil
-	case "sheet:updated":
-		return EventTopicSheetUpdated, nil
-	case "sheet:deleted":
-		return EventTopicSheetDeleted, nil
-	case "sheet:counts-updated":
-		return EventTopicSheetCountsUpdated, nil
-	case "snapshot:created":
-		return EventTopicSnapshotCreated, nil
-	case "records:created":
-		return EventTopicRecordsCreated, nil
-	case "records:updated":
-		return EventTopicRecordsUpdated, nil
-	case "records:deleted":
-		return EventTopicRecordsDeleted, nil
-	case "file:created":
-		return EventTopicFileCreated, nil
-	case "file:updated":
-		return EventTopicFileUpdated, nil
-	case "file:deleted":
-		return EventTopicFileDeleted, nil
-	case "file:expired":
-		return EventTopicFileExpired, nil
-	case "job:created":
-		return EventTopicJobCreated, nil
-	case "job:updated":
-		return EventTopicJobUpdated, nil
-	case "job:deleted":
-		return EventTopicJobDeleted, nil
-	case "job:completed":
-		return EventTopicJobCompleted, nil
-	case "job:ready":
-		return EventTopicJobReady, nil
-	case "job:scheduled":
-		return EventTopicJobScheduled, nil
-	case "job:outcome-acknowledged":
-		return EventTopicJobOutcomeAcknowledged, nil
-	case "job:parts-completed":
-		return EventTopicJobPartsCompleted, nil
-	case "job:failed":
-		return EventTopicJobFailed, nil
-	case "program:created":
-		return EventTopicProgramCreated, nil
-	case "program:updated":
-		return EventTopicProgramUpdated, nil
-	case "commit:created":
-		return EventTopicCommitCreated, nil
-	case "commit:updated":
-		return EventTopicCommitUpdated, nil
-	case "commit:completed":
-		return EventTopicCommitCompleted, nil
-	case "layer:created":
-		return EventTopicLayerCreated, nil
-	case "secret:created":
-		return EventTopicSecretCreated, nil
-	case "secret:updated":
-		return EventTopicSecretUpdated, nil
-	case "secret:deleted":
-		return EventTopicSecretDeleted, nil
-	case "cron:5-minutes":
-		return EventTopicCron5Minutes, nil
-	case "cron:hourly":
-		return EventTopicCronHourly, nil
-	case "cron:daily":
-		return EventTopicCronDaily, nil
-	case "cron:weekly":
-		return EventTopicCronWeekly, nil
-	case "environment:created":
-		return EventTopicEnvironmentCreated, nil
-	case "environment:updated":
-		return EventTopicEnvironmentUpdated, nil
-	case "environment:deleted":
-		return EventTopicEnvironmentDeleted, nil
-	case "action:created":
-		return EventTopicActionCreated, nil
-	case "action:updated":
-		return EventTopicActionUpdated, nil
-	case "action:deleted":
-		return EventTopicActionDeleted, nil
-	case "data-clip:created":
-		return EventTopicDataClipCreated, nil
-	case "data-clip:updated":
-		return EventTopicDataClipUpdated, nil
-	case "data-clip:deleted":
-		return EventTopicDataClipDeleted, nil
-	}
-	var t EventTopic
-	return "", fmt.Errorf("%s is not a valid %T", s, t)
+type ListGuidanceRequest struct {
+	// Include the guide with the guidance
+	Guide *string `json:"-" url:"guide,omitempty"`
 }
 
-func (e EventTopic) Ptr() *EventTopic {
-	return &e
-}
+// Guidance ID
+type GuidanceId = string
 
 type GetSpacesSortField string
 
@@ -270,6 +85,298 @@ func NewGetSpacesSortFieldFromString(s string) (GetSpacesSortField, error) {
 
 func (g GetSpacesSortField) Ptr() *GetSpacesSortField {
 	return &g
+}
+
+type GuidanceApiCreateData struct {
+	GuideSlug string `json:"guideSlug" url:"guideSlug"`
+	// Options for the guidance
+	Options *GuidanceOptions `json:"options,omitempty" url:"options,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GuidanceApiCreateData) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GuidanceApiCreateData) UnmarshalJSON(data []byte) error {
+	type unmarshaler GuidanceApiCreateData
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GuidanceApiCreateData(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GuidanceApiCreateData) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
+
+type GuidanceApiUpdateData struct {
+	// Options for the guidance
+	Options *GuidanceOptions `json:"options,omitempty" url:"options,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GuidanceApiUpdateData) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GuidanceApiUpdateData) UnmarshalJSON(data []byte) error {
+	type unmarshaler GuidanceApiUpdateData
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GuidanceApiUpdateData(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GuidanceApiUpdateData) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
+
+type GuidanceListResponse struct {
+	Data []*GuidanceResource `json:"data,omitempty" url:"data,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GuidanceListResponse) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GuidanceListResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler GuidanceListResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GuidanceListResponse(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GuidanceListResponse) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
+
+type GuidanceOptions struct {
+	Target  string      `json:"target" url:"target"`
+	Trigger TriggerEnum `json:"trigger" url:"trigger"`
+	Type    TypeEnum    `json:"type" url:"type"`
+	Role    RoleEnum    `json:"role" url:"role"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GuidanceOptions) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GuidanceOptions) UnmarshalJSON(data []byte) error {
+	type unmarshaler GuidanceOptions
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GuidanceOptions(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GuidanceOptions) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
+
+type GuidanceResource struct {
+	Id        GuidanceId       `json:"id" url:"id"`
+	GuideSlug string           `json:"guideSlug" url:"guideSlug"`
+	Options   *GuidanceOptions `json:"options,omitempty" url:"options,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GuidanceResource) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GuidanceResource) UnmarshalJSON(data []byte) error {
+	type unmarshaler GuidanceResource
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GuidanceResource(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GuidanceResource) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
+
+type InternalSpaceConfigBase struct {
+	SpaceConfigId *SpaceConfigId `json:"spaceConfigId,omitempty" url:"spaceConfigId,omitempty"`
+	EnvironmentId *EnvironmentId `json:"environmentId,omitempty" url:"environmentId,omitempty"`
+	// The ID of the primary workbook for the space. This should not be included in create space requests.
+	PrimaryWorkbookId *WorkbookId `json:"primaryWorkbookId,omitempty" url:"primaryWorkbookId,omitempty"`
+	// Metadata for the space
+	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
+	// The Space settings.
+	Settings         *SpaceSettings `json:"settings,omitempty" url:"settings,omitempty"`
+	Actions          []*Action      `json:"actions,omitempty" url:"actions,omitempty"`
+	Access           []SpaceAccess  `json:"access,omitempty" url:"access,omitempty"`
+	AutoConfigure    *bool          `json:"autoConfigure,omitempty" url:"autoConfigure,omitempty"`
+	Namespace        *string        `json:"namespace,omitempty" url:"namespace,omitempty"`
+	Labels           []string       `json:"labels,omitempty" url:"labels,omitempty"`
+	TranslationsPath *string        `json:"translationsPath,omitempty" url:"translationsPath,omitempty"`
+	LanguageOverride *string        `json:"languageOverride,omitempty" url:"languageOverride,omitempty"`
+	// Date when space was archived
+	ArchivedAt *time.Time `json:"archivedAt,omitempty" url:"archivedAt,omitempty"`
+	// The ID of the App that space is associated with
+	AppId *AppId `json:"appId,omitempty" url:"appId,omitempty"`
+	// Whether the space is an app template. Only one space per app can be an app template.
+	IsAppTemplate *bool `json:"isAppTemplate,omitempty" url:"isAppTemplate,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (i *InternalSpaceConfigBase) GetExtraProperties() map[string]interface{} {
+	return i.extraProperties
+}
+
+func (i *InternalSpaceConfigBase) UnmarshalJSON(data []byte) error {
+	type embed InternalSpaceConfigBase
+	var unmarshaler = struct {
+		embed
+		ArchivedAt *core.DateTime `json:"archivedAt,omitempty"`
+	}{
+		embed: embed(*i),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*i = InternalSpaceConfigBase(unmarshaler.embed)
+	i.ArchivedAt = unmarshaler.ArchivedAt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *i)
+	if err != nil {
+		return err
+	}
+	i.extraProperties = extraProperties
+
+	i._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (i *InternalSpaceConfigBase) MarshalJSON() ([]byte, error) {
+	type embed InternalSpaceConfigBase
+	var marshaler = struct {
+		embed
+		ArchivedAt *core.DateTime `json:"archivedAt,omitempty"`
+	}{
+		embed:      embed(*i),
+		ArchivedAt: core.NewOptionalDateTime(i.ArchivedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (i *InternalSpaceConfigBase) String() string {
+	if len(i._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(i._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(i); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", i)
 }
 
 // List of Space objects
@@ -315,6 +422,160 @@ func (l *ListSpacesResponse) String() string {
 	return fmt.Sprintf("%#v", l)
 }
 
+type RoleEnum string
+
+const (
+	RoleEnumAdmin RoleEnum = "admin"
+	RoleEnumGuest RoleEnum = "guest"
+)
+
+func NewRoleEnumFromString(s string) (RoleEnum, error) {
+	switch s {
+	case "admin":
+		return RoleEnumAdmin, nil
+	case "guest":
+		return RoleEnumGuest, nil
+	}
+	var t RoleEnum
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (r RoleEnum) Ptr() *RoleEnum {
+	return &r
+}
+
+// A place to store your workbooks
+type Space struct {
+	SpaceConfigId *SpaceConfigId `json:"spaceConfigId,omitempty" url:"spaceConfigId,omitempty"`
+	EnvironmentId *EnvironmentId `json:"environmentId,omitempty" url:"environmentId,omitempty"`
+	// The ID of the primary workbook for the space. This should not be included in create space requests.
+	PrimaryWorkbookId *WorkbookId `json:"primaryWorkbookId,omitempty" url:"primaryWorkbookId,omitempty"`
+	// Metadata for the space
+	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
+	// The Space settings.
+	Settings         *SpaceSettings `json:"settings,omitempty" url:"settings,omitempty"`
+	Actions          []*Action      `json:"actions,omitempty" url:"actions,omitempty"`
+	Access           []SpaceAccess  `json:"access,omitempty" url:"access,omitempty"`
+	AutoConfigure    *bool          `json:"autoConfigure,omitempty" url:"autoConfigure,omitempty"`
+	Namespace        *string        `json:"namespace,omitempty" url:"namespace,omitempty"`
+	Labels           []string       `json:"labels,omitempty" url:"labels,omitempty"`
+	TranslationsPath *string        `json:"translationsPath,omitempty" url:"translationsPath,omitempty"`
+	LanguageOverride *string        `json:"languageOverride,omitempty" url:"languageOverride,omitempty"`
+	// Date when space was archived
+	ArchivedAt *time.Time `json:"archivedAt,omitempty" url:"archivedAt,omitempty"`
+	// The ID of the App that space is associated with
+	AppId *AppId `json:"appId,omitempty" url:"appId,omitempty"`
+	// Whether the space is an app template. Only one space per app can be an app template.
+	IsAppTemplate *bool   `json:"isAppTemplate,omitempty" url:"isAppTemplate,omitempty"`
+	Id            SpaceId `json:"id" url:"id"`
+	// Amount of workbooks in the space
+	WorkbooksCount *int `json:"workbooksCount,omitempty" url:"workbooksCount,omitempty"`
+	// Amount of files in the space
+	FilesCount      *int    `json:"filesCount,omitempty" url:"filesCount,omitempty"`
+	CreatedByUserId *UserId `json:"createdByUserId,omitempty" url:"createdByUserId,omitempty"`
+	// User name who created space
+	CreatedByUserName *string `json:"createdByUserName,omitempty" url:"createdByUserName,omitempty"`
+	// Date when space was created
+	CreatedAt time.Time `json:"createdAt" url:"createdAt"`
+	// Date when space was updated
+	UpdatedAt time.Time `json:"updatedAt" url:"updatedAt"`
+	// Date when space was expired
+	ExpiredAt *time.Time `json:"expiredAt,omitempty" url:"expiredAt,omitempty"`
+	// This date marks the most recent activity within the space, tracking actions to the second. Activities include creating or updating records in a sheet, uploading files, or modifying a workbook's configuration.
+	LastActivityAt *time.Time `json:"lastActivityAt,omitempty" url:"lastActivityAt,omitempty"`
+	// Guest link to the space
+	GuestLink *string `json:"guestLink,omitempty" url:"guestLink,omitempty"`
+	// The name of the space
+	Name string `json:"name" url:"name"`
+	// The display order
+	DisplayOrder *int `json:"displayOrder,omitempty" url:"displayOrder,omitempty"`
+	// Access token for the space
+	AccessToken *string `json:"accessToken,omitempty" url:"accessToken,omitempty"`
+	// Flag for collaborative (project) spaces
+	IsCollaborative *bool `json:"isCollaborative,omitempty" url:"isCollaborative,omitempty"`
+	// Size information for the space
+	Size *SpaceSize `json:"size,omitempty" url:"size,omitempty"`
+	// Date when the space was upgraded
+	UpgradedAt *time.Time `json:"upgradedAt,omitempty" url:"upgradedAt,omitempty"`
+	// Type of guest authentication
+	GuestAuthentication []GuestAuthenticationEnum `json:"guestAuthentication,omitempty" url:"guestAuthentication,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *Space) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *Space) UnmarshalJSON(data []byte) error {
+	type embed Space
+	var unmarshaler = struct {
+		embed
+		ArchivedAt     *core.DateTime `json:"archivedAt,omitempty"`
+		CreatedAt      *core.DateTime `json:"createdAt"`
+		UpdatedAt      *core.DateTime `json:"updatedAt"`
+		ExpiredAt      *core.DateTime `json:"expiredAt,omitempty"`
+		LastActivityAt *core.DateTime `json:"lastActivityAt,omitempty"`
+		UpgradedAt     *core.DateTime `json:"upgradedAt,omitempty"`
+	}{
+		embed: embed(*s),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*s = Space(unmarshaler.embed)
+	s.ArchivedAt = unmarshaler.ArchivedAt.TimePtr()
+	s.CreatedAt = unmarshaler.CreatedAt.Time()
+	s.UpdatedAt = unmarshaler.UpdatedAt.Time()
+	s.ExpiredAt = unmarshaler.ExpiredAt.TimePtr()
+	s.LastActivityAt = unmarshaler.LastActivityAt.TimePtr()
+	s.UpgradedAt = unmarshaler.UpgradedAt.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *Space) MarshalJSON() ([]byte, error) {
+	type embed Space
+	var marshaler = struct {
+		embed
+		ArchivedAt     *core.DateTime `json:"archivedAt,omitempty"`
+		CreatedAt      *core.DateTime `json:"createdAt"`
+		UpdatedAt      *core.DateTime `json:"updatedAt"`
+		ExpiredAt      *core.DateTime `json:"expiredAt,omitempty"`
+		LastActivityAt *core.DateTime `json:"lastActivityAt,omitempty"`
+		UpgradedAt     *core.DateTime `json:"upgradedAt,omitempty"`
+	}{
+		embed:          embed(*s),
+		ArchivedAt:     core.NewOptionalDateTime(s.ArchivedAt),
+		CreatedAt:      core.NewDateTime(s.CreatedAt),
+		UpdatedAt:      core.NewDateTime(s.UpdatedAt),
+		ExpiredAt:      core.NewOptionalDateTime(s.ExpiredAt),
+		LastActivityAt: core.NewOptionalDateTime(s.LastActivityAt),
+		UpgradedAt:     core.NewOptionalDateTime(s.UpgradedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (s *Space) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
 // Properties used to create a new Space
 type SpaceConfig struct {
 	SpaceConfigId *SpaceConfigId `json:"spaceConfigId,omitempty" url:"spaceConfigId,omitempty"`
@@ -336,6 +597,8 @@ type SpaceConfig struct {
 	ArchivedAt *time.Time `json:"archivedAt,omitempty" url:"archivedAt,omitempty"`
 	// The ID of the App that space is associated with
 	AppId *AppId `json:"appId,omitempty" url:"appId,omitempty"`
+	// Whether the space is an app template. Only one space per app can be an app template.
+	IsAppTemplate *bool `json:"isAppTemplate,omitempty" url:"isAppTemplate,omitempty"`
 	// The name of the space
 	Name *string `json:"name,omitempty" url:"name,omitempty"`
 	// The display order
@@ -437,4 +700,188 @@ func (s *SpaceResponse) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", s)
+}
+
+// Settings for a space
+type SpaceSettings struct {
+	// The sidebar configuration for the space. (This will eventually replace metadata.sidebarconfig)
+	SidebarConfig *SpaceSidebarConfig `json:"sidebarConfig,omitempty" url:"sidebarConfig,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SpaceSettings) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SpaceSettings) UnmarshalJSON(data []byte) error {
+	type unmarshaler SpaceSettings
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SpaceSettings(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *SpaceSettings) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
+type SpaceSidebarConfig struct {
+	// Used to set the order of workbooks in the sidebar. This will not affect workbooks that are pinned and workbooks that are not specified here will be sorted alphabetically.
+	WorkbookSidebarOrder []WorkbookId `json:"workbookSidebarOrder,omitempty" url:"workbookSidebarOrder,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SpaceSidebarConfig) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SpaceSidebarConfig) UnmarshalJSON(data []byte) error {
+	type unmarshaler SpaceSidebarConfig
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SpaceSidebarConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *SpaceSidebarConfig) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
+// The size of a space
+type SpaceSize struct {
+	Name     string `json:"name" url:"name"`
+	Id       string `json:"id" url:"id"`
+	NumUsers int    `json:"numUsers" url:"numUsers"`
+	Pdv      int    `json:"pdv" url:"pdv"`
+	NumFiles int    `json:"numFiles" url:"numFiles"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SpaceSize) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SpaceSize) UnmarshalJSON(data []byte) error {
+	type unmarshaler SpaceSize
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SpaceSize(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *SpaceSize) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
+type TriggerEnum string
+
+const (
+	TriggerEnumFirst  TriggerEnum = "first"
+	TriggerEnumHover  TriggerEnum = "hover"
+	TriggerEnumEvent  TriggerEnum = "event"
+	TriggerEnumManual TriggerEnum = "manual"
+)
+
+func NewTriggerEnumFromString(s string) (TriggerEnum, error) {
+	switch s {
+	case "first":
+		return TriggerEnumFirst, nil
+	case "hover":
+		return TriggerEnumHover, nil
+	case "event":
+		return TriggerEnumEvent, nil
+	case "manual":
+		return TriggerEnumManual, nil
+	}
+	var t TriggerEnum
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (t TriggerEnum) Ptr() *TriggerEnum {
+	return &t
+}
+
+type TypeEnum string
+
+const (
+	TypeEnumSidebar TypeEnum = "sidebar"
+	TypeEnumPopout  TypeEnum = "popout"
+	TypeEnumTooltip TypeEnum = "tooltip"
+)
+
+func NewTypeEnumFromString(s string) (TypeEnum, error) {
+	switch s {
+	case "sidebar":
+		return TypeEnumSidebar, nil
+	case "popout":
+		return TypeEnumPopout, nil
+	case "tooltip":
+		return TypeEnumTooltip, nil
+	}
+	var t TypeEnum
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (t TypeEnum) Ptr() *TypeEnum {
+	return &t
 }
