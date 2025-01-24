@@ -38,6 +38,8 @@ type ListSpacesRequest struct {
 	SortDirection *SortDirection `json:"-" url:"sortDirection,omitempty"`
 	// Flag for collaborative (project) spaces
 	IsCollaborative *bool `json:"-" url:"isCollaborative,omitempty"`
+	// Filter by appId
+	AppId *AppId `json:"-" url:"appId,omitempty"`
 	// Flag for app templates
 	IsAppTemplate *bool `json:"-" url:"isAppTemplate,omitempty"`
 }

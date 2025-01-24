@@ -14,6 +14,8 @@ type CreateSnapshotRequest struct {
 	SheetId SheetId `json:"sheetId" url:"-"`
 	// Label for the snapshot
 	Label *string `json:"label,omitempty" url:"-"`
+	// ThreadId for the snapshot
+	ThreadId *string `json:"threadId,omitempty" url:"-"`
 }
 
 type GetSnapshotRequest struct {
@@ -33,6 +35,8 @@ type GetSnapshotRecordsRequest struct {
 type ListSnapshotRequest struct {
 	// ID of sheet
 	SheetId SheetId `json:"-" url:"sheetId"`
+	// ThreadId to filter snapshots by
+	ThreadId *string `json:"-" url:"threadId,omitempty"`
 }
 
 // Options to filter records in a snapshot
@@ -146,6 +150,8 @@ type Snapshot struct {
 	CreatedAt time.Time `json:"createdAt" url:"createdAt"`
 	// The actor who created the Snapshot.
 	CreatedBy UserId `json:"createdBy" url:"createdBy"`
+	// The ID of the thread associated with the snapshot.
+	ThreadId *string `json:"threadId,omitempty" url:"threadId,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
