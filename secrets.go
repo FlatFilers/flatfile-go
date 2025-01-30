@@ -5,7 +5,7 @@ package api
 import (
 	json "encoding/json"
 	fmt "fmt"
-	core "github.com/FlatFilers/flatfile-go/core"
+	internal "github.com/FlatFilers/flatfile-go/internal"
 )
 
 type ListSecrets struct {
@@ -16,9 +16,6 @@ type ListSecrets struct {
 	// The Actor of the secret.
 	ActorId *ActorIdUnion `json:"-" url:"actorId,omitempty"`
 }
-
-// Secret ID
-type SecretId = string
 
 // The value of a secret
 type Secret struct {
@@ -36,7 +33,49 @@ type Secret struct {
 	Id SecretId `json:"id" url:"id"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (s *Secret) GetName() SecretName {
+	if s == nil {
+		return ""
+	}
+	return s.Name
+}
+
+func (s *Secret) GetValue() SecretValue {
+	if s == nil {
+		return ""
+	}
+	return s.Value
+}
+
+func (s *Secret) GetEnvironmentId() *EnvironmentId {
+	if s == nil {
+		return nil
+	}
+	return s.EnvironmentId
+}
+
+func (s *Secret) GetSpaceId() *SpaceId {
+	if s == nil {
+		return nil
+	}
+	return s.SpaceId
+}
+
+func (s *Secret) GetActorId() *ActorIdUnion {
+	if s == nil {
+		return nil
+	}
+	return s.ActorId
+}
+
+func (s *Secret) GetId() SecretId {
+	if s == nil {
+		return ""
+	}
+	return s.Id
 }
 
 func (s *Secret) GetExtraProperties() map[string]interface{} {
@@ -50,24 +89,22 @@ func (s *Secret) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*s = Secret(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	extraProperties, err := internal.ExtractExtraProperties(data, *s)
 	if err != nil {
 		return err
 	}
 	s.extraProperties = extraProperties
-
-	s._rawJSON = json.RawMessage(data)
+	s.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (s *Secret) String() string {
-	if len(s._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+	if len(s.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(s.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(s); err == nil {
+	if value, err := internal.StringifyJSON(s); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", s)
@@ -83,7 +120,14 @@ type SecretsResponse struct {
 	Data []*Secret `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (s *SecretsResponse) GetData() []*Secret {
+	if s == nil {
+		return nil
+	}
+	return s.Data
 }
 
 func (s *SecretsResponse) GetExtraProperties() map[string]interface{} {
@@ -97,24 +141,22 @@ func (s *SecretsResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*s = SecretsResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	extraProperties, err := internal.ExtractExtraProperties(data, *s)
 	if err != nil {
 		return err
 	}
 	s.extraProperties = extraProperties
-
-	s._rawJSON = json.RawMessage(data)
+	s.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (s *SecretsResponse) String() string {
-	if len(s._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+	if len(s.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(s.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(s); err == nil {
+	if value, err := internal.StringifyJSON(s); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", s)
@@ -134,7 +176,42 @@ type WriteSecret struct {
 	ActorId *ActorIdUnion `json:"actorId,omitempty" url:"actorId,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (w *WriteSecret) GetName() SecretName {
+	if w == nil {
+		return ""
+	}
+	return w.Name
+}
+
+func (w *WriteSecret) GetValue() SecretValue {
+	if w == nil {
+		return ""
+	}
+	return w.Value
+}
+
+func (w *WriteSecret) GetEnvironmentId() *EnvironmentId {
+	if w == nil {
+		return nil
+	}
+	return w.EnvironmentId
+}
+
+func (w *WriteSecret) GetSpaceId() *SpaceId {
+	if w == nil {
+		return nil
+	}
+	return w.SpaceId
+}
+
+func (w *WriteSecret) GetActorId() *ActorIdUnion {
+	if w == nil {
+		return nil
+	}
+	return w.ActorId
 }
 
 func (w *WriteSecret) GetExtraProperties() map[string]interface{} {
@@ -148,24 +225,22 @@ func (w *WriteSecret) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*w = WriteSecret(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *w)
+	extraProperties, err := internal.ExtractExtraProperties(data, *w)
 	if err != nil {
 		return err
 	}
 	w.extraProperties = extraProperties
-
-	w._rawJSON = json.RawMessage(data)
+	w.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (w *WriteSecret) String() string {
-	if len(w._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(w._rawJSON); err == nil {
+	if len(w.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(w.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(w); err == nil {
+	if value, err := internal.StringifyJSON(w); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", w)

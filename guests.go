@@ -5,7 +5,7 @@ package api
 import (
 	json "encoding/json"
 	fmt "fmt"
-	core "github.com/FlatFilers/flatfile-go/core"
+	internal "github.com/FlatFilers/flatfile-go/internal"
 	time "time"
 )
 
@@ -25,7 +25,14 @@ type CreateGuestResponse struct {
 	Data []*Guest `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (c *CreateGuestResponse) GetData() []*Guest {
+	if c == nil {
+		return nil
+	}
+	return c.Data
 }
 
 func (c *CreateGuestResponse) GetExtraProperties() map[string]interface{} {
@@ -39,24 +46,22 @@ func (c *CreateGuestResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*c = CreateGuestResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
 	if err != nil {
 		return err
 	}
 	c.extraProperties = extraProperties
-
-	c._rawJSON = json.RawMessage(data)
+	c.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (c *CreateGuestResponse) String() string {
-	if len(c._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(c); err == nil {
+	if value, err := internal.StringifyJSON(c); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", c)
@@ -74,7 +79,56 @@ type Guest struct {
 	UpdatedAt time.Time `json:"updatedAt" url:"updatedAt"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (g *Guest) GetEnvironmentId() EnvironmentId {
+	if g == nil {
+		return ""
+	}
+	return g.EnvironmentId
+}
+
+func (g *Guest) GetEmail() string {
+	if g == nil {
+		return ""
+	}
+	return g.Email
+}
+
+func (g *Guest) GetName() string {
+	if g == nil {
+		return ""
+	}
+	return g.Name
+}
+
+func (g *Guest) GetSpaces() []*GuestSpace {
+	if g == nil {
+		return nil
+	}
+	return g.Spaces
+}
+
+func (g *Guest) GetId() GuestId {
+	if g == nil {
+		return ""
+	}
+	return g.Id
+}
+
+func (g *Guest) GetCreatedAt() time.Time {
+	if g == nil {
+		return time.Time{}
+	}
+	return g.CreatedAt
+}
+
+func (g *Guest) GetUpdatedAt() time.Time {
+	if g == nil {
+		return time.Time{}
+	}
+	return g.UpdatedAt
 }
 
 func (g *Guest) GetExtraProperties() map[string]interface{} {
@@ -85,8 +139,8 @@ func (g *Guest) UnmarshalJSON(data []byte) error {
 	type embed Guest
 	var unmarshaler = struct {
 		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-		UpdatedAt *core.DateTime `json:"updatedAt"`
+		CreatedAt *internal.DateTime `json:"createdAt"`
+		UpdatedAt *internal.DateTime `json:"updatedAt"`
 	}{
 		embed: embed(*g),
 	}
@@ -96,14 +150,12 @@ func (g *Guest) UnmarshalJSON(data []byte) error {
 	*g = Guest(unmarshaler.embed)
 	g.CreatedAt = unmarshaler.CreatedAt.Time()
 	g.UpdatedAt = unmarshaler.UpdatedAt.Time()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	extraProperties, err := internal.ExtractExtraProperties(data, *g)
 	if err != nil {
 		return err
 	}
 	g.extraProperties = extraProperties
-
-	g._rawJSON = json.RawMessage(data)
+	g.rawJSON = json.RawMessage(data)
 	return nil
 }
 
@@ -111,23 +163,23 @@ func (g *Guest) MarshalJSON() ([]byte, error) {
 	type embed Guest
 	var marshaler = struct {
 		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-		UpdatedAt *core.DateTime `json:"updatedAt"`
+		CreatedAt *internal.DateTime `json:"createdAt"`
+		UpdatedAt *internal.DateTime `json:"updatedAt"`
 	}{
 		embed:     embed(*g),
-		CreatedAt: core.NewDateTime(g.CreatedAt),
-		UpdatedAt: core.NewDateTime(g.UpdatedAt),
+		CreatedAt: internal.NewDateTime(g.CreatedAt),
+		UpdatedAt: internal.NewDateTime(g.UpdatedAt),
 	}
 	return json.Marshal(marshaler)
 }
 
 func (g *Guest) String() string {
-	if len(g._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+	if len(g.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(g.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(g); err == nil {
+	if value, err := internal.StringifyJSON(g); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", g)
@@ -141,7 +193,35 @@ type GuestConfig struct {
 	Spaces        []*GuestSpace `json:"spaces,omitempty" url:"spaces,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (g *GuestConfig) GetEnvironmentId() EnvironmentId {
+	if g == nil {
+		return ""
+	}
+	return g.EnvironmentId
+}
+
+func (g *GuestConfig) GetEmail() string {
+	if g == nil {
+		return ""
+	}
+	return g.Email
+}
+
+func (g *GuestConfig) GetName() string {
+	if g == nil {
+		return ""
+	}
+	return g.Name
+}
+
+func (g *GuestConfig) GetSpaces() []*GuestSpace {
+	if g == nil {
+		return nil
+	}
+	return g.Spaces
 }
 
 func (g *GuestConfig) GetExtraProperties() map[string]interface{} {
@@ -155,24 +235,22 @@ func (g *GuestConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*g = GuestConfig(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	extraProperties, err := internal.ExtractExtraProperties(data, *g)
 	if err != nil {
 		return err
 	}
 	g.extraProperties = extraProperties
-
-	g._rawJSON = json.RawMessage(data)
+	g.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (g *GuestConfig) String() string {
-	if len(g._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+	if len(g.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(g.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(g); err == nil {
+	if value, err := internal.StringifyJSON(g); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", g)
@@ -186,7 +264,35 @@ type GuestConfigUpdate struct {
 	Spaces        []*GuestSpace  `json:"spaces,omitempty" url:"spaces,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (g *GuestConfigUpdate) GetEnvironmentId() *EnvironmentId {
+	if g == nil {
+		return nil
+	}
+	return g.EnvironmentId
+}
+
+func (g *GuestConfigUpdate) GetEmail() *string {
+	if g == nil {
+		return nil
+	}
+	return g.Email
+}
+
+func (g *GuestConfigUpdate) GetName() *string {
+	if g == nil {
+		return nil
+	}
+	return g.Name
+}
+
+func (g *GuestConfigUpdate) GetSpaces() []*GuestSpace {
+	if g == nil {
+		return nil
+	}
+	return g.Spaces
 }
 
 func (g *GuestConfigUpdate) GetExtraProperties() map[string]interface{} {
@@ -200,24 +306,22 @@ func (g *GuestConfigUpdate) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*g = GuestConfigUpdate(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	extraProperties, err := internal.ExtractExtraProperties(data, *g)
 	if err != nil {
 		return err
 	}
 	g.extraProperties = extraProperties
-
-	g._rawJSON = json.RawMessage(data)
+	g.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (g *GuestConfigUpdate) String() string {
-	if len(g._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+	if len(g.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(g.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(g); err == nil {
+	if value, err := internal.StringifyJSON(g); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", g)
@@ -227,7 +331,14 @@ type GuestResponse struct {
 	Data *Guest `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (g *GuestResponse) GetData() *Guest {
+	if g == nil {
+		return nil
+	}
+	return g.Data
 }
 
 func (g *GuestResponse) GetExtraProperties() map[string]interface{} {
@@ -241,24 +352,22 @@ func (g *GuestResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*g = GuestResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	extraProperties, err := internal.ExtractExtraProperties(data, *g)
 	if err != nil {
 		return err
 	}
 	g.extraProperties = extraProperties
-
-	g._rawJSON = json.RawMessage(data)
+	g.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (g *GuestResponse) String() string {
-	if len(g._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+	if len(g.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(g.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(g); err == nil {
+	if value, err := internal.StringifyJSON(g); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", g)
@@ -270,7 +379,28 @@ type GuestSpace struct {
 	LastAccessed *time.Time       `json:"lastAccessed,omitempty" url:"lastAccessed,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (g *GuestSpace) GetId() SpaceId {
+	if g == nil {
+		return ""
+	}
+	return g.Id
+}
+
+func (g *GuestSpace) GetWorkbooks() []*GuestWorkbook {
+	if g == nil {
+		return nil
+	}
+	return g.Workbooks
+}
+
+func (g *GuestSpace) GetLastAccessed() *time.Time {
+	if g == nil {
+		return nil
+	}
+	return g.LastAccessed
 }
 
 func (g *GuestSpace) GetExtraProperties() map[string]interface{} {
@@ -281,7 +411,7 @@ func (g *GuestSpace) UnmarshalJSON(data []byte) error {
 	type embed GuestSpace
 	var unmarshaler = struct {
 		embed
-		LastAccessed *core.DateTime `json:"lastAccessed,omitempty"`
+		LastAccessed *internal.DateTime `json:"lastAccessed,omitempty"`
 	}{
 		embed: embed(*g),
 	}
@@ -290,14 +420,12 @@ func (g *GuestSpace) UnmarshalJSON(data []byte) error {
 	}
 	*g = GuestSpace(unmarshaler.embed)
 	g.LastAccessed = unmarshaler.LastAccessed.TimePtr()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	extraProperties, err := internal.ExtractExtraProperties(data, *g)
 	if err != nil {
 		return err
 	}
 	g.extraProperties = extraProperties
-
-	g._rawJSON = json.RawMessage(data)
+	g.rawJSON = json.RawMessage(data)
 	return nil
 }
 
@@ -305,21 +433,21 @@ func (g *GuestSpace) MarshalJSON() ([]byte, error) {
 	type embed GuestSpace
 	var marshaler = struct {
 		embed
-		LastAccessed *core.DateTime `json:"lastAccessed,omitempty"`
+		LastAccessed *internal.DateTime `json:"lastAccessed,omitempty"`
 	}{
 		embed:        embed(*g),
-		LastAccessed: core.NewOptionalDateTime(g.LastAccessed),
+		LastAccessed: internal.NewOptionalDateTime(g.LastAccessed),
 	}
 	return json.Marshal(marshaler)
 }
 
 func (g *GuestSpace) String() string {
-	if len(g._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+	if len(g.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(g.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(g); err == nil {
+	if value, err := internal.StringifyJSON(g); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", g)
@@ -331,7 +459,21 @@ type GuestToken struct {
 	Valid bool   `json:"valid" url:"valid"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (g *GuestToken) GetToken() string {
+	if g == nil {
+		return ""
+	}
+	return g.Token
+}
+
+func (g *GuestToken) GetValid() bool {
+	if g == nil {
+		return false
+	}
+	return g.Valid
 }
 
 func (g *GuestToken) GetExtraProperties() map[string]interface{} {
@@ -345,24 +487,22 @@ func (g *GuestToken) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*g = GuestToken(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	extraProperties, err := internal.ExtractExtraProperties(data, *g)
 	if err != nil {
 		return err
 	}
 	g.extraProperties = extraProperties
-
-	g._rawJSON = json.RawMessage(data)
+	g.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (g *GuestToken) String() string {
-	if len(g._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+	if len(g.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(g.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(g); err == nil {
+	if value, err := internal.StringifyJSON(g); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", g)
@@ -372,7 +512,14 @@ type GuestTokenResponse struct {
 	Data *GuestToken `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (g *GuestTokenResponse) GetData() *GuestToken {
+	if g == nil {
+		return nil
+	}
+	return g.Data
 }
 
 func (g *GuestTokenResponse) GetExtraProperties() map[string]interface{} {
@@ -386,24 +533,22 @@ func (g *GuestTokenResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*g = GuestTokenResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	extraProperties, err := internal.ExtractExtraProperties(data, *g)
 	if err != nil {
 		return err
 	}
 	g.extraProperties = extraProperties
-
-	g._rawJSON = json.RawMessage(data)
+	g.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (g *GuestTokenResponse) String() string {
-	if len(g._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+	if len(g.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(g.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(g); err == nil {
+	if value, err := internal.StringifyJSON(g); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", g)
@@ -413,7 +558,14 @@ type GuestWorkbook struct {
 	Id WorkbookId `json:"id" url:"id"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (g *GuestWorkbook) GetId() WorkbookId {
+	if g == nil {
+		return ""
+	}
+	return g.Id
 }
 
 func (g *GuestWorkbook) GetExtraProperties() map[string]interface{} {
@@ -427,24 +579,22 @@ func (g *GuestWorkbook) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*g = GuestWorkbook(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	extraProperties, err := internal.ExtractExtraProperties(data, *g)
 	if err != nil {
 		return err
 	}
 	g.extraProperties = extraProperties
-
-	g._rawJSON = json.RawMessage(data)
+	g.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (g *GuestWorkbook) String() string {
-	if len(g._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+	if len(g.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(g.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(g); err == nil {
+	if value, err := internal.StringifyJSON(g); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", g)
@@ -459,7 +609,35 @@ type Invite struct {
 	Message *string `json:"message,omitempty" url:"message,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (i *Invite) GetGuestId() GuestId {
+	if i == nil {
+		return ""
+	}
+	return i.GuestId
+}
+
+func (i *Invite) GetSpaceId() SpaceId {
+	if i == nil {
+		return ""
+	}
+	return i.SpaceId
+}
+
+func (i *Invite) GetFromName() *string {
+	if i == nil {
+		return nil
+	}
+	return i.FromName
+}
+
+func (i *Invite) GetMessage() *string {
+	if i == nil {
+		return nil
+	}
+	return i.Message
 }
 
 func (i *Invite) GetExtraProperties() map[string]interface{} {
@@ -473,24 +651,22 @@ func (i *Invite) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*i = Invite(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *i)
+	extraProperties, err := internal.ExtractExtraProperties(data, *i)
 	if err != nil {
 		return err
 	}
 	i.extraProperties = extraProperties
-
-	i._rawJSON = json.RawMessage(data)
+	i.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (i *Invite) String() string {
-	if len(i._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(i._rawJSON); err == nil {
+	if len(i.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(i.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(i); err == nil {
+	if value, err := internal.StringifyJSON(i); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", i)
@@ -500,7 +676,14 @@ type ListGuestsResponse struct {
 	Data []*Guest `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (l *ListGuestsResponse) GetData() []*Guest {
+	if l == nil {
+		return nil
+	}
+	return l.Data
 }
 
 func (l *ListGuestsResponse) GetExtraProperties() map[string]interface{} {
@@ -514,24 +697,22 @@ func (l *ListGuestsResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*l = ListGuestsResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	extraProperties, err := internal.ExtractExtraProperties(data, *l)
 	if err != nil {
 		return err
 	}
 	l.extraProperties = extraProperties
-
-	l._rawJSON = json.RawMessage(data)
+	l.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (l *ListGuestsResponse) String() string {
-	if len(l._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(l._rawJSON); err == nil {
+	if len(l.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(l.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(l); err == nil {
+	if value, err := internal.StringifyJSON(l); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", l)

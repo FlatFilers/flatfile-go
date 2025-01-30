@@ -5,7 +5,7 @@ package api
 import (
 	json "encoding/json"
 	fmt "fmt"
-	core "github.com/FlatFilers/flatfile-go/core"
+	internal "github.com/FlatFilers/flatfile-go/internal"
 	time "time"
 )
 
@@ -13,9 +13,6 @@ type ListDataRetentionPoliciesRequest struct {
 	// The associated Environment ID of the policy.
 	EnvironmentId *EnvironmentId `json:"-" url:"environmentId,omitempty"`
 }
-
-// Data Retention Policy ID
-type DataRetentionPolicyId = string
 
 // A data retention policy belonging to an environment
 type DataRetentionPolicy struct {
@@ -29,7 +26,49 @@ type DataRetentionPolicy struct {
 	UpdatedAt time.Time `json:"updatedAt" url:"updatedAt"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (d *DataRetentionPolicy) GetType() DataRetentionPolicyEnum {
+	if d == nil {
+		return ""
+	}
+	return d.Type
+}
+
+func (d *DataRetentionPolicy) GetPeriod() int {
+	if d == nil {
+		return 0
+	}
+	return d.Period
+}
+
+func (d *DataRetentionPolicy) GetEnvironmentId() EnvironmentId {
+	if d == nil {
+		return ""
+	}
+	return d.EnvironmentId
+}
+
+func (d *DataRetentionPolicy) GetId() DataRetentionPolicyId {
+	if d == nil {
+		return ""
+	}
+	return d.Id
+}
+
+func (d *DataRetentionPolicy) GetCreatedAt() time.Time {
+	if d == nil {
+		return time.Time{}
+	}
+	return d.CreatedAt
+}
+
+func (d *DataRetentionPolicy) GetUpdatedAt() time.Time {
+	if d == nil {
+		return time.Time{}
+	}
+	return d.UpdatedAt
 }
 
 func (d *DataRetentionPolicy) GetExtraProperties() map[string]interface{} {
@@ -40,8 +79,8 @@ func (d *DataRetentionPolicy) UnmarshalJSON(data []byte) error {
 	type embed DataRetentionPolicy
 	var unmarshaler = struct {
 		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-		UpdatedAt *core.DateTime `json:"updatedAt"`
+		CreatedAt *internal.DateTime `json:"createdAt"`
+		UpdatedAt *internal.DateTime `json:"updatedAt"`
 	}{
 		embed: embed(*d),
 	}
@@ -51,14 +90,12 @@ func (d *DataRetentionPolicy) UnmarshalJSON(data []byte) error {
 	*d = DataRetentionPolicy(unmarshaler.embed)
 	d.CreatedAt = unmarshaler.CreatedAt.Time()
 	d.UpdatedAt = unmarshaler.UpdatedAt.Time()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *d)
+	extraProperties, err := internal.ExtractExtraProperties(data, *d)
 	if err != nil {
 		return err
 	}
 	d.extraProperties = extraProperties
-
-	d._rawJSON = json.RawMessage(data)
+	d.rawJSON = json.RawMessage(data)
 	return nil
 }
 
@@ -66,23 +103,23 @@ func (d *DataRetentionPolicy) MarshalJSON() ([]byte, error) {
 	type embed DataRetentionPolicy
 	var marshaler = struct {
 		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-		UpdatedAt *core.DateTime `json:"updatedAt"`
+		CreatedAt *internal.DateTime `json:"createdAt"`
+		UpdatedAt *internal.DateTime `json:"updatedAt"`
 	}{
 		embed:     embed(*d),
-		CreatedAt: core.NewDateTime(d.CreatedAt),
-		UpdatedAt: core.NewDateTime(d.UpdatedAt),
+		CreatedAt: internal.NewDateTime(d.CreatedAt),
+		UpdatedAt: internal.NewDateTime(d.UpdatedAt),
 	}
 	return json.Marshal(marshaler)
 }
 
 func (d *DataRetentionPolicy) String() string {
-	if len(d._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(d._rawJSON); err == nil {
+	if len(d.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(d.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(d); err == nil {
+	if value, err := internal.StringifyJSON(d); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", d)
@@ -94,7 +131,28 @@ type DataRetentionPolicyConfig struct {
 	EnvironmentId EnvironmentId           `json:"environmentId" url:"environmentId"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (d *DataRetentionPolicyConfig) GetType() DataRetentionPolicyEnum {
+	if d == nil {
+		return ""
+	}
+	return d.Type
+}
+
+func (d *DataRetentionPolicyConfig) GetPeriod() int {
+	if d == nil {
+		return 0
+	}
+	return d.Period
+}
+
+func (d *DataRetentionPolicyConfig) GetEnvironmentId() EnvironmentId {
+	if d == nil {
+		return ""
+	}
+	return d.EnvironmentId
 }
 
 func (d *DataRetentionPolicyConfig) GetExtraProperties() map[string]interface{} {
@@ -108,24 +166,22 @@ func (d *DataRetentionPolicyConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*d = DataRetentionPolicyConfig(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *d)
+	extraProperties, err := internal.ExtractExtraProperties(data, *d)
 	if err != nil {
 		return err
 	}
 	d.extraProperties = extraProperties
-
-	d._rawJSON = json.RawMessage(data)
+	d.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (d *DataRetentionPolicyConfig) String() string {
-	if len(d._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(d._rawJSON); err == nil {
+	if len(d.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(d.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(d); err == nil {
+	if value, err := internal.StringifyJSON(d); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", d)
@@ -158,7 +214,14 @@ type DataRetentionPolicyResponse struct {
 	Data *DataRetentionPolicy `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (d *DataRetentionPolicyResponse) GetData() *DataRetentionPolicy {
+	if d == nil {
+		return nil
+	}
+	return d.Data
 }
 
 func (d *DataRetentionPolicyResponse) GetExtraProperties() map[string]interface{} {
@@ -172,24 +235,22 @@ func (d *DataRetentionPolicyResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*d = DataRetentionPolicyResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *d)
+	extraProperties, err := internal.ExtractExtraProperties(data, *d)
 	if err != nil {
 		return err
 	}
 	d.extraProperties = extraProperties
-
-	d._rawJSON = json.RawMessage(data)
+	d.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (d *DataRetentionPolicyResponse) String() string {
-	if len(d._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(d._rawJSON); err == nil {
+	if len(d.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(d.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(d); err == nil {
+	if value, err := internal.StringifyJSON(d); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", d)
@@ -199,7 +260,14 @@ type ListDataRetentionPoliciesResponse struct {
 	Data []*DataRetentionPolicy `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (l *ListDataRetentionPoliciesResponse) GetData() []*DataRetentionPolicy {
+	if l == nil {
+		return nil
+	}
+	return l.Data
 }
 
 func (l *ListDataRetentionPoliciesResponse) GetExtraProperties() map[string]interface{} {
@@ -213,24 +281,22 @@ func (l *ListDataRetentionPoliciesResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*l = ListDataRetentionPoliciesResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	extraProperties, err := internal.ExtractExtraProperties(data, *l)
 	if err != nil {
 		return err
 	}
 	l.extraProperties = extraProperties
-
-	l._rawJSON = json.RawMessage(data)
+	l.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (l *ListDataRetentionPoliciesResponse) String() string {
-	if len(l._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(l._rawJSON); err == nil {
+	if len(l.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(l.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(l); err == nil {
+	if value, err := internal.StringifyJSON(l); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", l)

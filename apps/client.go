@@ -6,13 +6,14 @@ import (
 	context "context"
 	flatfilego "github.com/FlatFilers/flatfile-go"
 	core "github.com/FlatFilers/flatfile-go/core"
+	internal "github.com/FlatFilers/flatfile-go/internal"
 	option "github.com/FlatFilers/flatfile-go/option"
 	http "net/http"
 )
 
 type Client struct {
 	baseURL string
-	caller  *core.Caller
+	caller  *internal.Caller
 	header  http.Header
 }
 
@@ -20,8 +21,8 @@ func NewClient(opts ...option.RequestOption) *Client {
 	options := core.NewRequestOptions(opts...)
 	return &Client{
 		baseURL: options.BaseURL,
-		caller: core.NewCaller(
-			&core.CallerParams{
+		caller: internal.NewCaller(
+			&internal.CallerParams{
 				Client:      options.HTTPClient,
 				MaxAttempts: options.MaxAttempts,
 			},
@@ -36,26 +37,25 @@ func (c *Client) List(
 	opts ...option.RequestOption,
 ) (*flatfilego.AppsResponse, error) {
 	options := core.NewRequestOptions(opts...)
-
-	baseURL := "https://api.x.flatfile.com/v1"
-	if c.baseURL != "" {
-		baseURL = c.baseURL
-	}
-	if options.BaseURL != "" {
-		baseURL = options.BaseURL
-	}
+	baseURL := internal.ResolveBaseURL(
+		options.BaseURL,
+		c.baseURL,
+		"https://api.x.flatfile.com/v1",
+	)
 	endpointURL := baseURL + "/apps"
-
-	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
+	headers := internal.MergeHeaders(
+		c.header.Clone(),
+		options.ToHeader(),
+	)
 
 	var response *flatfilego.AppsResponse
 	if err := c.caller.Call(
 		ctx,
-		&core.CallParams{
+		&internal.CallParams{
 			URL:             endpointURL,
 			Method:          http.MethodGet,
-			MaxAttempts:     options.MaxAttempts,
 			Headers:         headers,
+			MaxAttempts:     options.MaxAttempts,
 			BodyProperties:  options.BodyProperties,
 			QueryParameters: options.QueryParameters,
 			Client:          options.HTTPClient,
@@ -75,26 +75,28 @@ func (c *Client) Get(
 	opts ...option.RequestOption,
 ) (*flatfilego.AppResponse, error) {
 	options := core.NewRequestOptions(opts...)
-
-	baseURL := "https://api.x.flatfile.com/v1"
-	if c.baseURL != "" {
-		baseURL = c.baseURL
-	}
-	if options.BaseURL != "" {
-		baseURL = options.BaseURL
-	}
-	endpointURL := core.EncodeURL(baseURL+"/apps/%v", appId)
-
-	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
+	baseURL := internal.ResolveBaseURL(
+		options.BaseURL,
+		c.baseURL,
+		"https://api.x.flatfile.com/v1",
+	)
+	endpointURL := internal.EncodeURL(
+		baseURL+"/apps/%v",
+		appId,
+	)
+	headers := internal.MergeHeaders(
+		c.header.Clone(),
+		options.ToHeader(),
+	)
 
 	var response *flatfilego.AppResponse
 	if err := c.caller.Call(
 		ctx,
-		&core.CallParams{
+		&internal.CallParams{
 			URL:             endpointURL,
 			Method:          http.MethodGet,
-			MaxAttempts:     options.MaxAttempts,
 			Headers:         headers,
+			MaxAttempts:     options.MaxAttempts,
 			BodyProperties:  options.BodyProperties,
 			QueryParameters: options.QueryParameters,
 			Client:          options.HTTPClient,
@@ -115,26 +117,28 @@ func (c *Client) Update(
 	opts ...option.RequestOption,
 ) (*flatfilego.AppResponse, error) {
 	options := core.NewRequestOptions(opts...)
-
-	baseURL := "https://api.x.flatfile.com/v1"
-	if c.baseURL != "" {
-		baseURL = c.baseURL
-	}
-	if options.BaseURL != "" {
-		baseURL = options.BaseURL
-	}
-	endpointURL := core.EncodeURL(baseURL+"/apps/%v", appId)
-
-	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
+	baseURL := internal.ResolveBaseURL(
+		options.BaseURL,
+		c.baseURL,
+		"https://api.x.flatfile.com/v1",
+	)
+	endpointURL := internal.EncodeURL(
+		baseURL+"/apps/%v",
+		appId,
+	)
+	headers := internal.MergeHeaders(
+		c.header.Clone(),
+		options.ToHeader(),
+	)
 
 	var response *flatfilego.AppResponse
 	if err := c.caller.Call(
 		ctx,
-		&core.CallParams{
+		&internal.CallParams{
 			URL:             endpointURL,
 			Method:          http.MethodPatch,
-			MaxAttempts:     options.MaxAttempts,
 			Headers:         headers,
+			MaxAttempts:     options.MaxAttempts,
 			BodyProperties:  options.BodyProperties,
 			QueryParameters: options.QueryParameters,
 			Client:          options.HTTPClient,
@@ -154,26 +158,25 @@ func (c *Client) Create(
 	opts ...option.RequestOption,
 ) (*flatfilego.AppResponse, error) {
 	options := core.NewRequestOptions(opts...)
-
-	baseURL := "https://api.x.flatfile.com/v1"
-	if c.baseURL != "" {
-		baseURL = c.baseURL
-	}
-	if options.BaseURL != "" {
-		baseURL = options.BaseURL
-	}
+	baseURL := internal.ResolveBaseURL(
+		options.BaseURL,
+		c.baseURL,
+		"https://api.x.flatfile.com/v1",
+	)
 	endpointURL := baseURL + "/apps"
-
-	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
+	headers := internal.MergeHeaders(
+		c.header.Clone(),
+		options.ToHeader(),
+	)
 
 	var response *flatfilego.AppResponse
 	if err := c.caller.Call(
 		ctx,
-		&core.CallParams{
+		&internal.CallParams{
 			URL:             endpointURL,
 			Method:          http.MethodPost,
-			MaxAttempts:     options.MaxAttempts,
 			Headers:         headers,
+			MaxAttempts:     options.MaxAttempts,
 			BodyProperties:  options.BodyProperties,
 			QueryParameters: options.QueryParameters,
 			Client:          options.HTTPClient,
@@ -194,26 +197,28 @@ func (c *Client) Delete(
 	opts ...option.RequestOption,
 ) (*flatfilego.SuccessResponse, error) {
 	options := core.NewRequestOptions(opts...)
-
-	baseURL := "https://api.x.flatfile.com/v1"
-	if c.baseURL != "" {
-		baseURL = c.baseURL
-	}
-	if options.BaseURL != "" {
-		baseURL = options.BaseURL
-	}
-	endpointURL := core.EncodeURL(baseURL+"/apps/%v", appId)
-
-	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
+	baseURL := internal.ResolveBaseURL(
+		options.BaseURL,
+		c.baseURL,
+		"https://api.x.flatfile.com/v1",
+	)
+	endpointURL := internal.EncodeURL(
+		baseURL+"/apps/%v",
+		appId,
+	)
+	headers := internal.MergeHeaders(
+		c.header.Clone(),
+		options.ToHeader(),
+	)
 
 	var response *flatfilego.SuccessResponse
 	if err := c.caller.Call(
 		ctx,
-		&core.CallParams{
+		&internal.CallParams{
 			URL:             endpointURL,
 			Method:          http.MethodDelete,
-			MaxAttempts:     options.MaxAttempts,
 			Headers:         headers,
+			MaxAttempts:     options.MaxAttempts,
 			BodyProperties:  options.BodyProperties,
 			QueryParameters: options.QueryParameters,
 			Client:          options.HTTPClient,
@@ -234,34 +239,35 @@ func (c *Client) GetConstraints(
 	opts ...option.RequestOption,
 ) (*flatfilego.ConstraintsResponse, error) {
 	options := core.NewRequestOptions(opts...)
-
-	baseURL := "https://api.x.flatfile.com/v1"
-	if c.baseURL != "" {
-		baseURL = c.baseURL
-	}
-	if options.BaseURL != "" {
-		baseURL = options.BaseURL
-	}
-	endpointURL := core.EncodeURL(baseURL+"/apps/%v/constraints", appId)
-
-	queryParams, err := core.QueryValues(request)
+	baseURL := internal.ResolveBaseURL(
+		options.BaseURL,
+		c.baseURL,
+		"https://api.x.flatfile.com/v1",
+	)
+	endpointURL := internal.EncodeURL(
+		baseURL+"/apps/%v/constraints",
+		appId,
+	)
+	queryParams, err := internal.QueryValues(request)
 	if err != nil {
 		return nil, err
 	}
 	if len(queryParams) > 0 {
 		endpointURL += "?" + queryParams.Encode()
 	}
-
-	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
+	headers := internal.MergeHeaders(
+		c.header.Clone(),
+		options.ToHeader(),
+	)
 
 	var response *flatfilego.ConstraintsResponse
 	if err := c.caller.Call(
 		ctx,
-		&core.CallParams{
+		&internal.CallParams{
 			URL:             endpointURL,
 			Method:          http.MethodGet,
-			MaxAttempts:     options.MaxAttempts,
 			Headers:         headers,
+			MaxAttempts:     options.MaxAttempts,
 			BodyProperties:  options.BodyProperties,
 			QueryParameters: options.QueryParameters,
 			Client:          options.HTTPClient,
@@ -282,26 +288,28 @@ func (c *Client) CreateConstraint(
 	opts ...option.RequestOption,
 ) (*flatfilego.ConstraintResponse, error) {
 	options := core.NewRequestOptions(opts...)
-
-	baseURL := "https://api.x.flatfile.com/v1"
-	if c.baseURL != "" {
-		baseURL = c.baseURL
-	}
-	if options.BaseURL != "" {
-		baseURL = options.BaseURL
-	}
-	endpointURL := core.EncodeURL(baseURL+"/apps/%v/constraints", appId)
-
-	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
+	baseURL := internal.ResolveBaseURL(
+		options.BaseURL,
+		c.baseURL,
+		"https://api.x.flatfile.com/v1",
+	)
+	endpointURL := internal.EncodeURL(
+		baseURL+"/apps/%v/constraints",
+		appId,
+	)
+	headers := internal.MergeHeaders(
+		c.header.Clone(),
+		options.ToHeader(),
+	)
 
 	var response *flatfilego.ConstraintResponse
 	if err := c.caller.Call(
 		ctx,
-		&core.CallParams{
+		&internal.CallParams{
 			URL:             endpointURL,
 			Method:          http.MethodPost,
-			MaxAttempts:     options.MaxAttempts,
 			Headers:         headers,
+			MaxAttempts:     options.MaxAttempts,
 			BodyProperties:  options.BodyProperties,
 			QueryParameters: options.QueryParameters,
 			Client:          options.HTTPClient,
@@ -324,30 +332,29 @@ func (c *Client) GetConstraintById(
 	opts ...option.RequestOption,
 ) (*flatfilego.ConstraintResponse, error) {
 	options := core.NewRequestOptions(opts...)
-
-	baseURL := "https://api.x.flatfile.com/v1"
-	if c.baseURL != "" {
-		baseURL = c.baseURL
-	}
-	if options.BaseURL != "" {
-		baseURL = options.BaseURL
-	}
-	endpointURL := core.EncodeURL(
+	baseURL := internal.ResolveBaseURL(
+		options.BaseURL,
+		c.baseURL,
+		"https://api.x.flatfile.com/v1",
+	)
+	endpointURL := internal.EncodeURL(
 		baseURL+"/apps/%v/constraints/%v",
 		appId,
 		constraintId,
 	)
-
-	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
+	headers := internal.MergeHeaders(
+		c.header.Clone(),
+		options.ToHeader(),
+	)
 
 	var response *flatfilego.ConstraintResponse
 	if err := c.caller.Call(
 		ctx,
-		&core.CallParams{
+		&internal.CallParams{
 			URL:             endpointURL,
 			Method:          http.MethodGet,
-			MaxAttempts:     options.MaxAttempts,
 			Headers:         headers,
+			MaxAttempts:     options.MaxAttempts,
 			BodyProperties:  options.BodyProperties,
 			QueryParameters: options.QueryParameters,
 			Client:          options.HTTPClient,
@@ -369,30 +376,29 @@ func (c *Client) GetConstraintVersions(
 	opts ...option.RequestOption,
 ) (*flatfilego.ConstraintVersionsResponse, error) {
 	options := core.NewRequestOptions(opts...)
-
-	baseURL := "https://api.x.flatfile.com/v1"
-	if c.baseURL != "" {
-		baseURL = c.baseURL
-	}
-	if options.BaseURL != "" {
-		baseURL = options.BaseURL
-	}
-	endpointURL := core.EncodeURL(
+	baseURL := internal.ResolveBaseURL(
+		options.BaseURL,
+		c.baseURL,
+		"https://api.x.flatfile.com/v1",
+	)
+	endpointURL := internal.EncodeURL(
 		baseURL+"/apps/%v/constraints/%v/versions",
 		appId,
 		constraintId,
 	)
-
-	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
+	headers := internal.MergeHeaders(
+		c.header.Clone(),
+		options.ToHeader(),
+	)
 
 	var response *flatfilego.ConstraintVersionsResponse
 	if err := c.caller.Call(
 		ctx,
-		&core.CallParams{
+		&internal.CallParams{
 			URL:             endpointURL,
 			Method:          http.MethodGet,
-			MaxAttempts:     options.MaxAttempts,
 			Headers:         headers,
+			MaxAttempts:     options.MaxAttempts,
 			BodyProperties:  options.BodyProperties,
 			QueryParameters: options.QueryParameters,
 			Client:          options.HTTPClient,
@@ -416,31 +422,30 @@ func (c *Client) GetConstraintVersion(
 	opts ...option.RequestOption,
 ) (*flatfilego.ConstraintVersionResponse, error) {
 	options := core.NewRequestOptions(opts...)
-
-	baseURL := "https://api.x.flatfile.com/v1"
-	if c.baseURL != "" {
-		baseURL = c.baseURL
-	}
-	if options.BaseURL != "" {
-		baseURL = options.BaseURL
-	}
-	endpointURL := core.EncodeURL(
+	baseURL := internal.ResolveBaseURL(
+		options.BaseURL,
+		c.baseURL,
+		"https://api.x.flatfile.com/v1",
+	)
+	endpointURL := internal.EncodeURL(
 		baseURL+"/apps/%v/constraints/%v/versions/%v",
 		appId,
 		constraintId,
 		version,
 	)
-
-	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
+	headers := internal.MergeHeaders(
+		c.header.Clone(),
+		options.ToHeader(),
+	)
 
 	var response *flatfilego.ConstraintVersionResponse
 	if err := c.caller.Call(
 		ctx,
-		&core.CallParams{
+		&internal.CallParams{
 			URL:             endpointURL,
 			Method:          http.MethodGet,
-			MaxAttempts:     options.MaxAttempts,
 			Headers:         headers,
+			MaxAttempts:     options.MaxAttempts,
 			BodyProperties:  options.BodyProperties,
 			QueryParameters: options.QueryParameters,
 			Client:          options.HTTPClient,
@@ -463,30 +468,29 @@ func (c *Client) UpdateConstraint(
 	opts ...option.RequestOption,
 ) (*flatfilego.ConstraintResponse, error) {
 	options := core.NewRequestOptions(opts...)
-
-	baseURL := "https://api.x.flatfile.com/v1"
-	if c.baseURL != "" {
-		baseURL = c.baseURL
-	}
-	if options.BaseURL != "" {
-		baseURL = options.BaseURL
-	}
-	endpointURL := core.EncodeURL(
+	baseURL := internal.ResolveBaseURL(
+		options.BaseURL,
+		c.baseURL,
+		"https://api.x.flatfile.com/v1",
+	)
+	endpointURL := internal.EncodeURL(
 		baseURL+"/apps/%v/constraints/%v",
 		appId,
 		constraintId,
 	)
-
-	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
+	headers := internal.MergeHeaders(
+		c.header.Clone(),
+		options.ToHeader(),
+	)
 
 	var response *flatfilego.ConstraintResponse
 	if err := c.caller.Call(
 		ctx,
-		&core.CallParams{
+		&internal.CallParams{
 			URL:             endpointURL,
 			Method:          http.MethodPatch,
-			MaxAttempts:     options.MaxAttempts,
 			Headers:         headers,
+			MaxAttempts:     options.MaxAttempts,
 			BodyProperties:  options.BodyProperties,
 			QueryParameters: options.QueryParameters,
 			Client:          options.HTTPClient,
@@ -509,30 +513,29 @@ func (c *Client) DeleteConstraint(
 	opts ...option.RequestOption,
 ) (*flatfilego.SuccessResponse, error) {
 	options := core.NewRequestOptions(opts...)
-
-	baseURL := "https://api.x.flatfile.com/v1"
-	if c.baseURL != "" {
-		baseURL = c.baseURL
-	}
-	if options.BaseURL != "" {
-		baseURL = options.BaseURL
-	}
-	endpointURL := core.EncodeURL(
+	baseURL := internal.ResolveBaseURL(
+		options.BaseURL,
+		c.baseURL,
+		"https://api.x.flatfile.com/v1",
+	)
+	endpointURL := internal.EncodeURL(
 		baseURL+"/apps/%v/constraints/%v",
 		appId,
 		constraintId,
 	)
-
-	headers := core.MergeHeaders(c.header.Clone(), options.ToHeader())
+	headers := internal.MergeHeaders(
+		c.header.Clone(),
+		options.ToHeader(),
+	)
 
 	var response *flatfilego.SuccessResponse
 	if err := c.caller.Call(
 		ctx,
-		&core.CallParams{
+		&internal.CallParams{
 			URL:             endpointURL,
 			Method:          http.MethodDelete,
-			MaxAttempts:     options.MaxAttempts,
 			Headers:         headers,
+			MaxAttempts:     options.MaxAttempts,
 			BodyProperties:  options.BodyProperties,
 			QueryParameters: options.QueryParameters,
 			Client:          options.HTTPClient,

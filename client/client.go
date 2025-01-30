@@ -17,6 +17,7 @@ import (
 	events "github.com/FlatFilers/flatfile-go/events"
 	files "github.com/FlatFilers/flatfile-go/files"
 	guests "github.com/FlatFilers/flatfile-go/guests"
+	internal "github.com/FlatFilers/flatfile-go/internal"
 	jobs "github.com/FlatFilers/flatfile-go/jobs"
 	mapping "github.com/FlatFilers/flatfile-go/mapping"
 	option "github.com/FlatFilers/flatfile-go/option"
@@ -35,7 +36,7 @@ import (
 
 type Client struct {
 	baseURL string
-	caller  *core.Caller
+	caller  *internal.Caller
 	header  http.Header
 
 	Accounts              *accounts.Client
@@ -69,8 +70,8 @@ func NewClient(opts ...option.RequestOption) *Client {
 	options := core.NewRequestOptions(opts...)
 	return &Client{
 		baseURL: options.BaseURL,
-		caller: core.NewCaller(
-			&core.CallerParams{
+		caller: internal.NewCaller(
+			&internal.CallerParams{
 				Client:      options.HTTPClient,
 				MaxAttempts: options.MaxAttempts,
 			},

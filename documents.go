@@ -5,7 +5,7 @@ package api
 import (
 	json "encoding/json"
 	fmt "fmt"
-	core "github.com/FlatFilers/flatfile-go/core"
+	internal "github.com/FlatFilers/flatfile-go/internal"
 	time "time"
 )
 
@@ -25,7 +25,70 @@ type Document struct {
 	UpdatedAt time.Time `json:"updatedAt" url:"updatedAt"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (d *Document) GetTitle() string {
+	if d == nil {
+		return ""
+	}
+	return d.Title
+}
+
+func (d *Document) GetBody() string {
+	if d == nil {
+		return ""
+	}
+	return d.Body
+}
+
+func (d *Document) GetTreatments() []string {
+	if d == nil {
+		return nil
+	}
+	return d.Treatments
+}
+
+func (d *Document) GetActions() []*Action {
+	if d == nil {
+		return nil
+	}
+	return d.Actions
+}
+
+func (d *Document) GetId() DocumentId {
+	if d == nil {
+		return ""
+	}
+	return d.Id
+}
+
+func (d *Document) GetSpaceId() *SpaceId {
+	if d == nil {
+		return nil
+	}
+	return d.SpaceId
+}
+
+func (d *Document) GetEnvironmentId() *EnvironmentId {
+	if d == nil {
+		return nil
+	}
+	return d.EnvironmentId
+}
+
+func (d *Document) GetCreatedAt() time.Time {
+	if d == nil {
+		return time.Time{}
+	}
+	return d.CreatedAt
+}
+
+func (d *Document) GetUpdatedAt() time.Time {
+	if d == nil {
+		return time.Time{}
+	}
+	return d.UpdatedAt
 }
 
 func (d *Document) GetExtraProperties() map[string]interface{} {
@@ -36,8 +99,8 @@ func (d *Document) UnmarshalJSON(data []byte) error {
 	type embed Document
 	var unmarshaler = struct {
 		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-		UpdatedAt *core.DateTime `json:"updatedAt"`
+		CreatedAt *internal.DateTime `json:"createdAt"`
+		UpdatedAt *internal.DateTime `json:"updatedAt"`
 	}{
 		embed: embed(*d),
 	}
@@ -47,14 +110,12 @@ func (d *Document) UnmarshalJSON(data []byte) error {
 	*d = Document(unmarshaler.embed)
 	d.CreatedAt = unmarshaler.CreatedAt.Time()
 	d.UpdatedAt = unmarshaler.UpdatedAt.Time()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *d)
+	extraProperties, err := internal.ExtractExtraProperties(data, *d)
 	if err != nil {
 		return err
 	}
 	d.extraProperties = extraProperties
-
-	d._rawJSON = json.RawMessage(data)
+	d.rawJSON = json.RawMessage(data)
 	return nil
 }
 
@@ -62,23 +123,23 @@ func (d *Document) MarshalJSON() ([]byte, error) {
 	type embed Document
 	var marshaler = struct {
 		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-		UpdatedAt *core.DateTime `json:"updatedAt"`
+		CreatedAt *internal.DateTime `json:"createdAt"`
+		UpdatedAt *internal.DateTime `json:"updatedAt"`
 	}{
 		embed:     embed(*d),
-		CreatedAt: core.NewDateTime(d.CreatedAt),
-		UpdatedAt: core.NewDateTime(d.UpdatedAt),
+		CreatedAt: internal.NewDateTime(d.CreatedAt),
+		UpdatedAt: internal.NewDateTime(d.UpdatedAt),
 	}
 	return json.Marshal(marshaler)
 }
 
 func (d *Document) String() string {
-	if len(d._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(d._rawJSON); err == nil {
+	if len(d.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(d.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(d); err == nil {
+	if value, err := internal.StringifyJSON(d); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", d)
@@ -92,7 +153,35 @@ type DocumentConfig struct {
 	Actions    []*Action `json:"actions,omitempty" url:"actions,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (d *DocumentConfig) GetTitle() string {
+	if d == nil {
+		return ""
+	}
+	return d.Title
+}
+
+func (d *DocumentConfig) GetBody() string {
+	if d == nil {
+		return ""
+	}
+	return d.Body
+}
+
+func (d *DocumentConfig) GetTreatments() []string {
+	if d == nil {
+		return nil
+	}
+	return d.Treatments
+}
+
+func (d *DocumentConfig) GetActions() []*Action {
+	if d == nil {
+		return nil
+	}
+	return d.Actions
 }
 
 func (d *DocumentConfig) GetExtraProperties() map[string]interface{} {
@@ -106,24 +195,22 @@ func (d *DocumentConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*d = DocumentConfig(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *d)
+	extraProperties, err := internal.ExtractExtraProperties(data, *d)
 	if err != nil {
 		return err
 	}
 	d.extraProperties = extraProperties
-
-	d._rawJSON = json.RawMessage(data)
+	d.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (d *DocumentConfig) String() string {
-	if len(d._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(d._rawJSON); err == nil {
+	if len(d.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(d.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(d); err == nil {
+	if value, err := internal.StringifyJSON(d); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", d)
@@ -133,7 +220,14 @@ type DocumentResponse struct {
 	Data *Document `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (d *DocumentResponse) GetData() *Document {
+	if d == nil {
+		return nil
+	}
+	return d.Data
 }
 
 func (d *DocumentResponse) GetExtraProperties() map[string]interface{} {
@@ -147,24 +241,22 @@ func (d *DocumentResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*d = DocumentResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *d)
+	extraProperties, err := internal.ExtractExtraProperties(data, *d)
 	if err != nil {
 		return err
 	}
 	d.extraProperties = extraProperties
-
-	d._rawJSON = json.RawMessage(data)
+	d.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (d *DocumentResponse) String() string {
-	if len(d._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(d._rawJSON); err == nil {
+	if len(d.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(d.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(d); err == nil {
+	if value, err := internal.StringifyJSON(d); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", d)
@@ -174,7 +266,14 @@ type ListDocumentsResponse struct {
 	Data []*Document `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (l *ListDocumentsResponse) GetData() []*Document {
+	if l == nil {
+		return nil
+	}
+	return l.Data
 }
 
 func (l *ListDocumentsResponse) GetExtraProperties() map[string]interface{} {
@@ -188,24 +287,22 @@ func (l *ListDocumentsResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*l = ListDocumentsResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	extraProperties, err := internal.ExtractExtraProperties(data, *l)
 	if err != nil {
 		return err
 	}
 	l.extraProperties = extraProperties
-
-	l._rawJSON = json.RawMessage(data)
+	l.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (l *ListDocumentsResponse) String() string {
-	if len(l._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(l._rawJSON); err == nil {
+	if len(l.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(l.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(l); err == nil {
+	if value, err := internal.StringifyJSON(l); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", l)

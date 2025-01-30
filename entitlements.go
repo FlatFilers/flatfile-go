@@ -5,7 +5,7 @@ package api
 import (
 	json "encoding/json"
 	fmt "fmt"
-	core "github.com/FlatFilers/flatfile-go/core"
+	internal "github.com/FlatFilers/flatfile-go/internal"
 )
 
 type ListEntitlementsRequest struct {
@@ -21,7 +21,21 @@ type Entitlement struct {
 	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (e *Entitlement) GetKey() string {
+	if e == nil {
+		return ""
+	}
+	return e.Key
+}
+
+func (e *Entitlement) GetMetadata() interface{} {
+	if e == nil {
+		return nil
+	}
+	return e.Metadata
 }
 
 func (e *Entitlement) GetExtraProperties() map[string]interface{} {
@@ -35,24 +49,22 @@ func (e *Entitlement) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*e = Entitlement(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	extraProperties, err := internal.ExtractExtraProperties(data, *e)
 	if err != nil {
 		return err
 	}
 	e.extraProperties = extraProperties
-
-	e._rawJSON = json.RawMessage(data)
+	e.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (e *Entitlement) String() string {
-	if len(e._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+	if len(e.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(e.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(e); err == nil {
+	if value, err := internal.StringifyJSON(e); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", e)
@@ -62,7 +74,14 @@ type ListEntitlementsResponse struct {
 	Data []*Entitlement `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (l *ListEntitlementsResponse) GetData() []*Entitlement {
+	if l == nil {
+		return nil
+	}
+	return l.Data
 }
 
 func (l *ListEntitlementsResponse) GetExtraProperties() map[string]interface{} {
@@ -76,24 +95,22 @@ func (l *ListEntitlementsResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*l = ListEntitlementsResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	extraProperties, err := internal.ExtractExtraProperties(data, *l)
 	if err != nil {
 		return err
 	}
 	l.extraProperties = extraProperties
-
-	l._rawJSON = json.RawMessage(data)
+	l.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (l *ListEntitlementsResponse) String() string {
-	if len(l._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(l._rawJSON); err == nil {
+	if len(l.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(l.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(l); err == nil {
+	if value, err := internal.StringifyJSON(l); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", l)

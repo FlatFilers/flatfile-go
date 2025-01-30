@@ -5,15 +5,384 @@ package api
 import (
 	json "encoding/json"
 	fmt "fmt"
-	core "github.com/FlatFilers/flatfile-go/core"
+	internal "github.com/FlatFilers/flatfile-go/internal"
 	time "time"
 )
+
+type ActorRoleResponse struct {
+	Id         ActorRoleId      `json:"id" url:"id"`
+	RoleId     RoleId           `json:"roleId" url:"roleId"`
+	ActorId    *ActorIdUnion    `json:"actorId,omitempty" url:"actorId,omitempty"`
+	ResourceId *ResourceIdUnion `json:"resourceId,omitempty" url:"resourceId,omitempty"`
+	CreatedAt  time.Time        `json:"createdAt" url:"createdAt"`
+	UpdatedAt  time.Time        `json:"updatedAt" url:"updatedAt"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (a *ActorRoleResponse) GetId() ActorRoleId {
+	if a == nil {
+		return ""
+	}
+	return a.Id
+}
+
+func (a *ActorRoleResponse) GetRoleId() RoleId {
+	if a == nil {
+		return ""
+	}
+	return a.RoleId
+}
+
+func (a *ActorRoleResponse) GetActorId() *ActorIdUnion {
+	if a == nil {
+		return nil
+	}
+	return a.ActorId
+}
+
+func (a *ActorRoleResponse) GetResourceId() *ResourceIdUnion {
+	if a == nil {
+		return nil
+	}
+	return a.ResourceId
+}
+
+func (a *ActorRoleResponse) GetCreatedAt() time.Time {
+	if a == nil {
+		return time.Time{}
+	}
+	return a.CreatedAt
+}
+
+func (a *ActorRoleResponse) GetUpdatedAt() time.Time {
+	if a == nil {
+		return time.Time{}
+	}
+	return a.UpdatedAt
+}
+
+func (a *ActorRoleResponse) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *ActorRoleResponse) UnmarshalJSON(data []byte) error {
+	type embed ActorRoleResponse
+	var unmarshaler = struct {
+		embed
+		CreatedAt *internal.DateTime `json:"createdAt"`
+		UpdatedAt *internal.DateTime `json:"updatedAt"`
+	}{
+		embed: embed(*a),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*a = ActorRoleResponse(unmarshaler.embed)
+	a.CreatedAt = unmarshaler.CreatedAt.Time()
+	a.UpdatedAt = unmarshaler.UpdatedAt.Time()
+	extraProperties, err := internal.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+	a.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (a *ActorRoleResponse) MarshalJSON() ([]byte, error) {
+	type embed ActorRoleResponse
+	var marshaler = struct {
+		embed
+		CreatedAt *internal.DateTime `json:"createdAt"`
+		UpdatedAt *internal.DateTime `json:"updatedAt"`
+	}{
+		embed:     embed(*a),
+		CreatedAt: internal.NewDateTime(a.CreatedAt),
+		UpdatedAt: internal.NewDateTime(a.UpdatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (a *ActorRoleResponse) String() string {
+	if len(a.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(a.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
+type AssignActorRoleRequest struct {
+	RoleId     RoleId           `json:"roleId" url:"roleId"`
+	ResourceId *ResourceIdUnion `json:"resourceId,omitempty" url:"resourceId,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (a *AssignActorRoleRequest) GetRoleId() RoleId {
+	if a == nil {
+		return ""
+	}
+	return a.RoleId
+}
+
+func (a *AssignActorRoleRequest) GetResourceId() *ResourceIdUnion {
+	if a == nil {
+		return nil
+	}
+	return a.ResourceId
+}
+
+func (a *AssignActorRoleRequest) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AssignActorRoleRequest) UnmarshalJSON(data []byte) error {
+	type unmarshaler AssignActorRoleRequest
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AssignActorRoleRequest(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+	a.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (a *AssignActorRoleRequest) String() string {
+	if len(a.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(a.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
+type AssignRoleResponse struct {
+	Data *AssignRoleResponseData `json:"data,omitempty" url:"data,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (a *AssignRoleResponse) GetData() *AssignRoleResponseData {
+	if a == nil {
+		return nil
+	}
+	return a.Data
+}
+
+func (a *AssignRoleResponse) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AssignRoleResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler AssignRoleResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AssignRoleResponse(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+	a.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (a *AssignRoleResponse) String() string {
+	if len(a.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(a.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
+type AssignRoleResponseData struct {
+	Id         ActorRoleId      `json:"id" url:"id"`
+	RoleId     RoleId           `json:"roleId" url:"roleId"`
+	ActorId    *ActorIdUnion    `json:"actorId,omitempty" url:"actorId,omitempty"`
+	ResourceId *ResourceIdUnion `json:"resourceId,omitempty" url:"resourceId,omitempty"`
+	CreatedAt  time.Time        `json:"createdAt" url:"createdAt"`
+	UpdatedAt  time.Time        `json:"updatedAt" url:"updatedAt"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (a *AssignRoleResponseData) GetId() ActorRoleId {
+	if a == nil {
+		return ""
+	}
+	return a.Id
+}
+
+func (a *AssignRoleResponseData) GetRoleId() RoleId {
+	if a == nil {
+		return ""
+	}
+	return a.RoleId
+}
+
+func (a *AssignRoleResponseData) GetActorId() *ActorIdUnion {
+	if a == nil {
+		return nil
+	}
+	return a.ActorId
+}
+
+func (a *AssignRoleResponseData) GetResourceId() *ResourceIdUnion {
+	if a == nil {
+		return nil
+	}
+	return a.ResourceId
+}
+
+func (a *AssignRoleResponseData) GetCreatedAt() time.Time {
+	if a == nil {
+		return time.Time{}
+	}
+	return a.CreatedAt
+}
+
+func (a *AssignRoleResponseData) GetUpdatedAt() time.Time {
+	if a == nil {
+		return time.Time{}
+	}
+	return a.UpdatedAt
+}
+
+func (a *AssignRoleResponseData) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AssignRoleResponseData) UnmarshalJSON(data []byte) error {
+	type embed AssignRoleResponseData
+	var unmarshaler = struct {
+		embed
+		CreatedAt *internal.DateTime `json:"createdAt"`
+		UpdatedAt *internal.DateTime `json:"updatedAt"`
+	}{
+		embed: embed(*a),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*a = AssignRoleResponseData(unmarshaler.embed)
+	a.CreatedAt = unmarshaler.CreatedAt.Time()
+	a.UpdatedAt = unmarshaler.UpdatedAt.Time()
+	extraProperties, err := internal.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+	a.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (a *AssignRoleResponseData) MarshalJSON() ([]byte, error) {
+	type embed AssignRoleResponseData
+	var marshaler = struct {
+		embed
+		CreatedAt *internal.DateTime `json:"createdAt"`
+		UpdatedAt *internal.DateTime `json:"updatedAt"`
+	}{
+		embed:     embed(*a),
+		CreatedAt: internal.NewDateTime(a.CreatedAt),
+		UpdatedAt: internal.NewDateTime(a.UpdatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (a *AssignRoleResponseData) String() string {
+	if len(a.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(a.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
+type ListActorRolesResponse struct {
+	Data []*ActorRoleResponse `json:"data,omitempty" url:"data,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (l *ListActorRolesResponse) GetData() []*ActorRoleResponse {
+	if l == nil {
+		return nil
+	}
+	return l.Data
+}
+
+func (l *ListActorRolesResponse) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
+}
+
+func (l *ListActorRolesResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler ListActorRolesResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*l = ListActorRolesResponse(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+	l.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (l *ListActorRolesResponse) String() string {
+	if len(l.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(l.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(l); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", l)
+}
 
 type ListRolesResponse struct {
 	Data []*RoleResponse `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (l *ListRolesResponse) GetData() []*RoleResponse {
+	if l == nil {
+		return nil
+	}
+	return l.Data
 }
 
 func (l *ListRolesResponse) GetExtraProperties() map[string]interface{} {
@@ -27,27 +396,120 @@ func (l *ListRolesResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*l = ListRolesResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	extraProperties, err := internal.ExtractExtraProperties(data, *l)
 	if err != nil {
 		return err
 	}
 	l.extraProperties = extraProperties
-
-	l._rawJSON = json.RawMessage(data)
+	l.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (l *ListRolesResponse) String() string {
-	if len(l._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(l._rawJSON); err == nil {
+	if len(l.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(l.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(l); err == nil {
+	if value, err := internal.StringifyJSON(l); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", l)
+}
+
+type ResourceIdUnion struct {
+	AccountId     AccountId
+	EnvironmentId EnvironmentId
+	SpaceId       SpaceId
+
+	typ string
+}
+
+func NewResourceIdUnionFromAccountId(value AccountId) *ResourceIdUnion {
+	return &ResourceIdUnion{typ: "AccountId", AccountId: value}
+}
+
+func NewResourceIdUnionFromEnvironmentId(value EnvironmentId) *ResourceIdUnion {
+	return &ResourceIdUnion{typ: "EnvironmentId", EnvironmentId: value}
+}
+
+func NewResourceIdUnionFromSpaceId(value SpaceId) *ResourceIdUnion {
+	return &ResourceIdUnion{typ: "SpaceId", SpaceId: value}
+}
+
+func (r *ResourceIdUnion) GetAccountId() AccountId {
+	if r == nil {
+		return ""
+	}
+	return r.AccountId
+}
+
+func (r *ResourceIdUnion) GetEnvironmentId() EnvironmentId {
+	if r == nil {
+		return ""
+	}
+	return r.EnvironmentId
+}
+
+func (r *ResourceIdUnion) GetSpaceId() SpaceId {
+	if r == nil {
+		return ""
+	}
+	return r.SpaceId
+}
+
+func (r *ResourceIdUnion) UnmarshalJSON(data []byte) error {
+	var valueAccountId AccountId
+	if err := json.Unmarshal(data, &valueAccountId); err == nil {
+		r.typ = "AccountId"
+		r.AccountId = valueAccountId
+		return nil
+	}
+	var valueEnvironmentId EnvironmentId
+	if err := json.Unmarshal(data, &valueEnvironmentId); err == nil {
+		r.typ = "EnvironmentId"
+		r.EnvironmentId = valueEnvironmentId
+		return nil
+	}
+	var valueSpaceId SpaceId
+	if err := json.Unmarshal(data, &valueSpaceId); err == nil {
+		r.typ = "SpaceId"
+		r.SpaceId = valueSpaceId
+		return nil
+	}
+	return fmt.Errorf("%s cannot be deserialized as a %T", data, r)
+}
+
+func (r ResourceIdUnion) MarshalJSON() ([]byte, error) {
+	if r.typ == "AccountId" || r.AccountId != "" {
+		return json.Marshal(r.AccountId)
+	}
+	if r.typ == "EnvironmentId" || r.EnvironmentId != "" {
+		return json.Marshal(r.EnvironmentId)
+	}
+	if r.typ == "SpaceId" || r.SpaceId != "" {
+		return json.Marshal(r.SpaceId)
+	}
+	return nil, fmt.Errorf("type %T does not include a non-empty union type", r)
+}
+
+type ResourceIdUnionVisitor interface {
+	VisitAccountId(AccountId) error
+	VisitEnvironmentId(EnvironmentId) error
+	VisitSpaceId(SpaceId) error
+}
+
+func (r *ResourceIdUnion) Accept(visitor ResourceIdUnionVisitor) error {
+	if r.typ == "AccountId" || r.AccountId != "" {
+		return visitor.VisitAccountId(r.AccountId)
+	}
+	if r.typ == "EnvironmentId" || r.EnvironmentId != "" {
+		return visitor.VisitEnvironmentId(r.EnvironmentId)
+	}
+	if r.typ == "SpaceId" || r.SpaceId != "" {
+		return visitor.VisitSpaceId(r.SpaceId)
+	}
+	return fmt.Errorf("type %T does not include a non-empty union type", r)
 }
 
 type RoleResponse struct {
@@ -58,7 +520,42 @@ type RoleResponse struct {
 	UpdatedAt time.Time `json:"updatedAt" url:"updatedAt"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (r *RoleResponse) GetId() RoleId {
+	if r == nil {
+		return ""
+	}
+	return r.Id
+}
+
+func (r *RoleResponse) GetName() string {
+	if r == nil {
+		return ""
+	}
+	return r.Name
+}
+
+func (r *RoleResponse) GetAccountId() AccountId {
+	if r == nil {
+		return ""
+	}
+	return r.AccountId
+}
+
+func (r *RoleResponse) GetCreatedAt() time.Time {
+	if r == nil {
+		return time.Time{}
+	}
+	return r.CreatedAt
+}
+
+func (r *RoleResponse) GetUpdatedAt() time.Time {
+	if r == nil {
+		return time.Time{}
+	}
+	return r.UpdatedAt
 }
 
 func (r *RoleResponse) GetExtraProperties() map[string]interface{} {
@@ -69,8 +566,8 @@ func (r *RoleResponse) UnmarshalJSON(data []byte) error {
 	type embed RoleResponse
 	var unmarshaler = struct {
 		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-		UpdatedAt *core.DateTime `json:"updatedAt"`
+		CreatedAt *internal.DateTime `json:"createdAt"`
+		UpdatedAt *internal.DateTime `json:"updatedAt"`
 	}{
 		embed: embed(*r),
 	}
@@ -80,14 +577,12 @@ func (r *RoleResponse) UnmarshalJSON(data []byte) error {
 	*r = RoleResponse(unmarshaler.embed)
 	r.CreatedAt = unmarshaler.CreatedAt.Time()
 	r.UpdatedAt = unmarshaler.UpdatedAt.Time()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	extraProperties, err := internal.ExtractExtraProperties(data, *r)
 	if err != nil {
 		return err
 	}
 	r.extraProperties = extraProperties
-
-	r._rawJSON = json.RawMessage(data)
+	r.rawJSON = json.RawMessage(data)
 	return nil
 }
 
@@ -95,23 +590,23 @@ func (r *RoleResponse) MarshalJSON() ([]byte, error) {
 	type embed RoleResponse
 	var marshaler = struct {
 		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-		UpdatedAt *core.DateTime `json:"updatedAt"`
+		CreatedAt *internal.DateTime `json:"createdAt"`
+		UpdatedAt *internal.DateTime `json:"updatedAt"`
 	}{
 		embed:     embed(*r),
-		CreatedAt: core.NewDateTime(r.CreatedAt),
-		UpdatedAt: core.NewDateTime(r.UpdatedAt),
+		CreatedAt: internal.NewDateTime(r.CreatedAt),
+		UpdatedAt: internal.NewDateTime(r.UpdatedAt),
 	}
 	return json.Marshal(marshaler)
 }
 
 func (r *RoleResponse) String() string {
-	if len(r._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(r._rawJSON); err == nil {
+	if len(r.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(r.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(r); err == nil {
+	if value, err := internal.StringifyJSON(r); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", r)

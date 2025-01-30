@@ -5,7 +5,7 @@ package api
 import (
 	json "encoding/json"
 	fmt "fmt"
-	core "github.com/FlatFilers/flatfile-go/core"
+	internal "github.com/FlatFilers/flatfile-go/internal"
 	time "time"
 )
 
@@ -34,7 +34,77 @@ type Prompt struct {
 	DeletedAt *time.Time `json:"deletedAt,omitempty" url:"deletedAt,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (p *Prompt) GetId() PromptId {
+	if p == nil {
+		return ""
+	}
+	return p.Id
+}
+
+func (p *Prompt) GetCreatedById() string {
+	if p == nil {
+		return ""
+	}
+	return p.CreatedById
+}
+
+func (p *Prompt) GetAccountId() AccountId {
+	if p == nil {
+		return ""
+	}
+	return p.AccountId
+}
+
+func (p *Prompt) GetEnvironmentId() *EnvironmentId {
+	if p == nil {
+		return nil
+	}
+	return p.EnvironmentId
+}
+
+func (p *Prompt) GetSpaceId() *SpaceId {
+	if p == nil {
+		return nil
+	}
+	return p.SpaceId
+}
+
+func (p *Prompt) GetPromptType() PromptTypeEnum {
+	if p == nil {
+		return ""
+	}
+	return p.PromptType
+}
+
+func (p *Prompt) GetPrompt() string {
+	if p == nil {
+		return ""
+	}
+	return p.Prompt
+}
+
+func (p *Prompt) GetCreatedAt() time.Time {
+	if p == nil {
+		return time.Time{}
+	}
+	return p.CreatedAt
+}
+
+func (p *Prompt) GetUpdatedAt() time.Time {
+	if p == nil {
+		return time.Time{}
+	}
+	return p.UpdatedAt
+}
+
+func (p *Prompt) GetDeletedAt() *time.Time {
+	if p == nil {
+		return nil
+	}
+	return p.DeletedAt
 }
 
 func (p *Prompt) GetExtraProperties() map[string]interface{} {
@@ -45,9 +115,9 @@ func (p *Prompt) UnmarshalJSON(data []byte) error {
 	type embed Prompt
 	var unmarshaler = struct {
 		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-		UpdatedAt *core.DateTime `json:"updatedAt"`
-		DeletedAt *core.DateTime `json:"deletedAt,omitempty"`
+		CreatedAt *internal.DateTime `json:"createdAt"`
+		UpdatedAt *internal.DateTime `json:"updatedAt"`
+		DeletedAt *internal.DateTime `json:"deletedAt,omitempty"`
 	}{
 		embed: embed(*p),
 	}
@@ -58,14 +128,12 @@ func (p *Prompt) UnmarshalJSON(data []byte) error {
 	p.CreatedAt = unmarshaler.CreatedAt.Time()
 	p.UpdatedAt = unmarshaler.UpdatedAt.Time()
 	p.DeletedAt = unmarshaler.DeletedAt.TimePtr()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	extraProperties, err := internal.ExtractExtraProperties(data, *p)
 	if err != nil {
 		return err
 	}
 	p.extraProperties = extraProperties
-
-	p._rawJSON = json.RawMessage(data)
+	p.rawJSON = json.RawMessage(data)
 	return nil
 }
 
@@ -73,25 +141,25 @@ func (p *Prompt) MarshalJSON() ([]byte, error) {
 	type embed Prompt
 	var marshaler = struct {
 		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-		UpdatedAt *core.DateTime `json:"updatedAt"`
-		DeletedAt *core.DateTime `json:"deletedAt,omitempty"`
+		CreatedAt *internal.DateTime `json:"createdAt"`
+		UpdatedAt *internal.DateTime `json:"updatedAt"`
+		DeletedAt *internal.DateTime `json:"deletedAt,omitempty"`
 	}{
 		embed:     embed(*p),
-		CreatedAt: core.NewDateTime(p.CreatedAt),
-		UpdatedAt: core.NewDateTime(p.UpdatedAt),
-		DeletedAt: core.NewOptionalDateTime(p.DeletedAt),
+		CreatedAt: internal.NewDateTime(p.CreatedAt),
+		UpdatedAt: internal.NewDateTime(p.UpdatedAt),
+		DeletedAt: internal.NewOptionalDateTime(p.DeletedAt),
 	}
 	return json.Marshal(marshaler)
 }
 
 func (p *Prompt) String() string {
-	if len(p._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+	if len(p.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(p.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(p); err == nil {
+	if value, err := internal.StringifyJSON(p); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", p)
@@ -106,7 +174,35 @@ type PromptCreate struct {
 	SpaceId       SpaceId         `json:"spaceId" url:"spaceId"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (p *PromptCreate) GetPromptType() *PromptTypeEnum {
+	if p == nil {
+		return nil
+	}
+	return p.PromptType
+}
+
+func (p *PromptCreate) GetPrompt() string {
+	if p == nil {
+		return ""
+	}
+	return p.Prompt
+}
+
+func (p *PromptCreate) GetEnvironmentId() EnvironmentId {
+	if p == nil {
+		return ""
+	}
+	return p.EnvironmentId
+}
+
+func (p *PromptCreate) GetSpaceId() SpaceId {
+	if p == nil {
+		return ""
+	}
+	return p.SpaceId
 }
 
 func (p *PromptCreate) GetExtraProperties() map[string]interface{} {
@@ -120,24 +216,22 @@ func (p *PromptCreate) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*p = PromptCreate(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	extraProperties, err := internal.ExtractExtraProperties(data, *p)
 	if err != nil {
 		return err
 	}
 	p.extraProperties = extraProperties
-
-	p._rawJSON = json.RawMessage(data)
+	p.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (p *PromptCreate) String() string {
-	if len(p._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+	if len(p.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(p.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(p); err == nil {
+	if value, err := internal.StringifyJSON(p); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", p)
@@ -148,7 +242,14 @@ type PromptPatch struct {
 	Prompt string `json:"prompt" url:"prompt"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (p *PromptPatch) GetPrompt() string {
+	if p == nil {
+		return ""
+	}
+	return p.Prompt
 }
 
 func (p *PromptPatch) GetExtraProperties() map[string]interface{} {
@@ -162,24 +263,22 @@ func (p *PromptPatch) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*p = PromptPatch(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	extraProperties, err := internal.ExtractExtraProperties(data, *p)
 	if err != nil {
 		return err
 	}
 	p.extraProperties = extraProperties
-
-	p._rawJSON = json.RawMessage(data)
+	p.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (p *PromptPatch) String() string {
-	if len(p._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+	if len(p.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(p.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(p); err == nil {
+	if value, err := internal.StringifyJSON(p); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", p)
@@ -189,7 +288,14 @@ type PromptResponse struct {
 	Data *Prompt `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (p *PromptResponse) GetData() *Prompt {
+	if p == nil {
+		return nil
+	}
+	return p.Data
 }
 
 func (p *PromptResponse) GetExtraProperties() map[string]interface{} {
@@ -203,24 +309,22 @@ func (p *PromptResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*p = PromptResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	extraProperties, err := internal.ExtractExtraProperties(data, *p)
 	if err != nil {
 		return err
 	}
 	p.extraProperties = extraProperties
-
-	p._rawJSON = json.RawMessage(data)
+	p.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (p *PromptResponse) String() string {
-	if len(p._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+	if len(p.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(p.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(p); err == nil {
+	if value, err := internal.StringifyJSON(p); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", p)
@@ -278,7 +382,21 @@ type PromptsResponse struct {
 	Data       []*Prompt   `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (p *PromptsResponse) GetPagination() *Pagination {
+	if p == nil {
+		return nil
+	}
+	return p.Pagination
+}
+
+func (p *PromptsResponse) GetData() []*Prompt {
+	if p == nil {
+		return nil
+	}
+	return p.Data
 }
 
 func (p *PromptsResponse) GetExtraProperties() map[string]interface{} {
@@ -292,28 +410,23 @@ func (p *PromptsResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*p = PromptsResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	extraProperties, err := internal.ExtractExtraProperties(data, *p)
 	if err != nil {
 		return err
 	}
 	p.extraProperties = extraProperties
-
-	p._rawJSON = json.RawMessage(data)
+	p.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (p *PromptsResponse) String() string {
-	if len(p._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+	if len(p.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(p.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(p); err == nil {
+	if value, err := internal.StringifyJSON(p); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", p)
 }
-
-// Prompt ID
-type PromptId = string

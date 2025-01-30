@@ -5,7 +5,7 @@ package api
 import (
 	json "encoding/json"
 	fmt "fmt"
-	core "github.com/FlatFilers/flatfile-go/core"
+	internal "github.com/FlatFilers/flatfile-go/internal"
 	time "time"
 )
 
@@ -26,7 +26,98 @@ type Account struct {
 	Dashboard               *int                   `json:"dashboard,omitempty" url:"dashboard,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (a *Account) GetId() AccountId {
+	if a == nil {
+		return ""
+	}
+	return a.Id
+}
+
+func (a *Account) GetName() string {
+	if a == nil {
+		return ""
+	}
+	return a.Name
+}
+
+func (a *Account) GetSubdomain() *string {
+	if a == nil {
+		return nil
+	}
+	return a.Subdomain
+}
+
+func (a *Account) GetVanityDomainDashboard() *string {
+	if a == nil {
+		return nil
+	}
+	return a.VanityDomainDashboard
+}
+
+func (a *Account) GetVanityDomainSpaces() *string {
+	if a == nil {
+		return nil
+	}
+	return a.VanityDomainSpaces
+}
+
+func (a *Account) GetEmbeddedDomainWhitelist() []string {
+	if a == nil {
+		return nil
+	}
+	return a.EmbeddedDomainWhitelist
+}
+
+func (a *Account) GetCustomFromEmail() *string {
+	if a == nil {
+		return nil
+	}
+	return a.CustomFromEmail
+}
+
+func (a *Account) GetStripeCustomerId() *string {
+	if a == nil {
+		return nil
+	}
+	return a.StripeCustomerId
+}
+
+func (a *Account) GetMetadata() map[string]interface{} {
+	if a == nil {
+		return nil
+	}
+	return a.Metadata
+}
+
+func (a *Account) GetCreatedAt() time.Time {
+	if a == nil {
+		return time.Time{}
+	}
+	return a.CreatedAt
+}
+
+func (a *Account) GetUpdatedAt() time.Time {
+	if a == nil {
+		return time.Time{}
+	}
+	return a.UpdatedAt
+}
+
+func (a *Account) GetDefaultAppId() *AppId {
+	if a == nil {
+		return nil
+	}
+	return a.DefaultAppId
+}
+
+func (a *Account) GetDashboard() *int {
+	if a == nil {
+		return nil
+	}
+	return a.Dashboard
 }
 
 func (a *Account) GetExtraProperties() map[string]interface{} {
@@ -37,8 +128,8 @@ func (a *Account) UnmarshalJSON(data []byte) error {
 	type embed Account
 	var unmarshaler = struct {
 		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-		UpdatedAt *core.DateTime `json:"updatedAt"`
+		CreatedAt *internal.DateTime `json:"createdAt"`
+		UpdatedAt *internal.DateTime `json:"updatedAt"`
 	}{
 		embed: embed(*a),
 	}
@@ -48,14 +139,12 @@ func (a *Account) UnmarshalJSON(data []byte) error {
 	*a = Account(unmarshaler.embed)
 	a.CreatedAt = unmarshaler.CreatedAt.Time()
 	a.UpdatedAt = unmarshaler.UpdatedAt.Time()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	extraProperties, err := internal.ExtractExtraProperties(data, *a)
 	if err != nil {
 		return err
 	}
 	a.extraProperties = extraProperties
-
-	a._rawJSON = json.RawMessage(data)
+	a.rawJSON = json.RawMessage(data)
 	return nil
 }
 
@@ -63,23 +152,23 @@ func (a *Account) MarshalJSON() ([]byte, error) {
 	type embed Account
 	var marshaler = struct {
 		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-		UpdatedAt *core.DateTime `json:"updatedAt"`
+		CreatedAt *internal.DateTime `json:"createdAt"`
+		UpdatedAt *internal.DateTime `json:"updatedAt"`
 	}{
 		embed:     embed(*a),
-		CreatedAt: core.NewDateTime(a.CreatedAt),
-		UpdatedAt: core.NewDateTime(a.UpdatedAt),
+		CreatedAt: internal.NewDateTime(a.CreatedAt),
+		UpdatedAt: internal.NewDateTime(a.UpdatedAt),
 	}
 	return json.Marshal(marshaler)
 }
 
 func (a *Account) String() string {
-	if len(a._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+	if len(a.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(a.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(a); err == nil {
+	if value, err := internal.StringifyJSON(a); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", a)
@@ -90,7 +179,14 @@ type AccountPatch struct {
 	DefaultAppId AppId `json:"defaultAppId" url:"defaultAppId"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (a *AccountPatch) GetDefaultAppId() AppId {
+	if a == nil {
+		return ""
+	}
+	return a.DefaultAppId
 }
 
 func (a *AccountPatch) GetExtraProperties() map[string]interface{} {
@@ -104,24 +200,22 @@ func (a *AccountPatch) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*a = AccountPatch(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	extraProperties, err := internal.ExtractExtraProperties(data, *a)
 	if err != nil {
 		return err
 	}
 	a.extraProperties = extraProperties
-
-	a._rawJSON = json.RawMessage(data)
+	a.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (a *AccountPatch) String() string {
-	if len(a._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+	if len(a.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(a.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(a); err == nil {
+	if value, err := internal.StringifyJSON(a); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", a)
@@ -131,7 +225,14 @@ type AccountResponse struct {
 	Data *Account `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (a *AccountResponse) GetData() *Account {
+	if a == nil {
+		return nil
+	}
+	return a.Data
 }
 
 func (a *AccountResponse) GetExtraProperties() map[string]interface{} {
@@ -145,24 +246,22 @@ func (a *AccountResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*a = AccountResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	extraProperties, err := internal.ExtractExtraProperties(data, *a)
 	if err != nil {
 		return err
 	}
 	a.extraProperties = extraProperties
-
-	a._rawJSON = json.RawMessage(data)
+	a.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (a *AccountResponse) String() string {
-	if len(a._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+	if len(a.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(a.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(a); err == nil {
+	if value, err := internal.StringifyJSON(a); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", a)

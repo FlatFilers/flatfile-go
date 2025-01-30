@@ -5,7 +5,8 @@ package api
 import (
 	json "encoding/json"
 	fmt "fmt"
-	core "github.com/FlatFilers/flatfile-go/core"
+	internal "github.com/FlatFilers/flatfile-go/internal"
+	time "time"
 )
 
 type DeleteRecordsRequest struct {
@@ -83,13 +84,860 @@ type GetRecordIndicesRequest struct {
 	Q *string `json:"-" url:"q,omitempty"`
 }
 
+// CellConfig
+type CellConfig struct {
+	Readonly *bool `json:"readonly,omitempty" url:"readonly,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (c *CellConfig) GetReadonly() *bool {
+	if c == nil {
+		return nil
+	}
+	return c.Readonly
+}
+
+func (c *CellConfig) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CellConfig) UnmarshalJSON(data []byte) error {
+	type unmarshaler CellConfig
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CellConfig(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CellConfig) String() string {
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+type CellValue struct {
+	Valid    *bool                `json:"valid,omitempty" url:"valid,omitempty"`
+	Messages []*ValidationMessage `json:"messages,omitempty" url:"messages,omitempty"`
+	// Deprecated, use record level metadata instead.
+	Metadata  map[string]interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
+	Value     *CellValueUnion        `json:"value,omitempty" url:"value,omitempty"`
+	Layer     *string                `json:"layer,omitempty" url:"layer,omitempty"`
+	UpdatedAt *time.Time             `json:"updatedAt,omitempty" url:"updatedAt,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (c *CellValue) GetValid() *bool {
+	if c == nil {
+		return nil
+	}
+	return c.Valid
+}
+
+func (c *CellValue) GetMessages() []*ValidationMessage {
+	if c == nil {
+		return nil
+	}
+	return c.Messages
+}
+
+func (c *CellValue) GetMetadata() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.Metadata
+}
+
+func (c *CellValue) GetValue() *CellValueUnion {
+	if c == nil {
+		return nil
+	}
+	return c.Value
+}
+
+func (c *CellValue) GetLayer() *string {
+	if c == nil {
+		return nil
+	}
+	return c.Layer
+}
+
+func (c *CellValue) GetUpdatedAt() *time.Time {
+	if c == nil {
+		return nil
+	}
+	return c.UpdatedAt
+}
+
+func (c *CellValue) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CellValue) UnmarshalJSON(data []byte) error {
+	type embed CellValue
+	var unmarshaler = struct {
+		embed
+		UpdatedAt *internal.DateTime `json:"updatedAt,omitempty"`
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CellValue(unmarshaler.embed)
+	c.UpdatedAt = unmarshaler.UpdatedAt.TimePtr()
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CellValue) MarshalJSON() ([]byte, error) {
+	type embed CellValue
+	var marshaler = struct {
+		embed
+		UpdatedAt *internal.DateTime `json:"updatedAt,omitempty"`
+	}{
+		embed:     embed(*c),
+		UpdatedAt: internal.NewOptionalDateTime(c.UpdatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (c *CellValue) String() string {
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+type CellValueUnion struct {
+	String     string
+	Integer    int
+	Long       int64
+	Double     float64
+	Boolean    bool
+	Date       time.Time
+	DateTime   time.Time
+	StringList []string
+
+	typ string
+}
+
+func NewCellValueUnionFromString(value string) *CellValueUnion {
+	return &CellValueUnion{typ: "String", String: value}
+}
+
+func NewCellValueUnionFromInteger(value int) *CellValueUnion {
+	return &CellValueUnion{typ: "Integer", Integer: value}
+}
+
+func NewCellValueUnionFromLong(value int64) *CellValueUnion {
+	return &CellValueUnion{typ: "Long", Long: value}
+}
+
+func NewCellValueUnionFromDouble(value float64) *CellValueUnion {
+	return &CellValueUnion{typ: "Double", Double: value}
+}
+
+func NewCellValueUnionFromBoolean(value bool) *CellValueUnion {
+	return &CellValueUnion{typ: "Boolean", Boolean: value}
+}
+
+func NewCellValueUnionFromDate(value time.Time) *CellValueUnion {
+	return &CellValueUnion{typ: "Date", Date: value}
+}
+
+func NewCellValueUnionFromDateTime(value time.Time) *CellValueUnion {
+	return &CellValueUnion{typ: "DateTime", DateTime: value}
+}
+
+func NewCellValueUnionFromStringList(value []string) *CellValueUnion {
+	return &CellValueUnion{typ: "StringList", StringList: value}
+}
+
+func (c *CellValueUnion) GetString() string {
+	if c == nil {
+		return ""
+	}
+	return c.String
+}
+
+func (c *CellValueUnion) GetInteger() int {
+	if c == nil {
+		return 0
+	}
+	return c.Integer
+}
+
+func (c *CellValueUnion) GetLong() int64 {
+	if c == nil {
+		return 0
+	}
+	return c.Long
+}
+
+func (c *CellValueUnion) GetDouble() float64 {
+	if c == nil {
+		return 0
+	}
+	return c.Double
+}
+
+func (c *CellValueUnion) GetBoolean() bool {
+	if c == nil {
+		return false
+	}
+	return c.Boolean
+}
+
+func (c *CellValueUnion) GetDate() time.Time {
+	if c == nil {
+		return time.Time{}
+	}
+	return c.Date
+}
+
+func (c *CellValueUnion) GetDateTime() time.Time {
+	if c == nil {
+		return time.Time{}
+	}
+	return c.DateTime
+}
+
+func (c *CellValueUnion) GetStringList() []string {
+	if c == nil {
+		return nil
+	}
+	return c.StringList
+}
+
+func (c *CellValueUnion) UnmarshalJSON(data []byte) error {
+	var valueString string
+	if err := json.Unmarshal(data, &valueString); err == nil {
+		c.typ = "String"
+		c.String = valueString
+		return nil
+	}
+	var valueInteger int
+	if err := json.Unmarshal(data, &valueInteger); err == nil {
+		c.typ = "Integer"
+		c.Integer = valueInteger
+		return nil
+	}
+	var valueLong int64
+	if err := json.Unmarshal(data, &valueLong); err == nil {
+		c.typ = "Long"
+		c.Long = valueLong
+		return nil
+	}
+	var valueDouble float64
+	if err := json.Unmarshal(data, &valueDouble); err == nil {
+		c.typ = "Double"
+		c.Double = valueDouble
+		return nil
+	}
+	var valueBoolean bool
+	if err := json.Unmarshal(data, &valueBoolean); err == nil {
+		c.typ = "Boolean"
+		c.Boolean = valueBoolean
+		return nil
+	}
+	var valueDate *internal.Date
+	if err := json.Unmarshal(data, &valueDate); err == nil {
+		c.typ = "Date"
+		c.Date = valueDate.Time()
+		return nil
+	}
+	var valueDateTime *internal.DateTime
+	if err := json.Unmarshal(data, &valueDateTime); err == nil {
+		c.typ = "DateTime"
+		c.DateTime = valueDateTime.Time()
+		return nil
+	}
+	var valueStringList []string
+	if err := json.Unmarshal(data, &valueStringList); err == nil {
+		c.typ = "StringList"
+		c.StringList = valueStringList
+		return nil
+	}
+	return fmt.Errorf("%s cannot be deserialized as a %T", data, c)
+}
+
+func (c CellValueUnion) MarshalJSON() ([]byte, error) {
+	if c.typ == "String" || c.String != "" {
+		return json.Marshal(c.String)
+	}
+	if c.typ == "Integer" || c.Integer != 0 {
+		return json.Marshal(c.Integer)
+	}
+	if c.typ == "Long" || c.Long != 0 {
+		return json.Marshal(c.Long)
+	}
+	if c.typ == "Double" || c.Double != 0 {
+		return json.Marshal(c.Double)
+	}
+	if c.typ == "Boolean" || c.Boolean != false {
+		return json.Marshal(c.Boolean)
+	}
+	if c.typ == "Date" || !c.Date.IsZero() {
+		return json.Marshal(internal.NewDate(c.Date))
+	}
+	if c.typ == "DateTime" || !c.DateTime.IsZero() {
+		return json.Marshal(internal.NewDateTime(c.DateTime))
+	}
+	if c.typ == "StringList" || c.StringList != nil {
+		return json.Marshal(c.StringList)
+	}
+	return nil, fmt.Errorf("type %T does not include a non-empty union type", c)
+}
+
+type CellValueUnionVisitor interface {
+	VisitString(string) error
+	VisitInteger(int) error
+	VisitLong(int64) error
+	VisitDouble(float64) error
+	VisitBoolean(bool) error
+	VisitDate(time.Time) error
+	VisitDateTime(time.Time) error
+	VisitStringList([]string) error
+}
+
+func (c *CellValueUnion) Accept(visitor CellValueUnionVisitor) error {
+	if c.typ == "String" || c.String != "" {
+		return visitor.VisitString(c.String)
+	}
+	if c.typ == "Integer" || c.Integer != 0 {
+		return visitor.VisitInteger(c.Integer)
+	}
+	if c.typ == "Long" || c.Long != 0 {
+		return visitor.VisitLong(c.Long)
+	}
+	if c.typ == "Double" || c.Double != 0 {
+		return visitor.VisitDouble(c.Double)
+	}
+	if c.typ == "Boolean" || c.Boolean != false {
+		return visitor.VisitBoolean(c.Boolean)
+	}
+	if c.typ == "Date" || !c.Date.IsZero() {
+		return visitor.VisitDate(c.Date)
+	}
+	if c.typ == "DateTime" || !c.DateTime.IsZero() {
+		return visitor.VisitDateTime(c.DateTime)
+	}
+	if c.typ == "StringList" || c.StringList != nil {
+		return visitor.VisitStringList(c.StringList)
+	}
+	return fmt.Errorf("type %T does not include a non-empty union type", c)
+}
+
+type CellValueWithLinks struct {
+	Valid    *bool                `json:"valid,omitempty" url:"valid,omitempty"`
+	Messages []*ValidationMessage `json:"messages,omitempty" url:"messages,omitempty"`
+	// Deprecated, use record level metadata instead.
+	Metadata  map[string]interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
+	Value     *CellValueUnion        `json:"value,omitempty" url:"value,omitempty"`
+	Layer     *string                `json:"layer,omitempty" url:"layer,omitempty"`
+	UpdatedAt *time.Time             `json:"updatedAt,omitempty" url:"updatedAt,omitempty"`
+	Links     *Records               `json:"links,omitempty" url:"links,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (c *CellValueWithLinks) GetValid() *bool {
+	if c == nil {
+		return nil
+	}
+	return c.Valid
+}
+
+func (c *CellValueWithLinks) GetMessages() []*ValidationMessage {
+	if c == nil {
+		return nil
+	}
+	return c.Messages
+}
+
+func (c *CellValueWithLinks) GetMetadata() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.Metadata
+}
+
+func (c *CellValueWithLinks) GetValue() *CellValueUnion {
+	if c == nil {
+		return nil
+	}
+	return c.Value
+}
+
+func (c *CellValueWithLinks) GetLayer() *string {
+	if c == nil {
+		return nil
+	}
+	return c.Layer
+}
+
+func (c *CellValueWithLinks) GetUpdatedAt() *time.Time {
+	if c == nil {
+		return nil
+	}
+	return c.UpdatedAt
+}
+
+func (c *CellValueWithLinks) GetLinks() *Records {
+	if c == nil {
+		return nil
+	}
+	return c.Links
+}
+
+func (c *CellValueWithLinks) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CellValueWithLinks) UnmarshalJSON(data []byte) error {
+	type embed CellValueWithLinks
+	var unmarshaler = struct {
+		embed
+		UpdatedAt *internal.DateTime `json:"updatedAt,omitempty"`
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CellValueWithLinks(unmarshaler.embed)
+	c.UpdatedAt = unmarshaler.UpdatedAt.TimePtr()
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CellValueWithLinks) MarshalJSON() ([]byte, error) {
+	type embed CellValueWithLinks
+	var marshaler = struct {
+		embed
+		UpdatedAt *internal.DateTime `json:"updatedAt,omitempty"`
+	}{
+		embed:     embed(*c),
+		UpdatedAt: internal.NewOptionalDateTime(c.UpdatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (c *CellValueWithLinks) String() string {
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+type DiffData = map[string]*DiffValue
+
+type DiffRecord struct {
+	Id RecordId `json:"id" url:"id"`
+	// Deprecated, use `commitId` instead.
+	VersionId *VersionId `json:"versionId,omitempty" url:"versionId,omitempty"`
+	CommitId  *CommitId  `json:"commitId,omitempty" url:"commitId,omitempty"`
+	// Auto-generated value based on whether the record contains a field with an error message. Cannot be set via the API.
+	Valid *bool `json:"valid,omitempty" url:"valid,omitempty"`
+	// This record level `messages` property is deprecated and no longer stored or used. Use the `messages` property on the individual cell values instead. This property will be removed in a future release.
+	Messages []*ValidationMessage   `json:"messages,omitempty" url:"messages,omitempty"`
+	Metadata map[string]interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
+	Config   *RecordConfig          `json:"config,omitempty" url:"config,omitempty"`
+	Values   DiffData               `json:"values,omitempty" url:"values,omitempty"`
+	Resolves []*Resolve             `json:"resolves,omitempty" url:"resolves,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (d *DiffRecord) GetId() RecordId {
+	if d == nil {
+		return ""
+	}
+	return d.Id
+}
+
+func (d *DiffRecord) GetVersionId() *VersionId {
+	if d == nil {
+		return nil
+	}
+	return d.VersionId
+}
+
+func (d *DiffRecord) GetCommitId() *CommitId {
+	if d == nil {
+		return nil
+	}
+	return d.CommitId
+}
+
+func (d *DiffRecord) GetValid() *bool {
+	if d == nil {
+		return nil
+	}
+	return d.Valid
+}
+
+func (d *DiffRecord) GetMessages() []*ValidationMessage {
+	if d == nil {
+		return nil
+	}
+	return d.Messages
+}
+
+func (d *DiffRecord) GetMetadata() map[string]interface{} {
+	if d == nil {
+		return nil
+	}
+	return d.Metadata
+}
+
+func (d *DiffRecord) GetConfig() *RecordConfig {
+	if d == nil {
+		return nil
+	}
+	return d.Config
+}
+
+func (d *DiffRecord) GetValues() DiffData {
+	if d == nil {
+		return nil
+	}
+	return d.Values
+}
+
+func (d *DiffRecord) GetResolves() []*Resolve {
+	if d == nil {
+		return nil
+	}
+	return d.Resolves
+}
+
+func (d *DiffRecord) GetExtraProperties() map[string]interface{} {
+	return d.extraProperties
+}
+
+func (d *DiffRecord) UnmarshalJSON(data []byte) error {
+	type unmarshaler DiffRecord
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*d = DiffRecord(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *d)
+	if err != nil {
+		return err
+	}
+	d.extraProperties = extraProperties
+	d.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (d *DiffRecord) String() string {
+	if len(d.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(d.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(d); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", d)
+}
+
+// List of DiffRecord objects
+type DiffRecords = []*DiffRecord
+
+type DiffRecordsResponse struct {
+	Data DiffRecords `json:"data,omitempty" url:"data,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (d *DiffRecordsResponse) GetData() DiffRecords {
+	if d == nil {
+		return nil
+	}
+	return d.Data
+}
+
+func (d *DiffRecordsResponse) GetExtraProperties() map[string]interface{} {
+	return d.extraProperties
+}
+
+func (d *DiffRecordsResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler DiffRecordsResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*d = DiffRecordsResponse(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *d)
+	if err != nil {
+		return err
+	}
+	d.extraProperties = extraProperties
+	d.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (d *DiffRecordsResponse) String() string {
+	if len(d.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(d.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(d); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", d)
+}
+
+type DiffValue struct {
+	Valid    *bool                `json:"valid,omitempty" url:"valid,omitempty"`
+	Messages []*ValidationMessage `json:"messages,omitempty" url:"messages,omitempty"`
+	// Deprecated, use record level metadata instead.
+	Metadata      map[string]interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
+	Value         *CellValueUnion        `json:"value,omitempty" url:"value,omitempty"`
+	Layer         *string                `json:"layer,omitempty" url:"layer,omitempty"`
+	UpdatedAt     *time.Time             `json:"updatedAt,omitempty" url:"updatedAt,omitempty"`
+	SnapshotValue *CellValueUnion        `json:"snapshotValue,omitempty" url:"snapshotValue,omitempty"`
+	ClipValue     *CellValueUnion        `json:"clipValue,omitempty" url:"clipValue,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (d *DiffValue) GetValid() *bool {
+	if d == nil {
+		return nil
+	}
+	return d.Valid
+}
+
+func (d *DiffValue) GetMessages() []*ValidationMessage {
+	if d == nil {
+		return nil
+	}
+	return d.Messages
+}
+
+func (d *DiffValue) GetMetadata() map[string]interface{} {
+	if d == nil {
+		return nil
+	}
+	return d.Metadata
+}
+
+func (d *DiffValue) GetValue() *CellValueUnion {
+	if d == nil {
+		return nil
+	}
+	return d.Value
+}
+
+func (d *DiffValue) GetLayer() *string {
+	if d == nil {
+		return nil
+	}
+	return d.Layer
+}
+
+func (d *DiffValue) GetUpdatedAt() *time.Time {
+	if d == nil {
+		return nil
+	}
+	return d.UpdatedAt
+}
+
+func (d *DiffValue) GetSnapshotValue() *CellValueUnion {
+	if d == nil {
+		return nil
+	}
+	return d.SnapshotValue
+}
+
+func (d *DiffValue) GetClipValue() *CellValueUnion {
+	if d == nil {
+		return nil
+	}
+	return d.ClipValue
+}
+
+func (d *DiffValue) GetExtraProperties() map[string]interface{} {
+	return d.extraProperties
+}
+
+func (d *DiffValue) UnmarshalJSON(data []byte) error {
+	type embed DiffValue
+	var unmarshaler = struct {
+		embed
+		UpdatedAt *internal.DateTime `json:"updatedAt,omitempty"`
+	}{
+		embed: embed(*d),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*d = DiffValue(unmarshaler.embed)
+	d.UpdatedAt = unmarshaler.UpdatedAt.TimePtr()
+	extraProperties, err := internal.ExtractExtraProperties(data, *d)
+	if err != nil {
+		return err
+	}
+	d.extraProperties = extraProperties
+	d.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (d *DiffValue) MarshalJSON() ([]byte, error) {
+	type embed DiffValue
+	var marshaler = struct {
+		embed
+		UpdatedAt *internal.DateTime `json:"updatedAt,omitempty"`
+	}{
+		embed:     embed(*d),
+		UpdatedAt: internal.NewOptionalDateTime(d.UpdatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (d *DiffValue) String() string {
+	if len(d.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(d.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(d); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", d)
+}
+
+type FieldRecordCounts struct {
+	Total int `json:"total" url:"total"`
+	Valid int `json:"valid" url:"valid"`
+	Error int `json:"error" url:"error"`
+	Empty int `json:"empty" url:"empty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (f *FieldRecordCounts) GetTotal() int {
+	if f == nil {
+		return 0
+	}
+	return f.Total
+}
+
+func (f *FieldRecordCounts) GetValid() int {
+	if f == nil {
+		return 0
+	}
+	return f.Valid
+}
+
+func (f *FieldRecordCounts) GetError() int {
+	if f == nil {
+		return 0
+	}
+	return f.Error
+}
+
+func (f *FieldRecordCounts) GetEmpty() int {
+	if f == nil {
+		return 0
+	}
+	return f.Empty
+}
+
+func (f *FieldRecordCounts) GetExtraProperties() map[string]interface{} {
+	return f.extraProperties
+}
+
+func (f *FieldRecordCounts) UnmarshalJSON(data []byte) error {
+	type unmarshaler FieldRecordCounts
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*f = FieldRecordCounts(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *f)
+	if err != nil {
+		return err
+	}
+	f.extraProperties = extraProperties
+	f.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (f *FieldRecordCounts) String() string {
+	if len(f.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(f.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(f); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", f)
+}
+
 type GetRecordIndicesResponse = []*RecordIndices
 
 type GetRecordsResponse struct {
 	Data *GetRecordsResponseData `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (g *GetRecordsResponse) GetData() *GetRecordsResponseData {
+	if g == nil {
+		return nil
+	}
+	return g.Data
 }
 
 func (g *GetRecordsResponse) GetExtraProperties() map[string]interface{} {
@@ -103,24 +951,22 @@ func (g *GetRecordsResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*g = GetRecordsResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	extraProperties, err := internal.ExtractExtraProperties(data, *g)
 	if err != nil {
 		return err
 	}
 	g.extraProperties = extraProperties
-
-	g._rawJSON = json.RawMessage(data)
+	g.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (g *GetRecordsResponse) String() string {
-	if len(g._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+	if len(g.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(g.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(g); err == nil {
+	if value, err := internal.StringifyJSON(g); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", g)
@@ -136,7 +982,42 @@ type GetRecordsResponseData struct {
 	CommitId  *CommitId  `json:"commitId,omitempty" url:"commitId,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (g *GetRecordsResponseData) GetSuccess() bool {
+	if g == nil {
+		return false
+	}
+	return g.Success
+}
+
+func (g *GetRecordsResponseData) GetRecords() RecordsWithLinks {
+	if g == nil {
+		return nil
+	}
+	return g.Records
+}
+
+func (g *GetRecordsResponseData) GetCounts() *RecordCounts {
+	if g == nil {
+		return nil
+	}
+	return g.Counts
+}
+
+func (g *GetRecordsResponseData) GetVersionId() *VersionId {
+	if g == nil {
+		return nil
+	}
+	return g.VersionId
+}
+
+func (g *GetRecordsResponseData) GetCommitId() *CommitId {
+	if g == nil {
+		return nil
+	}
+	return g.CommitId
 }
 
 func (g *GetRecordsResponseData) GetExtraProperties() map[string]interface{} {
@@ -150,28 +1031,377 @@ func (g *GetRecordsResponseData) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*g = GetRecordsResponseData(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	extraProperties, err := internal.ExtractExtraProperties(data, *g)
 	if err != nil {
 		return err
 	}
 	g.extraProperties = extraProperties
-
-	g._rawJSON = json.RawMessage(data)
+	g.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (g *GetRecordsResponseData) String() string {
-	if len(g._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+	if len(g.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(g.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(g); err == nil {
+	if value, err := internal.StringifyJSON(g); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", g)
 }
+
+// A single row of data in a Sheet
+type Record struct {
+	Id RecordId `json:"id" url:"id"`
+	// Deprecated, use `commitId` instead.
+	VersionId *VersionId `json:"versionId,omitempty" url:"versionId,omitempty"`
+	CommitId  *CommitId  `json:"commitId,omitempty" url:"commitId,omitempty"`
+	// Auto-generated value based on whether the record contains a field with an error message. Cannot be set via the API.
+	Valid *bool `json:"valid,omitempty" url:"valid,omitempty"`
+	// This record level `messages` property is deprecated and no longer stored or used. Use the `messages` property on the individual cell values instead. This property will be removed in a future release.
+	Messages []*ValidationMessage   `json:"messages,omitempty" url:"messages,omitempty"`
+	Metadata map[string]interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
+	Config   *RecordConfig          `json:"config,omitempty" url:"config,omitempty"`
+	Values   RecordData             `json:"values,omitempty" url:"values,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (r *Record) GetId() RecordId {
+	if r == nil {
+		return ""
+	}
+	return r.Id
+}
+
+func (r *Record) GetVersionId() *VersionId {
+	if r == nil {
+		return nil
+	}
+	return r.VersionId
+}
+
+func (r *Record) GetCommitId() *CommitId {
+	if r == nil {
+		return nil
+	}
+	return r.CommitId
+}
+
+func (r *Record) GetValid() *bool {
+	if r == nil {
+		return nil
+	}
+	return r.Valid
+}
+
+func (r *Record) GetMessages() []*ValidationMessage {
+	if r == nil {
+		return nil
+	}
+	return r.Messages
+}
+
+func (r *Record) GetMetadata() map[string]interface{} {
+	if r == nil {
+		return nil
+	}
+	return r.Metadata
+}
+
+func (r *Record) GetConfig() *RecordConfig {
+	if r == nil {
+		return nil
+	}
+	return r.Config
+}
+
+func (r *Record) GetValues() RecordData {
+	if r == nil {
+		return nil
+	}
+	return r.Values
+}
+
+func (r *Record) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
+}
+
+func (r *Record) UnmarshalJSON(data []byte) error {
+	type unmarshaler Record
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*r = Record(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+	r.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (r *Record) String() string {
+	if len(r.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(r.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(r); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", r)
+}
+
+type RecordBase struct {
+	Id RecordId `json:"id" url:"id"`
+	// Deprecated, use `commitId` instead.
+	VersionId *VersionId `json:"versionId,omitempty" url:"versionId,omitempty"`
+	CommitId  *CommitId  `json:"commitId,omitempty" url:"commitId,omitempty"`
+	// Auto-generated value based on whether the record contains a field with an error message. Cannot be set via the API.
+	Valid *bool `json:"valid,omitempty" url:"valid,omitempty"`
+	// This record level `messages` property is deprecated and no longer stored or used. Use the `messages` property on the individual cell values instead. This property will be removed in a future release.
+	Messages []*ValidationMessage   `json:"messages,omitempty" url:"messages,omitempty"`
+	Metadata map[string]interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
+	Config   *RecordConfig          `json:"config,omitempty" url:"config,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (r *RecordBase) GetId() RecordId {
+	if r == nil {
+		return ""
+	}
+	return r.Id
+}
+
+func (r *RecordBase) GetVersionId() *VersionId {
+	if r == nil {
+		return nil
+	}
+	return r.VersionId
+}
+
+func (r *RecordBase) GetCommitId() *CommitId {
+	if r == nil {
+		return nil
+	}
+	return r.CommitId
+}
+
+func (r *RecordBase) GetValid() *bool {
+	if r == nil {
+		return nil
+	}
+	return r.Valid
+}
+
+func (r *RecordBase) GetMessages() []*ValidationMessage {
+	if r == nil {
+		return nil
+	}
+	return r.Messages
+}
+
+func (r *RecordBase) GetMetadata() map[string]interface{} {
+	if r == nil {
+		return nil
+	}
+	return r.Metadata
+}
+
+func (r *RecordBase) GetConfig() *RecordConfig {
+	if r == nil {
+		return nil
+	}
+	return r.Config
+}
+
+func (r *RecordBase) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
+}
+
+func (r *RecordBase) UnmarshalJSON(data []byte) error {
+	type unmarshaler RecordBase
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*r = RecordBase(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+	r.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (r *RecordBase) String() string {
+	if len(r.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(r.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(r); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", r)
+}
+
+// Configuration of a record or specific fields in the record
+type RecordConfig struct {
+	Readonly          *bool                  `json:"readonly,omitempty" url:"readonly,omitempty"`
+	Fields            map[string]*CellConfig `json:"fields,omitempty" url:"fields,omitempty"`
+	MarkedForDeletion *bool                  `json:"markedForDeletion,omitempty" url:"markedForDeletion,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (r *RecordConfig) GetReadonly() *bool {
+	if r == nil {
+		return nil
+	}
+	return r.Readonly
+}
+
+func (r *RecordConfig) GetFields() map[string]*CellConfig {
+	if r == nil {
+		return nil
+	}
+	return r.Fields
+}
+
+func (r *RecordConfig) GetMarkedForDeletion() *bool {
+	if r == nil {
+		return nil
+	}
+	return r.MarkedForDeletion
+}
+
+func (r *RecordConfig) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
+}
+
+func (r *RecordConfig) UnmarshalJSON(data []byte) error {
+	type unmarshaler RecordConfig
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*r = RecordConfig(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+	r.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (r *RecordConfig) String() string {
+	if len(r.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(r.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(r); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", r)
+}
+
+type RecordCounts struct {
+	Total         int            `json:"total" url:"total"`
+	Valid         int            `json:"valid" url:"valid"`
+	Error         int            `json:"error" url:"error"`
+	ErrorsByField map[string]int `json:"errorsByField,omitempty" url:"errorsByField,omitempty"`
+	// Counts for valid, error, and total records grouped by field key
+	ByField map[string]*FieldRecordCounts `json:"byField,omitempty" url:"byField,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (r *RecordCounts) GetTotal() int {
+	if r == nil {
+		return 0
+	}
+	return r.Total
+}
+
+func (r *RecordCounts) GetValid() int {
+	if r == nil {
+		return 0
+	}
+	return r.Valid
+}
+
+func (r *RecordCounts) GetError() int {
+	if r == nil {
+		return 0
+	}
+	return r.Error
+}
+
+func (r *RecordCounts) GetErrorsByField() map[string]int {
+	if r == nil {
+		return nil
+	}
+	return r.ErrorsByField
+}
+
+func (r *RecordCounts) GetByField() map[string]*FieldRecordCounts {
+	if r == nil {
+		return nil
+	}
+	return r.ByField
+}
+
+func (r *RecordCounts) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
+}
+
+func (r *RecordCounts) UnmarshalJSON(data []byte) error {
+	type unmarshaler RecordCounts
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*r = RecordCounts(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+	r.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (r *RecordCounts) String() string {
+	if len(r.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(r.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(r); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", r)
+}
+
+// A single row of data in a Sheet
+type RecordData = map[string]*CellValue
+
+// A single row of data in a Sheet, including links to related rows
+type RecordDataWithLinks = map[string]*CellValueWithLinks
 
 // A record index object
 type RecordIndices struct {
@@ -179,7 +1409,21 @@ type RecordIndices struct {
 	Index int    `json:"index" url:"index"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (r *RecordIndices) GetId() string {
+	if r == nil {
+		return ""
+	}
+	return r.Id
+}
+
+func (r *RecordIndices) GetIndex() int {
+	if r == nil {
+		return 0
+	}
+	return r.Index
 }
 
 func (r *RecordIndices) GetExtraProperties() map[string]interface{} {
@@ -193,25 +1437,380 @@ func (r *RecordIndices) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*r = RecordIndices(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	extraProperties, err := internal.ExtractExtraProperties(data, *r)
 	if err != nil {
 		return err
 	}
 	r.extraProperties = extraProperties
-
-	r._rawJSON = json.RawMessage(data)
+	r.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (r *RecordIndices) String() string {
-	if len(r._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(r._rawJSON); err == nil {
+	if len(r.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(r.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(r); err == nil {
+	if value, err := internal.StringifyJSON(r); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", r)
+}
+
+// A single row of data in a Sheet, including links to related rows
+type RecordWithLinks struct {
+	Id       RecordId               `json:"id" url:"id"`
+	Values   RecordDataWithLinks    `json:"values,omitempty" url:"values,omitempty"`
+	Valid    *bool                  `json:"valid,omitempty" url:"valid,omitempty"`
+	Messages []*ValidationMessage   `json:"messages,omitempty" url:"messages,omitempty"`
+	Metadata map[string]interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
+	Config   *RecordConfig          `json:"config,omitempty" url:"config,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (r *RecordWithLinks) GetId() RecordId {
+	if r == nil {
+		return ""
+	}
+	return r.Id
+}
+
+func (r *RecordWithLinks) GetValues() RecordDataWithLinks {
+	if r == nil {
+		return nil
+	}
+	return r.Values
+}
+
+func (r *RecordWithLinks) GetValid() *bool {
+	if r == nil {
+		return nil
+	}
+	return r.Valid
+}
+
+func (r *RecordWithLinks) GetMessages() []*ValidationMessage {
+	if r == nil {
+		return nil
+	}
+	return r.Messages
+}
+
+func (r *RecordWithLinks) GetMetadata() map[string]interface{} {
+	if r == nil {
+		return nil
+	}
+	return r.Metadata
+}
+
+func (r *RecordWithLinks) GetConfig() *RecordConfig {
+	if r == nil {
+		return nil
+	}
+	return r.Config
+}
+
+func (r *RecordWithLinks) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
+}
+
+func (r *RecordWithLinks) UnmarshalJSON(data []byte) error {
+	type unmarshaler RecordWithLinks
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*r = RecordWithLinks(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+	r.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (r *RecordWithLinks) String() string {
+	if len(r.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(r.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(r); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", r)
+}
+
+// List of Record objects
+type Records = []*Record
+
+type RecordsResponse struct {
+	Data *RecordsResponseData `json:"data,omitempty" url:"data,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (r *RecordsResponse) GetData() *RecordsResponseData {
+	if r == nil {
+		return nil
+	}
+	return r.Data
+}
+
+func (r *RecordsResponse) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
+}
+
+func (r *RecordsResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler RecordsResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*r = RecordsResponse(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+	r.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (r *RecordsResponse) String() string {
+	if len(r.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(r.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(r); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", r)
+}
+
+type RecordsResponseData struct {
+	Success bool              `json:"success" url:"success"`
+	Records *RecordsWithLinks `json:"records,omitempty" url:"records,omitempty"`
+	Counts  *RecordCounts     `json:"counts,omitempty" url:"counts,omitempty"`
+	// Deprecated, use `commitId` instead.
+	VersionId *VersionId `json:"versionId,omitempty" url:"versionId,omitempty"`
+	CommitId  *CommitId  `json:"commitId,omitempty" url:"commitId,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (r *RecordsResponseData) GetSuccess() bool {
+	if r == nil {
+		return false
+	}
+	return r.Success
+}
+
+func (r *RecordsResponseData) GetRecords() *RecordsWithLinks {
+	if r == nil {
+		return nil
+	}
+	return r.Records
+}
+
+func (r *RecordsResponseData) GetCounts() *RecordCounts {
+	if r == nil {
+		return nil
+	}
+	return r.Counts
+}
+
+func (r *RecordsResponseData) GetVersionId() *VersionId {
+	if r == nil {
+		return nil
+	}
+	return r.VersionId
+}
+
+func (r *RecordsResponseData) GetCommitId() *CommitId {
+	if r == nil {
+		return nil
+	}
+	return r.CommitId
+}
+
+func (r *RecordsResponseData) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
+}
+
+func (r *RecordsResponseData) UnmarshalJSON(data []byte) error {
+	type unmarshaler RecordsResponseData
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*r = RecordsResponseData(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+	r.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (r *RecordsResponseData) String() string {
+	if len(r.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(r.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(r); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", r)
+}
+
+// List of Record objects, including links to related rows
+type RecordsWithLinks = []*RecordWithLinks
+
+// Record data validation messages
+type ValidationMessage struct {
+	Field   *string           `json:"field,omitempty" url:"field,omitempty"`
+	Type    *ValidationType   `json:"type,omitempty" url:"type,omitempty"`
+	Source  *ValidationSource `json:"source,omitempty" url:"source,omitempty"`
+	Message *string           `json:"message,omitempty" url:"message,omitempty"`
+	// This JSONPath is based on the root of mapped cell object.
+	Path *JsonPathString `json:"path,omitempty" url:"path,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (v *ValidationMessage) GetField() *string {
+	if v == nil {
+		return nil
+	}
+	return v.Field
+}
+
+func (v *ValidationMessage) GetType() *ValidationType {
+	if v == nil {
+		return nil
+	}
+	return v.Type
+}
+
+func (v *ValidationMessage) GetSource() *ValidationSource {
+	if v == nil {
+		return nil
+	}
+	return v.Source
+}
+
+func (v *ValidationMessage) GetMessage() *string {
+	if v == nil {
+		return nil
+	}
+	return v.Message
+}
+
+func (v *ValidationMessage) GetPath() *JsonPathString {
+	if v == nil {
+		return nil
+	}
+	return v.Path
+}
+
+func (v *ValidationMessage) GetExtraProperties() map[string]interface{} {
+	return v.extraProperties
+}
+
+func (v *ValidationMessage) UnmarshalJSON(data []byte) error {
+	type unmarshaler ValidationMessage
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*v = ValidationMessage(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *v)
+	if err != nil {
+		return err
+	}
+	v.extraProperties = extraProperties
+	v.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (v *ValidationMessage) String() string {
+	if len(v.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(v.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(v); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", v)
+}
+
+type ValidationSource string
+
+const (
+	ValidationSourceRequiredConstraint ValidationSource = "required-constraint"
+	ValidationSourceUniqueConstraint   ValidationSource = "unique-constraint"
+	ValidationSourceCustomLogic        ValidationSource = "custom-logic"
+	ValidationSourceUnlinked           ValidationSource = "unlinked"
+	ValidationSourceInvalidOption      ValidationSource = "invalid-option"
+	ValidationSourceIsArtifact         ValidationSource = "is-artifact"
+)
+
+func NewValidationSourceFromString(s string) (ValidationSource, error) {
+	switch s {
+	case "required-constraint":
+		return ValidationSourceRequiredConstraint, nil
+	case "unique-constraint":
+		return ValidationSourceUniqueConstraint, nil
+	case "custom-logic":
+		return ValidationSourceCustomLogic, nil
+	case "unlinked":
+		return ValidationSourceUnlinked, nil
+	case "invalid-option":
+		return ValidationSourceInvalidOption, nil
+	case "is-artifact":
+		return ValidationSourceIsArtifact, nil
+	}
+	var t ValidationSource
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (v ValidationSource) Ptr() *ValidationSource {
+	return &v
+}
+
+type ValidationType string
+
+const (
+	ValidationTypeError ValidationType = "error"
+	ValidationTypeWarn  ValidationType = "warn"
+	ValidationTypeInfo  ValidationType = "info"
+)
+
+func NewValidationTypeFromString(s string) (ValidationType, error) {
+	switch s {
+	case "error":
+		return ValidationTypeError, nil
+	case "warn":
+		return ValidationTypeWarn, nil
+	case "info":
+		return ValidationTypeInfo, nil
+	}
+	var t ValidationType
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (v ValidationType) Ptr() *ValidationType {
+	return &v
 }

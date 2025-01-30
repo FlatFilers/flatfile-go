@@ -5,7 +5,7 @@ package api
 import (
 	json "encoding/json"
 	fmt "fmt"
-	core "github.com/FlatFilers/flatfile-go/core"
+	internal "github.com/FlatFilers/flatfile-go/internal"
 	time "time"
 )
 
@@ -32,7 +32,105 @@ type App struct {
 	ActivatedAt        *time.Time  `json:"activatedAt,omitempty" url:"activatedAt,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (a *App) GetId() AppId {
+	if a == nil {
+		return ""
+	}
+	return a.Id
+}
+
+func (a *App) GetName() string {
+	if a == nil {
+		return ""
+	}
+	return a.Name
+}
+
+func (a *App) GetNamespace() string {
+	if a == nil {
+		return ""
+	}
+	return a.Namespace
+}
+
+func (a *App) GetType() AppType {
+	if a == nil {
+		return ""
+	}
+	return a.Type
+}
+
+func (a *App) GetEntity() string {
+	if a == nil {
+		return ""
+	}
+	return a.Entity
+}
+
+func (a *App) GetEntityPlural() string {
+	if a == nil {
+		return ""
+	}
+	return a.EntityPlural
+}
+
+func (a *App) GetIcon() *string {
+	if a == nil {
+		return nil
+	}
+	return a.Icon
+}
+
+func (a *App) GetMetadata() interface{} {
+	if a == nil {
+		return nil
+	}
+	return a.Metadata
+}
+
+func (a *App) GetEnvironmentFilters() interface{} {
+	if a == nil {
+		return nil
+	}
+	return a.EnvironmentFilters
+}
+
+func (a *App) GetBlueprint() interface{} {
+	if a == nil {
+		return nil
+	}
+	return a.Blueprint
+}
+
+func (a *App) GetCreatedAt() time.Time {
+	if a == nil {
+		return time.Time{}
+	}
+	return a.CreatedAt
+}
+
+func (a *App) GetUpdatedAt() time.Time {
+	if a == nil {
+		return time.Time{}
+	}
+	return a.UpdatedAt
+}
+
+func (a *App) GetDeletedAt() *time.Time {
+	if a == nil {
+		return nil
+	}
+	return a.DeletedAt
+}
+
+func (a *App) GetActivatedAt() *time.Time {
+	if a == nil {
+		return nil
+	}
+	return a.ActivatedAt
 }
 
 func (a *App) GetExtraProperties() map[string]interface{} {
@@ -43,10 +141,10 @@ func (a *App) UnmarshalJSON(data []byte) error {
 	type embed App
 	var unmarshaler = struct {
 		embed
-		CreatedAt   *core.DateTime `json:"createdAt"`
-		UpdatedAt   *core.DateTime `json:"updatedAt"`
-		DeletedAt   *core.DateTime `json:"deletedAt,omitempty"`
-		ActivatedAt *core.DateTime `json:"activatedAt,omitempty"`
+		CreatedAt   *internal.DateTime `json:"createdAt"`
+		UpdatedAt   *internal.DateTime `json:"updatedAt"`
+		DeletedAt   *internal.DateTime `json:"deletedAt,omitempty"`
+		ActivatedAt *internal.DateTime `json:"activatedAt,omitempty"`
 	}{
 		embed: embed(*a),
 	}
@@ -58,14 +156,12 @@ func (a *App) UnmarshalJSON(data []byte) error {
 	a.UpdatedAt = unmarshaler.UpdatedAt.Time()
 	a.DeletedAt = unmarshaler.DeletedAt.TimePtr()
 	a.ActivatedAt = unmarshaler.ActivatedAt.TimePtr()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	extraProperties, err := internal.ExtractExtraProperties(data, *a)
 	if err != nil {
 		return err
 	}
 	a.extraProperties = extraProperties
-
-	a._rawJSON = json.RawMessage(data)
+	a.rawJSON = json.RawMessage(data)
 	return nil
 }
 
@@ -73,27 +169,27 @@ func (a *App) MarshalJSON() ([]byte, error) {
 	type embed App
 	var marshaler = struct {
 		embed
-		CreatedAt   *core.DateTime `json:"createdAt"`
-		UpdatedAt   *core.DateTime `json:"updatedAt"`
-		DeletedAt   *core.DateTime `json:"deletedAt,omitempty"`
-		ActivatedAt *core.DateTime `json:"activatedAt,omitempty"`
+		CreatedAt   *internal.DateTime `json:"createdAt"`
+		UpdatedAt   *internal.DateTime `json:"updatedAt"`
+		DeletedAt   *internal.DateTime `json:"deletedAt,omitempty"`
+		ActivatedAt *internal.DateTime `json:"activatedAt,omitempty"`
 	}{
 		embed:       embed(*a),
-		CreatedAt:   core.NewDateTime(a.CreatedAt),
-		UpdatedAt:   core.NewDateTime(a.UpdatedAt),
-		DeletedAt:   core.NewOptionalDateTime(a.DeletedAt),
-		ActivatedAt: core.NewOptionalDateTime(a.ActivatedAt),
+		CreatedAt:   internal.NewDateTime(a.CreatedAt),
+		UpdatedAt:   internal.NewDateTime(a.UpdatedAt),
+		DeletedAt:   internal.NewOptionalDateTime(a.DeletedAt),
+		ActivatedAt: internal.NewOptionalDateTime(a.ActivatedAt),
 	}
 	return json.Marshal(marshaler)
 }
 
 func (a *App) String() string {
-	if len(a._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+	if len(a.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(a.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(a); err == nil {
+	if value, err := internal.StringifyJSON(a); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", a)
@@ -112,7 +208,70 @@ type AppCreate struct {
 	Blueprint          interface{} `json:"blueprint,omitempty" url:"blueprint,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (a *AppCreate) GetName() string {
+	if a == nil {
+		return ""
+	}
+	return a.Name
+}
+
+func (a *AppCreate) GetNamespace() string {
+	if a == nil {
+		return ""
+	}
+	return a.Namespace
+}
+
+func (a *AppCreate) GetType() AppType {
+	if a == nil {
+		return ""
+	}
+	return a.Type
+}
+
+func (a *AppCreate) GetEntity() *string {
+	if a == nil {
+		return nil
+	}
+	return a.Entity
+}
+
+func (a *AppCreate) GetEntityPlural() *string {
+	if a == nil {
+		return nil
+	}
+	return a.EntityPlural
+}
+
+func (a *AppCreate) GetIcon() *string {
+	if a == nil {
+		return nil
+	}
+	return a.Icon
+}
+
+func (a *AppCreate) GetMetadata() interface{} {
+	if a == nil {
+		return nil
+	}
+	return a.Metadata
+}
+
+func (a *AppCreate) GetEnvironmentFilters() interface{} {
+	if a == nil {
+		return nil
+	}
+	return a.EnvironmentFilters
+}
+
+func (a *AppCreate) GetBlueprint() interface{} {
+	if a == nil {
+		return nil
+	}
+	return a.Blueprint
 }
 
 func (a *AppCreate) GetExtraProperties() map[string]interface{} {
@@ -126,24 +285,22 @@ func (a *AppCreate) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*a = AppCreate(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	extraProperties, err := internal.ExtractExtraProperties(data, *a)
 	if err != nil {
 		return err
 	}
 	a.extraProperties = extraProperties
-
-	a._rawJSON = json.RawMessage(data)
+	a.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (a *AppCreate) String() string {
-	if len(a._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+	if len(a.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(a.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(a); err == nil {
+	if value, err := internal.StringifyJSON(a); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", a)
@@ -162,7 +319,70 @@ type AppPatch struct {
 	ActivatedAt        *time.Time  `json:"activatedAt,omitempty" url:"activatedAt,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (a *AppPatch) GetName() *string {
+	if a == nil {
+		return nil
+	}
+	return a.Name
+}
+
+func (a *AppPatch) GetNamespace() *string {
+	if a == nil {
+		return nil
+	}
+	return a.Namespace
+}
+
+func (a *AppPatch) GetEntity() *string {
+	if a == nil {
+		return nil
+	}
+	return a.Entity
+}
+
+func (a *AppPatch) GetEntityPlural() *string {
+	if a == nil {
+		return nil
+	}
+	return a.EntityPlural
+}
+
+func (a *AppPatch) GetIcon() *string {
+	if a == nil {
+		return nil
+	}
+	return a.Icon
+}
+
+func (a *AppPatch) GetMetadata() interface{} {
+	if a == nil {
+		return nil
+	}
+	return a.Metadata
+}
+
+func (a *AppPatch) GetEnvironmentFilters() interface{} {
+	if a == nil {
+		return nil
+	}
+	return a.EnvironmentFilters
+}
+
+func (a *AppPatch) GetBlueprint() interface{} {
+	if a == nil {
+		return nil
+	}
+	return a.Blueprint
+}
+
+func (a *AppPatch) GetActivatedAt() *time.Time {
+	if a == nil {
+		return nil
+	}
+	return a.ActivatedAt
 }
 
 func (a *AppPatch) GetExtraProperties() map[string]interface{} {
@@ -173,7 +393,7 @@ func (a *AppPatch) UnmarshalJSON(data []byte) error {
 	type embed AppPatch
 	var unmarshaler = struct {
 		embed
-		ActivatedAt *core.DateTime `json:"activatedAt,omitempty"`
+		ActivatedAt *internal.DateTime `json:"activatedAt,omitempty"`
 	}{
 		embed: embed(*a),
 	}
@@ -182,14 +402,12 @@ func (a *AppPatch) UnmarshalJSON(data []byte) error {
 	}
 	*a = AppPatch(unmarshaler.embed)
 	a.ActivatedAt = unmarshaler.ActivatedAt.TimePtr()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	extraProperties, err := internal.ExtractExtraProperties(data, *a)
 	if err != nil {
 		return err
 	}
 	a.extraProperties = extraProperties
-
-	a._rawJSON = json.RawMessage(data)
+	a.rawJSON = json.RawMessage(data)
 	return nil
 }
 
@@ -197,21 +415,21 @@ func (a *AppPatch) MarshalJSON() ([]byte, error) {
 	type embed AppPatch
 	var marshaler = struct {
 		embed
-		ActivatedAt *core.DateTime `json:"activatedAt,omitempty"`
+		ActivatedAt *internal.DateTime `json:"activatedAt,omitempty"`
 	}{
 		embed:       embed(*a),
-		ActivatedAt: core.NewOptionalDateTime(a.ActivatedAt),
+		ActivatedAt: internal.NewOptionalDateTime(a.ActivatedAt),
 	}
 	return json.Marshal(marshaler)
 }
 
 func (a *AppPatch) String() string {
-	if len(a._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+	if len(a.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(a.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(a); err == nil {
+	if value, err := internal.StringifyJSON(a); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", a)
@@ -221,7 +439,14 @@ type AppResponse struct {
 	Data *App `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (a *AppResponse) GetData() *App {
+	if a == nil {
+		return nil
+	}
+	return a.Data
 }
 
 func (a *AppResponse) GetExtraProperties() map[string]interface{} {
@@ -235,24 +460,22 @@ func (a *AppResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*a = AppResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	extraProperties, err := internal.ExtractExtraProperties(data, *a)
 	if err != nil {
 		return err
 	}
 	a.extraProperties = extraProperties
-
-	a._rawJSON = json.RawMessage(data)
+	a.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (a *AppResponse) String() string {
-	if len(a._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+	if len(a.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(a.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(a); err == nil {
+	if value, err := internal.StringifyJSON(a); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", a)
@@ -293,7 +516,14 @@ type AppsResponse struct {
 	Data []*App `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (a *AppsResponse) GetData() []*App {
+	if a == nil {
+		return nil
+	}
+	return a.Data
 }
 
 func (a *AppsResponse) GetExtraProperties() map[string]interface{} {
@@ -307,24 +537,22 @@ func (a *AppsResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*a = AppsResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	extraProperties, err := internal.ExtractExtraProperties(data, *a)
 	if err != nil {
 		return err
 	}
 	a.extraProperties = extraProperties
-
-	a._rawJSON = json.RawMessage(data)
+	a.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (a *AppsResponse) String() string {
-	if len(a._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+	if len(a.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(a.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(a); err == nil {
+	if value, err := internal.StringifyJSON(a); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", a)
@@ -337,7 +565,35 @@ type ConstraintCreate struct {
 	Label       *string     `json:"label,omitempty" url:"label,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (c *ConstraintCreate) GetDescription() *string {
+	if c == nil {
+		return nil
+	}
+	return c.Description
+}
+
+func (c *ConstraintCreate) GetFunction() *string {
+	if c == nil {
+		return nil
+	}
+	return c.Function
+}
+
+func (c *ConstraintCreate) GetOptions() interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.Options
+}
+
+func (c *ConstraintCreate) GetLabel() *string {
+	if c == nil {
+		return nil
+	}
+	return c.Label
 }
 
 func (c *ConstraintCreate) GetExtraProperties() map[string]interface{} {
@@ -351,24 +607,22 @@ func (c *ConstraintCreate) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*c = ConstraintCreate(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
 	if err != nil {
 		return err
 	}
 	c.extraProperties = extraProperties
-
-	c._rawJSON = json.RawMessage(data)
+	c.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (c *ConstraintCreate) String() string {
-	if len(c._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(c); err == nil {
+	if value, err := internal.StringifyJSON(c); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", c)
@@ -386,7 +640,70 @@ type ConstraintResource struct {
 	UpdatedAt   time.Time    `json:"updatedAt" url:"updatedAt"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (c *ConstraintResource) GetId() ConstraintId {
+	if c == nil {
+		return ""
+	}
+	return c.Id
+}
+
+func (c *ConstraintResource) GetAppId() AppId {
+	if c == nil {
+		return ""
+	}
+	return c.AppId
+}
+
+func (c *ConstraintResource) GetValidator() string {
+	if c == nil {
+		return ""
+	}
+	return c.Validator
+}
+
+func (c *ConstraintResource) GetDescription() *string {
+	if c == nil {
+		return nil
+	}
+	return c.Description
+}
+
+func (c *ConstraintResource) GetFunction() *string {
+	if c == nil {
+		return nil
+	}
+	return c.Function
+}
+
+func (c *ConstraintResource) GetOptions() interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.Options
+}
+
+func (c *ConstraintResource) GetLabel() *string {
+	if c == nil {
+		return nil
+	}
+	return c.Label
+}
+
+func (c *ConstraintResource) GetCreatedAt() time.Time {
+	if c == nil {
+		return time.Time{}
+	}
+	return c.CreatedAt
+}
+
+func (c *ConstraintResource) GetUpdatedAt() time.Time {
+	if c == nil {
+		return time.Time{}
+	}
+	return c.UpdatedAt
 }
 
 func (c *ConstraintResource) GetExtraProperties() map[string]interface{} {
@@ -397,8 +714,8 @@ func (c *ConstraintResource) UnmarshalJSON(data []byte) error {
 	type embed ConstraintResource
 	var unmarshaler = struct {
 		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-		UpdatedAt *core.DateTime `json:"updatedAt"`
+		CreatedAt *internal.DateTime `json:"createdAt"`
+		UpdatedAt *internal.DateTime `json:"updatedAt"`
 	}{
 		embed: embed(*c),
 	}
@@ -408,14 +725,12 @@ func (c *ConstraintResource) UnmarshalJSON(data []byte) error {
 	*c = ConstraintResource(unmarshaler.embed)
 	c.CreatedAt = unmarshaler.CreatedAt.Time()
 	c.UpdatedAt = unmarshaler.UpdatedAt.Time()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
 	if err != nil {
 		return err
 	}
 	c.extraProperties = extraProperties
-
-	c._rawJSON = json.RawMessage(data)
+	c.rawJSON = json.RawMessage(data)
 	return nil
 }
 
@@ -423,23 +738,23 @@ func (c *ConstraintResource) MarshalJSON() ([]byte, error) {
 	type embed ConstraintResource
 	var marshaler = struct {
 		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-		UpdatedAt *core.DateTime `json:"updatedAt"`
+		CreatedAt *internal.DateTime `json:"createdAt"`
+		UpdatedAt *internal.DateTime `json:"updatedAt"`
 	}{
 		embed:     embed(*c),
-		CreatedAt: core.NewDateTime(c.CreatedAt),
-		UpdatedAt: core.NewDateTime(c.UpdatedAt),
+		CreatedAt: internal.NewDateTime(c.CreatedAt),
+		UpdatedAt: internal.NewDateTime(c.UpdatedAt),
 	}
 	return json.Marshal(marshaler)
 }
 
 func (c *ConstraintResource) String() string {
-	if len(c._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(c); err == nil {
+	if value, err := internal.StringifyJSON(c); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", c)
@@ -449,7 +764,14 @@ type ConstraintResponse struct {
 	Data *ConstraintResource `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (c *ConstraintResponse) GetData() *ConstraintResource {
+	if c == nil {
+		return nil
+	}
+	return c.Data
 }
 
 func (c *ConstraintResponse) GetExtraProperties() map[string]interface{} {
@@ -463,24 +785,22 @@ func (c *ConstraintResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*c = ConstraintResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
 	if err != nil {
 		return err
 	}
 	c.extraProperties = extraProperties
-
-	c._rawJSON = json.RawMessage(data)
+	c.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (c *ConstraintResponse) String() string {
-	if len(c._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(c); err == nil {
+	if value, err := internal.StringifyJSON(c); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", c)
@@ -493,7 +813,35 @@ type ConstraintUpdate struct {
 	Label       *string     `json:"label,omitempty" url:"label,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (c *ConstraintUpdate) GetDescription() *string {
+	if c == nil {
+		return nil
+	}
+	return c.Description
+}
+
+func (c *ConstraintUpdate) GetFunction() *string {
+	if c == nil {
+		return nil
+	}
+	return c.Function
+}
+
+func (c *ConstraintUpdate) GetOptions() interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.Options
+}
+
+func (c *ConstraintUpdate) GetLabel() *string {
+	if c == nil {
+		return nil
+	}
+	return c.Label
 }
 
 func (c *ConstraintUpdate) GetExtraProperties() map[string]interface{} {
@@ -507,24 +855,22 @@ func (c *ConstraintUpdate) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*c = ConstraintUpdate(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
 	if err != nil {
 		return err
 	}
 	c.extraProperties = extraProperties
-
-	c._rawJSON = json.RawMessage(data)
+	c.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (c *ConstraintUpdate) String() string {
-	if len(c._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(c); err == nil {
+	if value, err := internal.StringifyJSON(c); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", c)
@@ -544,7 +890,84 @@ type ConstraintVersionResource struct {
 	Prompt      *string      `json:"prompt,omitempty" url:"prompt,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (c *ConstraintVersionResource) GetId() ConstraintId {
+	if c == nil {
+		return ""
+	}
+	return c.Id
+}
+
+func (c *ConstraintVersionResource) GetAppId() AppId {
+	if c == nil {
+		return ""
+	}
+	return c.AppId
+}
+
+func (c *ConstraintVersionResource) GetValidator() string {
+	if c == nil {
+		return ""
+	}
+	return c.Validator
+}
+
+func (c *ConstraintVersionResource) GetDescription() *string {
+	if c == nil {
+		return nil
+	}
+	return c.Description
+}
+
+func (c *ConstraintVersionResource) GetFunction() *string {
+	if c == nil {
+		return nil
+	}
+	return c.Function
+}
+
+func (c *ConstraintVersionResource) GetOptions() interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.Options
+}
+
+func (c *ConstraintVersionResource) GetLabel() *string {
+	if c == nil {
+		return nil
+	}
+	return c.Label
+}
+
+func (c *ConstraintVersionResource) GetCreatedAt() time.Time {
+	if c == nil {
+		return time.Time{}
+	}
+	return c.CreatedAt
+}
+
+func (c *ConstraintVersionResource) GetUpdatedAt() time.Time {
+	if c == nil {
+		return time.Time{}
+	}
+	return c.UpdatedAt
+}
+
+func (c *ConstraintVersionResource) GetVersion() int {
+	if c == nil {
+		return 0
+	}
+	return c.Version
+}
+
+func (c *ConstraintVersionResource) GetPrompt() *string {
+	if c == nil {
+		return nil
+	}
+	return c.Prompt
 }
 
 func (c *ConstraintVersionResource) GetExtraProperties() map[string]interface{} {
@@ -555,8 +978,8 @@ func (c *ConstraintVersionResource) UnmarshalJSON(data []byte) error {
 	type embed ConstraintVersionResource
 	var unmarshaler = struct {
 		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-		UpdatedAt *core.DateTime `json:"updatedAt"`
+		CreatedAt *internal.DateTime `json:"createdAt"`
+		UpdatedAt *internal.DateTime `json:"updatedAt"`
 	}{
 		embed: embed(*c),
 	}
@@ -566,14 +989,12 @@ func (c *ConstraintVersionResource) UnmarshalJSON(data []byte) error {
 	*c = ConstraintVersionResource(unmarshaler.embed)
 	c.CreatedAt = unmarshaler.CreatedAt.Time()
 	c.UpdatedAt = unmarshaler.UpdatedAt.Time()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
 	if err != nil {
 		return err
 	}
 	c.extraProperties = extraProperties
-
-	c._rawJSON = json.RawMessage(data)
+	c.rawJSON = json.RawMessage(data)
 	return nil
 }
 
@@ -581,23 +1002,23 @@ func (c *ConstraintVersionResource) MarshalJSON() ([]byte, error) {
 	type embed ConstraintVersionResource
 	var marshaler = struct {
 		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-		UpdatedAt *core.DateTime `json:"updatedAt"`
+		CreatedAt *internal.DateTime `json:"createdAt"`
+		UpdatedAt *internal.DateTime `json:"updatedAt"`
 	}{
 		embed:     embed(*c),
-		CreatedAt: core.NewDateTime(c.CreatedAt),
-		UpdatedAt: core.NewDateTime(c.UpdatedAt),
+		CreatedAt: internal.NewDateTime(c.CreatedAt),
+		UpdatedAt: internal.NewDateTime(c.UpdatedAt),
 	}
 	return json.Marshal(marshaler)
 }
 
 func (c *ConstraintVersionResource) String() string {
-	if len(c._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(c); err == nil {
+	if value, err := internal.StringifyJSON(c); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", c)
@@ -607,7 +1028,14 @@ type ConstraintVersionResponse struct {
 	Data *ConstraintVersionResource `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (c *ConstraintVersionResponse) GetData() *ConstraintVersionResource {
+	if c == nil {
+		return nil
+	}
+	return c.Data
 }
 
 func (c *ConstraintVersionResponse) GetExtraProperties() map[string]interface{} {
@@ -621,24 +1049,22 @@ func (c *ConstraintVersionResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*c = ConstraintVersionResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
 	if err != nil {
 		return err
 	}
 	c.extraProperties = extraProperties
-
-	c._rawJSON = json.RawMessage(data)
+	c.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (c *ConstraintVersionResponse) String() string {
-	if len(c._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(c); err == nil {
+	if value, err := internal.StringifyJSON(c); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", c)
@@ -648,7 +1074,14 @@ type ConstraintVersionsResponse struct {
 	Data []*ConstraintVersionResource `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (c *ConstraintVersionsResponse) GetData() []*ConstraintVersionResource {
+	if c == nil {
+		return nil
+	}
+	return c.Data
 }
 
 func (c *ConstraintVersionsResponse) GetExtraProperties() map[string]interface{} {
@@ -662,24 +1095,22 @@ func (c *ConstraintVersionsResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*c = ConstraintVersionsResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
 	if err != nil {
 		return err
 	}
 	c.extraProperties = extraProperties
-
-	c._rawJSON = json.RawMessage(data)
+	c.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (c *ConstraintVersionsResponse) String() string {
-	if len(c._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(c); err == nil {
+	if value, err := internal.StringifyJSON(c); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", c)
@@ -689,7 +1120,14 @@ type ConstraintsResponse struct {
 	Data []*ConstraintResource `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (c *ConstraintsResponse) GetData() []*ConstraintResource {
+	if c == nil {
+		return nil
+	}
+	return c.Data
 }
 
 func (c *ConstraintsResponse) GetExtraProperties() map[string]interface{} {
@@ -703,24 +1141,22 @@ func (c *ConstraintsResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*c = ConstraintsResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
 	if err != nil {
 		return err
 	}
 	c.extraProperties = extraProperties
-
-	c._rawJSON = json.RawMessage(data)
+	c.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (c *ConstraintsResponse) String() string {
-	if len(c._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(c); err == nil {
+	if value, err := internal.StringifyJSON(c); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", c)
@@ -730,7 +1166,14 @@ type SuccessResponse struct {
 	Success bool `json:"success" url:"success"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (s *SuccessResponse) GetSuccess() bool {
+	if s == nil {
+		return false
+	}
+	return s.Success
 }
 
 func (s *SuccessResponse) GetExtraProperties() map[string]interface{} {
@@ -744,28 +1187,23 @@ func (s *SuccessResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*s = SuccessResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	extraProperties, err := internal.ExtractExtraProperties(data, *s)
 	if err != nil {
 		return err
 	}
 	s.extraProperties = extraProperties
-
-	s._rawJSON = json.RawMessage(data)
+	s.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (s *SuccessResponse) String() string {
-	if len(s._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+	if len(s.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(s.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(s); err == nil {
+	if value, err := internal.StringifyJSON(s); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", s)
 }
-
-// Constraint ID
-type ConstraintId = string

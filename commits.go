@@ -5,14 +5,135 @@ package api
 import (
 	json "encoding/json"
 	fmt "fmt"
-	core "github.com/FlatFilers/flatfile-go/core"
+	internal "github.com/FlatFilers/flatfile-go/internal"
+	time "time"
 )
+
+// A commit version
+type Commit struct {
+	Id      CommitId `json:"id" url:"id"`
+	SheetId SheetId  `json:"sheetId" url:"sheetId"`
+	// The actor (user or system) who created the commit
+	CreatedBy string `json:"createdBy" url:"createdBy"`
+	// The actor (user or system) who completed the commit
+	CompletedBy *string `json:"completedBy,omitempty" url:"completedBy,omitempty"`
+	// The time the commit was created
+	CreatedAt time.Time `json:"createdAt" url:"createdAt"`
+	// The time the commit was acknowledged
+	CompletedAt *time.Time `json:"completedAt,omitempty" url:"completedAt,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (c *Commit) GetId() CommitId {
+	if c == nil {
+		return ""
+	}
+	return c.Id
+}
+
+func (c *Commit) GetSheetId() SheetId {
+	if c == nil {
+		return ""
+	}
+	return c.SheetId
+}
+
+func (c *Commit) GetCreatedBy() string {
+	if c == nil {
+		return ""
+	}
+	return c.CreatedBy
+}
+
+func (c *Commit) GetCompletedBy() *string {
+	if c == nil {
+		return nil
+	}
+	return c.CompletedBy
+}
+
+func (c *Commit) GetCreatedAt() time.Time {
+	if c == nil {
+		return time.Time{}
+	}
+	return c.CreatedAt
+}
+
+func (c *Commit) GetCompletedAt() *time.Time {
+	if c == nil {
+		return nil
+	}
+	return c.CompletedAt
+}
+
+func (c *Commit) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *Commit) UnmarshalJSON(data []byte) error {
+	type embed Commit
+	var unmarshaler = struct {
+		embed
+		CreatedAt   *internal.DateTime `json:"createdAt"`
+		CompletedAt *internal.DateTime `json:"completedAt,omitempty"`
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = Commit(unmarshaler.embed)
+	c.CreatedAt = unmarshaler.CreatedAt.Time()
+	c.CompletedAt = unmarshaler.CompletedAt.TimePtr()
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *Commit) MarshalJSON() ([]byte, error) {
+	type embed Commit
+	var marshaler = struct {
+		embed
+		CreatedAt   *internal.DateTime `json:"createdAt"`
+		CompletedAt *internal.DateTime `json:"completedAt,omitempty"`
+	}{
+		embed:       embed(*c),
+		CreatedAt:   internal.NewDateTime(c.CreatedAt),
+		CompletedAt: internal.NewOptionalDateTime(c.CompletedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (c *Commit) String() string {
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
 
 type CommitResponse struct {
 	Data *Commit `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (c *CommitResponse) GetData() *Commit {
+	if c == nil {
+		return nil
+	}
+	return c.Data
 }
 
 func (c *CommitResponse) GetExtraProperties() map[string]interface{} {
@@ -26,25 +147,69 @@ func (c *CommitResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*c = CommitResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
 	if err != nil {
 		return err
 	}
 	c.extraProperties = extraProperties
-
-	c._rawJSON = json.RawMessage(data)
+	c.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (c *CommitResponse) String() string {
-	if len(c._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(c); err == nil {
+	if value, err := internal.StringifyJSON(c); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", c)
+}
+
+type ListCommitsResponse struct {
+	Data []*Commit `json:"data,omitempty" url:"data,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (l *ListCommitsResponse) GetData() []*Commit {
+	if l == nil {
+		return nil
+	}
+	return l.Data
+}
+
+func (l *ListCommitsResponse) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
+}
+
+func (l *ListCommitsResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler ListCommitsResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*l = ListCommitsResponse(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+	l.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (l *ListCommitsResponse) String() string {
+	if len(l.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(l.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(l); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", l)
 }

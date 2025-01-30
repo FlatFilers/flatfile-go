@@ -5,7 +5,7 @@ package api
 import (
 	json "encoding/json"
 	fmt "fmt"
-	core "github.com/FlatFilers/flatfile-go/core"
+	internal "github.com/FlatFilers/flatfile-go/internal"
 	time "time"
 )
 
@@ -35,6 +35,327 @@ type ListEventsRequest struct {
 	IncludeAcknowledged *bool `json:"-" url:"includeAcknowledged,omitempty"`
 }
 
+// Name of an action
+type ActionName = string
+
+type BaseEvent struct {
+	// The domain of the event
+	Domain Domain `json:"domain" url:"domain"`
+	// The context of the event
+	Context *Context `json:"context,omitempty" url:"context,omitempty"`
+	// The attributes of the event
+	Attributes *EventAttributes `json:"attributes,omitempty" url:"attributes,omitempty"`
+	// The callback url to acknowledge the event
+	CallbackUrl *string `json:"callbackUrl,omitempty" url:"callbackUrl,omitempty"`
+	// The url to retrieve the data associated with the event
+	DataUrl    *string  `json:"dataUrl,omitempty" url:"dataUrl,omitempty"`
+	Target     *string  `json:"target,omitempty" url:"target,omitempty"`
+	Origin     *Origin  `json:"origin,omitempty" url:"origin,omitempty"`
+	Namespaces []string `json:"namespaces,omitempty" url:"namespaces,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (b *BaseEvent) GetDomain() Domain {
+	if b == nil {
+		return ""
+	}
+	return b.Domain
+}
+
+func (b *BaseEvent) GetContext() *Context {
+	if b == nil {
+		return nil
+	}
+	return b.Context
+}
+
+func (b *BaseEvent) GetAttributes() *EventAttributes {
+	if b == nil {
+		return nil
+	}
+	return b.Attributes
+}
+
+func (b *BaseEvent) GetCallbackUrl() *string {
+	if b == nil {
+		return nil
+	}
+	return b.CallbackUrl
+}
+
+func (b *BaseEvent) GetDataUrl() *string {
+	if b == nil {
+		return nil
+	}
+	return b.DataUrl
+}
+
+func (b *BaseEvent) GetTarget() *string {
+	if b == nil {
+		return nil
+	}
+	return b.Target
+}
+
+func (b *BaseEvent) GetOrigin() *Origin {
+	if b == nil {
+		return nil
+	}
+	return b.Origin
+}
+
+func (b *BaseEvent) GetNamespaces() []string {
+	if b == nil {
+		return nil
+	}
+	return b.Namespaces
+}
+
+func (b *BaseEvent) GetExtraProperties() map[string]interface{} {
+	return b.extraProperties
+}
+
+func (b *BaseEvent) UnmarshalJSON(data []byte) error {
+	type unmarshaler BaseEvent
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*b = BaseEvent(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *b)
+	if err != nil {
+		return err
+	}
+	b.extraProperties = extraProperties
+	b.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (b *BaseEvent) String() string {
+	if len(b.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(b.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(b); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", b)
+}
+
+// The context of the event
+type Context struct {
+	// The namespaces of the event
+	Namespaces []string `json:"namespaces,omitempty" url:"namespaces,omitempty"`
+	// The slugs of related resources
+	Slugs         *EventContextSlugs `json:"slugs,omitempty" url:"slugs,omitempty"`
+	ActionName    *ActionName        `json:"actionName,omitempty" url:"actionName,omitempty"`
+	AccountId     AccountId          `json:"accountId" url:"accountId"`
+	EnvironmentId EnvironmentId      `json:"environmentId" url:"environmentId"`
+	SpaceId       *SpaceId           `json:"spaceId,omitempty" url:"spaceId,omitempty"`
+	WorkbookId    *WorkbookId        `json:"workbookId,omitempty" url:"workbookId,omitempty"`
+	SheetId       *SheetId           `json:"sheetId,omitempty" url:"sheetId,omitempty"`
+	SheetSlug     *SheetSlug         `json:"sheetSlug,omitempty" url:"sheetSlug,omitempty"`
+	SnapshotId    *SnapshotId        `json:"snapshotId,omitempty" url:"snapshotId,omitempty"`
+	// Deprecated, use `commitId` instead.
+	VersionId        *VersionId  `json:"versionId,omitempty" url:"versionId,omitempty"`
+	CommitId         *CommitId   `json:"commitId,omitempty" url:"commitId,omitempty"`
+	JobId            *JobId      `json:"jobId,omitempty" url:"jobId,omitempty"`
+	ProgramId        *ProgramId  `json:"programId,omitempty" url:"programId,omitempty"`
+	FileId           *FileId     `json:"fileId,omitempty" url:"fileId,omitempty"`
+	DocumentId       *DocumentId `json:"documentId,omitempty" url:"documentId,omitempty"`
+	PrecedingEventId *EventId    `json:"precedingEventId,omitempty" url:"precedingEventId,omitempty"`
+	// Can be a UserId, GuestId, or AgentId
+	ActorId    *string     `json:"actorId,omitempty" url:"actorId,omitempty"`
+	AppId      *AppId      `json:"appId,omitempty" url:"appId,omitempty"`
+	ActionId   *ActionId   `json:"actionId,omitempty" url:"actionId,omitempty"`
+	DataClipId *DataClipId `json:"dataClipId,omitempty" url:"dataClipId,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (c *Context) GetNamespaces() []string {
+	if c == nil {
+		return nil
+	}
+	return c.Namespaces
+}
+
+func (c *Context) GetSlugs() *EventContextSlugs {
+	if c == nil {
+		return nil
+	}
+	return c.Slugs
+}
+
+func (c *Context) GetActionName() *ActionName {
+	if c == nil {
+		return nil
+	}
+	return c.ActionName
+}
+
+func (c *Context) GetAccountId() AccountId {
+	if c == nil {
+		return ""
+	}
+	return c.AccountId
+}
+
+func (c *Context) GetEnvironmentId() EnvironmentId {
+	if c == nil {
+		return ""
+	}
+	return c.EnvironmentId
+}
+
+func (c *Context) GetSpaceId() *SpaceId {
+	if c == nil {
+		return nil
+	}
+	return c.SpaceId
+}
+
+func (c *Context) GetWorkbookId() *WorkbookId {
+	if c == nil {
+		return nil
+	}
+	return c.WorkbookId
+}
+
+func (c *Context) GetSheetId() *SheetId {
+	if c == nil {
+		return nil
+	}
+	return c.SheetId
+}
+
+func (c *Context) GetSheetSlug() *SheetSlug {
+	if c == nil {
+		return nil
+	}
+	return c.SheetSlug
+}
+
+func (c *Context) GetSnapshotId() *SnapshotId {
+	if c == nil {
+		return nil
+	}
+	return c.SnapshotId
+}
+
+func (c *Context) GetVersionId() *VersionId {
+	if c == nil {
+		return nil
+	}
+	return c.VersionId
+}
+
+func (c *Context) GetCommitId() *CommitId {
+	if c == nil {
+		return nil
+	}
+	return c.CommitId
+}
+
+func (c *Context) GetJobId() *JobId {
+	if c == nil {
+		return nil
+	}
+	return c.JobId
+}
+
+func (c *Context) GetProgramId() *ProgramId {
+	if c == nil {
+		return nil
+	}
+	return c.ProgramId
+}
+
+func (c *Context) GetFileId() *FileId {
+	if c == nil {
+		return nil
+	}
+	return c.FileId
+}
+
+func (c *Context) GetDocumentId() *DocumentId {
+	if c == nil {
+		return nil
+	}
+	return c.DocumentId
+}
+
+func (c *Context) GetPrecedingEventId() *EventId {
+	if c == nil {
+		return nil
+	}
+	return c.PrecedingEventId
+}
+
+func (c *Context) GetActorId() *string {
+	if c == nil {
+		return nil
+	}
+	return c.ActorId
+}
+
+func (c *Context) GetAppId() *AppId {
+	if c == nil {
+		return nil
+	}
+	return c.AppId
+}
+
+func (c *Context) GetActionId() *ActionId {
+	if c == nil {
+		return nil
+	}
+	return c.ActionId
+}
+
+func (c *Context) GetDataClipId() *DataClipId {
+	if c == nil {
+		return nil
+	}
+	return c.DataClipId
+}
+
+func (c *Context) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *Context) UnmarshalJSON(data []byte) error {
+	type unmarshaler Context
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = Context(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *Context) String() string {
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
 // Properties used to create a new event
 type CreateEventConfig struct {
 	// The domain of the event
@@ -56,7 +377,84 @@ type CreateEventConfig struct {
 	DeletedAt *time.Time `json:"deletedAt,omitempty" url:"deletedAt,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (c *CreateEventConfig) GetDomain() Domain {
+	if c == nil {
+		return ""
+	}
+	return c.Domain
+}
+
+func (c *CreateEventConfig) GetContext() *Context {
+	if c == nil {
+		return nil
+	}
+	return c.Context
+}
+
+func (c *CreateEventConfig) GetAttributes() *EventAttributes {
+	if c == nil {
+		return nil
+	}
+	return c.Attributes
+}
+
+func (c *CreateEventConfig) GetCallbackUrl() *string {
+	if c == nil {
+		return nil
+	}
+	return c.CallbackUrl
+}
+
+func (c *CreateEventConfig) GetDataUrl() *string {
+	if c == nil {
+		return nil
+	}
+	return c.DataUrl
+}
+
+func (c *CreateEventConfig) GetTarget() *string {
+	if c == nil {
+		return nil
+	}
+	return c.Target
+}
+
+func (c *CreateEventConfig) GetOrigin() *Origin {
+	if c == nil {
+		return nil
+	}
+	return c.Origin
+}
+
+func (c *CreateEventConfig) GetNamespaces() []string {
+	if c == nil {
+		return nil
+	}
+	return c.Namespaces
+}
+
+func (c *CreateEventConfig) GetTopic() EventTopic {
+	if c == nil {
+		return ""
+	}
+	return c.Topic
+}
+
+func (c *CreateEventConfig) GetPayload() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.Payload
+}
+
+func (c *CreateEventConfig) GetDeletedAt() *time.Time {
+	if c == nil {
+		return nil
+	}
+	return c.DeletedAt
 }
 
 func (c *CreateEventConfig) GetExtraProperties() map[string]interface{} {
@@ -67,7 +465,7 @@ func (c *CreateEventConfig) UnmarshalJSON(data []byte) error {
 	type embed CreateEventConfig
 	var unmarshaler = struct {
 		embed
-		DeletedAt *core.DateTime `json:"deletedAt,omitempty"`
+		DeletedAt *internal.DateTime `json:"deletedAt,omitempty"`
 	}{
 		embed: embed(*c),
 	}
@@ -76,14 +474,12 @@ func (c *CreateEventConfig) UnmarshalJSON(data []byte) error {
 	}
 	*c = CreateEventConfig(unmarshaler.embed)
 	c.DeletedAt = unmarshaler.DeletedAt.TimePtr()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
 	if err != nil {
 		return err
 	}
 	c.extraProperties = extraProperties
-
-	c._rawJSON = json.RawMessage(data)
+	c.rawJSON = json.RawMessage(data)
 	return nil
 }
 
@@ -91,22 +487,2461 @@ func (c *CreateEventConfig) MarshalJSON() ([]byte, error) {
 	type embed CreateEventConfig
 	var marshaler = struct {
 		embed
-		DeletedAt *core.DateTime `json:"deletedAt,omitempty"`
+		DeletedAt *internal.DateTime `json:"deletedAt,omitempty"`
 	}{
 		embed:     embed(*c),
-		DeletedAt: core.NewOptionalDateTime(c.DeletedAt),
+		DeletedAt: internal.NewOptionalDateTime(c.DeletedAt),
 	}
 	return json.Marshal(marshaler)
 }
 
 func (c *CreateEventConfig) String() string {
-	if len(c._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(c); err == nil {
+	if value, err := internal.StringifyJSON(c); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", c)
 }
+
+// The domain of the event
+type Domain string
+
+const (
+	DomainFile        Domain = "file"
+	DomainSpace       Domain = "space"
+	DomainWorkbook    Domain = "workbook"
+	DomainJob         Domain = "job"
+	DomainDocument    Domain = "document"
+	DomainSheet       Domain = "sheet"
+	DomainProgram     Domain = "program"
+	DomainSecret      Domain = "secret"
+	DomainCron        Domain = "cron"
+	DomainEnvironment Domain = "environment"
+	DomainDataClip    Domain = "data-clip"
+)
+
+func NewDomainFromString(s string) (Domain, error) {
+	switch s {
+	case "file":
+		return DomainFile, nil
+	case "space":
+		return DomainSpace, nil
+	case "workbook":
+		return DomainWorkbook, nil
+	case "job":
+		return DomainJob, nil
+	case "document":
+		return DomainDocument, nil
+	case "sheet":
+		return DomainSheet, nil
+	case "program":
+		return DomainProgram, nil
+	case "secret":
+		return DomainSecret, nil
+	case "cron":
+		return DomainCron, nil
+	case "environment":
+		return DomainEnvironment, nil
+	case "data-clip":
+		return DomainDataClip, nil
+	}
+	var t Domain
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (d Domain) Ptr() *Domain {
+	return &d
+}
+
+// An event that tracks an activity within an environment
+type Event struct {
+	Topic                        string
+	AgentCreated                 *GenericEvent
+	AgentUpdated                 *GenericEvent
+	AgentDeleted                 *GenericEvent
+	SpaceCreated                 *GenericEvent
+	SpaceUpdated                 *GenericEvent
+	SpaceDeleted                 *GenericEvent
+	SpaceArchived                *GenericEvent
+	SpaceExpired                 *GenericEvent
+	SpaceGuestAdded              *GenericEvent
+	SpaceGuestRemoved            *GenericEvent
+	DocumentCreated              *GenericEvent
+	DocumentUpdated              *GenericEvent
+	DocumentDeleted              *GenericEvent
+	WorkbookCreated              *GenericEvent
+	WorkbookUpdated              *GenericEvent
+	WorkbookDeleted              *GenericEvent
+	WorkbookExpired              *GenericEvent
+	SheetCreated                 *GenericEvent
+	SheetUpdated                 *GenericEvent
+	SheetDeleted                 *GenericEvent
+	SheetCountsUpdated           *GenericEvent
+	SnapshotCreated              *GenericEvent
+	RecordsCreated               *GenericEvent
+	RecordsUpdated               *GenericEvent
+	RecordsDeleted               *GenericEvent
+	FileCreated                  *GenericEvent
+	FileUpdated                  *GenericEvent
+	FileDeleted                  *GenericEvent
+	FileExpired                  *GenericEvent
+	JobCreated                   *GenericEvent
+	JobUpdated                   *GenericEvent
+	JobDeleted                   *GenericEvent
+	JobFailed                    *GenericEvent
+	JobCompleted                 *GenericEvent
+	JobReady                     *GenericEvent
+	JobScheduled                 *GenericEvent
+	JobOutcomeAcknowledged       *GenericEvent
+	JobPartsCompleted            *GenericEvent
+	ProgramCreated               *GenericEvent
+	ProgramUpdated               *GenericEvent
+	CommitCreated                *GenericEvent
+	CommitUpdated                *GenericEvent
+	CommitCompleted              *GenericEvent
+	SecretCreated                *GenericEvent
+	SecretUpdated                *GenericEvent
+	SecretDeleted                *GenericEvent
+	LayerCreated                 *GenericEvent
+	EnvironmentCreated           *GenericEvent
+	EnvironmentUpdated           *GenericEvent
+	EnvironmentDeleted           *GenericEvent
+	ActionCreated                *GenericEvent
+	ActionUpdated                *GenericEvent
+	ActionDeleted                *GenericEvent
+	DataClipCreated              *GenericEvent
+	DataClipUpdated              *GenericEvent
+	DataClipDeleted              *GenericEvent
+	DataClipCollaboratorUpdated  *GenericEvent
+	DataClipResolutionsCreated   *GenericEvent
+	DataClipResolutionsUpdated   *GenericEvent
+	DataClipResolutionsRefreshed *GenericEvent
+}
+
+func NewEventFromAgentCreated(value *GenericEvent) *Event {
+	return &Event{Topic: "agent:created", AgentCreated: value}
+}
+
+func NewEventFromAgentUpdated(value *GenericEvent) *Event {
+	return &Event{Topic: "agent:updated", AgentUpdated: value}
+}
+
+func NewEventFromAgentDeleted(value *GenericEvent) *Event {
+	return &Event{Topic: "agent:deleted", AgentDeleted: value}
+}
+
+func NewEventFromSpaceCreated(value *GenericEvent) *Event {
+	return &Event{Topic: "space:created", SpaceCreated: value}
+}
+
+func NewEventFromSpaceUpdated(value *GenericEvent) *Event {
+	return &Event{Topic: "space:updated", SpaceUpdated: value}
+}
+
+func NewEventFromSpaceDeleted(value *GenericEvent) *Event {
+	return &Event{Topic: "space:deleted", SpaceDeleted: value}
+}
+
+func NewEventFromSpaceArchived(value *GenericEvent) *Event {
+	return &Event{Topic: "space:archived", SpaceArchived: value}
+}
+
+func NewEventFromSpaceExpired(value *GenericEvent) *Event {
+	return &Event{Topic: "space:expired", SpaceExpired: value}
+}
+
+func NewEventFromSpaceGuestAdded(value *GenericEvent) *Event {
+	return &Event{Topic: "space:guestAdded", SpaceGuestAdded: value}
+}
+
+func NewEventFromSpaceGuestRemoved(value *GenericEvent) *Event {
+	return &Event{Topic: "space:guestRemoved", SpaceGuestRemoved: value}
+}
+
+func NewEventFromDocumentCreated(value *GenericEvent) *Event {
+	return &Event{Topic: "document:created", DocumentCreated: value}
+}
+
+func NewEventFromDocumentUpdated(value *GenericEvent) *Event {
+	return &Event{Topic: "document:updated", DocumentUpdated: value}
+}
+
+func NewEventFromDocumentDeleted(value *GenericEvent) *Event {
+	return &Event{Topic: "document:deleted", DocumentDeleted: value}
+}
+
+func NewEventFromWorkbookCreated(value *GenericEvent) *Event {
+	return &Event{Topic: "workbook:created", WorkbookCreated: value}
+}
+
+func NewEventFromWorkbookUpdated(value *GenericEvent) *Event {
+	return &Event{Topic: "workbook:updated", WorkbookUpdated: value}
+}
+
+func NewEventFromWorkbookDeleted(value *GenericEvent) *Event {
+	return &Event{Topic: "workbook:deleted", WorkbookDeleted: value}
+}
+
+func NewEventFromWorkbookExpired(value *GenericEvent) *Event {
+	return &Event{Topic: "workbook:expired", WorkbookExpired: value}
+}
+
+func NewEventFromSheetCreated(value *GenericEvent) *Event {
+	return &Event{Topic: "sheet:created", SheetCreated: value}
+}
+
+func NewEventFromSheetUpdated(value *GenericEvent) *Event {
+	return &Event{Topic: "sheet:updated", SheetUpdated: value}
+}
+
+func NewEventFromSheetDeleted(value *GenericEvent) *Event {
+	return &Event{Topic: "sheet:deleted", SheetDeleted: value}
+}
+
+func NewEventFromSheetCountsUpdated(value *GenericEvent) *Event {
+	return &Event{Topic: "sheet:counts-updated", SheetCountsUpdated: value}
+}
+
+func NewEventFromSnapshotCreated(value *GenericEvent) *Event {
+	return &Event{Topic: "snapshot:created", SnapshotCreated: value}
+}
+
+func NewEventFromRecordsCreated(value *GenericEvent) *Event {
+	return &Event{Topic: "records:created", RecordsCreated: value}
+}
+
+func NewEventFromRecordsUpdated(value *GenericEvent) *Event {
+	return &Event{Topic: "records:updated", RecordsUpdated: value}
+}
+
+func NewEventFromRecordsDeleted(value *GenericEvent) *Event {
+	return &Event{Topic: "records:deleted", RecordsDeleted: value}
+}
+
+func NewEventFromFileCreated(value *GenericEvent) *Event {
+	return &Event{Topic: "file:created", FileCreated: value}
+}
+
+func NewEventFromFileUpdated(value *GenericEvent) *Event {
+	return &Event{Topic: "file:updated", FileUpdated: value}
+}
+
+func NewEventFromFileDeleted(value *GenericEvent) *Event {
+	return &Event{Topic: "file:deleted", FileDeleted: value}
+}
+
+func NewEventFromFileExpired(value *GenericEvent) *Event {
+	return &Event{Topic: "file:expired", FileExpired: value}
+}
+
+func NewEventFromJobCreated(value *GenericEvent) *Event {
+	return &Event{Topic: "job:created", JobCreated: value}
+}
+
+func NewEventFromJobUpdated(value *GenericEvent) *Event {
+	return &Event{Topic: "job:updated", JobUpdated: value}
+}
+
+func NewEventFromJobDeleted(value *GenericEvent) *Event {
+	return &Event{Topic: "job:deleted", JobDeleted: value}
+}
+
+func NewEventFromJobFailed(value *GenericEvent) *Event {
+	return &Event{Topic: "job:failed", JobFailed: value}
+}
+
+func NewEventFromJobCompleted(value *GenericEvent) *Event {
+	return &Event{Topic: "job:completed", JobCompleted: value}
+}
+
+func NewEventFromJobReady(value *GenericEvent) *Event {
+	return &Event{Topic: "job:ready", JobReady: value}
+}
+
+func NewEventFromJobScheduled(value *GenericEvent) *Event {
+	return &Event{Topic: "job:scheduled", JobScheduled: value}
+}
+
+func NewEventFromJobOutcomeAcknowledged(value *GenericEvent) *Event {
+	return &Event{Topic: "job:outcome-acknowledged", JobOutcomeAcknowledged: value}
+}
+
+func NewEventFromJobPartsCompleted(value *GenericEvent) *Event {
+	return &Event{Topic: "job:parts-completed", JobPartsCompleted: value}
+}
+
+func NewEventFromProgramCreated(value *GenericEvent) *Event {
+	return &Event{Topic: "program:created", ProgramCreated: value}
+}
+
+func NewEventFromProgramUpdated(value *GenericEvent) *Event {
+	return &Event{Topic: "program:updated", ProgramUpdated: value}
+}
+
+func NewEventFromCommitCreated(value *GenericEvent) *Event {
+	return &Event{Topic: "commit:created", CommitCreated: value}
+}
+
+func NewEventFromCommitUpdated(value *GenericEvent) *Event {
+	return &Event{Topic: "commit:updated", CommitUpdated: value}
+}
+
+func NewEventFromCommitCompleted(value *GenericEvent) *Event {
+	return &Event{Topic: "commit:completed", CommitCompleted: value}
+}
+
+func NewEventFromSecretCreated(value *GenericEvent) *Event {
+	return &Event{Topic: "secret:created", SecretCreated: value}
+}
+
+func NewEventFromSecretUpdated(value *GenericEvent) *Event {
+	return &Event{Topic: "secret:updated", SecretUpdated: value}
+}
+
+func NewEventFromSecretDeleted(value *GenericEvent) *Event {
+	return &Event{Topic: "secret:deleted", SecretDeleted: value}
+}
+
+func NewEventFromLayerCreated(value *GenericEvent) *Event {
+	return &Event{Topic: "layer:created", LayerCreated: value}
+}
+
+func NewEventFromEnvironmentCreated(value *GenericEvent) *Event {
+	return &Event{Topic: "environment:created", EnvironmentCreated: value}
+}
+
+func NewEventFromEnvironmentUpdated(value *GenericEvent) *Event {
+	return &Event{Topic: "environment:updated", EnvironmentUpdated: value}
+}
+
+func NewEventFromEnvironmentDeleted(value *GenericEvent) *Event {
+	return &Event{Topic: "environment:deleted", EnvironmentDeleted: value}
+}
+
+func NewEventFromActionCreated(value *GenericEvent) *Event {
+	return &Event{Topic: "action:created", ActionCreated: value}
+}
+
+func NewEventFromActionUpdated(value *GenericEvent) *Event {
+	return &Event{Topic: "action:updated", ActionUpdated: value}
+}
+
+func NewEventFromActionDeleted(value *GenericEvent) *Event {
+	return &Event{Topic: "action:deleted", ActionDeleted: value}
+}
+
+func NewEventFromDataClipCreated(value *GenericEvent) *Event {
+	return &Event{Topic: "data-clip:created", DataClipCreated: value}
+}
+
+func NewEventFromDataClipUpdated(value *GenericEvent) *Event {
+	return &Event{Topic: "data-clip:updated", DataClipUpdated: value}
+}
+
+func NewEventFromDataClipDeleted(value *GenericEvent) *Event {
+	return &Event{Topic: "data-clip:deleted", DataClipDeleted: value}
+}
+
+func NewEventFromDataClipCollaboratorUpdated(value *GenericEvent) *Event {
+	return &Event{Topic: "data-clip:collaborator-updated", DataClipCollaboratorUpdated: value}
+}
+
+func NewEventFromDataClipResolutionsCreated(value *GenericEvent) *Event {
+	return &Event{Topic: "data-clip:resolutions-created", DataClipResolutionsCreated: value}
+}
+
+func NewEventFromDataClipResolutionsUpdated(value *GenericEvent) *Event {
+	return &Event{Topic: "data-clip:resolutions-updated", DataClipResolutionsUpdated: value}
+}
+
+func NewEventFromDataClipResolutionsRefreshed(value *GenericEvent) *Event {
+	return &Event{Topic: "data-clip:resolutions-refreshed", DataClipResolutionsRefreshed: value}
+}
+
+func (e *Event) GetTopic() string {
+	if e == nil {
+		return ""
+	}
+	return e.Topic
+}
+
+func (e *Event) GetAgentCreated() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.AgentCreated
+}
+
+func (e *Event) GetAgentUpdated() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.AgentUpdated
+}
+
+func (e *Event) GetAgentDeleted() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.AgentDeleted
+}
+
+func (e *Event) GetSpaceCreated() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.SpaceCreated
+}
+
+func (e *Event) GetSpaceUpdated() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.SpaceUpdated
+}
+
+func (e *Event) GetSpaceDeleted() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.SpaceDeleted
+}
+
+func (e *Event) GetSpaceArchived() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.SpaceArchived
+}
+
+func (e *Event) GetSpaceExpired() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.SpaceExpired
+}
+
+func (e *Event) GetSpaceGuestAdded() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.SpaceGuestAdded
+}
+
+func (e *Event) GetSpaceGuestRemoved() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.SpaceGuestRemoved
+}
+
+func (e *Event) GetDocumentCreated() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.DocumentCreated
+}
+
+func (e *Event) GetDocumentUpdated() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.DocumentUpdated
+}
+
+func (e *Event) GetDocumentDeleted() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.DocumentDeleted
+}
+
+func (e *Event) GetWorkbookCreated() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.WorkbookCreated
+}
+
+func (e *Event) GetWorkbookUpdated() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.WorkbookUpdated
+}
+
+func (e *Event) GetWorkbookDeleted() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.WorkbookDeleted
+}
+
+func (e *Event) GetWorkbookExpired() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.WorkbookExpired
+}
+
+func (e *Event) GetSheetCreated() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.SheetCreated
+}
+
+func (e *Event) GetSheetUpdated() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.SheetUpdated
+}
+
+func (e *Event) GetSheetDeleted() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.SheetDeleted
+}
+
+func (e *Event) GetSheetCountsUpdated() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.SheetCountsUpdated
+}
+
+func (e *Event) GetSnapshotCreated() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.SnapshotCreated
+}
+
+func (e *Event) GetRecordsCreated() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.RecordsCreated
+}
+
+func (e *Event) GetRecordsUpdated() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.RecordsUpdated
+}
+
+func (e *Event) GetRecordsDeleted() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.RecordsDeleted
+}
+
+func (e *Event) GetFileCreated() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.FileCreated
+}
+
+func (e *Event) GetFileUpdated() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.FileUpdated
+}
+
+func (e *Event) GetFileDeleted() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.FileDeleted
+}
+
+func (e *Event) GetFileExpired() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.FileExpired
+}
+
+func (e *Event) GetJobCreated() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.JobCreated
+}
+
+func (e *Event) GetJobUpdated() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.JobUpdated
+}
+
+func (e *Event) GetJobDeleted() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.JobDeleted
+}
+
+func (e *Event) GetJobFailed() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.JobFailed
+}
+
+func (e *Event) GetJobCompleted() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.JobCompleted
+}
+
+func (e *Event) GetJobReady() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.JobReady
+}
+
+func (e *Event) GetJobScheduled() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.JobScheduled
+}
+
+func (e *Event) GetJobOutcomeAcknowledged() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.JobOutcomeAcknowledged
+}
+
+func (e *Event) GetJobPartsCompleted() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.JobPartsCompleted
+}
+
+func (e *Event) GetProgramCreated() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.ProgramCreated
+}
+
+func (e *Event) GetProgramUpdated() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.ProgramUpdated
+}
+
+func (e *Event) GetCommitCreated() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.CommitCreated
+}
+
+func (e *Event) GetCommitUpdated() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.CommitUpdated
+}
+
+func (e *Event) GetCommitCompleted() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.CommitCompleted
+}
+
+func (e *Event) GetSecretCreated() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.SecretCreated
+}
+
+func (e *Event) GetSecretUpdated() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.SecretUpdated
+}
+
+func (e *Event) GetSecretDeleted() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.SecretDeleted
+}
+
+func (e *Event) GetLayerCreated() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.LayerCreated
+}
+
+func (e *Event) GetEnvironmentCreated() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.EnvironmentCreated
+}
+
+func (e *Event) GetEnvironmentUpdated() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.EnvironmentUpdated
+}
+
+func (e *Event) GetEnvironmentDeleted() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.EnvironmentDeleted
+}
+
+func (e *Event) GetActionCreated() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.ActionCreated
+}
+
+func (e *Event) GetActionUpdated() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.ActionUpdated
+}
+
+func (e *Event) GetActionDeleted() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.ActionDeleted
+}
+
+func (e *Event) GetDataClipCreated() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.DataClipCreated
+}
+
+func (e *Event) GetDataClipUpdated() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.DataClipUpdated
+}
+
+func (e *Event) GetDataClipDeleted() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.DataClipDeleted
+}
+
+func (e *Event) GetDataClipCollaboratorUpdated() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.DataClipCollaboratorUpdated
+}
+
+func (e *Event) GetDataClipResolutionsCreated() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.DataClipResolutionsCreated
+}
+
+func (e *Event) GetDataClipResolutionsUpdated() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.DataClipResolutionsUpdated
+}
+
+func (e *Event) GetDataClipResolutionsRefreshed() *GenericEvent {
+	if e == nil {
+		return nil
+	}
+	return e.DataClipResolutionsRefreshed
+}
+
+func (e *Event) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Topic string `json:"topic"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	e.Topic = unmarshaler.Topic
+	if unmarshaler.Topic == "" {
+		return fmt.Errorf("%T did not include discriminant topic", e)
+	}
+	switch unmarshaler.Topic {
+	case "agent:created":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.AgentCreated = value
+	case "agent:updated":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.AgentUpdated = value
+	case "agent:deleted":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.AgentDeleted = value
+	case "space:created":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.SpaceCreated = value
+	case "space:updated":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.SpaceUpdated = value
+	case "space:deleted":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.SpaceDeleted = value
+	case "space:archived":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.SpaceArchived = value
+	case "space:expired":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.SpaceExpired = value
+	case "space:guestAdded":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.SpaceGuestAdded = value
+	case "space:guestRemoved":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.SpaceGuestRemoved = value
+	case "document:created":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.DocumentCreated = value
+	case "document:updated":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.DocumentUpdated = value
+	case "document:deleted":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.DocumentDeleted = value
+	case "workbook:created":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.WorkbookCreated = value
+	case "workbook:updated":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.WorkbookUpdated = value
+	case "workbook:deleted":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.WorkbookDeleted = value
+	case "workbook:expired":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.WorkbookExpired = value
+	case "sheet:created":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.SheetCreated = value
+	case "sheet:updated":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.SheetUpdated = value
+	case "sheet:deleted":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.SheetDeleted = value
+	case "sheet:counts-updated":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.SheetCountsUpdated = value
+	case "snapshot:created":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.SnapshotCreated = value
+	case "records:created":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.RecordsCreated = value
+	case "records:updated":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.RecordsUpdated = value
+	case "records:deleted":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.RecordsDeleted = value
+	case "file:created":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.FileCreated = value
+	case "file:updated":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.FileUpdated = value
+	case "file:deleted":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.FileDeleted = value
+	case "file:expired":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.FileExpired = value
+	case "job:created":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.JobCreated = value
+	case "job:updated":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.JobUpdated = value
+	case "job:deleted":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.JobDeleted = value
+	case "job:failed":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.JobFailed = value
+	case "job:completed":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.JobCompleted = value
+	case "job:ready":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.JobReady = value
+	case "job:scheduled":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.JobScheduled = value
+	case "job:outcome-acknowledged":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.JobOutcomeAcknowledged = value
+	case "job:parts-completed":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.JobPartsCompleted = value
+	case "program:created":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.ProgramCreated = value
+	case "program:updated":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.ProgramUpdated = value
+	case "commit:created":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.CommitCreated = value
+	case "commit:updated":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.CommitUpdated = value
+	case "commit:completed":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.CommitCompleted = value
+	case "secret:created":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.SecretCreated = value
+	case "secret:updated":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.SecretUpdated = value
+	case "secret:deleted":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.SecretDeleted = value
+	case "layer:created":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.LayerCreated = value
+	case "environment:created":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.EnvironmentCreated = value
+	case "environment:updated":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.EnvironmentUpdated = value
+	case "environment:deleted":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.EnvironmentDeleted = value
+	case "action:created":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.ActionCreated = value
+	case "action:updated":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.ActionUpdated = value
+	case "action:deleted":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.ActionDeleted = value
+	case "data-clip:created":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.DataClipCreated = value
+	case "data-clip:updated":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.DataClipUpdated = value
+	case "data-clip:deleted":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.DataClipDeleted = value
+	case "data-clip:collaborator-updated":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.DataClipCollaboratorUpdated = value
+	case "data-clip:resolutions-created":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.DataClipResolutionsCreated = value
+	case "data-clip:resolutions-updated":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.DataClipResolutionsUpdated = value
+	case "data-clip:resolutions-refreshed":
+		value := new(GenericEvent)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		e.DataClipResolutionsRefreshed = value
+	}
+	return nil
+}
+
+func (e Event) MarshalJSON() ([]byte, error) {
+	if err := e.validate(); err != nil {
+		return nil, err
+	}
+	switch e.Topic {
+	default:
+		return nil, fmt.Errorf("invalid type %s in %T", e.Topic, e)
+	case "agent:created":
+		return internal.MarshalJSONWithExtraProperty(e.AgentCreated, "topic", "agent:created")
+	case "agent:updated":
+		return internal.MarshalJSONWithExtraProperty(e.AgentUpdated, "topic", "agent:updated")
+	case "agent:deleted":
+		return internal.MarshalJSONWithExtraProperty(e.AgentDeleted, "topic", "agent:deleted")
+	case "space:created":
+		return internal.MarshalJSONWithExtraProperty(e.SpaceCreated, "topic", "space:created")
+	case "space:updated":
+		return internal.MarshalJSONWithExtraProperty(e.SpaceUpdated, "topic", "space:updated")
+	case "space:deleted":
+		return internal.MarshalJSONWithExtraProperty(e.SpaceDeleted, "topic", "space:deleted")
+	case "space:archived":
+		return internal.MarshalJSONWithExtraProperty(e.SpaceArchived, "topic", "space:archived")
+	case "space:expired":
+		return internal.MarshalJSONWithExtraProperty(e.SpaceExpired, "topic", "space:expired")
+	case "space:guestAdded":
+		return internal.MarshalJSONWithExtraProperty(e.SpaceGuestAdded, "topic", "space:guestAdded")
+	case "space:guestRemoved":
+		return internal.MarshalJSONWithExtraProperty(e.SpaceGuestRemoved, "topic", "space:guestRemoved")
+	case "document:created":
+		return internal.MarshalJSONWithExtraProperty(e.DocumentCreated, "topic", "document:created")
+	case "document:updated":
+		return internal.MarshalJSONWithExtraProperty(e.DocumentUpdated, "topic", "document:updated")
+	case "document:deleted":
+		return internal.MarshalJSONWithExtraProperty(e.DocumentDeleted, "topic", "document:deleted")
+	case "workbook:created":
+		return internal.MarshalJSONWithExtraProperty(e.WorkbookCreated, "topic", "workbook:created")
+	case "workbook:updated":
+		return internal.MarshalJSONWithExtraProperty(e.WorkbookUpdated, "topic", "workbook:updated")
+	case "workbook:deleted":
+		return internal.MarshalJSONWithExtraProperty(e.WorkbookDeleted, "topic", "workbook:deleted")
+	case "workbook:expired":
+		return internal.MarshalJSONWithExtraProperty(e.WorkbookExpired, "topic", "workbook:expired")
+	case "sheet:created":
+		return internal.MarshalJSONWithExtraProperty(e.SheetCreated, "topic", "sheet:created")
+	case "sheet:updated":
+		return internal.MarshalJSONWithExtraProperty(e.SheetUpdated, "topic", "sheet:updated")
+	case "sheet:deleted":
+		return internal.MarshalJSONWithExtraProperty(e.SheetDeleted, "topic", "sheet:deleted")
+	case "sheet:counts-updated":
+		return internal.MarshalJSONWithExtraProperty(e.SheetCountsUpdated, "topic", "sheet:counts-updated")
+	case "snapshot:created":
+		return internal.MarshalJSONWithExtraProperty(e.SnapshotCreated, "topic", "snapshot:created")
+	case "records:created":
+		return internal.MarshalJSONWithExtraProperty(e.RecordsCreated, "topic", "records:created")
+	case "records:updated":
+		return internal.MarshalJSONWithExtraProperty(e.RecordsUpdated, "topic", "records:updated")
+	case "records:deleted":
+		return internal.MarshalJSONWithExtraProperty(e.RecordsDeleted, "topic", "records:deleted")
+	case "file:created":
+		return internal.MarshalJSONWithExtraProperty(e.FileCreated, "topic", "file:created")
+	case "file:updated":
+		return internal.MarshalJSONWithExtraProperty(e.FileUpdated, "topic", "file:updated")
+	case "file:deleted":
+		return internal.MarshalJSONWithExtraProperty(e.FileDeleted, "topic", "file:deleted")
+	case "file:expired":
+		return internal.MarshalJSONWithExtraProperty(e.FileExpired, "topic", "file:expired")
+	case "job:created":
+		return internal.MarshalJSONWithExtraProperty(e.JobCreated, "topic", "job:created")
+	case "job:updated":
+		return internal.MarshalJSONWithExtraProperty(e.JobUpdated, "topic", "job:updated")
+	case "job:deleted":
+		return internal.MarshalJSONWithExtraProperty(e.JobDeleted, "topic", "job:deleted")
+	case "job:failed":
+		return internal.MarshalJSONWithExtraProperty(e.JobFailed, "topic", "job:failed")
+	case "job:completed":
+		return internal.MarshalJSONWithExtraProperty(e.JobCompleted, "topic", "job:completed")
+	case "job:ready":
+		return internal.MarshalJSONWithExtraProperty(e.JobReady, "topic", "job:ready")
+	case "job:scheduled":
+		return internal.MarshalJSONWithExtraProperty(e.JobScheduled, "topic", "job:scheduled")
+	case "job:outcome-acknowledged":
+		return internal.MarshalJSONWithExtraProperty(e.JobOutcomeAcknowledged, "topic", "job:outcome-acknowledged")
+	case "job:parts-completed":
+		return internal.MarshalJSONWithExtraProperty(e.JobPartsCompleted, "topic", "job:parts-completed")
+	case "program:created":
+		return internal.MarshalJSONWithExtraProperty(e.ProgramCreated, "topic", "program:created")
+	case "program:updated":
+		return internal.MarshalJSONWithExtraProperty(e.ProgramUpdated, "topic", "program:updated")
+	case "commit:created":
+		return internal.MarshalJSONWithExtraProperty(e.CommitCreated, "topic", "commit:created")
+	case "commit:updated":
+		return internal.MarshalJSONWithExtraProperty(e.CommitUpdated, "topic", "commit:updated")
+	case "commit:completed":
+		return internal.MarshalJSONWithExtraProperty(e.CommitCompleted, "topic", "commit:completed")
+	case "secret:created":
+		return internal.MarshalJSONWithExtraProperty(e.SecretCreated, "topic", "secret:created")
+	case "secret:updated":
+		return internal.MarshalJSONWithExtraProperty(e.SecretUpdated, "topic", "secret:updated")
+	case "secret:deleted":
+		return internal.MarshalJSONWithExtraProperty(e.SecretDeleted, "topic", "secret:deleted")
+	case "layer:created":
+		return internal.MarshalJSONWithExtraProperty(e.LayerCreated, "topic", "layer:created")
+	case "environment:created":
+		return internal.MarshalJSONWithExtraProperty(e.EnvironmentCreated, "topic", "environment:created")
+	case "environment:updated":
+		return internal.MarshalJSONWithExtraProperty(e.EnvironmentUpdated, "topic", "environment:updated")
+	case "environment:deleted":
+		return internal.MarshalJSONWithExtraProperty(e.EnvironmentDeleted, "topic", "environment:deleted")
+	case "action:created":
+		return internal.MarshalJSONWithExtraProperty(e.ActionCreated, "topic", "action:created")
+	case "action:updated":
+		return internal.MarshalJSONWithExtraProperty(e.ActionUpdated, "topic", "action:updated")
+	case "action:deleted":
+		return internal.MarshalJSONWithExtraProperty(e.ActionDeleted, "topic", "action:deleted")
+	case "data-clip:created":
+		return internal.MarshalJSONWithExtraProperty(e.DataClipCreated, "topic", "data-clip:created")
+	case "data-clip:updated":
+		return internal.MarshalJSONWithExtraProperty(e.DataClipUpdated, "topic", "data-clip:updated")
+	case "data-clip:deleted":
+		return internal.MarshalJSONWithExtraProperty(e.DataClipDeleted, "topic", "data-clip:deleted")
+	case "data-clip:collaborator-updated":
+		return internal.MarshalJSONWithExtraProperty(e.DataClipCollaboratorUpdated, "topic", "data-clip:collaborator-updated")
+	case "data-clip:resolutions-created":
+		return internal.MarshalJSONWithExtraProperty(e.DataClipResolutionsCreated, "topic", "data-clip:resolutions-created")
+	case "data-clip:resolutions-updated":
+		return internal.MarshalJSONWithExtraProperty(e.DataClipResolutionsUpdated, "topic", "data-clip:resolutions-updated")
+	case "data-clip:resolutions-refreshed":
+		return internal.MarshalJSONWithExtraProperty(e.DataClipResolutionsRefreshed, "topic", "data-clip:resolutions-refreshed")
+	}
+}
+
+type EventVisitor interface {
+	VisitAgentCreated(*GenericEvent) error
+	VisitAgentUpdated(*GenericEvent) error
+	VisitAgentDeleted(*GenericEvent) error
+	VisitSpaceCreated(*GenericEvent) error
+	VisitSpaceUpdated(*GenericEvent) error
+	VisitSpaceDeleted(*GenericEvent) error
+	VisitSpaceArchived(*GenericEvent) error
+	VisitSpaceExpired(*GenericEvent) error
+	VisitSpaceGuestAdded(*GenericEvent) error
+	VisitSpaceGuestRemoved(*GenericEvent) error
+	VisitDocumentCreated(*GenericEvent) error
+	VisitDocumentUpdated(*GenericEvent) error
+	VisitDocumentDeleted(*GenericEvent) error
+	VisitWorkbookCreated(*GenericEvent) error
+	VisitWorkbookUpdated(*GenericEvent) error
+	VisitWorkbookDeleted(*GenericEvent) error
+	VisitWorkbookExpired(*GenericEvent) error
+	VisitSheetCreated(*GenericEvent) error
+	VisitSheetUpdated(*GenericEvent) error
+	VisitSheetDeleted(*GenericEvent) error
+	VisitSheetCountsUpdated(*GenericEvent) error
+	VisitSnapshotCreated(*GenericEvent) error
+	VisitRecordsCreated(*GenericEvent) error
+	VisitRecordsUpdated(*GenericEvent) error
+	VisitRecordsDeleted(*GenericEvent) error
+	VisitFileCreated(*GenericEvent) error
+	VisitFileUpdated(*GenericEvent) error
+	VisitFileDeleted(*GenericEvent) error
+	VisitFileExpired(*GenericEvent) error
+	VisitJobCreated(*GenericEvent) error
+	VisitJobUpdated(*GenericEvent) error
+	VisitJobDeleted(*GenericEvent) error
+	VisitJobFailed(*GenericEvent) error
+	VisitJobCompleted(*GenericEvent) error
+	VisitJobReady(*GenericEvent) error
+	VisitJobScheduled(*GenericEvent) error
+	VisitJobOutcomeAcknowledged(*GenericEvent) error
+	VisitJobPartsCompleted(*GenericEvent) error
+	VisitProgramCreated(*GenericEvent) error
+	VisitProgramUpdated(*GenericEvent) error
+	VisitCommitCreated(*GenericEvent) error
+	VisitCommitUpdated(*GenericEvent) error
+	VisitCommitCompleted(*GenericEvent) error
+	VisitSecretCreated(*GenericEvent) error
+	VisitSecretUpdated(*GenericEvent) error
+	VisitSecretDeleted(*GenericEvent) error
+	VisitLayerCreated(*GenericEvent) error
+	VisitEnvironmentCreated(*GenericEvent) error
+	VisitEnvironmentUpdated(*GenericEvent) error
+	VisitEnvironmentDeleted(*GenericEvent) error
+	VisitActionCreated(*GenericEvent) error
+	VisitActionUpdated(*GenericEvent) error
+	VisitActionDeleted(*GenericEvent) error
+	VisitDataClipCreated(*GenericEvent) error
+	VisitDataClipUpdated(*GenericEvent) error
+	VisitDataClipDeleted(*GenericEvent) error
+	VisitDataClipCollaboratorUpdated(*GenericEvent) error
+	VisitDataClipResolutionsCreated(*GenericEvent) error
+	VisitDataClipResolutionsUpdated(*GenericEvent) error
+	VisitDataClipResolutionsRefreshed(*GenericEvent) error
+}
+
+func (e *Event) Accept(visitor EventVisitor) error {
+	switch e.Topic {
+	default:
+		return fmt.Errorf("invalid type %s in %T", e.Topic, e)
+	case "agent:created":
+		return visitor.VisitAgentCreated(e.AgentCreated)
+	case "agent:updated":
+		return visitor.VisitAgentUpdated(e.AgentUpdated)
+	case "agent:deleted":
+		return visitor.VisitAgentDeleted(e.AgentDeleted)
+	case "space:created":
+		return visitor.VisitSpaceCreated(e.SpaceCreated)
+	case "space:updated":
+		return visitor.VisitSpaceUpdated(e.SpaceUpdated)
+	case "space:deleted":
+		return visitor.VisitSpaceDeleted(e.SpaceDeleted)
+	case "space:archived":
+		return visitor.VisitSpaceArchived(e.SpaceArchived)
+	case "space:expired":
+		return visitor.VisitSpaceExpired(e.SpaceExpired)
+	case "space:guestAdded":
+		return visitor.VisitSpaceGuestAdded(e.SpaceGuestAdded)
+	case "space:guestRemoved":
+		return visitor.VisitSpaceGuestRemoved(e.SpaceGuestRemoved)
+	case "document:created":
+		return visitor.VisitDocumentCreated(e.DocumentCreated)
+	case "document:updated":
+		return visitor.VisitDocumentUpdated(e.DocumentUpdated)
+	case "document:deleted":
+		return visitor.VisitDocumentDeleted(e.DocumentDeleted)
+	case "workbook:created":
+		return visitor.VisitWorkbookCreated(e.WorkbookCreated)
+	case "workbook:updated":
+		return visitor.VisitWorkbookUpdated(e.WorkbookUpdated)
+	case "workbook:deleted":
+		return visitor.VisitWorkbookDeleted(e.WorkbookDeleted)
+	case "workbook:expired":
+		return visitor.VisitWorkbookExpired(e.WorkbookExpired)
+	case "sheet:created":
+		return visitor.VisitSheetCreated(e.SheetCreated)
+	case "sheet:updated":
+		return visitor.VisitSheetUpdated(e.SheetUpdated)
+	case "sheet:deleted":
+		return visitor.VisitSheetDeleted(e.SheetDeleted)
+	case "sheet:counts-updated":
+		return visitor.VisitSheetCountsUpdated(e.SheetCountsUpdated)
+	case "snapshot:created":
+		return visitor.VisitSnapshotCreated(e.SnapshotCreated)
+	case "records:created":
+		return visitor.VisitRecordsCreated(e.RecordsCreated)
+	case "records:updated":
+		return visitor.VisitRecordsUpdated(e.RecordsUpdated)
+	case "records:deleted":
+		return visitor.VisitRecordsDeleted(e.RecordsDeleted)
+	case "file:created":
+		return visitor.VisitFileCreated(e.FileCreated)
+	case "file:updated":
+		return visitor.VisitFileUpdated(e.FileUpdated)
+	case "file:deleted":
+		return visitor.VisitFileDeleted(e.FileDeleted)
+	case "file:expired":
+		return visitor.VisitFileExpired(e.FileExpired)
+	case "job:created":
+		return visitor.VisitJobCreated(e.JobCreated)
+	case "job:updated":
+		return visitor.VisitJobUpdated(e.JobUpdated)
+	case "job:deleted":
+		return visitor.VisitJobDeleted(e.JobDeleted)
+	case "job:failed":
+		return visitor.VisitJobFailed(e.JobFailed)
+	case "job:completed":
+		return visitor.VisitJobCompleted(e.JobCompleted)
+	case "job:ready":
+		return visitor.VisitJobReady(e.JobReady)
+	case "job:scheduled":
+		return visitor.VisitJobScheduled(e.JobScheduled)
+	case "job:outcome-acknowledged":
+		return visitor.VisitJobOutcomeAcknowledged(e.JobOutcomeAcknowledged)
+	case "job:parts-completed":
+		return visitor.VisitJobPartsCompleted(e.JobPartsCompleted)
+	case "program:created":
+		return visitor.VisitProgramCreated(e.ProgramCreated)
+	case "program:updated":
+		return visitor.VisitProgramUpdated(e.ProgramUpdated)
+	case "commit:created":
+		return visitor.VisitCommitCreated(e.CommitCreated)
+	case "commit:updated":
+		return visitor.VisitCommitUpdated(e.CommitUpdated)
+	case "commit:completed":
+		return visitor.VisitCommitCompleted(e.CommitCompleted)
+	case "secret:created":
+		return visitor.VisitSecretCreated(e.SecretCreated)
+	case "secret:updated":
+		return visitor.VisitSecretUpdated(e.SecretUpdated)
+	case "secret:deleted":
+		return visitor.VisitSecretDeleted(e.SecretDeleted)
+	case "layer:created":
+		return visitor.VisitLayerCreated(e.LayerCreated)
+	case "environment:created":
+		return visitor.VisitEnvironmentCreated(e.EnvironmentCreated)
+	case "environment:updated":
+		return visitor.VisitEnvironmentUpdated(e.EnvironmentUpdated)
+	case "environment:deleted":
+		return visitor.VisitEnvironmentDeleted(e.EnvironmentDeleted)
+	case "action:created":
+		return visitor.VisitActionCreated(e.ActionCreated)
+	case "action:updated":
+		return visitor.VisitActionUpdated(e.ActionUpdated)
+	case "action:deleted":
+		return visitor.VisitActionDeleted(e.ActionDeleted)
+	case "data-clip:created":
+		return visitor.VisitDataClipCreated(e.DataClipCreated)
+	case "data-clip:updated":
+		return visitor.VisitDataClipUpdated(e.DataClipUpdated)
+	case "data-clip:deleted":
+		return visitor.VisitDataClipDeleted(e.DataClipDeleted)
+	case "data-clip:collaborator-updated":
+		return visitor.VisitDataClipCollaboratorUpdated(e.DataClipCollaboratorUpdated)
+	case "data-clip:resolutions-created":
+		return visitor.VisitDataClipResolutionsCreated(e.DataClipResolutionsCreated)
+	case "data-clip:resolutions-updated":
+		return visitor.VisitDataClipResolutionsUpdated(e.DataClipResolutionsUpdated)
+	case "data-clip:resolutions-refreshed":
+		return visitor.VisitDataClipResolutionsRefreshed(e.DataClipResolutionsRefreshed)
+	}
+}
+
+func (e *Event) validate() error {
+	if e == nil {
+		return fmt.Errorf("type %T is nil", e)
+	}
+	var fields []string
+	if e.AgentCreated != nil {
+		fields = append(fields, "agent:created")
+	}
+	if e.AgentUpdated != nil {
+		fields = append(fields, "agent:updated")
+	}
+	if e.AgentDeleted != nil {
+		fields = append(fields, "agent:deleted")
+	}
+	if e.SpaceCreated != nil {
+		fields = append(fields, "space:created")
+	}
+	if e.SpaceUpdated != nil {
+		fields = append(fields, "space:updated")
+	}
+	if e.SpaceDeleted != nil {
+		fields = append(fields, "space:deleted")
+	}
+	if e.SpaceArchived != nil {
+		fields = append(fields, "space:archived")
+	}
+	if e.SpaceExpired != nil {
+		fields = append(fields, "space:expired")
+	}
+	if e.SpaceGuestAdded != nil {
+		fields = append(fields, "space:guestAdded")
+	}
+	if e.SpaceGuestRemoved != nil {
+		fields = append(fields, "space:guestRemoved")
+	}
+	if e.DocumentCreated != nil {
+		fields = append(fields, "document:created")
+	}
+	if e.DocumentUpdated != nil {
+		fields = append(fields, "document:updated")
+	}
+	if e.DocumentDeleted != nil {
+		fields = append(fields, "document:deleted")
+	}
+	if e.WorkbookCreated != nil {
+		fields = append(fields, "workbook:created")
+	}
+	if e.WorkbookUpdated != nil {
+		fields = append(fields, "workbook:updated")
+	}
+	if e.WorkbookDeleted != nil {
+		fields = append(fields, "workbook:deleted")
+	}
+	if e.WorkbookExpired != nil {
+		fields = append(fields, "workbook:expired")
+	}
+	if e.SheetCreated != nil {
+		fields = append(fields, "sheet:created")
+	}
+	if e.SheetUpdated != nil {
+		fields = append(fields, "sheet:updated")
+	}
+	if e.SheetDeleted != nil {
+		fields = append(fields, "sheet:deleted")
+	}
+	if e.SheetCountsUpdated != nil {
+		fields = append(fields, "sheet:counts-updated")
+	}
+	if e.SnapshotCreated != nil {
+		fields = append(fields, "snapshot:created")
+	}
+	if e.RecordsCreated != nil {
+		fields = append(fields, "records:created")
+	}
+	if e.RecordsUpdated != nil {
+		fields = append(fields, "records:updated")
+	}
+	if e.RecordsDeleted != nil {
+		fields = append(fields, "records:deleted")
+	}
+	if e.FileCreated != nil {
+		fields = append(fields, "file:created")
+	}
+	if e.FileUpdated != nil {
+		fields = append(fields, "file:updated")
+	}
+	if e.FileDeleted != nil {
+		fields = append(fields, "file:deleted")
+	}
+	if e.FileExpired != nil {
+		fields = append(fields, "file:expired")
+	}
+	if e.JobCreated != nil {
+		fields = append(fields, "job:created")
+	}
+	if e.JobUpdated != nil {
+		fields = append(fields, "job:updated")
+	}
+	if e.JobDeleted != nil {
+		fields = append(fields, "job:deleted")
+	}
+	if e.JobFailed != nil {
+		fields = append(fields, "job:failed")
+	}
+	if e.JobCompleted != nil {
+		fields = append(fields, "job:completed")
+	}
+	if e.JobReady != nil {
+		fields = append(fields, "job:ready")
+	}
+	if e.JobScheduled != nil {
+		fields = append(fields, "job:scheduled")
+	}
+	if e.JobOutcomeAcknowledged != nil {
+		fields = append(fields, "job:outcome-acknowledged")
+	}
+	if e.JobPartsCompleted != nil {
+		fields = append(fields, "job:parts-completed")
+	}
+	if e.ProgramCreated != nil {
+		fields = append(fields, "program:created")
+	}
+	if e.ProgramUpdated != nil {
+		fields = append(fields, "program:updated")
+	}
+	if e.CommitCreated != nil {
+		fields = append(fields, "commit:created")
+	}
+	if e.CommitUpdated != nil {
+		fields = append(fields, "commit:updated")
+	}
+	if e.CommitCompleted != nil {
+		fields = append(fields, "commit:completed")
+	}
+	if e.SecretCreated != nil {
+		fields = append(fields, "secret:created")
+	}
+	if e.SecretUpdated != nil {
+		fields = append(fields, "secret:updated")
+	}
+	if e.SecretDeleted != nil {
+		fields = append(fields, "secret:deleted")
+	}
+	if e.LayerCreated != nil {
+		fields = append(fields, "layer:created")
+	}
+	if e.EnvironmentCreated != nil {
+		fields = append(fields, "environment:created")
+	}
+	if e.EnvironmentUpdated != nil {
+		fields = append(fields, "environment:updated")
+	}
+	if e.EnvironmentDeleted != nil {
+		fields = append(fields, "environment:deleted")
+	}
+	if e.ActionCreated != nil {
+		fields = append(fields, "action:created")
+	}
+	if e.ActionUpdated != nil {
+		fields = append(fields, "action:updated")
+	}
+	if e.ActionDeleted != nil {
+		fields = append(fields, "action:deleted")
+	}
+	if e.DataClipCreated != nil {
+		fields = append(fields, "data-clip:created")
+	}
+	if e.DataClipUpdated != nil {
+		fields = append(fields, "data-clip:updated")
+	}
+	if e.DataClipDeleted != nil {
+		fields = append(fields, "data-clip:deleted")
+	}
+	if e.DataClipCollaboratorUpdated != nil {
+		fields = append(fields, "data-clip:collaborator-updated")
+	}
+	if e.DataClipResolutionsCreated != nil {
+		fields = append(fields, "data-clip:resolutions-created")
+	}
+	if e.DataClipResolutionsUpdated != nil {
+		fields = append(fields, "data-clip:resolutions-updated")
+	}
+	if e.DataClipResolutionsRefreshed != nil {
+		fields = append(fields, "data-clip:resolutions-refreshed")
+	}
+	if len(fields) == 0 {
+		if e.Topic != "" {
+			return fmt.Errorf("type %T defines a discriminant set to %q but the field is not set", e, e.Topic)
+		}
+		return fmt.Errorf("type %T is empty", e)
+	}
+	if len(fields) > 1 {
+		return fmt.Errorf("type %T defines values for %s, but only one value is allowed", e, fields)
+	}
+	if e.Topic != "" {
+		field := fields[0]
+		if e.Topic != field {
+			return fmt.Errorf(
+				"type %T defines a discriminant set to %q, but it does not match the %T field; either remove or update the discriminant to match",
+				e,
+				e.Topic,
+				e,
+			)
+		}
+	}
+	return nil
+}
+
+// The attributes of the event
+type EventAttributes struct {
+	// Date the related entity was last updated
+	TargetUpdatedAt *time.Time `json:"targetUpdatedAt,omitempty" url:"targetUpdatedAt,omitempty"`
+	// The progress of the event within a collection of iterable events
+	Progress *Progress `json:"progress,omitempty" url:"progress,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (e *EventAttributes) GetTargetUpdatedAt() *time.Time {
+	if e == nil {
+		return nil
+	}
+	return e.TargetUpdatedAt
+}
+
+func (e *EventAttributes) GetProgress() *Progress {
+	if e == nil {
+		return nil
+	}
+	return e.Progress
+}
+
+func (e *EventAttributes) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *EventAttributes) UnmarshalJSON(data []byte) error {
+	type embed EventAttributes
+	var unmarshaler = struct {
+		embed
+		TargetUpdatedAt *internal.DateTime `json:"targetUpdatedAt,omitempty"`
+	}{
+		embed: embed(*e),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*e = EventAttributes(unmarshaler.embed)
+	e.TargetUpdatedAt = unmarshaler.TargetUpdatedAt.TimePtr()
+	extraProperties, err := internal.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+	e.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (e *EventAttributes) MarshalJSON() ([]byte, error) {
+	type embed EventAttributes
+	var marshaler = struct {
+		embed
+		TargetUpdatedAt *internal.DateTime `json:"targetUpdatedAt,omitempty"`
+	}{
+		embed:           embed(*e),
+		TargetUpdatedAt: internal.NewOptionalDateTime(e.TargetUpdatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (e *EventAttributes) String() string {
+	if len(e.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(e.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
+type EventContextSlugs struct {
+	// The slug of the space
+	Space *string `json:"space,omitempty" url:"space,omitempty"`
+	// The slug of the workbook
+	Workbook *string `json:"workbook,omitempty" url:"workbook,omitempty"`
+	// The slug of the sheet
+	Sheet *string `json:"sheet,omitempty" url:"sheet,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (e *EventContextSlugs) GetSpace() *string {
+	if e == nil {
+		return nil
+	}
+	return e.Space
+}
+
+func (e *EventContextSlugs) GetWorkbook() *string {
+	if e == nil {
+		return nil
+	}
+	return e.Workbook
+}
+
+func (e *EventContextSlugs) GetSheet() *string {
+	if e == nil {
+		return nil
+	}
+	return e.Sheet
+}
+
+func (e *EventContextSlugs) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *EventContextSlugs) UnmarshalJSON(data []byte) error {
+	type unmarshaler EventContextSlugs
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = EventContextSlugs(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+	e.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (e *EventContextSlugs) String() string {
+	if len(e.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(e.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
+type EventResponse struct {
+	Data *Event `json:"data,omitempty" url:"data,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (e *EventResponse) GetData() *Event {
+	if e == nil {
+		return nil
+	}
+	return e.Data
+}
+
+func (e *EventResponse) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *EventResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler EventResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = EventResponse(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+	e.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (e *EventResponse) String() string {
+	if len(e.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(e.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
+// The topic of the event
+type EventTopic string
+
+const (
+	EventTopicAgentCreated                 EventTopic = "agent:created"
+	EventTopicAgentUpdated                 EventTopic = "agent:updated"
+	EventTopicAgentDeleted                 EventTopic = "agent:deleted"
+	EventTopicSpaceCreated                 EventTopic = "space:created"
+	EventTopicSpaceUpdated                 EventTopic = "space:updated"
+	EventTopicSpaceDeleted                 EventTopic = "space:deleted"
+	EventTopicSpaceArchived                EventTopic = "space:archived"
+	EventTopicSpaceUnarchived              EventTopic = "space:unarchived"
+	EventTopicSpaceExpired                 EventTopic = "space:expired"
+	EventTopicSpaceGuestAdded              EventTopic = "space:guestAdded"
+	EventTopicSpaceGuestRemoved            EventTopic = "space:guestRemoved"
+	EventTopicDocumentCreated              EventTopic = "document:created"
+	EventTopicDocumentUpdated              EventTopic = "document:updated"
+	EventTopicDocumentDeleted              EventTopic = "document:deleted"
+	EventTopicWorkbookCreated              EventTopic = "workbook:created"
+	EventTopicWorkbookUpdated              EventTopic = "workbook:updated"
+	EventTopicWorkbookDeleted              EventTopic = "workbook:deleted"
+	EventTopicWorkbookExpired              EventTopic = "workbook:expired"
+	EventTopicSheetCreated                 EventTopic = "sheet:created"
+	EventTopicSheetUpdated                 EventTopic = "sheet:updated"
+	EventTopicSheetDeleted                 EventTopic = "sheet:deleted"
+	EventTopicSheetCountsUpdated           EventTopic = "sheet:counts-updated"
+	EventTopicSnapshotCreated              EventTopic = "snapshot:created"
+	EventTopicRecordsCreated               EventTopic = "records:created"
+	EventTopicRecordsUpdated               EventTopic = "records:updated"
+	EventTopicRecordsDeleted               EventTopic = "records:deleted"
+	EventTopicFileCreated                  EventTopic = "file:created"
+	EventTopicFileUpdated                  EventTopic = "file:updated"
+	EventTopicFileDeleted                  EventTopic = "file:deleted"
+	EventTopicFileExpired                  EventTopic = "file:expired"
+	EventTopicJobCreated                   EventTopic = "job:created"
+	EventTopicJobUpdated                   EventTopic = "job:updated"
+	EventTopicJobDeleted                   EventTopic = "job:deleted"
+	EventTopicJobCompleted                 EventTopic = "job:completed"
+	EventTopicJobReady                     EventTopic = "job:ready"
+	EventTopicJobScheduled                 EventTopic = "job:scheduled"
+	EventTopicJobOutcomeAcknowledged       EventTopic = "job:outcome-acknowledged"
+	EventTopicJobPartsCompleted            EventTopic = "job:parts-completed"
+	EventTopicJobFailed                    EventTopic = "job:failed"
+	EventTopicProgramCreated               EventTopic = "program:created"
+	EventTopicProgramUpdated               EventTopic = "program:updated"
+	EventTopicCommitCreated                EventTopic = "commit:created"
+	EventTopicCommitUpdated                EventTopic = "commit:updated"
+	EventTopicCommitCompleted              EventTopic = "commit:completed"
+	EventTopicLayerCreated                 EventTopic = "layer:created"
+	EventTopicSecretCreated                EventTopic = "secret:created"
+	EventTopicSecretUpdated                EventTopic = "secret:updated"
+	EventTopicSecretDeleted                EventTopic = "secret:deleted"
+	EventTopicCron5Minutes                 EventTopic = "cron:5-minutes"
+	EventTopicCronHourly                   EventTopic = "cron:hourly"
+	EventTopicCronDaily                    EventTopic = "cron:daily"
+	EventTopicCronWeekly                   EventTopic = "cron:weekly"
+	EventTopicEnvironmentCreated           EventTopic = "environment:created"
+	EventTopicEnvironmentUpdated           EventTopic = "environment:updated"
+	EventTopicEnvironmentDeleted           EventTopic = "environment:deleted"
+	EventTopicActionCreated                EventTopic = "action:created"
+	EventTopicActionUpdated                EventTopic = "action:updated"
+	EventTopicActionDeleted                EventTopic = "action:deleted"
+	EventTopicDataClipCreated              EventTopic = "data-clip:created"
+	EventTopicDataClipUpdated              EventTopic = "data-clip:updated"
+	EventTopicDataClipDeleted              EventTopic = "data-clip:deleted"
+	EventTopicDataClipCollaboratorUpdated  EventTopic = "data-clip:collaborator-updated"
+	EventTopicDataClipResolutionsCreated   EventTopic = "data-clip:resolutions-created"
+	EventTopicDataClipResolutionsUpdated   EventTopic = "data-clip:resolutions-updated"
+	EventTopicDataClipResolutionsRefreshed EventTopic = "data-clip:resolutions-refreshed"
+)
+
+func NewEventTopicFromString(s string) (EventTopic, error) {
+	switch s {
+	case "agent:created":
+		return EventTopicAgentCreated, nil
+	case "agent:updated":
+		return EventTopicAgentUpdated, nil
+	case "agent:deleted":
+		return EventTopicAgentDeleted, nil
+	case "space:created":
+		return EventTopicSpaceCreated, nil
+	case "space:updated":
+		return EventTopicSpaceUpdated, nil
+	case "space:deleted":
+		return EventTopicSpaceDeleted, nil
+	case "space:archived":
+		return EventTopicSpaceArchived, nil
+	case "space:unarchived":
+		return EventTopicSpaceUnarchived, nil
+	case "space:expired":
+		return EventTopicSpaceExpired, nil
+	case "space:guestAdded":
+		return EventTopicSpaceGuestAdded, nil
+	case "space:guestRemoved":
+		return EventTopicSpaceGuestRemoved, nil
+	case "document:created":
+		return EventTopicDocumentCreated, nil
+	case "document:updated":
+		return EventTopicDocumentUpdated, nil
+	case "document:deleted":
+		return EventTopicDocumentDeleted, nil
+	case "workbook:created":
+		return EventTopicWorkbookCreated, nil
+	case "workbook:updated":
+		return EventTopicWorkbookUpdated, nil
+	case "workbook:deleted":
+		return EventTopicWorkbookDeleted, nil
+	case "workbook:expired":
+		return EventTopicWorkbookExpired, nil
+	case "sheet:created":
+		return EventTopicSheetCreated, nil
+	case "sheet:updated":
+		return EventTopicSheetUpdated, nil
+	case "sheet:deleted":
+		return EventTopicSheetDeleted, nil
+	case "sheet:counts-updated":
+		return EventTopicSheetCountsUpdated, nil
+	case "snapshot:created":
+		return EventTopicSnapshotCreated, nil
+	case "records:created":
+		return EventTopicRecordsCreated, nil
+	case "records:updated":
+		return EventTopicRecordsUpdated, nil
+	case "records:deleted":
+		return EventTopicRecordsDeleted, nil
+	case "file:created":
+		return EventTopicFileCreated, nil
+	case "file:updated":
+		return EventTopicFileUpdated, nil
+	case "file:deleted":
+		return EventTopicFileDeleted, nil
+	case "file:expired":
+		return EventTopicFileExpired, nil
+	case "job:created":
+		return EventTopicJobCreated, nil
+	case "job:updated":
+		return EventTopicJobUpdated, nil
+	case "job:deleted":
+		return EventTopicJobDeleted, nil
+	case "job:completed":
+		return EventTopicJobCompleted, nil
+	case "job:ready":
+		return EventTopicJobReady, nil
+	case "job:scheduled":
+		return EventTopicJobScheduled, nil
+	case "job:outcome-acknowledged":
+		return EventTopicJobOutcomeAcknowledged, nil
+	case "job:parts-completed":
+		return EventTopicJobPartsCompleted, nil
+	case "job:failed":
+		return EventTopicJobFailed, nil
+	case "program:created":
+		return EventTopicProgramCreated, nil
+	case "program:updated":
+		return EventTopicProgramUpdated, nil
+	case "commit:created":
+		return EventTopicCommitCreated, nil
+	case "commit:updated":
+		return EventTopicCommitUpdated, nil
+	case "commit:completed":
+		return EventTopicCommitCompleted, nil
+	case "layer:created":
+		return EventTopicLayerCreated, nil
+	case "secret:created":
+		return EventTopicSecretCreated, nil
+	case "secret:updated":
+		return EventTopicSecretUpdated, nil
+	case "secret:deleted":
+		return EventTopicSecretDeleted, nil
+	case "cron:5-minutes":
+		return EventTopicCron5Minutes, nil
+	case "cron:hourly":
+		return EventTopicCronHourly, nil
+	case "cron:daily":
+		return EventTopicCronDaily, nil
+	case "cron:weekly":
+		return EventTopicCronWeekly, nil
+	case "environment:created":
+		return EventTopicEnvironmentCreated, nil
+	case "environment:updated":
+		return EventTopicEnvironmentUpdated, nil
+	case "environment:deleted":
+		return EventTopicEnvironmentDeleted, nil
+	case "action:created":
+		return EventTopicActionCreated, nil
+	case "action:updated":
+		return EventTopicActionUpdated, nil
+	case "action:deleted":
+		return EventTopicActionDeleted, nil
+	case "data-clip:created":
+		return EventTopicDataClipCreated, nil
+	case "data-clip:updated":
+		return EventTopicDataClipUpdated, nil
+	case "data-clip:deleted":
+		return EventTopicDataClipDeleted, nil
+	case "data-clip:collaborator-updated":
+		return EventTopicDataClipCollaboratorUpdated, nil
+	case "data-clip:resolutions-created":
+		return EventTopicDataClipResolutionsCreated, nil
+	case "data-clip:resolutions-updated":
+		return EventTopicDataClipResolutionsUpdated, nil
+	case "data-clip:resolutions-refreshed":
+		return EventTopicDataClipResolutionsRefreshed, nil
+	}
+	var t EventTopic
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (e EventTopic) Ptr() *EventTopic {
+	return &e
+}
+
+type GenericEvent struct {
+	// The domain of the event
+	Domain Domain `json:"domain" url:"domain"`
+	// The context of the event
+	Context *Context `json:"context,omitempty" url:"context,omitempty"`
+	// The attributes of the event
+	Attributes *EventAttributes `json:"attributes,omitempty" url:"attributes,omitempty"`
+	// The callback url to acknowledge the event
+	CallbackUrl *string `json:"callbackUrl,omitempty" url:"callbackUrl,omitempty"`
+	// The url to retrieve the data associated with the event
+	DataUrl    *string  `json:"dataUrl,omitempty" url:"dataUrl,omitempty"`
+	Target     *string  `json:"target,omitempty" url:"target,omitempty"`
+	Origin     *Origin  `json:"origin,omitempty" url:"origin,omitempty"`
+	Namespaces []string `json:"namespaces,omitempty" url:"namespaces,omitempty"`
+	Id         EventId  `json:"id" url:"id"`
+	// Date the event was created
+	CreatedAt time.Time `json:"createdAt" url:"createdAt"`
+	// Date the event was deleted
+	DeletedAt *time.Time `json:"deletedAt,omitempty" url:"deletedAt,omitempty"`
+	// Date the event was acknowledged
+	AcknowledgedAt *time.Time `json:"acknowledgedAt,omitempty" url:"acknowledgedAt,omitempty"`
+	// The actor (user or system) who acknowledged the event
+	AcknowledgedBy *string                `json:"acknowledgedBy,omitempty" url:"acknowledgedBy,omitempty"`
+	Payload        map[string]interface{} `json:"payload,omitempty" url:"payload,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (g *GenericEvent) GetDomain() Domain {
+	if g == nil {
+		return ""
+	}
+	return g.Domain
+}
+
+func (g *GenericEvent) GetContext() *Context {
+	if g == nil {
+		return nil
+	}
+	return g.Context
+}
+
+func (g *GenericEvent) GetAttributes() *EventAttributes {
+	if g == nil {
+		return nil
+	}
+	return g.Attributes
+}
+
+func (g *GenericEvent) GetCallbackUrl() *string {
+	if g == nil {
+		return nil
+	}
+	return g.CallbackUrl
+}
+
+func (g *GenericEvent) GetDataUrl() *string {
+	if g == nil {
+		return nil
+	}
+	return g.DataUrl
+}
+
+func (g *GenericEvent) GetTarget() *string {
+	if g == nil {
+		return nil
+	}
+	return g.Target
+}
+
+func (g *GenericEvent) GetOrigin() *Origin {
+	if g == nil {
+		return nil
+	}
+	return g.Origin
+}
+
+func (g *GenericEvent) GetNamespaces() []string {
+	if g == nil {
+		return nil
+	}
+	return g.Namespaces
+}
+
+func (g *GenericEvent) GetId() EventId {
+	if g == nil {
+		return ""
+	}
+	return g.Id
+}
+
+func (g *GenericEvent) GetCreatedAt() time.Time {
+	if g == nil {
+		return time.Time{}
+	}
+	return g.CreatedAt
+}
+
+func (g *GenericEvent) GetDeletedAt() *time.Time {
+	if g == nil {
+		return nil
+	}
+	return g.DeletedAt
+}
+
+func (g *GenericEvent) GetAcknowledgedAt() *time.Time {
+	if g == nil {
+		return nil
+	}
+	return g.AcknowledgedAt
+}
+
+func (g *GenericEvent) GetAcknowledgedBy() *string {
+	if g == nil {
+		return nil
+	}
+	return g.AcknowledgedBy
+}
+
+func (g *GenericEvent) GetPayload() map[string]interface{} {
+	if g == nil {
+		return nil
+	}
+	return g.Payload
+}
+
+func (g *GenericEvent) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GenericEvent) UnmarshalJSON(data []byte) error {
+	type embed GenericEvent
+	var unmarshaler = struct {
+		embed
+		CreatedAt      *internal.DateTime `json:"createdAt"`
+		DeletedAt      *internal.DateTime `json:"deletedAt,omitempty"`
+		AcknowledgedAt *internal.DateTime `json:"acknowledgedAt,omitempty"`
+	}{
+		embed: embed(*g),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*g = GenericEvent(unmarshaler.embed)
+	g.CreatedAt = unmarshaler.CreatedAt.Time()
+	g.DeletedAt = unmarshaler.DeletedAt.TimePtr()
+	g.AcknowledgedAt = unmarshaler.AcknowledgedAt.TimePtr()
+	extraProperties, err := internal.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+	g.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GenericEvent) MarshalJSON() ([]byte, error) {
+	type embed GenericEvent
+	var marshaler = struct {
+		embed
+		CreatedAt      *internal.DateTime `json:"createdAt"`
+		DeletedAt      *internal.DateTime `json:"deletedAt,omitempty"`
+		AcknowledgedAt *internal.DateTime `json:"acknowledgedAt,omitempty"`
+	}{
+		embed:          embed(*g),
+		CreatedAt:      internal.NewDateTime(g.CreatedAt),
+		DeletedAt:      internal.NewOptionalDateTime(g.DeletedAt),
+		AcknowledgedAt: internal.NewOptionalDateTime(g.AcknowledgedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (g *GenericEvent) String() string {
+	if len(g.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(g.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
+
+type ListAllEventsResponse struct {
+	Data []*Event `json:"data,omitempty" url:"data,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (l *ListAllEventsResponse) GetData() []*Event {
+	if l == nil {
+		return nil
+	}
+	return l.Data
+}
+
+func (l *ListAllEventsResponse) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
+}
+
+func (l *ListAllEventsResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler ListAllEventsResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*l = ListAllEventsResponse(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+	l.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (l *ListAllEventsResponse) String() string {
+	if len(l.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(l.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(l); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", l)
+}
+
+// The origin resource of the event
+type Origin struct {
+	Id   *string `json:"id,omitempty" url:"id,omitempty"`
+	Slug *string `json:"slug,omitempty" url:"slug,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (o *Origin) GetId() *string {
+	if o == nil {
+		return nil
+	}
+	return o.Id
+}
+
+func (o *Origin) GetSlug() *string {
+	if o == nil {
+		return nil
+	}
+	return o.Slug
+}
+
+func (o *Origin) GetExtraProperties() map[string]interface{} {
+	return o.extraProperties
+}
+
+func (o *Origin) UnmarshalJSON(data []byte) error {
+	type unmarshaler Origin
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*o = Origin(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *o)
+	if err != nil {
+		return err
+	}
+	o.extraProperties = extraProperties
+	o.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (o *Origin) String() string {
+	if len(o.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(o.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(o); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", o)
+}
+
+// The progress of the event within a collection of iterable events
+type Progress struct {
+	// The current progress of the event
+	Current *int `json:"current,omitempty" url:"current,omitempty"`
+	// The total number of events in this group
+	Total *int `json:"total,omitempty" url:"total,omitempty"`
+	// The percent complete of the event group
+	Percent *int `json:"percent,omitempty" url:"percent,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (p *Progress) GetCurrent() *int {
+	if p == nil {
+		return nil
+	}
+	return p.Current
+}
+
+func (p *Progress) GetTotal() *int {
+	if p == nil {
+		return nil
+	}
+	return p.Total
+}
+
+func (p *Progress) GetPercent() *int {
+	if p == nil {
+		return nil
+	}
+	return p.Percent
+}
+
+func (p *Progress) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *Progress) UnmarshalJSON(data []byte) error {
+	type unmarshaler Progress
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = Progress(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+	p.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (p *Progress) String() string {
+	if len(p.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(p.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
+}
+
+// Sheet Slug
+type SheetSlug = string

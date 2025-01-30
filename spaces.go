@@ -5,7 +5,7 @@ package api
 import (
 	json "encoding/json"
 	fmt "fmt"
-	core "github.com/FlatFilers/flatfile-go/core"
+	internal "github.com/FlatFilers/flatfile-go/internal"
 	time "time"
 )
 
@@ -49,8 +49,126 @@ type ListGuidanceRequest struct {
 	Guide *string `json:"-" url:"guide,omitempty"`
 }
 
-// Guidance ID
-type GuidanceId = string
+// Properties used to allow users to connect to the event bus
+type EventToken struct {
+	// The ID of the Account.
+	AccountId *AccountId `json:"accountId,omitempty" url:"accountId,omitempty"`
+	// The id of the event bus to subscribe to
+	SubscribeKey *string `json:"subscribeKey,omitempty" url:"subscribeKey,omitempty"`
+	// Time to live in minutes
+	Ttl *int `json:"ttl,omitempty" url:"ttl,omitempty"`
+	// This should be your API key.
+	Token *string `json:"token,omitempty" url:"token,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (e *EventToken) GetAccountId() *AccountId {
+	if e == nil {
+		return nil
+	}
+	return e.AccountId
+}
+
+func (e *EventToken) GetSubscribeKey() *string {
+	if e == nil {
+		return nil
+	}
+	return e.SubscribeKey
+}
+
+func (e *EventToken) GetTtl() *int {
+	if e == nil {
+		return nil
+	}
+	return e.Ttl
+}
+
+func (e *EventToken) GetToken() *string {
+	if e == nil {
+		return nil
+	}
+	return e.Token
+}
+
+func (e *EventToken) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *EventToken) UnmarshalJSON(data []byte) error {
+	type unmarshaler EventToken
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = EventToken(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+	e.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (e *EventToken) String() string {
+	if len(e.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(e.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
+
+type EventTokenResponse struct {
+	Data *EventToken `json:"data,omitempty" url:"data,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (e *EventTokenResponse) GetData() *EventToken {
+	if e == nil {
+		return nil
+	}
+	return e.Data
+}
+
+func (e *EventTokenResponse) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *EventTokenResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler EventTokenResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = EventTokenResponse(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+	e.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (e *EventTokenResponse) String() string {
+	if len(e.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(e.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
 
 type GetSpacesSortField string
 
@@ -95,7 +213,21 @@ type GuidanceApiCreateData struct {
 	Options *GuidanceOptions `json:"options,omitempty" url:"options,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (g *GuidanceApiCreateData) GetGuideSlug() string {
+	if g == nil {
+		return ""
+	}
+	return g.GuideSlug
+}
+
+func (g *GuidanceApiCreateData) GetOptions() *GuidanceOptions {
+	if g == nil {
+		return nil
+	}
+	return g.Options
 }
 
 func (g *GuidanceApiCreateData) GetExtraProperties() map[string]interface{} {
@@ -109,24 +241,22 @@ func (g *GuidanceApiCreateData) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*g = GuidanceApiCreateData(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	extraProperties, err := internal.ExtractExtraProperties(data, *g)
 	if err != nil {
 		return err
 	}
 	g.extraProperties = extraProperties
-
-	g._rawJSON = json.RawMessage(data)
+	g.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (g *GuidanceApiCreateData) String() string {
-	if len(g._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+	if len(g.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(g.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(g); err == nil {
+	if value, err := internal.StringifyJSON(g); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", g)
@@ -137,7 +267,14 @@ type GuidanceApiUpdateData struct {
 	Options *GuidanceOptions `json:"options,omitempty" url:"options,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (g *GuidanceApiUpdateData) GetOptions() *GuidanceOptions {
+	if g == nil {
+		return nil
+	}
+	return g.Options
 }
 
 func (g *GuidanceApiUpdateData) GetExtraProperties() map[string]interface{} {
@@ -151,24 +288,22 @@ func (g *GuidanceApiUpdateData) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*g = GuidanceApiUpdateData(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	extraProperties, err := internal.ExtractExtraProperties(data, *g)
 	if err != nil {
 		return err
 	}
 	g.extraProperties = extraProperties
-
-	g._rawJSON = json.RawMessage(data)
+	g.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (g *GuidanceApiUpdateData) String() string {
-	if len(g._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+	if len(g.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(g.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(g); err == nil {
+	if value, err := internal.StringifyJSON(g); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", g)
@@ -178,7 +313,14 @@ type GuidanceListResponse struct {
 	Data []*GuidanceResource `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (g *GuidanceListResponse) GetData() []*GuidanceResource {
+	if g == nil {
+		return nil
+	}
+	return g.Data
 }
 
 func (g *GuidanceListResponse) GetExtraProperties() map[string]interface{} {
@@ -192,24 +334,22 @@ func (g *GuidanceListResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*g = GuidanceListResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	extraProperties, err := internal.ExtractExtraProperties(data, *g)
 	if err != nil {
 		return err
 	}
 	g.extraProperties = extraProperties
-
-	g._rawJSON = json.RawMessage(data)
+	g.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (g *GuidanceListResponse) String() string {
-	if len(g._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+	if len(g.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(g.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(g); err == nil {
+	if value, err := internal.StringifyJSON(g); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", g)
@@ -222,7 +362,35 @@ type GuidanceOptions struct {
 	Role    RoleEnum    `json:"role" url:"role"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (g *GuidanceOptions) GetTarget() string {
+	if g == nil {
+		return ""
+	}
+	return g.Target
+}
+
+func (g *GuidanceOptions) GetTrigger() TriggerEnum {
+	if g == nil {
+		return ""
+	}
+	return g.Trigger
+}
+
+func (g *GuidanceOptions) GetType() TypeEnum {
+	if g == nil {
+		return ""
+	}
+	return g.Type
+}
+
+func (g *GuidanceOptions) GetRole() RoleEnum {
+	if g == nil {
+		return ""
+	}
+	return g.Role
 }
 
 func (g *GuidanceOptions) GetExtraProperties() map[string]interface{} {
@@ -236,24 +404,22 @@ func (g *GuidanceOptions) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*g = GuidanceOptions(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	extraProperties, err := internal.ExtractExtraProperties(data, *g)
 	if err != nil {
 		return err
 	}
 	g.extraProperties = extraProperties
-
-	g._rawJSON = json.RawMessage(data)
+	g.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (g *GuidanceOptions) String() string {
-	if len(g._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+	if len(g.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(g.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(g); err == nil {
+	if value, err := internal.StringifyJSON(g); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", g)
@@ -265,7 +431,28 @@ type GuidanceResource struct {
 	Options   *GuidanceOptions `json:"options,omitempty" url:"options,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (g *GuidanceResource) GetId() GuidanceId {
+	if g == nil {
+		return ""
+	}
+	return g.Id
+}
+
+func (g *GuidanceResource) GetGuideSlug() string {
+	if g == nil {
+		return ""
+	}
+	return g.GuideSlug
+}
+
+func (g *GuidanceResource) GetOptions() *GuidanceOptions {
+	if g == nil {
+		return nil
+	}
+	return g.Options
 }
 
 func (g *GuidanceResource) GetExtraProperties() map[string]interface{} {
@@ -279,24 +466,22 @@ func (g *GuidanceResource) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*g = GuidanceResource(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	extraProperties, err := internal.ExtractExtraProperties(data, *g)
 	if err != nil {
 		return err
 	}
 	g.extraProperties = extraProperties
-
-	g._rawJSON = json.RawMessage(data)
+	g.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (g *GuidanceResource) String() string {
-	if len(g._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+	if len(g.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(g.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(g); err == nil {
+	if value, err := internal.StringifyJSON(g); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", g)
@@ -326,7 +511,112 @@ type InternalSpaceConfigBase struct {
 	IsAppTemplate *bool `json:"isAppTemplate,omitempty" url:"isAppTemplate,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (i *InternalSpaceConfigBase) GetSpaceConfigId() *SpaceConfigId {
+	if i == nil {
+		return nil
+	}
+	return i.SpaceConfigId
+}
+
+func (i *InternalSpaceConfigBase) GetEnvironmentId() *EnvironmentId {
+	if i == nil {
+		return nil
+	}
+	return i.EnvironmentId
+}
+
+func (i *InternalSpaceConfigBase) GetPrimaryWorkbookId() *WorkbookId {
+	if i == nil {
+		return nil
+	}
+	return i.PrimaryWorkbookId
+}
+
+func (i *InternalSpaceConfigBase) GetMetadata() interface{} {
+	if i == nil {
+		return nil
+	}
+	return i.Metadata
+}
+
+func (i *InternalSpaceConfigBase) GetSettings() *SpaceSettings {
+	if i == nil {
+		return nil
+	}
+	return i.Settings
+}
+
+func (i *InternalSpaceConfigBase) GetActions() []*Action {
+	if i == nil {
+		return nil
+	}
+	return i.Actions
+}
+
+func (i *InternalSpaceConfigBase) GetAccess() []SpaceAccess {
+	if i == nil {
+		return nil
+	}
+	return i.Access
+}
+
+func (i *InternalSpaceConfigBase) GetAutoConfigure() *bool {
+	if i == nil {
+		return nil
+	}
+	return i.AutoConfigure
+}
+
+func (i *InternalSpaceConfigBase) GetNamespace() *string {
+	if i == nil {
+		return nil
+	}
+	return i.Namespace
+}
+
+func (i *InternalSpaceConfigBase) GetLabels() []string {
+	if i == nil {
+		return nil
+	}
+	return i.Labels
+}
+
+func (i *InternalSpaceConfigBase) GetTranslationsPath() *string {
+	if i == nil {
+		return nil
+	}
+	return i.TranslationsPath
+}
+
+func (i *InternalSpaceConfigBase) GetLanguageOverride() *string {
+	if i == nil {
+		return nil
+	}
+	return i.LanguageOverride
+}
+
+func (i *InternalSpaceConfigBase) GetArchivedAt() *time.Time {
+	if i == nil {
+		return nil
+	}
+	return i.ArchivedAt
+}
+
+func (i *InternalSpaceConfigBase) GetAppId() *AppId {
+	if i == nil {
+		return nil
+	}
+	return i.AppId
+}
+
+func (i *InternalSpaceConfigBase) GetIsAppTemplate() *bool {
+	if i == nil {
+		return nil
+	}
+	return i.IsAppTemplate
 }
 
 func (i *InternalSpaceConfigBase) GetExtraProperties() map[string]interface{} {
@@ -337,7 +627,7 @@ func (i *InternalSpaceConfigBase) UnmarshalJSON(data []byte) error {
 	type embed InternalSpaceConfigBase
 	var unmarshaler = struct {
 		embed
-		ArchivedAt *core.DateTime `json:"archivedAt,omitempty"`
+		ArchivedAt *internal.DateTime `json:"archivedAt,omitempty"`
 	}{
 		embed: embed(*i),
 	}
@@ -346,14 +636,12 @@ func (i *InternalSpaceConfigBase) UnmarshalJSON(data []byte) error {
 	}
 	*i = InternalSpaceConfigBase(unmarshaler.embed)
 	i.ArchivedAt = unmarshaler.ArchivedAt.TimePtr()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *i)
+	extraProperties, err := internal.ExtractExtraProperties(data, *i)
 	if err != nil {
 		return err
 	}
 	i.extraProperties = extraProperties
-
-	i._rawJSON = json.RawMessage(data)
+	i.rawJSON = json.RawMessage(data)
 	return nil
 }
 
@@ -361,21 +649,21 @@ func (i *InternalSpaceConfigBase) MarshalJSON() ([]byte, error) {
 	type embed InternalSpaceConfigBase
 	var marshaler = struct {
 		embed
-		ArchivedAt *core.DateTime `json:"archivedAt,omitempty"`
+		ArchivedAt *internal.DateTime `json:"archivedAt,omitempty"`
 	}{
 		embed:      embed(*i),
-		ArchivedAt: core.NewOptionalDateTime(i.ArchivedAt),
+		ArchivedAt: internal.NewOptionalDateTime(i.ArchivedAt),
 	}
 	return json.Marshal(marshaler)
 }
 
 func (i *InternalSpaceConfigBase) String() string {
-	if len(i._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(i._rawJSON); err == nil {
+	if len(i.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(i.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(i); err == nil {
+	if value, err := internal.StringifyJSON(i); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", i)
@@ -387,7 +675,21 @@ type ListSpacesResponse struct {
 	Data       []*Space    `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (l *ListSpacesResponse) GetPagination() *Pagination {
+	if l == nil {
+		return nil
+	}
+	return l.Pagination
+}
+
+func (l *ListSpacesResponse) GetData() []*Space {
+	if l == nil {
+		return nil
+	}
+	return l.Data
 }
 
 func (l *ListSpacesResponse) GetExtraProperties() map[string]interface{} {
@@ -401,24 +703,22 @@ func (l *ListSpacesResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*l = ListSpacesResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	extraProperties, err := internal.ExtractExtraProperties(data, *l)
 	if err != nil {
 		return err
 	}
 	l.extraProperties = extraProperties
-
-	l._rawJSON = json.RawMessage(data)
+	l.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (l *ListSpacesResponse) String() string {
-	if len(l._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(l._rawJSON); err == nil {
+	if len(l.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(l.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(l); err == nil {
+	if value, err := internal.StringifyJSON(l); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", l)
@@ -503,7 +803,231 @@ type Space struct {
 	GuestAuthentication []GuestAuthenticationEnum `json:"guestAuthentication,omitempty" url:"guestAuthentication,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (s *Space) GetSpaceConfigId() *SpaceConfigId {
+	if s == nil {
+		return nil
+	}
+	return s.SpaceConfigId
+}
+
+func (s *Space) GetEnvironmentId() *EnvironmentId {
+	if s == nil {
+		return nil
+	}
+	return s.EnvironmentId
+}
+
+func (s *Space) GetPrimaryWorkbookId() *WorkbookId {
+	if s == nil {
+		return nil
+	}
+	return s.PrimaryWorkbookId
+}
+
+func (s *Space) GetMetadata() interface{} {
+	if s == nil {
+		return nil
+	}
+	return s.Metadata
+}
+
+func (s *Space) GetSettings() *SpaceSettings {
+	if s == nil {
+		return nil
+	}
+	return s.Settings
+}
+
+func (s *Space) GetActions() []*Action {
+	if s == nil {
+		return nil
+	}
+	return s.Actions
+}
+
+func (s *Space) GetAccess() []SpaceAccess {
+	if s == nil {
+		return nil
+	}
+	return s.Access
+}
+
+func (s *Space) GetAutoConfigure() *bool {
+	if s == nil {
+		return nil
+	}
+	return s.AutoConfigure
+}
+
+func (s *Space) GetNamespace() *string {
+	if s == nil {
+		return nil
+	}
+	return s.Namespace
+}
+
+func (s *Space) GetLabels() []string {
+	if s == nil {
+		return nil
+	}
+	return s.Labels
+}
+
+func (s *Space) GetTranslationsPath() *string {
+	if s == nil {
+		return nil
+	}
+	return s.TranslationsPath
+}
+
+func (s *Space) GetLanguageOverride() *string {
+	if s == nil {
+		return nil
+	}
+	return s.LanguageOverride
+}
+
+func (s *Space) GetArchivedAt() *time.Time {
+	if s == nil {
+		return nil
+	}
+	return s.ArchivedAt
+}
+
+func (s *Space) GetAppId() *AppId {
+	if s == nil {
+		return nil
+	}
+	return s.AppId
+}
+
+func (s *Space) GetIsAppTemplate() *bool {
+	if s == nil {
+		return nil
+	}
+	return s.IsAppTemplate
+}
+
+func (s *Space) GetId() SpaceId {
+	if s == nil {
+		return ""
+	}
+	return s.Id
+}
+
+func (s *Space) GetWorkbooksCount() *int {
+	if s == nil {
+		return nil
+	}
+	return s.WorkbooksCount
+}
+
+func (s *Space) GetFilesCount() *int {
+	if s == nil {
+		return nil
+	}
+	return s.FilesCount
+}
+
+func (s *Space) GetCreatedByUserId() *UserId {
+	if s == nil {
+		return nil
+	}
+	return s.CreatedByUserId
+}
+
+func (s *Space) GetCreatedByUserName() *string {
+	if s == nil {
+		return nil
+	}
+	return s.CreatedByUserName
+}
+
+func (s *Space) GetCreatedAt() time.Time {
+	if s == nil {
+		return time.Time{}
+	}
+	return s.CreatedAt
+}
+
+func (s *Space) GetUpdatedAt() time.Time {
+	if s == nil {
+		return time.Time{}
+	}
+	return s.UpdatedAt
+}
+
+func (s *Space) GetExpiredAt() *time.Time {
+	if s == nil {
+		return nil
+	}
+	return s.ExpiredAt
+}
+
+func (s *Space) GetLastActivityAt() *time.Time {
+	if s == nil {
+		return nil
+	}
+	return s.LastActivityAt
+}
+
+func (s *Space) GetGuestLink() *string {
+	if s == nil {
+		return nil
+	}
+	return s.GuestLink
+}
+
+func (s *Space) GetName() string {
+	if s == nil {
+		return ""
+	}
+	return s.Name
+}
+
+func (s *Space) GetDisplayOrder() *int {
+	if s == nil {
+		return nil
+	}
+	return s.DisplayOrder
+}
+
+func (s *Space) GetAccessToken() *string {
+	if s == nil {
+		return nil
+	}
+	return s.AccessToken
+}
+
+func (s *Space) GetIsCollaborative() *bool {
+	if s == nil {
+		return nil
+	}
+	return s.IsCollaborative
+}
+
+func (s *Space) GetSize() *SpaceSize {
+	if s == nil {
+		return nil
+	}
+	return s.Size
+}
+
+func (s *Space) GetUpgradedAt() *time.Time {
+	if s == nil {
+		return nil
+	}
+	return s.UpgradedAt
+}
+
+func (s *Space) GetGuestAuthentication() []GuestAuthenticationEnum {
+	if s == nil {
+		return nil
+	}
+	return s.GuestAuthentication
 }
 
 func (s *Space) GetExtraProperties() map[string]interface{} {
@@ -514,12 +1038,12 @@ func (s *Space) UnmarshalJSON(data []byte) error {
 	type embed Space
 	var unmarshaler = struct {
 		embed
-		ArchivedAt     *core.DateTime `json:"archivedAt,omitempty"`
-		CreatedAt      *core.DateTime `json:"createdAt"`
-		UpdatedAt      *core.DateTime `json:"updatedAt"`
-		ExpiredAt      *core.DateTime `json:"expiredAt,omitempty"`
-		LastActivityAt *core.DateTime `json:"lastActivityAt,omitempty"`
-		UpgradedAt     *core.DateTime `json:"upgradedAt,omitempty"`
+		ArchivedAt     *internal.DateTime `json:"archivedAt,omitempty"`
+		CreatedAt      *internal.DateTime `json:"createdAt"`
+		UpdatedAt      *internal.DateTime `json:"updatedAt"`
+		ExpiredAt      *internal.DateTime `json:"expiredAt,omitempty"`
+		LastActivityAt *internal.DateTime `json:"lastActivityAt,omitempty"`
+		UpgradedAt     *internal.DateTime `json:"upgradedAt,omitempty"`
 	}{
 		embed: embed(*s),
 	}
@@ -533,14 +1057,12 @@ func (s *Space) UnmarshalJSON(data []byte) error {
 	s.ExpiredAt = unmarshaler.ExpiredAt.TimePtr()
 	s.LastActivityAt = unmarshaler.LastActivityAt.TimePtr()
 	s.UpgradedAt = unmarshaler.UpgradedAt.TimePtr()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	extraProperties, err := internal.ExtractExtraProperties(data, *s)
 	if err != nil {
 		return err
 	}
 	s.extraProperties = extraProperties
-
-	s._rawJSON = json.RawMessage(data)
+	s.rawJSON = json.RawMessage(data)
 	return nil
 }
 
@@ -548,34 +1070,56 @@ func (s *Space) MarshalJSON() ([]byte, error) {
 	type embed Space
 	var marshaler = struct {
 		embed
-		ArchivedAt     *core.DateTime `json:"archivedAt,omitempty"`
-		CreatedAt      *core.DateTime `json:"createdAt"`
-		UpdatedAt      *core.DateTime `json:"updatedAt"`
-		ExpiredAt      *core.DateTime `json:"expiredAt,omitempty"`
-		LastActivityAt *core.DateTime `json:"lastActivityAt,omitempty"`
-		UpgradedAt     *core.DateTime `json:"upgradedAt,omitempty"`
+		ArchivedAt     *internal.DateTime `json:"archivedAt,omitempty"`
+		CreatedAt      *internal.DateTime `json:"createdAt"`
+		UpdatedAt      *internal.DateTime `json:"updatedAt"`
+		ExpiredAt      *internal.DateTime `json:"expiredAt,omitempty"`
+		LastActivityAt *internal.DateTime `json:"lastActivityAt,omitempty"`
+		UpgradedAt     *internal.DateTime `json:"upgradedAt,omitempty"`
 	}{
 		embed:          embed(*s),
-		ArchivedAt:     core.NewOptionalDateTime(s.ArchivedAt),
-		CreatedAt:      core.NewDateTime(s.CreatedAt),
-		UpdatedAt:      core.NewDateTime(s.UpdatedAt),
-		ExpiredAt:      core.NewOptionalDateTime(s.ExpiredAt),
-		LastActivityAt: core.NewOptionalDateTime(s.LastActivityAt),
-		UpgradedAt:     core.NewOptionalDateTime(s.UpgradedAt),
+		ArchivedAt:     internal.NewOptionalDateTime(s.ArchivedAt),
+		CreatedAt:      internal.NewDateTime(s.CreatedAt),
+		UpdatedAt:      internal.NewDateTime(s.UpdatedAt),
+		ExpiredAt:      internal.NewOptionalDateTime(s.ExpiredAt),
+		LastActivityAt: internal.NewOptionalDateTime(s.LastActivityAt),
+		UpgradedAt:     internal.NewOptionalDateTime(s.UpgradedAt),
 	}
 	return json.Marshal(marshaler)
 }
 
 func (s *Space) String() string {
-	if len(s._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+	if len(s.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(s.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(s); err == nil {
+	if value, err := internal.StringifyJSON(s); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", s)
+}
+
+type SpaceAccess string
+
+const (
+	SpaceAccessAll    SpaceAccess = "*"
+	SpaceAccessUpload SpaceAccess = "upload"
+)
+
+func NewSpaceAccessFromString(s string) (SpaceAccess, error) {
+	switch s {
+	case "*":
+		return SpaceAccessAll, nil
+	case "upload":
+		return SpaceAccessUpload, nil
+	}
+	var t SpaceAccess
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (s SpaceAccess) Ptr() *SpaceAccess {
+	return &s
 }
 
 // Properties used to create a new Space
@@ -608,7 +1152,133 @@ type SpaceConfig struct {
 	GuestAuthentication []GuestAuthenticationEnum `json:"guestAuthentication,omitempty" url:"guestAuthentication,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (s *SpaceConfig) GetSpaceConfigId() *SpaceConfigId {
+	if s == nil {
+		return nil
+	}
+	return s.SpaceConfigId
+}
+
+func (s *SpaceConfig) GetEnvironmentId() *EnvironmentId {
+	if s == nil {
+		return nil
+	}
+	return s.EnvironmentId
+}
+
+func (s *SpaceConfig) GetPrimaryWorkbookId() *WorkbookId {
+	if s == nil {
+		return nil
+	}
+	return s.PrimaryWorkbookId
+}
+
+func (s *SpaceConfig) GetMetadata() interface{} {
+	if s == nil {
+		return nil
+	}
+	return s.Metadata
+}
+
+func (s *SpaceConfig) GetSettings() *SpaceSettings {
+	if s == nil {
+		return nil
+	}
+	return s.Settings
+}
+
+func (s *SpaceConfig) GetActions() []*Action {
+	if s == nil {
+		return nil
+	}
+	return s.Actions
+}
+
+func (s *SpaceConfig) GetAccess() []SpaceAccess {
+	if s == nil {
+		return nil
+	}
+	return s.Access
+}
+
+func (s *SpaceConfig) GetAutoConfigure() *bool {
+	if s == nil {
+		return nil
+	}
+	return s.AutoConfigure
+}
+
+func (s *SpaceConfig) GetNamespace() *string {
+	if s == nil {
+		return nil
+	}
+	return s.Namespace
+}
+
+func (s *SpaceConfig) GetLabels() []string {
+	if s == nil {
+		return nil
+	}
+	return s.Labels
+}
+
+func (s *SpaceConfig) GetTranslationsPath() *string {
+	if s == nil {
+		return nil
+	}
+	return s.TranslationsPath
+}
+
+func (s *SpaceConfig) GetLanguageOverride() *string {
+	if s == nil {
+		return nil
+	}
+	return s.LanguageOverride
+}
+
+func (s *SpaceConfig) GetArchivedAt() *time.Time {
+	if s == nil {
+		return nil
+	}
+	return s.ArchivedAt
+}
+
+func (s *SpaceConfig) GetAppId() *AppId {
+	if s == nil {
+		return nil
+	}
+	return s.AppId
+}
+
+func (s *SpaceConfig) GetIsAppTemplate() *bool {
+	if s == nil {
+		return nil
+	}
+	return s.IsAppTemplate
+}
+
+func (s *SpaceConfig) GetName() *string {
+	if s == nil {
+		return nil
+	}
+	return s.Name
+}
+
+func (s *SpaceConfig) GetDisplayOrder() *int {
+	if s == nil {
+		return nil
+	}
+	return s.DisplayOrder
+}
+
+func (s *SpaceConfig) GetGuestAuthentication() []GuestAuthenticationEnum {
+	if s == nil {
+		return nil
+	}
+	return s.GuestAuthentication
 }
 
 func (s *SpaceConfig) GetExtraProperties() map[string]interface{} {
@@ -619,7 +1289,7 @@ func (s *SpaceConfig) UnmarshalJSON(data []byte) error {
 	type embed SpaceConfig
 	var unmarshaler = struct {
 		embed
-		ArchivedAt *core.DateTime `json:"archivedAt,omitempty"`
+		ArchivedAt *internal.DateTime `json:"archivedAt,omitempty"`
 	}{
 		embed: embed(*s),
 	}
@@ -628,14 +1298,12 @@ func (s *SpaceConfig) UnmarshalJSON(data []byte) error {
 	}
 	*s = SpaceConfig(unmarshaler.embed)
 	s.ArchivedAt = unmarshaler.ArchivedAt.TimePtr()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	extraProperties, err := internal.ExtractExtraProperties(data, *s)
 	if err != nil {
 		return err
 	}
 	s.extraProperties = extraProperties
-
-	s._rawJSON = json.RawMessage(data)
+	s.rawJSON = json.RawMessage(data)
 	return nil
 }
 
@@ -643,21 +1311,21 @@ func (s *SpaceConfig) MarshalJSON() ([]byte, error) {
 	type embed SpaceConfig
 	var marshaler = struct {
 		embed
-		ArchivedAt *core.DateTime `json:"archivedAt,omitempty"`
+		ArchivedAt *internal.DateTime `json:"archivedAt,omitempty"`
 	}{
 		embed:      embed(*s),
-		ArchivedAt: core.NewOptionalDateTime(s.ArchivedAt),
+		ArchivedAt: internal.NewOptionalDateTime(s.ArchivedAt),
 	}
 	return json.Marshal(marshaler)
 }
 
 func (s *SpaceConfig) String() string {
-	if len(s._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+	if len(s.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(s.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(s); err == nil {
+	if value, err := internal.StringifyJSON(s); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", s)
@@ -667,7 +1335,14 @@ type SpaceResponse struct {
 	Data *Space `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (s *SpaceResponse) GetData() *Space {
+	if s == nil {
+		return nil
+	}
+	return s.Data
 }
 
 func (s *SpaceResponse) GetExtraProperties() map[string]interface{} {
@@ -681,24 +1356,22 @@ func (s *SpaceResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*s = SpaceResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	extraProperties, err := internal.ExtractExtraProperties(data, *s)
 	if err != nil {
 		return err
 	}
 	s.extraProperties = extraProperties
-
-	s._rawJSON = json.RawMessage(data)
+	s.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (s *SpaceResponse) String() string {
-	if len(s._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+	if len(s.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(s.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(s); err == nil {
+	if value, err := internal.StringifyJSON(s); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", s)
@@ -710,7 +1383,14 @@ type SpaceSettings struct {
 	SidebarConfig *SpaceSidebarConfig `json:"sidebarConfig,omitempty" url:"sidebarConfig,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (s *SpaceSettings) GetSidebarConfig() *SpaceSidebarConfig {
+	if s == nil {
+		return nil
+	}
+	return s.SidebarConfig
 }
 
 func (s *SpaceSettings) GetExtraProperties() map[string]interface{} {
@@ -724,24 +1404,22 @@ func (s *SpaceSettings) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*s = SpaceSettings(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	extraProperties, err := internal.ExtractExtraProperties(data, *s)
 	if err != nil {
 		return err
 	}
 	s.extraProperties = extraProperties
-
-	s._rawJSON = json.RawMessage(data)
+	s.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (s *SpaceSettings) String() string {
-	if len(s._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+	if len(s.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(s.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(s); err == nil {
+	if value, err := internal.StringifyJSON(s); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", s)
@@ -752,7 +1430,14 @@ type SpaceSidebarConfig struct {
 	WorkbookSidebarOrder []WorkbookId `json:"workbookSidebarOrder,omitempty" url:"workbookSidebarOrder,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (s *SpaceSidebarConfig) GetWorkbookSidebarOrder() []WorkbookId {
+	if s == nil {
+		return nil
+	}
+	return s.WorkbookSidebarOrder
 }
 
 func (s *SpaceSidebarConfig) GetExtraProperties() map[string]interface{} {
@@ -766,24 +1451,22 @@ func (s *SpaceSidebarConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*s = SpaceSidebarConfig(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	extraProperties, err := internal.ExtractExtraProperties(data, *s)
 	if err != nil {
 		return err
 	}
 	s.extraProperties = extraProperties
-
-	s._rawJSON = json.RawMessage(data)
+	s.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (s *SpaceSidebarConfig) String() string {
-	if len(s._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+	if len(s.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(s.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(s); err == nil {
+	if value, err := internal.StringifyJSON(s); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", s)
@@ -798,7 +1481,42 @@ type SpaceSize struct {
 	NumFiles int    `json:"numFiles" url:"numFiles"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (s *SpaceSize) GetName() string {
+	if s == nil {
+		return ""
+	}
+	return s.Name
+}
+
+func (s *SpaceSize) GetId() string {
+	if s == nil {
+		return ""
+	}
+	return s.Id
+}
+
+func (s *SpaceSize) GetNumUsers() int {
+	if s == nil {
+		return 0
+	}
+	return s.NumUsers
+}
+
+func (s *SpaceSize) GetPdv() int {
+	if s == nil {
+		return 0
+	}
+	return s.Pdv
+}
+
+func (s *SpaceSize) GetNumFiles() int {
+	if s == nil {
+		return 0
+	}
+	return s.NumFiles
 }
 
 func (s *SpaceSize) GetExtraProperties() map[string]interface{} {
@@ -812,24 +1530,22 @@ func (s *SpaceSize) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*s = SpaceSize(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	extraProperties, err := internal.ExtractExtraProperties(data, *s)
 	if err != nil {
 		return err
 	}
 	s.extraProperties = extraProperties
-
-	s._rawJSON = json.RawMessage(data)
+	s.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (s *SpaceSize) String() string {
-	if len(s._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+	if len(s.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(s.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(s); err == nil {
+	if value, err := internal.StringifyJSON(s); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", s)

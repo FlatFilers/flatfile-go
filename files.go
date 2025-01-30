@@ -5,7 +5,7 @@ package api
 import (
 	json "encoding/json"
 	fmt "fmt"
-	core "github.com/FlatFilers/flatfile-go/core"
+	internal "github.com/FlatFilers/flatfile-go/internal"
 	time "time"
 )
 
@@ -51,7 +51,126 @@ type File struct {
 	Origin     *FileOrigin `json:"origin,omitempty" url:"origin,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (f *File) GetId() FileId {
+	if f == nil {
+		return ""
+	}
+	return f.Id
+}
+
+func (f *File) GetName() string {
+	if f == nil {
+		return ""
+	}
+	return f.Name
+}
+
+func (f *File) GetExt() string {
+	if f == nil {
+		return ""
+	}
+	return f.Ext
+}
+
+func (f *File) GetMimetype() string {
+	if f == nil {
+		return ""
+	}
+	return f.Mimetype
+}
+
+func (f *File) GetEncoding() string {
+	if f == nil {
+		return ""
+	}
+	return f.Encoding
+}
+
+func (f *File) GetStatus() ModelFileStatusEnum {
+	if f == nil {
+		return ""
+	}
+	return f.Status
+}
+
+func (f *File) GetMode() *Mode {
+	if f == nil {
+		return nil
+	}
+	return f.Mode
+}
+
+func (f *File) GetSize() int {
+	if f == nil {
+		return 0
+	}
+	return f.Size
+}
+
+func (f *File) GetBytesReceived() int {
+	if f == nil {
+		return 0
+	}
+	return f.BytesReceived
+}
+
+func (f *File) GetCreatedAt() time.Time {
+	if f == nil {
+		return time.Time{}
+	}
+	return f.CreatedAt
+}
+
+func (f *File) GetUpdatedAt() time.Time {
+	if f == nil {
+		return time.Time{}
+	}
+	return f.UpdatedAt
+}
+
+func (f *File) GetExpiredAt() *time.Time {
+	if f == nil {
+		return nil
+	}
+	return f.ExpiredAt
+}
+
+func (f *File) GetSpaceId() SpaceId {
+	if f == nil {
+		return ""
+	}
+	return f.SpaceId
+}
+
+func (f *File) GetWorkbookId() *WorkbookId {
+	if f == nil {
+		return nil
+	}
+	return f.WorkbookId
+}
+
+func (f *File) GetSheetId() *SheetId {
+	if f == nil {
+		return nil
+	}
+	return f.SheetId
+}
+
+func (f *File) GetActions() []*Action {
+	if f == nil {
+		return nil
+	}
+	return f.Actions
+}
+
+func (f *File) GetOrigin() *FileOrigin {
+	if f == nil {
+		return nil
+	}
+	return f.Origin
 }
 
 func (f *File) GetExtraProperties() map[string]interface{} {
@@ -62,9 +181,9 @@ func (f *File) UnmarshalJSON(data []byte) error {
 	type embed File
 	var unmarshaler = struct {
 		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-		UpdatedAt *core.DateTime `json:"updatedAt"`
-		ExpiredAt *core.DateTime `json:"expiredAt,omitempty"`
+		CreatedAt *internal.DateTime `json:"createdAt"`
+		UpdatedAt *internal.DateTime `json:"updatedAt"`
+		ExpiredAt *internal.DateTime `json:"expiredAt,omitempty"`
 	}{
 		embed: embed(*f),
 	}
@@ -75,14 +194,12 @@ func (f *File) UnmarshalJSON(data []byte) error {
 	f.CreatedAt = unmarshaler.CreatedAt.Time()
 	f.UpdatedAt = unmarshaler.UpdatedAt.Time()
 	f.ExpiredAt = unmarshaler.ExpiredAt.TimePtr()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *f)
+	extraProperties, err := internal.ExtractExtraProperties(data, *f)
 	if err != nil {
 		return err
 	}
 	f.extraProperties = extraProperties
-
-	f._rawJSON = json.RawMessage(data)
+	f.rawJSON = json.RawMessage(data)
 	return nil
 }
 
@@ -90,25 +207,25 @@ func (f *File) MarshalJSON() ([]byte, error) {
 	type embed File
 	var marshaler = struct {
 		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-		UpdatedAt *core.DateTime `json:"updatedAt"`
-		ExpiredAt *core.DateTime `json:"expiredAt,omitempty"`
+		CreatedAt *internal.DateTime `json:"createdAt"`
+		UpdatedAt *internal.DateTime `json:"updatedAt"`
+		ExpiredAt *internal.DateTime `json:"expiredAt,omitempty"`
 	}{
 		embed:     embed(*f),
-		CreatedAt: core.NewDateTime(f.CreatedAt),
-		UpdatedAt: core.NewDateTime(f.UpdatedAt),
-		ExpiredAt: core.NewOptionalDateTime(f.ExpiredAt),
+		CreatedAt: internal.NewDateTime(f.CreatedAt),
+		UpdatedAt: internal.NewDateTime(f.UpdatedAt),
+		ExpiredAt: internal.NewOptionalDateTime(f.ExpiredAt),
 	}
 	return json.Marshal(marshaler)
 }
 
 func (f *File) String() string {
-	if len(f._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(f._rawJSON); err == nil {
+	if len(f.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(f.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(f); err == nil {
+	if value, err := internal.StringifyJSON(f); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", f)
@@ -146,7 +263,14 @@ type FileResponse struct {
 	Data *File `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (f *FileResponse) GetData() *File {
+	if f == nil {
+		return nil
+	}
+	return f.Data
 }
 
 func (f *FileResponse) GetExtraProperties() map[string]interface{} {
@@ -160,24 +284,22 @@ func (f *FileResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*f = FileResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *f)
+	extraProperties, err := internal.ExtractExtraProperties(data, *f)
 	if err != nil {
 		return err
 	}
 	f.extraProperties = extraProperties
-
-	f._rawJSON = json.RawMessage(data)
+	f.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (f *FileResponse) String() string {
-	if len(f._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(f._rawJSON); err == nil {
+	if len(f.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(f.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(f); err == nil {
+	if value, err := internal.StringifyJSON(f); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", f)
@@ -188,7 +310,21 @@ type ListFilesResponse struct {
 	Data       []*File     `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (l *ListFilesResponse) GetPagination() *Pagination {
+	if l == nil {
+		return nil
+	}
+	return l.Pagination
+}
+
+func (l *ListFilesResponse) GetData() []*File {
+	if l == nil {
+		return nil
+	}
+	return l.Data
 }
 
 func (l *ListFilesResponse) GetExtraProperties() map[string]interface{} {
@@ -202,24 +338,22 @@ func (l *ListFilesResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*l = ListFilesResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	extraProperties, err := internal.ExtractExtraProperties(data, *l)
 	if err != nil {
 		return err
 	}
 	l.extraProperties = extraProperties
-
-	l._rawJSON = json.RawMessage(data)
+	l.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (l *ListFilesResponse) String() string {
-	if len(l._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(l._rawJSON); err == nil {
+	if len(l.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(l.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(l); err == nil {
+	if value, err := internal.StringifyJSON(l); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", l)

@@ -5,7 +5,7 @@ package api
 import (
 	json "encoding/json"
 	fmt "fmt"
-	core "github.com/FlatFilers/flatfile-go/core"
+	internal "github.com/FlatFilers/flatfile-go/internal"
 	time "time"
 )
 
@@ -96,7 +96,56 @@ type CellValueWithCounts struct {
 	Counts    *RecordCounts          `json:"counts,omitempty" url:"counts,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (c *CellValueWithCounts) GetValid() *bool {
+	if c == nil {
+		return nil
+	}
+	return c.Valid
+}
+
+func (c *CellValueWithCounts) GetMessages() []*ValidationMessage {
+	if c == nil {
+		return nil
+	}
+	return c.Messages
+}
+
+func (c *CellValueWithCounts) GetMetadata() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.Metadata
+}
+
+func (c *CellValueWithCounts) GetValue() *CellValueUnion {
+	if c == nil {
+		return nil
+	}
+	return c.Value
+}
+
+func (c *CellValueWithCounts) GetLayer() *string {
+	if c == nil {
+		return nil
+	}
+	return c.Layer
+}
+
+func (c *CellValueWithCounts) GetUpdatedAt() *time.Time {
+	if c == nil {
+		return nil
+	}
+	return c.UpdatedAt
+}
+
+func (c *CellValueWithCounts) GetCounts() *RecordCounts {
+	if c == nil {
+		return nil
+	}
+	return c.Counts
 }
 
 func (c *CellValueWithCounts) GetExtraProperties() map[string]interface{} {
@@ -107,7 +156,7 @@ func (c *CellValueWithCounts) UnmarshalJSON(data []byte) error {
 	type embed CellValueWithCounts
 	var unmarshaler = struct {
 		embed
-		UpdatedAt *core.DateTime `json:"updatedAt,omitempty"`
+		UpdatedAt *internal.DateTime `json:"updatedAt,omitempty"`
 	}{
 		embed: embed(*c),
 	}
@@ -116,14 +165,12 @@ func (c *CellValueWithCounts) UnmarshalJSON(data []byte) error {
 	}
 	*c = CellValueWithCounts(unmarshaler.embed)
 	c.UpdatedAt = unmarshaler.UpdatedAt.TimePtr()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
 	if err != nil {
 		return err
 	}
 	c.extraProperties = extraProperties
-
-	c._rawJSON = json.RawMessage(data)
+	c.rawJSON = json.RawMessage(data)
 	return nil
 }
 
@@ -131,21 +178,21 @@ func (c *CellValueWithCounts) MarshalJSON() ([]byte, error) {
 	type embed CellValueWithCounts
 	var marshaler = struct {
 		embed
-		UpdatedAt *core.DateTime `json:"updatedAt,omitempty"`
+		UpdatedAt *internal.DateTime `json:"updatedAt,omitempty"`
 	}{
 		embed:     embed(*c),
-		UpdatedAt: core.NewOptionalDateTime(c.UpdatedAt),
+		UpdatedAt: internal.NewOptionalDateTime(c.UpdatedAt),
 	}
 	return json.Marshal(marshaler)
 }
 
 func (c *CellValueWithCounts) String() string {
-	if len(c._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(c); err == nil {
+	if value, err := internal.StringifyJSON(c); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", c)
@@ -155,7 +202,14 @@ type CellsResponse struct {
 	Data CellsResponseData `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (c *CellsResponse) GetData() CellsResponseData {
+	if c == nil {
+		return nil
+	}
+	return c.Data
 }
 
 func (c *CellsResponse) GetExtraProperties() map[string]interface{} {
@@ -169,24 +223,22 @@ func (c *CellsResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*c = CellsResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
 	if err != nil {
 		return err
 	}
 	c.extraProperties = extraProperties
-
-	c._rawJSON = json.RawMessage(data)
+	c.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (c *CellsResponse) String() string {
-	if len(c._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(c); err == nil {
+	if value, err := internal.StringifyJSON(c); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", c)
@@ -195,8 +247,168 @@ func (c *CellsResponse) String() string {
 // Cell values grouped by field key
 type CellsResponseData = map[string][]*CellValueWithCounts
 
+type CompositeUniqueConstraint struct {
+	// The name of the constraint
+	Name string `json:"name" url:"name"`
+	// The fields that must be unique together
+	Fields []string `json:"fields,omitempty" url:"fields,omitempty"`
+	// Fields that, when empty, will cause this unique constraint to be ignored
+	RequiredFields []string                          `json:"requiredFields,omitempty" url:"requiredFields,omitempty"`
+	Strategy       CompositeUniqueConstraintStrategy `json:"strategy" url:"strategy"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (c *CompositeUniqueConstraint) GetName() string {
+	if c == nil {
+		return ""
+	}
+	return c.Name
+}
+
+func (c *CompositeUniqueConstraint) GetFields() []string {
+	if c == nil {
+		return nil
+	}
+	return c.Fields
+}
+
+func (c *CompositeUniqueConstraint) GetRequiredFields() []string {
+	if c == nil {
+		return nil
+	}
+	return c.RequiredFields
+}
+
+func (c *CompositeUniqueConstraint) GetStrategy() CompositeUniqueConstraintStrategy {
+	if c == nil {
+		return ""
+	}
+	return c.Strategy
+}
+
+func (c *CompositeUniqueConstraint) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CompositeUniqueConstraint) UnmarshalJSON(data []byte) error {
+	type unmarshaler CompositeUniqueConstraint
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*c = CompositeUniqueConstraint(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CompositeUniqueConstraint) String() string {
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+type CompositeUniqueConstraintStrategy string
+
+const (
+	// A hash of the fields will be used to determine uniqueness
+	CompositeUniqueConstraintStrategyHash CompositeUniqueConstraintStrategy = "hash"
+	// The values of the fields will be concatenated to determine uniqueness
+	CompositeUniqueConstraintStrategyConcat CompositeUniqueConstraintStrategy = "concat"
+)
+
+func NewCompositeUniqueConstraintStrategyFromString(s string) (CompositeUniqueConstraintStrategy, error) {
+	switch s {
+	case "hash":
+		return CompositeUniqueConstraintStrategyHash, nil
+	case "concat":
+		return CompositeUniqueConstraintStrategyConcat, nil
+	}
+	var t CompositeUniqueConstraintStrategy
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (c CompositeUniqueConstraintStrategy) Ptr() *CompositeUniqueConstraintStrategy {
+	return &c
+}
+
 // When true, excludes duplicate values
 type Distinct = bool
+
+type ExternalSheetConstraint struct {
+	Validator string `json:"validator" url:"validator"`
+	// The fields that must be unique together
+	Fields []string    `json:"fields,omitempty" url:"fields,omitempty"`
+	Config interface{} `json:"config,omitempty" url:"config,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (e *ExternalSheetConstraint) GetValidator() string {
+	if e == nil {
+		return ""
+	}
+	return e.Validator
+}
+
+func (e *ExternalSheetConstraint) GetFields() []string {
+	if e == nil {
+		return nil
+	}
+	return e.Fields
+}
+
+func (e *ExternalSheetConstraint) GetConfig() interface{} {
+	if e == nil {
+		return nil
+	}
+	return e.Config
+}
+
+func (e *ExternalSheetConstraint) GetExtraProperties() map[string]interface{} {
+	return e.extraProperties
+}
+
+func (e *ExternalSheetConstraint) UnmarshalJSON(data []byte) error {
+	type unmarshaler ExternalSheetConstraint
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*e = ExternalSheetConstraint(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *e)
+	if err != nil {
+		return err
+	}
+	e.extraProperties = extraProperties
+	e.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (e *ExternalSheetConstraint) String() string {
+	if len(e.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(e.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(e); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", e)
+}
 
 // Returns results from the given field only. Otherwise all field cells are returned
 type FieldKey = string
@@ -204,11 +416,64 @@ type FieldKey = string
 // When both distinct and includeCounts are true, the count of distinct field values will be returned
 type IncludeCounts = bool
 
+type ListSheetsResponse struct {
+	Data []*Sheet `json:"data,omitempty" url:"data,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (l *ListSheetsResponse) GetData() []*Sheet {
+	if l == nil {
+		return nil
+	}
+	return l.Data
+}
+
+func (l *ListSheetsResponse) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
+}
+
+func (l *ListSheetsResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler ListSheetsResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*l = ListSheetsResponse(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+	l.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (l *ListSheetsResponse) String() string {
+	if len(l.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(l.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(l); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", l)
+}
+
 type RecordCountsResponse struct {
 	Data *RecordCountsResponseData `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (r *RecordCountsResponse) GetData() *RecordCountsResponseData {
+	if r == nil {
+		return nil
+	}
+	return r.Data
 }
 
 func (r *RecordCountsResponse) GetExtraProperties() map[string]interface{} {
@@ -222,24 +487,22 @@ func (r *RecordCountsResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*r = RecordCountsResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	extraProperties, err := internal.ExtractExtraProperties(data, *r)
 	if err != nil {
 		return err
 	}
 	r.extraProperties = extraProperties
-
-	r._rawJSON = json.RawMessage(data)
+	r.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (r *RecordCountsResponse) String() string {
-	if len(r._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(r._rawJSON); err == nil {
+	if len(r.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(r.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(r); err == nil {
+	if value, err := internal.StringifyJSON(r); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", r)
@@ -250,7 +513,21 @@ type RecordCountsResponseData struct {
 	Success bool          `json:"success" url:"success"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (r *RecordCountsResponseData) GetCounts() *RecordCounts {
+	if r == nil {
+		return nil
+	}
+	return r.Counts
+}
+
+func (r *RecordCountsResponseData) GetSuccess() bool {
+	if r == nil {
+		return false
+	}
+	return r.Success
 }
 
 func (r *RecordCountsResponseData) GetExtraProperties() map[string]interface{} {
@@ -264,34 +541,832 @@ func (r *RecordCountsResponseData) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*r = RecordCountsResponseData(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	extraProperties, err := internal.ExtractExtraProperties(data, *r)
 	if err != nil {
 		return err
 	}
 	r.extraProperties = extraProperties
-
-	r._rawJSON = json.RawMessage(data)
+	r.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (r *RecordCountsResponseData) String() string {
-	if len(r._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(r._rawJSON); err == nil {
+	if len(r.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(r.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(r); err == nil {
+	if value, err := internal.StringifyJSON(r); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", r)
+}
+
+// A place to store tabular data
+type Sheet struct {
+	// The ID of the Sheet.
+	Id SheetId `json:"id" url:"id"`
+	// The ID of the Workbook.
+	WorkbookId WorkbookId `json:"workbookId" url:"workbookId"`
+	// The name of the Sheet.
+	Name string `json:"name" url:"name"`
+	// The slug of the Sheet.
+	Slug string `json:"slug" url:"slug"`
+	// Describes shape of data as well as behavior
+	Config *SheetConfig `json:"config,omitempty" url:"config,omitempty"`
+	// Useful for any contextual metadata regarding the sheet. Store any valid json
+	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
+	// The scoped namespace of the Sheet.
+	Namespace *string `json:"namespace,omitempty" url:"namespace,omitempty"`
+	// The actor who locked the Sheet.
+	LockedBy *string `json:"lockedBy,omitempty" url:"lockedBy,omitempty"`
+	// Date the sheet was last updated
+	UpdatedAt time.Time `json:"updatedAt" url:"updatedAt"`
+	// Date the sheet was created
+	CreatedAt time.Time `json:"createdAt" url:"createdAt"`
+	// The time the Sheet was locked.
+	LockedAt *time.Time `json:"lockedAt,omitempty" url:"lockedAt,omitempty"`
+	// The precomputed counts of records in the Sheet (may not exist).
+	RecordCounts *RecordCounts `json:"recordCounts,omitempty" url:"recordCounts,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (s *Sheet) GetId() SheetId {
+	if s == nil {
+		return ""
+	}
+	return s.Id
+}
+
+func (s *Sheet) GetWorkbookId() WorkbookId {
+	if s == nil {
+		return ""
+	}
+	return s.WorkbookId
+}
+
+func (s *Sheet) GetName() string {
+	if s == nil {
+		return ""
+	}
+	return s.Name
+}
+
+func (s *Sheet) GetSlug() string {
+	if s == nil {
+		return ""
+	}
+	return s.Slug
+}
+
+func (s *Sheet) GetConfig() *SheetConfig {
+	if s == nil {
+		return nil
+	}
+	return s.Config
+}
+
+func (s *Sheet) GetMetadata() interface{} {
+	if s == nil {
+		return nil
+	}
+	return s.Metadata
+}
+
+func (s *Sheet) GetNamespace() *string {
+	if s == nil {
+		return nil
+	}
+	return s.Namespace
+}
+
+func (s *Sheet) GetLockedBy() *string {
+	if s == nil {
+		return nil
+	}
+	return s.LockedBy
+}
+
+func (s *Sheet) GetUpdatedAt() time.Time {
+	if s == nil {
+		return time.Time{}
+	}
+	return s.UpdatedAt
+}
+
+func (s *Sheet) GetCreatedAt() time.Time {
+	if s == nil {
+		return time.Time{}
+	}
+	return s.CreatedAt
+}
+
+func (s *Sheet) GetLockedAt() *time.Time {
+	if s == nil {
+		return nil
+	}
+	return s.LockedAt
+}
+
+func (s *Sheet) GetRecordCounts() *RecordCounts {
+	if s == nil {
+		return nil
+	}
+	return s.RecordCounts
+}
+
+func (s *Sheet) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *Sheet) UnmarshalJSON(data []byte) error {
+	type embed Sheet
+	var unmarshaler = struct {
+		embed
+		UpdatedAt *internal.DateTime `json:"updatedAt"`
+		CreatedAt *internal.DateTime `json:"createdAt"`
+		LockedAt  *internal.DateTime `json:"lockedAt,omitempty"`
+	}{
+		embed: embed(*s),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*s = Sheet(unmarshaler.embed)
+	s.UpdatedAt = unmarshaler.UpdatedAt.Time()
+	s.CreatedAt = unmarshaler.CreatedAt.Time()
+	s.LockedAt = unmarshaler.LockedAt.TimePtr()
+	extraProperties, err := internal.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+	s.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *Sheet) MarshalJSON() ([]byte, error) {
+	type embed Sheet
+	var marshaler = struct {
+		embed
+		UpdatedAt *internal.DateTime `json:"updatedAt"`
+		CreatedAt *internal.DateTime `json:"createdAt"`
+		LockedAt  *internal.DateTime `json:"lockedAt,omitempty"`
+	}{
+		embed:     embed(*s),
+		UpdatedAt: internal.NewDateTime(s.UpdatedAt),
+		CreatedAt: internal.NewDateTime(s.CreatedAt),
+		LockedAt:  internal.NewOptionalDateTime(s.LockedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (s *Sheet) String() string {
+	if len(s.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(s.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
+type SheetAccess string
+
+const (
+	SheetAccessAll    SheetAccess = "*"
+	SheetAccessAdd    SheetAccess = "add"
+	SheetAccessEdit   SheetAccess = "edit"
+	SheetAccessDelete SheetAccess = "delete"
+	SheetAccessImport SheetAccess = "import"
+)
+
+func NewSheetAccessFromString(s string) (SheetAccess, error) {
+	switch s {
+	case "*":
+		return SheetAccessAll, nil
+	case "add":
+		return SheetAccessAdd, nil
+	case "edit":
+		return SheetAccessEdit, nil
+	case "delete":
+		return SheetAccessDelete, nil
+	case "import":
+		return SheetAccessImport, nil
+	}
+	var t SheetAccess
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (s SheetAccess) Ptr() *SheetAccess {
+	return &s
+}
+
+// Describes shape of data as well as behavior
+type SheetConfig struct {
+	// The name of your Sheet as it will appear to your end users.
+	Name string `json:"name" url:"name"`
+	// A sentence or two describing the purpose of your Sheet.
+	Description *string `json:"description,omitempty" url:"description,omitempty"`
+	// A unique identifier for your Sheet.
+	Slug *string `json:"slug,omitempty" url:"slug,omitempty"`
+	// A boolean specifying whether or not this sheet is read only. Read only sheets are not editable by end users.
+	Readonly *bool `json:"readonly,omitempty" url:"readonly,omitempty"`
+	// Allow end users to add fields during mapping.
+	AllowAdditionalFields *bool `json:"allowAdditionalFields,omitempty" url:"allowAdditionalFields,omitempty"`
+	// The minimum confidence required to automatically map a field
+	MappingConfidenceThreshold *float64 `json:"mappingConfidenceThreshold,omitempty" url:"mappingConfidenceThreshold,omitempty"`
+	// Control Sheet-level access for all users.
+	Access []SheetAccess `json:"access,omitempty" url:"access,omitempty"`
+	// Where you define your Sheet’s data schema.
+	Fields []*Property `json:"fields,omitempty" url:"fields,omitempty"`
+	// An array of actions that end users can perform on this Sheet.
+	Actions []*Action `json:"actions,omitempty" url:"actions,omitempty"`
+	// Useful for any contextual metadata regarding the schema. Store any valid json
+	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
+	// An array of constraints that end users can perform on this Sheet.
+	Constraints []*SheetConstraint `json:"constraints,omitempty" url:"constraints,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (s *SheetConfig) GetName() string {
+	if s == nil {
+		return ""
+	}
+	return s.Name
+}
+
+func (s *SheetConfig) GetDescription() *string {
+	if s == nil {
+		return nil
+	}
+	return s.Description
+}
+
+func (s *SheetConfig) GetSlug() *string {
+	if s == nil {
+		return nil
+	}
+	return s.Slug
+}
+
+func (s *SheetConfig) GetReadonly() *bool {
+	if s == nil {
+		return nil
+	}
+	return s.Readonly
+}
+
+func (s *SheetConfig) GetAllowAdditionalFields() *bool {
+	if s == nil {
+		return nil
+	}
+	return s.AllowAdditionalFields
+}
+
+func (s *SheetConfig) GetMappingConfidenceThreshold() *float64 {
+	if s == nil {
+		return nil
+	}
+	return s.MappingConfidenceThreshold
+}
+
+func (s *SheetConfig) GetAccess() []SheetAccess {
+	if s == nil {
+		return nil
+	}
+	return s.Access
+}
+
+func (s *SheetConfig) GetFields() []*Property {
+	if s == nil {
+		return nil
+	}
+	return s.Fields
+}
+
+func (s *SheetConfig) GetActions() []*Action {
+	if s == nil {
+		return nil
+	}
+	return s.Actions
+}
+
+func (s *SheetConfig) GetMetadata() interface{} {
+	if s == nil {
+		return nil
+	}
+	return s.Metadata
+}
+
+func (s *SheetConfig) GetConstraints() []*SheetConstraint {
+	if s == nil {
+		return nil
+	}
+	return s.Constraints
+}
+
+func (s *SheetConfig) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SheetConfig) UnmarshalJSON(data []byte) error {
+	type unmarshaler SheetConfig
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SheetConfig(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+	s.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *SheetConfig) String() string {
+	if len(s.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(s.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
+type SheetConfigOrUpdate struct {
+	// The name of your Sheet as it will appear to your end users.
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
+	// A sentence or two describing the purpose of your Sheet.
+	Description *string `json:"description,omitempty" url:"description,omitempty"`
+	// A unique identifier for your Sheet. **Required when updating a Workbook.**
+	Slug *string `json:"slug,omitempty" url:"slug,omitempty"`
+	// A boolean specifying whether or not this sheet is read only. Read only sheets are not editable by end users.
+	Readonly *bool `json:"readonly,omitempty" url:"readonly,omitempty"`
+	// Allow end users to add fields during mapping.
+	AllowAdditionalFields *bool `json:"allowAdditionalFields,omitempty" url:"allowAdditionalFields,omitempty"`
+	// The minimum confidence required to automatically map a field
+	MappingConfidenceThreshold *float64 `json:"mappingConfidenceThreshold,omitempty" url:"mappingConfidenceThreshold,omitempty"`
+	// Control Sheet-level access for all users.
+	Access []SheetAccess `json:"access,omitempty" url:"access,omitempty"`
+	// Where you define your Sheet’s data schema.
+	Fields []*Property `json:"fields,omitempty" url:"fields,omitempty"`
+	// An array of actions that end users can perform on this Sheet.
+	Actions []*Action `json:"actions,omitempty" url:"actions,omitempty"`
+	// The ID of the Sheet.
+	Id *SheetId `json:"id,omitempty" url:"id,omitempty"`
+	// The ID of the Workbook.
+	WorkbookId *WorkbookId `json:"workbookId,omitempty" url:"workbookId,omitempty"`
+	// Describes shape of data as well as behavior.
+	Config *SheetConfig `json:"config,omitempty" url:"config,omitempty"`
+	// Useful for any contextual metadata regarding the sheet. Store any valid json
+	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
+	// The scoped namespace of the Sheet.
+	Namespace *string `json:"namespace,omitempty" url:"namespace,omitempty"`
+	// Date the sheet was last updated
+	UpdatedAt *time.Time `json:"updatedAt,omitempty" url:"updatedAt,omitempty"`
+	// Date the sheet was created
+	CreatedAt *time.Time `json:"createdAt,omitempty" url:"createdAt,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (s *SheetConfigOrUpdate) GetName() *string {
+	if s == nil {
+		return nil
+	}
+	return s.Name
+}
+
+func (s *SheetConfigOrUpdate) GetDescription() *string {
+	if s == nil {
+		return nil
+	}
+	return s.Description
+}
+
+func (s *SheetConfigOrUpdate) GetSlug() *string {
+	if s == nil {
+		return nil
+	}
+	return s.Slug
+}
+
+func (s *SheetConfigOrUpdate) GetReadonly() *bool {
+	if s == nil {
+		return nil
+	}
+	return s.Readonly
+}
+
+func (s *SheetConfigOrUpdate) GetAllowAdditionalFields() *bool {
+	if s == nil {
+		return nil
+	}
+	return s.AllowAdditionalFields
+}
+
+func (s *SheetConfigOrUpdate) GetMappingConfidenceThreshold() *float64 {
+	if s == nil {
+		return nil
+	}
+	return s.MappingConfidenceThreshold
+}
+
+func (s *SheetConfigOrUpdate) GetAccess() []SheetAccess {
+	if s == nil {
+		return nil
+	}
+	return s.Access
+}
+
+func (s *SheetConfigOrUpdate) GetFields() []*Property {
+	if s == nil {
+		return nil
+	}
+	return s.Fields
+}
+
+func (s *SheetConfigOrUpdate) GetActions() []*Action {
+	if s == nil {
+		return nil
+	}
+	return s.Actions
+}
+
+func (s *SheetConfigOrUpdate) GetId() *SheetId {
+	if s == nil {
+		return nil
+	}
+	return s.Id
+}
+
+func (s *SheetConfigOrUpdate) GetWorkbookId() *WorkbookId {
+	if s == nil {
+		return nil
+	}
+	return s.WorkbookId
+}
+
+func (s *SheetConfigOrUpdate) GetConfig() *SheetConfig {
+	if s == nil {
+		return nil
+	}
+	return s.Config
+}
+
+func (s *SheetConfigOrUpdate) GetMetadata() interface{} {
+	if s == nil {
+		return nil
+	}
+	return s.Metadata
+}
+
+func (s *SheetConfigOrUpdate) GetNamespace() *string {
+	if s == nil {
+		return nil
+	}
+	return s.Namespace
+}
+
+func (s *SheetConfigOrUpdate) GetUpdatedAt() *time.Time {
+	if s == nil {
+		return nil
+	}
+	return s.UpdatedAt
+}
+
+func (s *SheetConfigOrUpdate) GetCreatedAt() *time.Time {
+	if s == nil {
+		return nil
+	}
+	return s.CreatedAt
+}
+
+func (s *SheetConfigOrUpdate) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SheetConfigOrUpdate) UnmarshalJSON(data []byte) error {
+	type embed SheetConfigOrUpdate
+	var unmarshaler = struct {
+		embed
+		UpdatedAt *internal.DateTime `json:"updatedAt,omitempty"`
+		CreatedAt *internal.DateTime `json:"createdAt,omitempty"`
+	}{
+		embed: embed(*s),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*s = SheetConfigOrUpdate(unmarshaler.embed)
+	s.UpdatedAt = unmarshaler.UpdatedAt.TimePtr()
+	s.CreatedAt = unmarshaler.CreatedAt.TimePtr()
+	extraProperties, err := internal.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+	s.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *SheetConfigOrUpdate) MarshalJSON() ([]byte, error) {
+	type embed SheetConfigOrUpdate
+	var marshaler = struct {
+		embed
+		UpdatedAt *internal.DateTime `json:"updatedAt,omitempty"`
+		CreatedAt *internal.DateTime `json:"createdAt,omitempty"`
+	}{
+		embed:     embed(*s),
+		UpdatedAt: internal.NewOptionalDateTime(s.UpdatedAt),
+		CreatedAt: internal.NewOptionalDateTime(s.CreatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (s *SheetConfigOrUpdate) String() string {
+	if len(s.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(s.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
+// Changes to make to an existing sheet config
+type SheetConfigUpdate struct {
+	// The name of your Sheet as it will appear to your end users.
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
+	// A sentence or two describing the purpose of your Sheet.
+	Description *string `json:"description,omitempty" url:"description,omitempty"`
+	// A unique identifier for your Sheet. **Required when updating a Workbook.**
+	Slug *string `json:"slug,omitempty" url:"slug,omitempty"`
+	// A boolean specifying whether or not this sheet is read only. Read only sheets are not editable by end users.
+	Readonly *bool `json:"readonly,omitempty" url:"readonly,omitempty"`
+	// Allow end users to add fields during mapping.
+	AllowAdditionalFields *bool `json:"allowAdditionalFields,omitempty" url:"allowAdditionalFields,omitempty"`
+	// The minimum confidence required to automatically map a field
+	MappingConfidenceThreshold *float64 `json:"mappingConfidenceThreshold,omitempty" url:"mappingConfidenceThreshold,omitempty"`
+	// Control Sheet-level access for all users.
+	Access []SheetAccess `json:"access,omitempty" url:"access,omitempty"`
+	// Where you define your Sheet’s data schema.
+	Fields []*Property `json:"fields,omitempty" url:"fields,omitempty"`
+	// An array of actions that end users can perform on this Sheet.
+	Actions []*Action `json:"actions,omitempty" url:"actions,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (s *SheetConfigUpdate) GetName() *string {
+	if s == nil {
+		return nil
+	}
+	return s.Name
+}
+
+func (s *SheetConfigUpdate) GetDescription() *string {
+	if s == nil {
+		return nil
+	}
+	return s.Description
+}
+
+func (s *SheetConfigUpdate) GetSlug() *string {
+	if s == nil {
+		return nil
+	}
+	return s.Slug
+}
+
+func (s *SheetConfigUpdate) GetReadonly() *bool {
+	if s == nil {
+		return nil
+	}
+	return s.Readonly
+}
+
+func (s *SheetConfigUpdate) GetAllowAdditionalFields() *bool {
+	if s == nil {
+		return nil
+	}
+	return s.AllowAdditionalFields
+}
+
+func (s *SheetConfigUpdate) GetMappingConfidenceThreshold() *float64 {
+	if s == nil {
+		return nil
+	}
+	return s.MappingConfidenceThreshold
+}
+
+func (s *SheetConfigUpdate) GetAccess() []SheetAccess {
+	if s == nil {
+		return nil
+	}
+	return s.Access
+}
+
+func (s *SheetConfigUpdate) GetFields() []*Property {
+	if s == nil {
+		return nil
+	}
+	return s.Fields
+}
+
+func (s *SheetConfigUpdate) GetActions() []*Action {
+	if s == nil {
+		return nil
+	}
+	return s.Actions
+}
+
+func (s *SheetConfigUpdate) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SheetConfigUpdate) UnmarshalJSON(data []byte) error {
+	type unmarshaler SheetConfigUpdate
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SheetConfigUpdate(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+	s.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *SheetConfigUpdate) String() string {
+	if len(s.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(s.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
+type SheetConstraint struct {
+	Type     string
+	Unique   *CompositeUniqueConstraint
+	External *ExternalSheetConstraint
+}
+
+func NewSheetConstraintFromUnique(value *CompositeUniqueConstraint) *SheetConstraint {
+	return &SheetConstraint{Type: "unique", Unique: value}
+}
+
+func NewSheetConstraintFromExternal(value *ExternalSheetConstraint) *SheetConstraint {
+	return &SheetConstraint{Type: "external", External: value}
+}
+
+func (s *SheetConstraint) GetType() string {
+	if s == nil {
+		return ""
+	}
+	return s.Type
+}
+
+func (s *SheetConstraint) GetUnique() *CompositeUniqueConstraint {
+	if s == nil {
+		return nil
+	}
+	return s.Unique
+}
+
+func (s *SheetConstraint) GetExternal() *ExternalSheetConstraint {
+	if s == nil {
+		return nil
+	}
+	return s.External
+}
+
+func (s *SheetConstraint) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	s.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", s)
+	}
+	switch unmarshaler.Type {
+	case "unique":
+		value := new(CompositeUniqueConstraint)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		s.Unique = value
+	case "external":
+		value := new(ExternalSheetConstraint)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		s.External = value
+	}
+	return nil
+}
+
+func (s SheetConstraint) MarshalJSON() ([]byte, error) {
+	if err := s.validate(); err != nil {
+		return nil, err
+	}
+	switch s.Type {
+	default:
+		return nil, fmt.Errorf("invalid type %s in %T", s.Type, s)
+	case "unique":
+		return internal.MarshalJSONWithExtraProperty(s.Unique, "type", "unique")
+	case "external":
+		return internal.MarshalJSONWithExtraProperty(s.External, "type", "external")
+	}
+}
+
+type SheetConstraintVisitor interface {
+	VisitUnique(*CompositeUniqueConstraint) error
+	VisitExternal(*ExternalSheetConstraint) error
+}
+
+func (s *SheetConstraint) Accept(visitor SheetConstraintVisitor) error {
+	switch s.Type {
+	default:
+		return fmt.Errorf("invalid type %s in %T", s.Type, s)
+	case "unique":
+		return visitor.VisitUnique(s.Unique)
+	case "external":
+		return visitor.VisitExternal(s.External)
+	}
+}
+
+func (s *SheetConstraint) validate() error {
+	if s == nil {
+		return fmt.Errorf("type %T is nil", s)
+	}
+	var fields []string
+	if s.Unique != nil {
+		fields = append(fields, "unique")
+	}
+	if s.External != nil {
+		fields = append(fields, "external")
+	}
+	if len(fields) == 0 {
+		if s.Type != "" {
+			return fmt.Errorf("type %T defines a discriminant set to %q but the field is not set", s, s.Type)
+		}
+		return fmt.Errorf("type %T is empty", s)
+	}
+	if len(fields) > 1 {
+		return fmt.Errorf("type %T defines values for %s, but only one value is allowed", s, fields)
+	}
+	if s.Type != "" {
+		field := fields[0]
+		if s.Type != field {
+			return fmt.Errorf(
+				"type %T defines a discriminant set to %q, but it does not match the %T field; either remove or update the discriminant to match",
+				s,
+				s.Type,
+				s,
+			)
+		}
+	}
+	return nil
 }
 
 type SheetResponse struct {
 	Data *Sheet `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (s *SheetResponse) GetData() *Sheet {
+	if s == nil {
+		return nil
+	}
+	return s.Data
 }
 
 func (s *SheetResponse) GetExtraProperties() map[string]interface{} {
@@ -305,24 +1380,146 @@ func (s *SheetResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*s = SheetResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	extraProperties, err := internal.ExtractExtraProperties(data, *s)
 	if err != nil {
 		return err
 	}
 	s.extraProperties = extraProperties
-
-	s._rawJSON = json.RawMessage(data)
+	s.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (s *SheetResponse) String() string {
-	if len(s._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+	if len(s.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(s.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(s); err == nil {
+	if value, err := internal.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
+// Changes to make to an existing sheet
+type SheetUpdate struct {
+	// The ID of the Sheet.
+	Id *SheetId `json:"id,omitempty" url:"id,omitempty"`
+	// The ID of the Workbook.
+	WorkbookId *WorkbookId `json:"workbookId,omitempty" url:"workbookId,omitempty"`
+	// Describes shape of data as well as behavior.
+	Config *SheetConfig `json:"config,omitempty" url:"config,omitempty"`
+	// Useful for any contextual metadata regarding the sheet. Store any valid json
+	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
+	// The scoped namespace of the Sheet.
+	Namespace *string `json:"namespace,omitempty" url:"namespace,omitempty"`
+	// Date the sheet was last updated
+	UpdatedAt *time.Time `json:"updatedAt,omitempty" url:"updatedAt,omitempty"`
+	// Date the sheet was created
+	CreatedAt *time.Time `json:"createdAt,omitempty" url:"createdAt,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (s *SheetUpdate) GetId() *SheetId {
+	if s == nil {
+		return nil
+	}
+	return s.Id
+}
+
+func (s *SheetUpdate) GetWorkbookId() *WorkbookId {
+	if s == nil {
+		return nil
+	}
+	return s.WorkbookId
+}
+
+func (s *SheetUpdate) GetConfig() *SheetConfig {
+	if s == nil {
+		return nil
+	}
+	return s.Config
+}
+
+func (s *SheetUpdate) GetMetadata() interface{} {
+	if s == nil {
+		return nil
+	}
+	return s.Metadata
+}
+
+func (s *SheetUpdate) GetNamespace() *string {
+	if s == nil {
+		return nil
+	}
+	return s.Namespace
+}
+
+func (s *SheetUpdate) GetUpdatedAt() *time.Time {
+	if s == nil {
+		return nil
+	}
+	return s.UpdatedAt
+}
+
+func (s *SheetUpdate) GetCreatedAt() *time.Time {
+	if s == nil {
+		return nil
+	}
+	return s.CreatedAt
+}
+
+func (s *SheetUpdate) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SheetUpdate) UnmarshalJSON(data []byte) error {
+	type embed SheetUpdate
+	var unmarshaler = struct {
+		embed
+		UpdatedAt *internal.DateTime `json:"updatedAt,omitempty"`
+		CreatedAt *internal.DateTime `json:"createdAt,omitempty"`
+	}{
+		embed: embed(*s),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*s = SheetUpdate(unmarshaler.embed)
+	s.UpdatedAt = unmarshaler.UpdatedAt.TimePtr()
+	s.CreatedAt = unmarshaler.CreatedAt.TimePtr()
+	extraProperties, err := internal.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+	s.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *SheetUpdate) MarshalJSON() ([]byte, error) {
+	type embed SheetUpdate
+	var marshaler = struct {
+		embed
+		UpdatedAt *internal.DateTime `json:"updatedAt,omitempty"`
+		CreatedAt *internal.DateTime `json:"createdAt,omitempty"`
+	}{
+		embed:     embed(*s),
+		UpdatedAt: internal.NewOptionalDateTime(s.UpdatedAt),
+		CreatedAt: internal.NewOptionalDateTime(s.CreatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (s *SheetUpdate) String() string {
+	if len(s.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(s.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(s); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", s)
@@ -338,7 +1535,28 @@ type SheetUpdateRequest struct {
 	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (s *SheetUpdateRequest) GetName() *string {
+	if s == nil {
+		return nil
+	}
+	return s.Name
+}
+
+func (s *SheetUpdateRequest) GetSlug() *string {
+	if s == nil {
+		return nil
+	}
+	return s.Slug
+}
+
+func (s *SheetUpdateRequest) GetMetadata() interface{} {
+	if s == nil {
+		return nil
+	}
+	return s.Metadata
 }
 
 func (s *SheetUpdateRequest) GetExtraProperties() map[string]interface{} {
@@ -352,24 +1570,22 @@ func (s *SheetUpdateRequest) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*s = SheetUpdateRequest(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	extraProperties, err := internal.ExtractExtraProperties(data, *s)
 	if err != nil {
 		return err
 	}
 	s.extraProperties = extraProperties
-
-	s._rawJSON = json.RawMessage(data)
+	s.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (s *SheetUpdateRequest) String() string {
-	if len(s._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+	if len(s.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(s.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(s); err == nil {
+	if value, err := internal.StringifyJSON(s); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", s)

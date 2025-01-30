@@ -2,9 +2,107 @@
 
 package api
 
+import (
+	json "encoding/json"
+	fmt "fmt"
+	internal "github.com/FlatFilers/flatfile-go/internal"
+)
+
 type VersionsPostRequestBody struct {
 	// The ID of the Sheet.
 	SheetId *SheetId `json:"sheetId,omitempty" url:"-"`
 	// Deprecated, creating or updating a group of records together will automatically generate a commitId to group those record changes together.
 	ParentVersionId *VersionId `json:"parentVersionId,omitempty" url:"-"`
+}
+
+type Version struct {
+	VersionId VersionId `json:"versionId" url:"versionId"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (v *Version) GetVersionId() VersionId {
+	if v == nil {
+		return ""
+	}
+	return v.VersionId
+}
+
+func (v *Version) GetExtraProperties() map[string]interface{} {
+	return v.extraProperties
+}
+
+func (v *Version) UnmarshalJSON(data []byte) error {
+	type unmarshaler Version
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*v = Version(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *v)
+	if err != nil {
+		return err
+	}
+	v.extraProperties = extraProperties
+	v.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (v *Version) String() string {
+	if len(v.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(v.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(v); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", v)
+}
+
+type VersionResponse struct {
+	Data *Version `json:"data,omitempty" url:"data,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (v *VersionResponse) GetData() *Version {
+	if v == nil {
+		return nil
+	}
+	return v.Data
+}
+
+func (v *VersionResponse) GetExtraProperties() map[string]interface{} {
+	return v.extraProperties
+}
+
+func (v *VersionResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler VersionResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*v = VersionResponse(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *v)
+	if err != nil {
+		return err
+	}
+	v.extraProperties = extraProperties
+	v.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (v *VersionResponse) String() string {
+	if len(v.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(v.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(v); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", v)
 }

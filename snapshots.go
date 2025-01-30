@@ -5,7 +5,7 @@ package api
 import (
 	json "encoding/json"
 	fmt "fmt"
-	core "github.com/FlatFilers/flatfile-go/core"
+	internal "github.com/FlatFilers/flatfile-go/internal"
 	time "time"
 )
 
@@ -71,7 +71,28 @@ type RestoreOptions struct {
 	Deleted bool `json:"deleted" url:"deleted"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (r *RestoreOptions) GetCreated() bool {
+	if r == nil {
+		return false
+	}
+	return r.Created
+}
+
+func (r *RestoreOptions) GetUpdated() bool {
+	if r == nil {
+		return false
+	}
+	return r.Updated
+}
+
+func (r *RestoreOptions) GetDeleted() bool {
+	if r == nil {
+		return false
+	}
+	return r.Deleted
 }
 
 func (r *RestoreOptions) GetExtraProperties() map[string]interface{} {
@@ -85,24 +106,22 @@ func (r *RestoreOptions) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*r = RestoreOptions(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	extraProperties, err := internal.ExtractExtraProperties(data, *r)
 	if err != nil {
 		return err
 	}
 	r.extraProperties = extraProperties
-
-	r._rawJSON = json.RawMessage(data)
+	r.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (r *RestoreOptions) String() string {
-	if len(r._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(r._rawJSON); err == nil {
+	if len(r.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(r.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(r); err == nil {
+	if value, err := internal.StringifyJSON(r); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", r)
@@ -154,7 +173,56 @@ type Snapshot struct {
 	ThreadId *string `json:"threadId,omitempty" url:"threadId,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (s *Snapshot) GetId() SnapshotId {
+	if s == nil {
+		return ""
+	}
+	return s.Id
+}
+
+func (s *Snapshot) GetSheetId() SheetId {
+	if s == nil {
+		return ""
+	}
+	return s.SheetId
+}
+
+func (s *Snapshot) GetLabel() *string {
+	if s == nil {
+		return nil
+	}
+	return s.Label
+}
+
+func (s *Snapshot) GetSummary() *SnapshotSummary {
+	if s == nil {
+		return nil
+	}
+	return s.Summary
+}
+
+func (s *Snapshot) GetCreatedAt() time.Time {
+	if s == nil {
+		return time.Time{}
+	}
+	return s.CreatedAt
+}
+
+func (s *Snapshot) GetCreatedBy() UserId {
+	if s == nil {
+		return ""
+	}
+	return s.CreatedBy
+}
+
+func (s *Snapshot) GetThreadId() *string {
+	if s == nil {
+		return nil
+	}
+	return s.ThreadId
 }
 
 func (s *Snapshot) GetExtraProperties() map[string]interface{} {
@@ -165,7 +233,7 @@ func (s *Snapshot) UnmarshalJSON(data []byte) error {
 	type embed Snapshot
 	var unmarshaler = struct {
 		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
+		CreatedAt *internal.DateTime `json:"createdAt"`
 	}{
 		embed: embed(*s),
 	}
@@ -174,14 +242,12 @@ func (s *Snapshot) UnmarshalJSON(data []byte) error {
 	}
 	*s = Snapshot(unmarshaler.embed)
 	s.CreatedAt = unmarshaler.CreatedAt.Time()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	extraProperties, err := internal.ExtractExtraProperties(data, *s)
 	if err != nil {
 		return err
 	}
 	s.extraProperties = extraProperties
-
-	s._rawJSON = json.RawMessage(data)
+	s.rawJSON = json.RawMessage(data)
 	return nil
 }
 
@@ -189,21 +255,21 @@ func (s *Snapshot) MarshalJSON() ([]byte, error) {
 	type embed Snapshot
 	var marshaler = struct {
 		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
+		CreatedAt *internal.DateTime `json:"createdAt"`
 	}{
 		embed:     embed(*s),
-		CreatedAt: core.NewDateTime(s.CreatedAt),
+		CreatedAt: internal.NewDateTime(s.CreatedAt),
 	}
 	return json.Marshal(marshaler)
 }
 
 func (s *Snapshot) String() string {
-	if len(s._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+	if len(s.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(s.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(s); err == nil {
+	if value, err := internal.StringifyJSON(s); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", s)
@@ -213,7 +279,14 @@ type SnapshotResponse struct {
 	Data *Snapshot `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (s *SnapshotResponse) GetData() *Snapshot {
+	if s == nil {
+		return nil
+	}
+	return s.Data
 }
 
 func (s *SnapshotResponse) GetExtraProperties() map[string]interface{} {
@@ -227,24 +300,22 @@ func (s *SnapshotResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*s = SnapshotResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	extraProperties, err := internal.ExtractExtraProperties(data, *s)
 	if err != nil {
 		return err
 	}
 	s.extraProperties = extraProperties
-
-	s._rawJSON = json.RawMessage(data)
+	s.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (s *SnapshotResponse) String() string {
-	if len(s._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+	if len(s.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(s.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(s); err == nil {
+	if value, err := internal.StringifyJSON(s); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", s)
@@ -260,7 +331,42 @@ type SnapshotSummary struct {
 	Config *SheetConfig `json:"config,omitempty" url:"config,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (s *SnapshotSummary) GetCreatedSince() *SummarySection {
+	if s == nil {
+		return nil
+	}
+	return s.CreatedSince
+}
+
+func (s *SnapshotSummary) GetUpdatedSince() *SummarySection {
+	if s == nil {
+		return nil
+	}
+	return s.UpdatedSince
+}
+
+func (s *SnapshotSummary) GetDeletedSince() *SummarySection {
+	if s == nil {
+		return nil
+	}
+	return s.DeletedSince
+}
+
+func (s *SnapshotSummary) GetSchemaDiff() SchemaDiffRecord {
+	if s == nil {
+		return nil
+	}
+	return s.SchemaDiff
+}
+
+func (s *SnapshotSummary) GetConfig() *SheetConfig {
+	if s == nil {
+		return nil
+	}
+	return s.Config
 }
 
 func (s *SnapshotSummary) GetExtraProperties() map[string]interface{} {
@@ -274,24 +380,22 @@ func (s *SnapshotSummary) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*s = SnapshotSummary(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	extraProperties, err := internal.ExtractExtraProperties(data, *s)
 	if err != nil {
 		return err
 	}
 	s.extraProperties = extraProperties
-
-	s._rawJSON = json.RawMessage(data)
+	s.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (s *SnapshotSummary) String() string {
-	if len(s._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+	if len(s.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(s.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(s); err == nil {
+	if value, err := internal.StringifyJSON(s); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", s)
@@ -301,7 +405,14 @@ type SnapshotsResponse struct {
 	Data []*Snapshot `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (s *SnapshotsResponse) GetData() []*Snapshot {
+	if s == nil {
+		return nil
+	}
+	return s.Data
 }
 
 func (s *SnapshotsResponse) GetExtraProperties() map[string]interface{} {
@@ -315,24 +426,22 @@ func (s *SnapshotsResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*s = SnapshotsResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	extraProperties, err := internal.ExtractExtraProperties(data, *s)
 	if err != nil {
 		return err
 	}
 	s.extraProperties = extraProperties
-
-	s._rawJSON = json.RawMessage(data)
+	s.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (s *SnapshotsResponse) String() string {
-	if len(s._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+	if len(s.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(s.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(s); err == nil {
+	if value, err := internal.StringifyJSON(s); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", s)
@@ -343,7 +452,21 @@ type SummarySection struct {
 	ByField map[string]int `json:"byField,omitempty" url:"byField,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (s *SummarySection) GetTotal() int {
+	if s == nil {
+		return 0
+	}
+	return s.Total
+}
+
+func (s *SummarySection) GetByField() map[string]int {
+	if s == nil {
+		return nil
+	}
+	return s.ByField
 }
 
 func (s *SummarySection) GetExtraProperties() map[string]interface{} {
@@ -357,24 +480,22 @@ func (s *SummarySection) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*s = SummarySection(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	extraProperties, err := internal.ExtractExtraProperties(data, *s)
 	if err != nil {
 		return err
 	}
 	s.extraProperties = extraProperties
-
-	s._rawJSON = json.RawMessage(data)
+	s.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (s *SummarySection) String() string {
-	if len(s._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+	if len(s.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(s.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(s); err == nil {
+	if value, err := internal.StringifyJSON(s); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", s)

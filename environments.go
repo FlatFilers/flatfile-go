@@ -5,7 +5,7 @@ package api
 import (
 	json "encoding/json"
 	fmt "fmt"
-	core "github.com/FlatFilers/flatfile-go/core"
+	internal "github.com/FlatFilers/flatfile-go/internal"
 	time "time"
 )
 
@@ -20,9 +20,6 @@ type ListEnvironmentsRequest struct {
 	// Based on pageSize, which page of environments to return
 	PageNumber *int `json:"-" url:"pageNumber,omitempty"`
 }
-
-// Guide ID
-type GuideId = string
 
 type Environment struct {
 	Id        EnvironmentId `json:"id" url:"id"`
@@ -39,7 +36,77 @@ type Environment struct {
 	LanguageOverride    *string                   `json:"languageOverride,omitempty" url:"languageOverride,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (e *Environment) GetId() EnvironmentId {
+	if e == nil {
+		return ""
+	}
+	return e.Id
+}
+
+func (e *Environment) GetAccountId() AccountId {
+	if e == nil {
+		return ""
+	}
+	return e.AccountId
+}
+
+func (e *Environment) GetName() string {
+	if e == nil {
+		return ""
+	}
+	return e.Name
+}
+
+func (e *Environment) GetIsProd() bool {
+	if e == nil {
+		return false
+	}
+	return e.IsProd
+}
+
+func (e *Environment) GetGuestAuthentication() []GuestAuthenticationEnum {
+	if e == nil {
+		return nil
+	}
+	return e.GuestAuthentication
+}
+
+func (e *Environment) GetFeatures() map[string]interface{} {
+	if e == nil {
+		return nil
+	}
+	return e.Features
+}
+
+func (e *Environment) GetMetadata() map[string]interface{} {
+	if e == nil {
+		return nil
+	}
+	return e.Metadata
+}
+
+func (e *Environment) GetTranslationsPath() *string {
+	if e == nil {
+		return nil
+	}
+	return e.TranslationsPath
+}
+
+func (e *Environment) GetNamespaces() []string {
+	if e == nil {
+		return nil
+	}
+	return e.Namespaces
+}
+
+func (e *Environment) GetLanguageOverride() *string {
+	if e == nil {
+		return nil
+	}
+	return e.LanguageOverride
 }
 
 func (e *Environment) GetExtraProperties() map[string]interface{} {
@@ -53,24 +120,22 @@ func (e *Environment) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*e = Environment(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	extraProperties, err := internal.ExtractExtraProperties(data, *e)
 	if err != nil {
 		return err
 	}
 	e.extraProperties = extraProperties
-
-	e._rawJSON = json.RawMessage(data)
+	e.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (e *Environment) String() string {
-	if len(e._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+	if len(e.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(e.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(e); err == nil {
+	if value, err := internal.StringifyJSON(e); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", e)
@@ -89,7 +154,56 @@ type EnvironmentConfigCreate struct {
 	LanguageOverride    *string                   `json:"languageOverride,omitempty" url:"languageOverride,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (e *EnvironmentConfigCreate) GetName() string {
+	if e == nil {
+		return ""
+	}
+	return e.Name
+}
+
+func (e *EnvironmentConfigCreate) GetIsProd() bool {
+	if e == nil {
+		return false
+	}
+	return e.IsProd
+}
+
+func (e *EnvironmentConfigCreate) GetGuestAuthentication() []GuestAuthenticationEnum {
+	if e == nil {
+		return nil
+	}
+	return e.GuestAuthentication
+}
+
+func (e *EnvironmentConfigCreate) GetMetadata() map[string]interface{} {
+	if e == nil {
+		return nil
+	}
+	return e.Metadata
+}
+
+func (e *EnvironmentConfigCreate) GetTranslationsPath() *string {
+	if e == nil {
+		return nil
+	}
+	return e.TranslationsPath
+}
+
+func (e *EnvironmentConfigCreate) GetNamespaces() []string {
+	if e == nil {
+		return nil
+	}
+	return e.Namespaces
+}
+
+func (e *EnvironmentConfigCreate) GetLanguageOverride() *string {
+	if e == nil {
+		return nil
+	}
+	return e.LanguageOverride
 }
 
 func (e *EnvironmentConfigCreate) GetExtraProperties() map[string]interface{} {
@@ -103,24 +217,22 @@ func (e *EnvironmentConfigCreate) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*e = EnvironmentConfigCreate(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	extraProperties, err := internal.ExtractExtraProperties(data, *e)
 	if err != nil {
 		return err
 	}
 	e.extraProperties = extraProperties
-
-	e._rawJSON = json.RawMessage(data)
+	e.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (e *EnvironmentConfigCreate) String() string {
-	if len(e._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+	if len(e.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(e.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(e); err == nil {
+	if value, err := internal.StringifyJSON(e); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", e)
@@ -139,7 +251,56 @@ type EnvironmentConfigUpdate struct {
 	LanguageOverride    *string                   `json:"languageOverride,omitempty" url:"languageOverride,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (e *EnvironmentConfigUpdate) GetName() *string {
+	if e == nil {
+		return nil
+	}
+	return e.Name
+}
+
+func (e *EnvironmentConfigUpdate) GetIsProd() *bool {
+	if e == nil {
+		return nil
+	}
+	return e.IsProd
+}
+
+func (e *EnvironmentConfigUpdate) GetGuestAuthentication() []GuestAuthenticationEnum {
+	if e == nil {
+		return nil
+	}
+	return e.GuestAuthentication
+}
+
+func (e *EnvironmentConfigUpdate) GetMetadata() map[string]interface{} {
+	if e == nil {
+		return nil
+	}
+	return e.Metadata
+}
+
+func (e *EnvironmentConfigUpdate) GetTranslationsPath() *string {
+	if e == nil {
+		return nil
+	}
+	return e.TranslationsPath
+}
+
+func (e *EnvironmentConfigUpdate) GetNamespaces() []string {
+	if e == nil {
+		return nil
+	}
+	return e.Namespaces
+}
+
+func (e *EnvironmentConfigUpdate) GetLanguageOverride() *string {
+	if e == nil {
+		return nil
+	}
+	return e.LanguageOverride
 }
 
 func (e *EnvironmentConfigUpdate) GetExtraProperties() map[string]interface{} {
@@ -153,24 +314,22 @@ func (e *EnvironmentConfigUpdate) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*e = EnvironmentConfigUpdate(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	extraProperties, err := internal.ExtractExtraProperties(data, *e)
 	if err != nil {
 		return err
 	}
 	e.extraProperties = extraProperties
-
-	e._rawJSON = json.RawMessage(data)
+	e.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (e *EnvironmentConfigUpdate) String() string {
-	if len(e._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+	if len(e.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(e.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(e); err == nil {
+	if value, err := internal.StringifyJSON(e); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", e)
@@ -180,7 +339,14 @@ type EnvironmentResponse struct {
 	Data *Environment `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (e *EnvironmentResponse) GetData() *Environment {
+	if e == nil {
+		return nil
+	}
+	return e.Data
 }
 
 func (e *EnvironmentResponse) GetExtraProperties() map[string]interface{} {
@@ -194,24 +360,22 @@ func (e *EnvironmentResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*e = EnvironmentResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	extraProperties, err := internal.ExtractExtraProperties(data, *e)
 	if err != nil {
 		return err
 	}
 	e.extraProperties = extraProperties
-
-	e._rawJSON = json.RawMessage(data)
+	e.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (e *EnvironmentResponse) String() string {
-	if len(e._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+	if len(e.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(e.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(e); err == nil {
+	if value, err := internal.StringifyJSON(e); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", e)
@@ -228,7 +392,56 @@ type GuideCreateRequest struct {
 	EnvironmentId string                   `json:"environmentId" url:"environmentId"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (g *GuideCreateRequest) GetDescription() string {
+	if g == nil {
+		return ""
+	}
+	return g.Description
+}
+
+func (g *GuideCreateRequest) GetTitle() string {
+	if g == nil {
+		return ""
+	}
+	return g.Title
+}
+
+func (g *GuideCreateRequest) GetMetadata() map[string]interface{} {
+	if g == nil {
+		return nil
+	}
+	return g.Metadata
+}
+
+func (g *GuideCreateRequest) GetSlug() string {
+	if g == nil {
+		return ""
+	}
+	return g.Slug
+}
+
+func (g *GuideCreateRequest) GetVersions() []*GuideVersionResource {
+	if g == nil {
+		return nil
+	}
+	return g.Versions
+}
+
+func (g *GuideCreateRequest) GetBlocks() []map[string]interface{} {
+	if g == nil {
+		return nil
+	}
+	return g.Blocks
+}
+
+func (g *GuideCreateRequest) GetEnvironmentId() string {
+	if g == nil {
+		return ""
+	}
+	return g.EnvironmentId
 }
 
 func (g *GuideCreateRequest) GetExtraProperties() map[string]interface{} {
@@ -242,24 +455,22 @@ func (g *GuideCreateRequest) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*g = GuideCreateRequest(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	extraProperties, err := internal.ExtractExtraProperties(data, *g)
 	if err != nil {
 		return err
 	}
 	g.extraProperties = extraProperties
-
-	g._rawJSON = json.RawMessage(data)
+	g.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (g *GuideCreateRequest) String() string {
-	if len(g._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+	if len(g.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(g.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(g); err == nil {
+	if value, err := internal.StringifyJSON(g); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", g)
@@ -269,7 +480,14 @@ type GuideDeleteResponse struct {
 	Data *GuideDeleteResponseData `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (g *GuideDeleteResponse) GetData() *GuideDeleteResponseData {
+	if g == nil {
+		return nil
+	}
+	return g.Data
 }
 
 func (g *GuideDeleteResponse) GetExtraProperties() map[string]interface{} {
@@ -283,24 +501,22 @@ func (g *GuideDeleteResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*g = GuideDeleteResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	extraProperties, err := internal.ExtractExtraProperties(data, *g)
 	if err != nil {
 		return err
 	}
 	g.extraProperties = extraProperties
-
-	g._rawJSON = json.RawMessage(data)
+	g.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (g *GuideDeleteResponse) String() string {
-	if len(g._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+	if len(g.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(g.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(g); err == nil {
+	if value, err := internal.StringifyJSON(g); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", g)
@@ -310,7 +526,14 @@ type GuideDeleteResponseData struct {
 	Success bool `json:"success" url:"success"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (g *GuideDeleteResponseData) GetSuccess() bool {
+	if g == nil {
+		return false
+	}
+	return g.Success
 }
 
 func (g *GuideDeleteResponseData) GetExtraProperties() map[string]interface{} {
@@ -324,24 +547,22 @@ func (g *GuideDeleteResponseData) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*g = GuideDeleteResponseData(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	extraProperties, err := internal.ExtractExtraProperties(data, *g)
 	if err != nil {
 		return err
 	}
 	g.extraProperties = extraProperties
-
-	g._rawJSON = json.RawMessage(data)
+	g.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (g *GuideDeleteResponseData) String() string {
-	if len(g._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+	if len(g.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(g.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(g); err == nil {
+	if value, err := internal.StringifyJSON(g); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", g)
@@ -351,7 +572,14 @@ type GuideDetailResponse struct {
 	Data *GuideResource `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (g *GuideDetailResponse) GetData() *GuideResource {
+	if g == nil {
+		return nil
+	}
+	return g.Data
 }
 
 func (g *GuideDetailResponse) GetExtraProperties() map[string]interface{} {
@@ -365,24 +593,22 @@ func (g *GuideDetailResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*g = GuideDetailResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	extraProperties, err := internal.ExtractExtraProperties(data, *g)
 	if err != nil {
 		return err
 	}
 	g.extraProperties = extraProperties
-
-	g._rawJSON = json.RawMessage(data)
+	g.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (g *GuideDetailResponse) String() string {
-	if len(g._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+	if len(g.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(g.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(g); err == nil {
+	if value, err := internal.StringifyJSON(g); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", g)
@@ -392,7 +618,14 @@ type GuideListResponse struct {
 	Data []*GuideResource `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (g *GuideListResponse) GetData() []*GuideResource {
+	if g == nil {
+		return nil
+	}
+	return g.Data
 }
 
 func (g *GuideListResponse) GetExtraProperties() map[string]interface{} {
@@ -406,24 +639,22 @@ func (g *GuideListResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*g = GuideListResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	extraProperties, err := internal.ExtractExtraProperties(data, *g)
 	if err != nil {
 		return err
 	}
 	g.extraProperties = extraProperties
-
-	g._rawJSON = json.RawMessage(data)
+	g.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (g *GuideListResponse) String() string {
-	if len(g._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+	if len(g.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(g.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(g); err == nil {
+	if value, err := internal.StringifyJSON(g); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", g)
@@ -442,7 +673,70 @@ type GuideResource struct {
 	UpdatedAt   time.Time                `json:"updatedAt" url:"updatedAt"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (g *GuideResource) GetId() GuideId {
+	if g == nil {
+		return ""
+	}
+	return g.Id
+}
+
+func (g *GuideResource) GetDescription() *string {
+	if g == nil {
+		return nil
+	}
+	return g.Description
+}
+
+func (g *GuideResource) GetMetadata() map[string]interface{} {
+	if g == nil {
+		return nil
+	}
+	return g.Metadata
+}
+
+func (g *GuideResource) GetSlug() string {
+	if g == nil {
+		return ""
+	}
+	return g.Slug
+}
+
+func (g *GuideResource) GetTitle() string {
+	if g == nil {
+		return ""
+	}
+	return g.Title
+}
+
+func (g *GuideResource) GetVersions() []*GuideVersionResource {
+	if g == nil {
+		return nil
+	}
+	return g.Versions
+}
+
+func (g *GuideResource) GetBlocks() []map[string]interface{} {
+	if g == nil {
+		return nil
+	}
+	return g.Blocks
+}
+
+func (g *GuideResource) GetCreatedAt() time.Time {
+	if g == nil {
+		return time.Time{}
+	}
+	return g.CreatedAt
+}
+
+func (g *GuideResource) GetUpdatedAt() time.Time {
+	if g == nil {
+		return time.Time{}
+	}
+	return g.UpdatedAt
 }
 
 func (g *GuideResource) GetExtraProperties() map[string]interface{} {
@@ -453,8 +747,8 @@ func (g *GuideResource) UnmarshalJSON(data []byte) error {
 	type embed GuideResource
 	var unmarshaler = struct {
 		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-		UpdatedAt *core.DateTime `json:"updatedAt"`
+		CreatedAt *internal.DateTime `json:"createdAt"`
+		UpdatedAt *internal.DateTime `json:"updatedAt"`
 	}{
 		embed: embed(*g),
 	}
@@ -464,14 +758,12 @@ func (g *GuideResource) UnmarshalJSON(data []byte) error {
 	*g = GuideResource(unmarshaler.embed)
 	g.CreatedAt = unmarshaler.CreatedAt.Time()
 	g.UpdatedAt = unmarshaler.UpdatedAt.Time()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	extraProperties, err := internal.ExtractExtraProperties(data, *g)
 	if err != nil {
 		return err
 	}
 	g.extraProperties = extraProperties
-
-	g._rawJSON = json.RawMessage(data)
+	g.rawJSON = json.RawMessage(data)
 	return nil
 }
 
@@ -479,23 +771,23 @@ func (g *GuideResource) MarshalJSON() ([]byte, error) {
 	type embed GuideResource
 	var marshaler = struct {
 		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-		UpdatedAt *core.DateTime `json:"updatedAt"`
+		CreatedAt *internal.DateTime `json:"createdAt"`
+		UpdatedAt *internal.DateTime `json:"updatedAt"`
 	}{
 		embed:     embed(*g),
-		CreatedAt: core.NewDateTime(g.CreatedAt),
-		UpdatedAt: core.NewDateTime(g.UpdatedAt),
+		CreatedAt: internal.NewDateTime(g.CreatedAt),
+		UpdatedAt: internal.NewDateTime(g.UpdatedAt),
 	}
 	return json.Marshal(marshaler)
 }
 
 func (g *GuideResource) String() string {
-	if len(g._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+	if len(g.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(g.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(g); err == nil {
+	if value, err := internal.StringifyJSON(g); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", g)
@@ -512,7 +804,56 @@ type GuideUpdateRequest struct {
 	EnvironmentId *string                  `json:"environmentId,omitempty" url:"environmentId,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (g *GuideUpdateRequest) GetDescription() *string {
+	if g == nil {
+		return nil
+	}
+	return g.Description
+}
+
+func (g *GuideUpdateRequest) GetTitle() *string {
+	if g == nil {
+		return nil
+	}
+	return g.Title
+}
+
+func (g *GuideUpdateRequest) GetMetadata() map[string]interface{} {
+	if g == nil {
+		return nil
+	}
+	return g.Metadata
+}
+
+func (g *GuideUpdateRequest) GetSlug() *string {
+	if g == nil {
+		return nil
+	}
+	return g.Slug
+}
+
+func (g *GuideUpdateRequest) GetVersions() []*GuideVersionResource {
+	if g == nil {
+		return nil
+	}
+	return g.Versions
+}
+
+func (g *GuideUpdateRequest) GetBlocks() []map[string]interface{} {
+	if g == nil {
+		return nil
+	}
+	return g.Blocks
+}
+
+func (g *GuideUpdateRequest) GetEnvironmentId() *string {
+	if g == nil {
+		return nil
+	}
+	return g.EnvironmentId
 }
 
 func (g *GuideUpdateRequest) GetExtraProperties() map[string]interface{} {
@@ -526,24 +867,22 @@ func (g *GuideUpdateRequest) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*g = GuideUpdateRequest(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	extraProperties, err := internal.ExtractExtraProperties(data, *g)
 	if err != nil {
 		return err
 	}
 	g.extraProperties = extraProperties
-
-	g._rawJSON = json.RawMessage(data)
+	g.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (g *GuideUpdateRequest) String() string {
-	if len(g._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+	if len(g.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(g.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(g); err == nil {
+	if value, err := internal.StringifyJSON(g); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", g)
@@ -558,7 +897,42 @@ type GuideVersionResource struct {
 	UpdatedAt time.Time `json:"updatedAt" url:"updatedAt"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (g *GuideVersionResource) GetId() string {
+	if g == nil {
+		return ""
+	}
+	return g.Id
+}
+
+func (g *GuideVersionResource) GetVersion() int {
+	if g == nil {
+		return 0
+	}
+	return g.Version
+}
+
+func (g *GuideVersionResource) GetContent() string {
+	if g == nil {
+		return ""
+	}
+	return g.Content
+}
+
+func (g *GuideVersionResource) GetCreatedAt() time.Time {
+	if g == nil {
+		return time.Time{}
+	}
+	return g.CreatedAt
+}
+
+func (g *GuideVersionResource) GetUpdatedAt() time.Time {
+	if g == nil {
+		return time.Time{}
+	}
+	return g.UpdatedAt
 }
 
 func (g *GuideVersionResource) GetExtraProperties() map[string]interface{} {
@@ -569,8 +943,8 @@ func (g *GuideVersionResource) UnmarshalJSON(data []byte) error {
 	type embed GuideVersionResource
 	var unmarshaler = struct {
 		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-		UpdatedAt *core.DateTime `json:"updatedAt"`
+		CreatedAt *internal.DateTime `json:"createdAt"`
+		UpdatedAt *internal.DateTime `json:"updatedAt"`
 	}{
 		embed: embed(*g),
 	}
@@ -580,14 +954,12 @@ func (g *GuideVersionResource) UnmarshalJSON(data []byte) error {
 	*g = GuideVersionResource(unmarshaler.embed)
 	g.CreatedAt = unmarshaler.CreatedAt.Time()
 	g.UpdatedAt = unmarshaler.UpdatedAt.Time()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	extraProperties, err := internal.ExtractExtraProperties(data, *g)
 	if err != nil {
 		return err
 	}
 	g.extraProperties = extraProperties
-
-	g._rawJSON = json.RawMessage(data)
+	g.rawJSON = json.RawMessage(data)
 	return nil
 }
 
@@ -595,23 +967,23 @@ func (g *GuideVersionResource) MarshalJSON() ([]byte, error) {
 	type embed GuideVersionResource
 	var marshaler = struct {
 		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-		UpdatedAt *core.DateTime `json:"updatedAt"`
+		CreatedAt *internal.DateTime `json:"createdAt"`
+		UpdatedAt *internal.DateTime `json:"updatedAt"`
 	}{
 		embed:     embed(*g),
-		CreatedAt: core.NewDateTime(g.CreatedAt),
-		UpdatedAt: core.NewDateTime(g.UpdatedAt),
+		CreatedAt: internal.NewDateTime(g.CreatedAt),
+		UpdatedAt: internal.NewDateTime(g.UpdatedAt),
 	}
 	return json.Marshal(marshaler)
 }
 
 func (g *GuideVersionResource) String() string {
-	if len(g._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+	if len(g.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(g.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(g); err == nil {
+	if value, err := internal.StringifyJSON(g); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", g)
@@ -621,7 +993,14 @@ type GuideVersionResponse struct {
 	Data *GuideVersionResource `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (g *GuideVersionResponse) GetData() *GuideVersionResource {
+	if g == nil {
+		return nil
+	}
+	return g.Data
 }
 
 func (g *GuideVersionResponse) GetExtraProperties() map[string]interface{} {
@@ -635,24 +1014,22 @@ func (g *GuideVersionResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*g = GuideVersionResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	extraProperties, err := internal.ExtractExtraProperties(data, *g)
 	if err != nil {
 		return err
 	}
 	g.extraProperties = extraProperties
-
-	g._rawJSON = json.RawMessage(data)
+	g.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (g *GuideVersionResponse) String() string {
-	if len(g._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+	if len(g.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(g.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(g); err == nil {
+	if value, err := internal.StringifyJSON(g); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", g)
@@ -663,7 +1040,21 @@ type ListEnvironmentsResponse struct {
 	Pagination *Pagination    `json:"pagination,omitempty" url:"pagination,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (l *ListEnvironmentsResponse) GetData() []*Environment {
+	if l == nil {
+		return nil
+	}
+	return l.Data
+}
+
+func (l *ListEnvironmentsResponse) GetPagination() *Pagination {
+	if l == nil {
+		return nil
+	}
+	return l.Pagination
 }
 
 func (l *ListEnvironmentsResponse) GetExtraProperties() map[string]interface{} {
@@ -677,24 +1068,22 @@ func (l *ListEnvironmentsResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*l = ListEnvironmentsResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	extraProperties, err := internal.ExtractExtraProperties(data, *l)
 	if err != nil {
 		return err
 	}
 	l.extraProperties = extraProperties
-
-	l._rawJSON = json.RawMessage(data)
+	l.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (l *ListEnvironmentsResponse) String() string {
-	if len(l._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(l._rawJSON); err == nil {
+	if len(l.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(l.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(l); err == nil {
+	if value, err := internal.StringifyJSON(l); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", l)

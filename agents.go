@@ -5,7 +5,7 @@ package api
 import (
 	json "encoding/json"
 	fmt "fmt"
-	core "github.com/FlatFilers/flatfile-go/core"
+	internal "github.com/FlatFilers/flatfile-go/internal"
 	time "time"
 )
 
@@ -63,6 +63,380 @@ type ListAgentsRequest struct {
 	EnvironmentId EnvironmentId `json:"-" url:"environmentId"`
 }
 
+type Agent struct {
+	// The topics the agent should listen for
+	Topics []EventTopic `json:"topics,omitempty" url:"topics,omitempty"`
+	// The compiler of the agent
+	Compiler *Compiler `json:"compiler,omitempty" url:"compiler,omitempty"`
+	// The source of the agent
+	Source *string `json:"source,omitempty" url:"source,omitempty"`
+	// The source map of the agent
+	SourceMap *string `json:"sourceMap,omitempty" url:"sourceMap,omitempty"`
+	// The slug of the agent
+	Slug *string `json:"slug,omitempty" url:"slug,omitempty"`
+	// Options for the agent
+	Options       map[string]interface{} `json:"options,omitempty" url:"options,omitempty"`
+	Id            AgentId                `json:"id" url:"id"`
+	CreatedAt     time.Time              `json:"createdAt" url:"createdAt"`
+	UpdatedAt     time.Time              `json:"updatedAt" url:"updatedAt"`
+	AccountId     AccountId              `json:"accountId" url:"accountId"`
+	EnvironmentId EnvironmentId          `json:"environmentId" url:"environmentId"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (a *Agent) GetTopics() []EventTopic {
+	if a == nil {
+		return nil
+	}
+	return a.Topics
+}
+
+func (a *Agent) GetCompiler() *Compiler {
+	if a == nil {
+		return nil
+	}
+	return a.Compiler
+}
+
+func (a *Agent) GetSource() *string {
+	if a == nil {
+		return nil
+	}
+	return a.Source
+}
+
+func (a *Agent) GetSourceMap() *string {
+	if a == nil {
+		return nil
+	}
+	return a.SourceMap
+}
+
+func (a *Agent) GetSlug() *string {
+	if a == nil {
+		return nil
+	}
+	return a.Slug
+}
+
+func (a *Agent) GetOptions() map[string]interface{} {
+	if a == nil {
+		return nil
+	}
+	return a.Options
+}
+
+func (a *Agent) GetId() AgentId {
+	if a == nil {
+		return ""
+	}
+	return a.Id
+}
+
+func (a *Agent) GetCreatedAt() time.Time {
+	if a == nil {
+		return time.Time{}
+	}
+	return a.CreatedAt
+}
+
+func (a *Agent) GetUpdatedAt() time.Time {
+	if a == nil {
+		return time.Time{}
+	}
+	return a.UpdatedAt
+}
+
+func (a *Agent) GetAccountId() AccountId {
+	if a == nil {
+		return ""
+	}
+	return a.AccountId
+}
+
+func (a *Agent) GetEnvironmentId() EnvironmentId {
+	if a == nil {
+		return ""
+	}
+	return a.EnvironmentId
+}
+
+func (a *Agent) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *Agent) UnmarshalJSON(data []byte) error {
+	type embed Agent
+	var unmarshaler = struct {
+		embed
+		CreatedAt *internal.DateTime `json:"createdAt"`
+		UpdatedAt *internal.DateTime `json:"updatedAt"`
+	}{
+		embed: embed(*a),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*a = Agent(unmarshaler.embed)
+	a.CreatedAt = unmarshaler.CreatedAt.Time()
+	a.UpdatedAt = unmarshaler.UpdatedAt.Time()
+	extraProperties, err := internal.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+	a.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (a *Agent) MarshalJSON() ([]byte, error) {
+	type embed Agent
+	var marshaler = struct {
+		embed
+		CreatedAt *internal.DateTime `json:"createdAt"`
+		UpdatedAt *internal.DateTime `json:"updatedAt"`
+	}{
+		embed:     embed(*a),
+		CreatedAt: internal.NewDateTime(a.CreatedAt),
+		UpdatedAt: internal.NewDateTime(a.UpdatedAt),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (a *Agent) String() string {
+	if len(a.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(a.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
+// Properties used to create a new agent
+type AgentConfig struct {
+	// The topics the agent should listen for
+	Topics []EventTopic `json:"topics,omitempty" url:"topics,omitempty"`
+	// The compiler of the agent
+	Compiler *Compiler `json:"compiler,omitempty" url:"compiler,omitempty"`
+	// The source of the agent
+	Source *string `json:"source,omitempty" url:"source,omitempty"`
+	// The source map of the agent
+	SourceMap *string `json:"sourceMap,omitempty" url:"sourceMap,omitempty"`
+	// The slug of the agent
+	Slug *string `json:"slug,omitempty" url:"slug,omitempty"`
+	// Options for the agent
+	Options map[string]interface{} `json:"options,omitempty" url:"options,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (a *AgentConfig) GetTopics() []EventTopic {
+	if a == nil {
+		return nil
+	}
+	return a.Topics
+}
+
+func (a *AgentConfig) GetCompiler() *Compiler {
+	if a == nil {
+		return nil
+	}
+	return a.Compiler
+}
+
+func (a *AgentConfig) GetSource() *string {
+	if a == nil {
+		return nil
+	}
+	return a.Source
+}
+
+func (a *AgentConfig) GetSourceMap() *string {
+	if a == nil {
+		return nil
+	}
+	return a.SourceMap
+}
+
+func (a *AgentConfig) GetSlug() *string {
+	if a == nil {
+		return nil
+	}
+	return a.Slug
+}
+
+func (a *AgentConfig) GetOptions() map[string]interface{} {
+	if a == nil {
+		return nil
+	}
+	return a.Options
+}
+
+func (a *AgentConfig) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AgentConfig) UnmarshalJSON(data []byte) error {
+	type unmarshaler AgentConfig
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AgentConfig(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+	a.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (a *AgentConfig) String() string {
+	if len(a.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(a.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
+// A log of an agent execution
+type AgentLog struct {
+	EventId EventId `json:"eventId" url:"eventId"`
+	// Whether the agent execution was successful
+	Success     bool   `json:"success" url:"success"`
+	CreatedAt   string `json:"createdAt" url:"createdAt"`
+	CompletedAt string `json:"completedAt" url:"completedAt"`
+	// The log of the agent execution
+	Log *string `json:"log,omitempty" url:"log,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (a *AgentLog) GetEventId() EventId {
+	if a == nil {
+		return ""
+	}
+	return a.EventId
+}
+
+func (a *AgentLog) GetSuccess() bool {
+	if a == nil {
+		return false
+	}
+	return a.Success
+}
+
+func (a *AgentLog) GetCreatedAt() string {
+	if a == nil {
+		return ""
+	}
+	return a.CreatedAt
+}
+
+func (a *AgentLog) GetCompletedAt() string {
+	if a == nil {
+		return ""
+	}
+	return a.CompletedAt
+}
+
+func (a *AgentLog) GetLog() *string {
+	if a == nil {
+		return nil
+	}
+	return a.Log
+}
+
+func (a *AgentLog) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AgentLog) UnmarshalJSON(data []byte) error {
+	type unmarshaler AgentLog
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AgentLog(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+	a.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (a *AgentLog) String() string {
+	if len(a.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(a.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
+type AgentResponse struct {
+	Data *Agent `json:"data,omitempty" url:"data,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (a *AgentResponse) GetData() *Agent {
+	if a == nil {
+		return nil
+	}
+	return a.Data
+}
+
+func (a *AgentResponse) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *AgentResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler AgentResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = AgentResponse(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+	a.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (a *AgentResponse) String() string {
+	if len(a.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(a.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
 type AgentVersion struct {
 	// The topics the agent should listen for
 	Topics []EventTopic `json:"topics,omitempty" url:"topics,omitempty"`
@@ -84,7 +458,91 @@ type AgentVersion struct {
 	AgentId   AgentId                `json:"agent_id" url:"agent_id"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (a *AgentVersion) GetTopics() []EventTopic {
+	if a == nil {
+		return nil
+	}
+	return a.Topics
+}
+
+func (a *AgentVersion) GetCompiler() *Compiler {
+	if a == nil {
+		return nil
+	}
+	return a.Compiler
+}
+
+func (a *AgentVersion) GetSource() *string {
+	if a == nil {
+		return nil
+	}
+	return a.Source
+}
+
+func (a *AgentVersion) GetSourceMap() *string {
+	if a == nil {
+		return nil
+	}
+	return a.SourceMap
+}
+
+func (a *AgentVersion) GetSlug() *string {
+	if a == nil {
+		return nil
+	}
+	return a.Slug
+}
+
+func (a *AgentVersion) GetOptions() map[string]interface{} {
+	if a == nil {
+		return nil
+	}
+	return a.Options
+}
+
+func (a *AgentVersion) GetId() AgentVersionId {
+	if a == nil {
+		return ""
+	}
+	return a.Id
+}
+
+func (a *AgentVersion) GetVersion() int {
+	if a == nil {
+		return 0
+	}
+	return a.Version
+}
+
+func (a *AgentVersion) GetOrigin() int {
+	if a == nil {
+		return 0
+	}
+	return a.Origin
+}
+
+func (a *AgentVersion) GetCreatedAt() time.Time {
+	if a == nil {
+		return time.Time{}
+	}
+	return a.CreatedAt
+}
+
+func (a *AgentVersion) GetUpdatedAt() time.Time {
+	if a == nil {
+		return time.Time{}
+	}
+	return a.UpdatedAt
+}
+
+func (a *AgentVersion) GetAgentId() AgentId {
+	if a == nil {
+		return ""
+	}
+	return a.AgentId
 }
 
 func (a *AgentVersion) GetExtraProperties() map[string]interface{} {
@@ -95,8 +553,8 @@ func (a *AgentVersion) UnmarshalJSON(data []byte) error {
 	type embed AgentVersion
 	var unmarshaler = struct {
 		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-		UpdatedAt *core.DateTime `json:"updatedAt"`
+		CreatedAt *internal.DateTime `json:"createdAt"`
+		UpdatedAt *internal.DateTime `json:"updatedAt"`
 	}{
 		embed: embed(*a),
 	}
@@ -106,14 +564,12 @@ func (a *AgentVersion) UnmarshalJSON(data []byte) error {
 	*a = AgentVersion(unmarshaler.embed)
 	a.CreatedAt = unmarshaler.CreatedAt.Time()
 	a.UpdatedAt = unmarshaler.UpdatedAt.Time()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	extraProperties, err := internal.ExtractExtraProperties(data, *a)
 	if err != nil {
 		return err
 	}
 	a.extraProperties = extraProperties
-
-	a._rawJSON = json.RawMessage(data)
+	a.rawJSON = json.RawMessage(data)
 	return nil
 }
 
@@ -121,23 +577,23 @@ func (a *AgentVersion) MarshalJSON() ([]byte, error) {
 	type embed AgentVersion
 	var marshaler = struct {
 		embed
-		CreatedAt *core.DateTime `json:"createdAt"`
-		UpdatedAt *core.DateTime `json:"updatedAt"`
+		CreatedAt *internal.DateTime `json:"createdAt"`
+		UpdatedAt *internal.DateTime `json:"updatedAt"`
 	}{
 		embed:     embed(*a),
-		CreatedAt: core.NewDateTime(a.CreatedAt),
-		UpdatedAt: core.NewDateTime(a.UpdatedAt),
+		CreatedAt: internal.NewDateTime(a.CreatedAt),
+		UpdatedAt: internal.NewDateTime(a.UpdatedAt),
 	}
 	return json.Marshal(marshaler)
 }
 
 func (a *AgentVersion) String() string {
-	if len(a._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+	if len(a.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(a.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(a); err == nil {
+	if value, err := internal.StringifyJSON(a); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", a)
@@ -147,7 +603,14 @@ type AgentVersionResponse struct {
 	Data *AgentVersion `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (a *AgentVersionResponse) GetData() *AgentVersion {
+	if a == nil {
+		return nil
+	}
+	return a.Data
 }
 
 func (a *AgentVersionResponse) GetExtraProperties() map[string]interface{} {
@@ -161,27 +624,45 @@ func (a *AgentVersionResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*a = AgentVersionResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	extraProperties, err := internal.ExtractExtraProperties(data, *a)
 	if err != nil {
 		return err
 	}
 	a.extraProperties = extraProperties
-
-	a._rawJSON = json.RawMessage(data)
+	a.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (a *AgentVersionResponse) String() string {
-	if len(a._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+	if len(a.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(a.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(a); err == nil {
+	if value, err := internal.StringifyJSON(a); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", a)
+}
+
+// The compiler of the agent
+type Compiler string
+
+const (
+	CompilerJs Compiler = "js"
+)
+
+func NewCompilerFromString(s string) (Compiler, error) {
+	switch s {
+	case "js":
+		return CompilerJs, nil
+	}
+	var t Compiler
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (c Compiler) Ptr() *Compiler {
+	return &c
 }
 
 // A log of an agent execution
@@ -201,7 +682,63 @@ type DetailedAgentLog struct {
 	Log *string `json:"log,omitempty" url:"log,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (d *DetailedAgentLog) GetEventId() EventId {
+	if d == nil {
+		return ""
+	}
+	return d.EventId
+}
+
+func (d *DetailedAgentLog) GetSuccess() bool {
+	if d == nil {
+		return false
+	}
+	return d.Success
+}
+
+func (d *DetailedAgentLog) GetCreatedAt() time.Time {
+	if d == nil {
+		return time.Time{}
+	}
+	return d.CreatedAt
+}
+
+func (d *DetailedAgentLog) GetCompletedAt() time.Time {
+	if d == nil {
+		return time.Time{}
+	}
+	return d.CompletedAt
+}
+
+func (d *DetailedAgentLog) GetDuration() int {
+	if d == nil {
+		return 0
+	}
+	return d.Duration
+}
+
+func (d *DetailedAgentLog) GetTopic() string {
+	if d == nil {
+		return ""
+	}
+	return d.Topic
+}
+
+func (d *DetailedAgentLog) GetContext() map[string]interface{} {
+	if d == nil {
+		return nil
+	}
+	return d.Context
+}
+
+func (d *DetailedAgentLog) GetLog() *string {
+	if d == nil {
+		return nil
+	}
+	return d.Log
 }
 
 func (d *DetailedAgentLog) GetExtraProperties() map[string]interface{} {
@@ -212,8 +749,8 @@ func (d *DetailedAgentLog) UnmarshalJSON(data []byte) error {
 	type embed DetailedAgentLog
 	var unmarshaler = struct {
 		embed
-		CreatedAt   *core.DateTime `json:"createdAt"`
-		CompletedAt *core.DateTime `json:"completedAt"`
+		CreatedAt   *internal.DateTime `json:"createdAt"`
+		CompletedAt *internal.DateTime `json:"completedAt"`
 	}{
 		embed: embed(*d),
 	}
@@ -223,14 +760,12 @@ func (d *DetailedAgentLog) UnmarshalJSON(data []byte) error {
 	*d = DetailedAgentLog(unmarshaler.embed)
 	d.CreatedAt = unmarshaler.CreatedAt.Time()
 	d.CompletedAt = unmarshaler.CompletedAt.Time()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *d)
+	extraProperties, err := internal.ExtractExtraProperties(data, *d)
 	if err != nil {
 		return err
 	}
 	d.extraProperties = extraProperties
-
-	d._rawJSON = json.RawMessage(data)
+	d.rawJSON = json.RawMessage(data)
 	return nil
 }
 
@@ -238,23 +773,23 @@ func (d *DetailedAgentLog) MarshalJSON() ([]byte, error) {
 	type embed DetailedAgentLog
 	var marshaler = struct {
 		embed
-		CreatedAt   *core.DateTime `json:"createdAt"`
-		CompletedAt *core.DateTime `json:"completedAt"`
+		CreatedAt   *internal.DateTime `json:"createdAt"`
+		CompletedAt *internal.DateTime `json:"completedAt"`
 	}{
 		embed:       embed(*d),
-		CreatedAt:   core.NewDateTime(d.CreatedAt),
-		CompletedAt: core.NewDateTime(d.CompletedAt),
+		CreatedAt:   internal.NewDateTime(d.CreatedAt),
+		CompletedAt: internal.NewDateTime(d.CompletedAt),
 	}
 	return json.Marshal(marshaler)
 }
 
 func (d *DetailedAgentLog) String() string {
-	if len(d._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(d._rawJSON); err == nil {
+	if len(d.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(d.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(d); err == nil {
+	if value, err := internal.StringifyJSON(d); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", d)
@@ -273,7 +808,49 @@ type Execution struct {
 	Topic string `json:"topic" url:"topic"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (e *Execution) GetEventId() EventId {
+	if e == nil {
+		return ""
+	}
+	return e.EventId
+}
+
+func (e *Execution) GetSuccess() bool {
+	if e == nil {
+		return false
+	}
+	return e.Success
+}
+
+func (e *Execution) GetCreatedAt() time.Time {
+	if e == nil {
+		return time.Time{}
+	}
+	return e.CreatedAt
+}
+
+func (e *Execution) GetCompletedAt() time.Time {
+	if e == nil {
+		return time.Time{}
+	}
+	return e.CompletedAt
+}
+
+func (e *Execution) GetDuration() int {
+	if e == nil {
+		return 0
+	}
+	return e.Duration
+}
+
+func (e *Execution) GetTopic() string {
+	if e == nil {
+		return ""
+	}
+	return e.Topic
 }
 
 func (e *Execution) GetExtraProperties() map[string]interface{} {
@@ -284,8 +861,8 @@ func (e *Execution) UnmarshalJSON(data []byte) error {
 	type embed Execution
 	var unmarshaler = struct {
 		embed
-		CreatedAt   *core.DateTime `json:"createdAt"`
-		CompletedAt *core.DateTime `json:"completedAt"`
+		CreatedAt   *internal.DateTime `json:"createdAt"`
+		CompletedAt *internal.DateTime `json:"completedAt"`
 	}{
 		embed: embed(*e),
 	}
@@ -295,14 +872,12 @@ func (e *Execution) UnmarshalJSON(data []byte) error {
 	*e = Execution(unmarshaler.embed)
 	e.CreatedAt = unmarshaler.CreatedAt.Time()
 	e.CompletedAt = unmarshaler.CompletedAt.Time()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	extraProperties, err := internal.ExtractExtraProperties(data, *e)
 	if err != nil {
 		return err
 	}
 	e.extraProperties = extraProperties
-
-	e._rawJSON = json.RawMessage(data)
+	e.rawJSON = json.RawMessage(data)
 	return nil
 }
 
@@ -310,33 +885,94 @@ func (e *Execution) MarshalJSON() ([]byte, error) {
 	type embed Execution
 	var marshaler = struct {
 		embed
-		CreatedAt   *core.DateTime `json:"createdAt"`
-		CompletedAt *core.DateTime `json:"completedAt"`
+		CreatedAt   *internal.DateTime `json:"createdAt"`
+		CompletedAt *internal.DateTime `json:"completedAt"`
 	}{
 		embed:       embed(*e),
-		CreatedAt:   core.NewDateTime(e.CreatedAt),
-		CompletedAt: core.NewDateTime(e.CompletedAt),
+		CreatedAt:   internal.NewDateTime(e.CreatedAt),
+		CompletedAt: internal.NewDateTime(e.CompletedAt),
 	}
 	return json.Marshal(marshaler)
 }
 
 func (e *Execution) String() string {
-	if len(e._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+	if len(e.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(e.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(e); err == nil {
+	if value, err := internal.StringifyJSON(e); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", e)
+}
+
+type GetAgentLogsResponse struct {
+	Pagination *Pagination `json:"pagination,omitempty" url:"pagination,omitempty"`
+	Data       []*AgentLog `json:"data,omitempty" url:"data,omitempty"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (g *GetAgentLogsResponse) GetPagination() *Pagination {
+	if g == nil {
+		return nil
+	}
+	return g.Pagination
+}
+
+func (g *GetAgentLogsResponse) GetData() []*AgentLog {
+	if g == nil {
+		return nil
+	}
+	return g.Data
+}
+
+func (g *GetAgentLogsResponse) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GetAgentLogsResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler GetAgentLogsResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GetAgentLogsResponse(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+	g.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GetAgentLogsResponse) String() string {
+	if len(g.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(g.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
 }
 
 type GetDetailedAgentLogResponse struct {
 	Data *DetailedAgentLog `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (g *GetDetailedAgentLogResponse) GetData() *DetailedAgentLog {
+	if g == nil {
+		return nil
+	}
+	return g.Data
 }
 
 func (g *GetDetailedAgentLogResponse) GetExtraProperties() map[string]interface{} {
@@ -350,24 +986,22 @@ func (g *GetDetailedAgentLogResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*g = GetDetailedAgentLogResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	extraProperties, err := internal.ExtractExtraProperties(data, *g)
 	if err != nil {
 		return err
 	}
 	g.extraProperties = extraProperties
-
-	g._rawJSON = json.RawMessage(data)
+	g.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (g *GetDetailedAgentLogResponse) String() string {
-	if len(g._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+	if len(g.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(g.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(g); err == nil {
+	if value, err := internal.StringifyJSON(g); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", g)
@@ -378,7 +1012,21 @@ type GetDetailedAgentLogsResponse struct {
 	Data       []*DetailedAgentLog `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (g *GetDetailedAgentLogsResponse) GetPagination() *Pagination {
+	if g == nil {
+		return nil
+	}
+	return g.Pagination
+}
+
+func (g *GetDetailedAgentLogsResponse) GetData() []*DetailedAgentLog {
+	if g == nil {
+		return nil
+	}
+	return g.Data
 }
 
 func (g *GetDetailedAgentLogsResponse) GetExtraProperties() map[string]interface{} {
@@ -392,24 +1040,22 @@ func (g *GetDetailedAgentLogsResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*g = GetDetailedAgentLogsResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	extraProperties, err := internal.ExtractExtraProperties(data, *g)
 	if err != nil {
 		return err
 	}
 	g.extraProperties = extraProperties
-
-	g._rawJSON = json.RawMessage(data)
+	g.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (g *GetDetailedAgentLogsResponse) String() string {
-	if len(g._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+	if len(g.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(g.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(g); err == nil {
+	if value, err := internal.StringifyJSON(g); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", g)
@@ -420,7 +1066,21 @@ type GetExecutionsResponse struct {
 	Data       []*Execution `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (g *GetExecutionsResponse) GetPagination() *Pagination {
+	if g == nil {
+		return nil
+	}
+	return g.Pagination
+}
+
+func (g *GetExecutionsResponse) GetData() []*Execution {
+	if g == nil {
+		return nil
+	}
+	return g.Data
 }
 
 func (g *GetExecutionsResponse) GetExtraProperties() map[string]interface{} {
@@ -434,24 +1094,22 @@ func (g *GetExecutionsResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*g = GetExecutionsResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	extraProperties, err := internal.ExtractExtraProperties(data, *g)
 	if err != nil {
 		return err
 	}
 	g.extraProperties = extraProperties
-
-	g._rawJSON = json.RawMessage(data)
+	g.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (g *GetExecutionsResponse) String() string {
-	if len(g._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+	if len(g.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(g.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(g); err == nil {
+	if value, err := internal.StringifyJSON(g); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", g)
@@ -461,7 +1119,14 @@ type ListAgentVersionsResponse struct {
 	Data []*AgentVersion `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (l *ListAgentVersionsResponse) GetData() []*AgentVersion {
+	if l == nil {
+		return nil
+	}
+	return l.Data
 }
 
 func (l *ListAgentVersionsResponse) GetExtraProperties() map[string]interface{} {
@@ -475,31 +1140,69 @@ func (l *ListAgentVersionsResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*l = ListAgentVersionsResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	extraProperties, err := internal.ExtractExtraProperties(data, *l)
 	if err != nil {
 		return err
 	}
 	l.extraProperties = extraProperties
-
-	l._rawJSON = json.RawMessage(data)
+	l.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (l *ListAgentVersionsResponse) String() string {
-	if len(l._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(l._rawJSON); err == nil {
+	if len(l.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(l.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(l); err == nil {
+	if value, err := internal.StringifyJSON(l); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", l)
 }
 
-// Agent version ID
-type AgentVersionId = string
+type ListAgentsResponse struct {
+	Data []*Agent `json:"data,omitempty" url:"data,omitempty"`
 
-// Boolean
-type SuccessQueryParameter = bool
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (l *ListAgentsResponse) GetData() []*Agent {
+	if l == nil {
+		return nil
+	}
+	return l.Data
+}
+
+func (l *ListAgentsResponse) GetExtraProperties() map[string]interface{} {
+	return l.extraProperties
+}
+
+func (l *ListAgentsResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler ListAgentsResponse
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*l = ListAgentsResponse(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *l)
+	if err != nil {
+		return err
+	}
+	l.extraProperties = extraProperties
+	l.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (l *ListAgentsResponse) String() string {
+	if len(l.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(l.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(l); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", l)
+}

@@ -5,7 +5,7 @@ package api
 import (
 	json "encoding/json"
 	fmt "fmt"
-	core "github.com/FlatFilers/flatfile-go/core"
+	internal "github.com/FlatFilers/flatfile-go/internal"
 	time "time"
 )
 
@@ -36,7 +36,21 @@ type AddRecordsToDataClipJobConfig struct {
 	SheetId    SheetId    `json:"sheetId" url:"sheetId"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (a *AddRecordsToDataClipJobConfig) GetDataClipId() DataClipId {
+	if a == nil {
+		return ""
+	}
+	return a.DataClipId
+}
+
+func (a *AddRecordsToDataClipJobConfig) GetSheetId() SheetId {
+	if a == nil {
+		return ""
+	}
+	return a.SheetId
 }
 
 func (a *AddRecordsToDataClipJobConfig) GetExtraProperties() map[string]interface{} {
@@ -50,24 +64,22 @@ func (a *AddRecordsToDataClipJobConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*a = AddRecordsToDataClipJobConfig(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	extraProperties, err := internal.ExtractExtraProperties(data, *a)
 	if err != nil {
 		return err
 	}
 	a.extraProperties = extraProperties
-
-	a._rawJSON = json.RawMessage(data)
+	a.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (a *AddRecordsToDataClipJobConfig) String() string {
-	if len(a._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+	if len(a.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(a.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(a); err == nil {
+	if value, err := internal.StringifyJSON(a); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", a)
@@ -78,7 +90,21 @@ type AiGenerateBlueprintConstraintsJobConfig struct {
 	WorkbookId WorkbookId `json:"workbookId" url:"workbookId"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (a *AiGenerateBlueprintConstraintsJobConfig) GetSpaceId() SpaceId {
+	if a == nil {
+		return ""
+	}
+	return a.SpaceId
+}
+
+func (a *AiGenerateBlueprintConstraintsJobConfig) GetWorkbookId() WorkbookId {
+	if a == nil {
+		return ""
+	}
+	return a.WorkbookId
 }
 
 func (a *AiGenerateBlueprintConstraintsJobConfig) GetExtraProperties() map[string]interface{} {
@@ -92,24 +118,22 @@ func (a *AiGenerateBlueprintConstraintsJobConfig) UnmarshalJSON(data []byte) err
 		return err
 	}
 	*a = AiGenerateBlueprintConstraintsJobConfig(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	extraProperties, err := internal.ExtractExtraProperties(data, *a)
 	if err != nil {
 		return err
 	}
 	a.extraProperties = extraProperties
-
-	a._rawJSON = json.RawMessage(data)
+	a.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (a *AiGenerateBlueprintConstraintsJobConfig) String() string {
-	if len(a._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+	if len(a.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(a.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(a); err == nil {
+	if value, err := internal.StringifyJSON(a); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", a)
@@ -120,7 +144,21 @@ type AiGenerateBlueprintJobConfig struct {
 	AppId   AppId   `json:"appId" url:"appId"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (a *AiGenerateBlueprintJobConfig) GetSpaceId() SpaceId {
+	if a == nil {
+		return ""
+	}
+	return a.SpaceId
+}
+
+func (a *AiGenerateBlueprintJobConfig) GetAppId() AppId {
+	if a == nil {
+		return ""
+	}
+	return a.AppId
 }
 
 func (a *AiGenerateBlueprintJobConfig) GetExtraProperties() map[string]interface{} {
@@ -134,24 +172,22 @@ func (a *AiGenerateBlueprintJobConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*a = AiGenerateBlueprintJobConfig(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	extraProperties, err := internal.ExtractExtraProperties(data, *a)
 	if err != nil {
 		return err
 	}
 	a.extraProperties = extraProperties
-
-	a._rawJSON = json.RawMessage(data)
+	a.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (a *AiGenerateBlueprintJobConfig) String() string {
-	if len(a._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+	if len(a.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(a.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(a); err == nil {
+	if value, err := internal.StringifyJSON(a); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", a)
@@ -164,7 +200,28 @@ type AiGenerateConstraintJobConfig struct {
 	Description *string `json:"description,omitempty" url:"description,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (a *AiGenerateConstraintJobConfig) GetSpaceId() SpaceId {
+	if a == nil {
+		return ""
+	}
+	return a.SpaceId
+}
+
+func (a *AiGenerateConstraintJobConfig) GetConstraints() []*StoredConstraint {
+	if a == nil {
+		return nil
+	}
+	return a.Constraints
+}
+
+func (a *AiGenerateConstraintJobConfig) GetDescription() *string {
+	if a == nil {
+		return nil
+	}
+	return a.Description
 }
 
 func (a *AiGenerateConstraintJobConfig) GetExtraProperties() map[string]interface{} {
@@ -178,24 +235,22 @@ func (a *AiGenerateConstraintJobConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*a = AiGenerateConstraintJobConfig(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	extraProperties, err := internal.ExtractExtraProperties(data, *a)
 	if err != nil {
 		return err
 	}
 	a.extraProperties = extraProperties
-
-	a._rawJSON = json.RawMessage(data)
+	a.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (a *AiGenerateConstraintJobConfig) String() string {
-	if len(a._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+	if len(a.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(a.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(a); err == nil {
+	if value, err := internal.StringifyJSON(a); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", a)
@@ -206,7 +261,21 @@ type AiGenerateSampleDataJobConfig struct {
 	AppId   AppId   `json:"appId" url:"appId"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (a *AiGenerateSampleDataJobConfig) GetSpaceId() SpaceId {
+	if a == nil {
+		return ""
+	}
+	return a.SpaceId
+}
+
+func (a *AiGenerateSampleDataJobConfig) GetAppId() AppId {
+	if a == nil {
+		return ""
+	}
+	return a.AppId
 }
 
 func (a *AiGenerateSampleDataJobConfig) GetExtraProperties() map[string]interface{} {
@@ -220,24 +289,22 @@ func (a *AiGenerateSampleDataJobConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*a = AiGenerateSampleDataJobConfig(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	extraProperties, err := internal.ExtractExtraProperties(data, *a)
 	if err != nil {
 		return err
 	}
 	a.extraProperties = extraProperties
-
-	a._rawJSON = json.RawMessage(data)
+	a.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (a *AiGenerateSampleDataJobConfig) String() string {
-	if len(a._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+	if len(a.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(a.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(a); err == nil {
+	if value, err := internal.StringifyJSON(a); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", a)
@@ -257,7 +324,42 @@ type AiRuleCreationJobConfig struct {
 	Index *int `json:"index,omitempty" url:"index,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (a *AiRuleCreationJobConfig) GetLabel() *string {
+	if a == nil {
+		return nil
+	}
+	return a.Label
+}
+
+func (a *AiRuleCreationJobConfig) GetPrompt() string {
+	if a == nil {
+		return ""
+	}
+	return a.Prompt
+}
+
+func (a *AiRuleCreationJobConfig) GetSheetId() SheetId {
+	if a == nil {
+		return ""
+	}
+	return a.SheetId
+}
+
+func (a *AiRuleCreationJobConfig) GetFieldKey() string {
+	if a == nil {
+		return ""
+	}
+	return a.FieldKey
+}
+
+func (a *AiRuleCreationJobConfig) GetIndex() *int {
+	if a == nil {
+		return nil
+	}
+	return a.Index
 }
 
 func (a *AiRuleCreationJobConfig) GetExtraProperties() map[string]interface{} {
@@ -271,24 +373,22 @@ func (a *AiRuleCreationJobConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*a = AiRuleCreationJobConfig(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	extraProperties, err := internal.ExtractExtraProperties(data, *a)
 	if err != nil {
 		return err
 	}
 	a.extraProperties = extraProperties
-
-	a._rawJSON = json.RawMessage(data)
+	a.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (a *AiRuleCreationJobConfig) String() string {
-	if len(a._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+	if len(a.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(a.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(a); err == nil {
+	if value, err := internal.StringifyJSON(a); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", a)
@@ -299,7 +399,21 @@ type AppAutobuildDeployJobConfig struct {
 	AppId   AppId   `json:"appId" url:"appId"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (a *AppAutobuildDeployJobConfig) GetSpaceId() SpaceId {
+	if a == nil {
+		return ""
+	}
+	return a.SpaceId
+}
+
+func (a *AppAutobuildDeployJobConfig) GetAppId() AppId {
+	if a == nil {
+		return ""
+	}
+	return a.AppId
 }
 
 func (a *AppAutobuildDeployJobConfig) GetExtraProperties() map[string]interface{} {
@@ -313,24 +427,22 @@ func (a *AppAutobuildDeployJobConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*a = AppAutobuildDeployJobConfig(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	extraProperties, err := internal.ExtractExtraProperties(data, *a)
 	if err != nil {
 		return err
 	}
 	a.extraProperties = extraProperties
-
-	a._rawJSON = json.RawMessage(data)
+	a.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (a *AppAutobuildDeployJobConfig) String() string {
-	if len(a._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+	if len(a.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(a.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(a); err == nil {
+	if value, err := internal.StringifyJSON(a); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", a)
@@ -343,7 +455,21 @@ type CategoryMapping struct {
 	DestinationValue *EnumValue `json:"destinationValue,omitempty" url:"destinationValue,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (c *CategoryMapping) GetSourceValue() *EnumValue {
+	if c == nil {
+		return nil
+	}
+	return c.SourceValue
+}
+
+func (c *CategoryMapping) GetDestinationValue() *EnumValue {
+	if c == nil {
+		return nil
+	}
+	return c.DestinationValue
 }
 
 func (c *CategoryMapping) GetExtraProperties() map[string]interface{} {
@@ -357,24 +483,22 @@ func (c *CategoryMapping) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*c = CategoryMapping(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
 	if err != nil {
 		return err
 	}
 	c.extraProperties = extraProperties
-
-	c._rawJSON = json.RawMessage(data)
+	c.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (c *CategoryMapping) String() string {
-	if len(c._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(c); err == nil {
+	if value, err := internal.StringifyJSON(c); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", c)
@@ -414,7 +538,28 @@ type CollectionJobSubject struct {
 	Query    map[string]interface{} `json:"query,omitempty" url:"query,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (c *CollectionJobSubject) GetResource() string {
+	if c == nil {
+		return ""
+	}
+	return c.Resource
+}
+
+func (c *CollectionJobSubject) GetParams() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.Params
+}
+
+func (c *CollectionJobSubject) GetQuery() map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return c.Query
 }
 
 func (c *CollectionJobSubject) GetExtraProperties() map[string]interface{} {
@@ -428,24 +573,22 @@ func (c *CollectionJobSubject) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*c = CollectionJobSubject(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	extraProperties, err := internal.ExtractExtraProperties(data, *c)
 	if err != nil {
 		return err
 	}
 	c.extraProperties = extraProperties
-
-	c._rawJSON = json.RawMessage(data)
+	c.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (c *CollectionJobSubject) String() string {
-	if len(c._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(c); err == nil {
+	if value, err := internal.StringifyJSON(c); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", c)
@@ -468,7 +611,63 @@ type DeleteRecordsJobConfig struct {
 	SnapshotLabel *string `json:"snapshotLabel,omitempty" url:"snapshotLabel,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (d *DeleteRecordsJobConfig) GetFilter() *Filter {
+	if d == nil {
+		return nil
+	}
+	return d.Filter
+}
+
+func (d *DeleteRecordsJobConfig) GetFilterField() *FilterField {
+	if d == nil {
+		return nil
+	}
+	return d.FilterField
+}
+
+func (d *DeleteRecordsJobConfig) GetSearchValue() *SearchValue {
+	if d == nil {
+		return nil
+	}
+	return d.SearchValue
+}
+
+func (d *DeleteRecordsJobConfig) GetSearchField() *SearchField {
+	if d == nil {
+		return nil
+	}
+	return d.SearchField
+}
+
+func (d *DeleteRecordsJobConfig) GetQ() *string {
+	if d == nil {
+		return nil
+	}
+	return d.Q
+}
+
+func (d *DeleteRecordsJobConfig) GetSheet() SheetId {
+	if d == nil {
+		return ""
+	}
+	return d.Sheet
+}
+
+func (d *DeleteRecordsJobConfig) GetExceptions() []RecordId {
+	if d == nil {
+		return nil
+	}
+	return d.Exceptions
+}
+
+func (d *DeleteRecordsJobConfig) GetSnapshotLabel() *string {
+	if d == nil {
+		return nil
+	}
+	return d.SnapshotLabel
 }
 
 func (d *DeleteRecordsJobConfig) GetExtraProperties() map[string]interface{} {
@@ -482,24 +681,22 @@ func (d *DeleteRecordsJobConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*d = DeleteRecordsJobConfig(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *d)
+	extraProperties, err := internal.ExtractExtraProperties(data, *d)
 	if err != nil {
 		return err
 	}
 	d.extraProperties = extraProperties
-
-	d._rawJSON = json.RawMessage(data)
+	d.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (d *DeleteRecordsJobConfig) String() string {
-	if len(d._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(d._rawJSON); err == nil {
+	if len(d.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(d.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(d); err == nil {
+	if value, err := internal.StringifyJSON(d); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", d)
@@ -512,7 +709,21 @@ type DestinationField struct {
 	Preview []string `json:"preview,omitempty" url:"preview,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (d *DestinationField) GetDestinationField() *Property {
+	if d == nil {
+		return nil
+	}
+	return d.DestinationField
+}
+
+func (d *DestinationField) GetPreview() []string {
+	if d == nil {
+		return nil
+	}
+	return d.Preview
 }
 
 func (d *DestinationField) GetExtraProperties() map[string]interface{} {
@@ -526,24 +737,22 @@ func (d *DestinationField) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*d = DestinationField(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *d)
+	extraProperties, err := internal.ExtractExtraProperties(data, *d)
 	if err != nil {
 		return err
 	}
 	d.extraProperties = extraProperties
-
-	d._rawJSON = json.RawMessage(data)
+	d.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (d *DestinationField) String() string {
-	if len(d._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(d._rawJSON); err == nil {
+	if len(d.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(d.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(d); err == nil {
+	if value, err := internal.StringifyJSON(d); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", d)
@@ -582,7 +791,42 @@ type Edge struct {
 	Metadata *Metadata `json:"metadata,omitempty" url:"metadata,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (e *Edge) GetSourceField() *Property {
+	if e == nil {
+		return nil
+	}
+	return e.SourceField
+}
+
+func (e *Edge) GetDestinationField() *Property {
+	if e == nil {
+		return nil
+	}
+	return e.DestinationField
+}
+
+func (e *Edge) GetPreview() []string {
+	if e == nil {
+		return nil
+	}
+	return e.Preview
+}
+
+func (e *Edge) GetEnumDetails() *EnumDetails {
+	if e == nil {
+		return nil
+	}
+	return e.EnumDetails
+}
+
+func (e *Edge) GetMetadata() *Metadata {
+	if e == nil {
+		return nil
+	}
+	return e.Metadata
 }
 
 func (e *Edge) GetExtraProperties() map[string]interface{} {
@@ -596,24 +840,22 @@ func (e *Edge) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*e = Edge(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	extraProperties, err := internal.ExtractExtraProperties(data, *e)
 	if err != nil {
 		return err
 	}
 	e.extraProperties = extraProperties
-
-	e._rawJSON = json.RawMessage(data)
+	e.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (e *Edge) String() string {
-	if len(e._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+	if len(e.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(e.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(e); err == nil {
+	if value, err := internal.StringifyJSON(e); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", e)
@@ -621,7 +863,7 @@ func (e *Edge) String() string {
 
 type EmptyObject struct {
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
 }
 
 func (e *EmptyObject) GetExtraProperties() map[string]interface{} {
@@ -635,24 +877,22 @@ func (e *EmptyObject) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*e = EmptyObject(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	extraProperties, err := internal.ExtractExtraProperties(data, *e)
 	if err != nil {
 		return err
 	}
 	e.extraProperties = extraProperties
-
-	e._rawJSON = json.RawMessage(data)
+	e.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (e *EmptyObject) String() string {
-	if len(e._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+	if len(e.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(e.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(e); err == nil {
+	if value, err := internal.StringifyJSON(e); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", e)
@@ -668,7 +908,28 @@ type EnumDetails struct {
 	UnusedDestinationValues []*EnumValue `json:"unusedDestinationValues,omitempty" url:"unusedDestinationValues,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (e *EnumDetails) GetMapping() []*CategoryMapping {
+	if e == nil {
+		return nil
+	}
+	return e.Mapping
+}
+
+func (e *EnumDetails) GetUnusedSourceValues() []*EnumValue {
+	if e == nil {
+		return nil
+	}
+	return e.UnusedSourceValues
+}
+
+func (e *EnumDetails) GetUnusedDestinationValues() []*EnumValue {
+	if e == nil {
+		return nil
+	}
+	return e.UnusedDestinationValues
 }
 
 func (e *EnumDetails) GetExtraProperties() map[string]interface{} {
@@ -682,24 +943,22 @@ func (e *EnumDetails) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*e = EnumDetails(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	extraProperties, err := internal.ExtractExtraProperties(data, *e)
 	if err != nil {
 		return err
 	}
 	e.extraProperties = extraProperties
-
-	e._rawJSON = json.RawMessage(data)
+	e.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (e *EnumDetails) String() string {
-	if len(e._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+	if len(e.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(e.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(e); err == nil {
+	if value, err := internal.StringifyJSON(e); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", e)
@@ -723,6 +982,27 @@ func NewEnumValueFromInteger(value int) *EnumValue {
 
 func NewEnumValueFromBoolean(value bool) *EnumValue {
 	return &EnumValue{typ: "Boolean", Boolean: value}
+}
+
+func (e *EnumValue) GetString() string {
+	if e == nil {
+		return ""
+	}
+	return e.String
+}
+
+func (e *EnumValue) GetInteger() int {
+	if e == nil {
+		return 0
+	}
+	return e.Integer
+}
+
+func (e *EnumValue) GetBoolean() bool {
+	if e == nil {
+		return false
+	}
+	return e.Boolean
 }
 
 func (e *EnumValue) UnmarshalJSON(data []byte) error {
@@ -783,7 +1063,14 @@ type ExportJobConfig struct {
 	Options *ExportOptions `json:"options,omitempty" url:"options,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (e *ExportJobConfig) GetOptions() *ExportOptions {
+	if e == nil {
+		return nil
+	}
+	return e.Options
 }
 
 func (e *ExportJobConfig) GetExtraProperties() map[string]interface{} {
@@ -797,24 +1084,22 @@ func (e *ExportJobConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*e = ExportJobConfig(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	extraProperties, err := internal.ExtractExtraProperties(data, *e)
 	if err != nil {
 		return err
 	}
 	e.extraProperties = extraProperties
-
-	e._rawJSON = json.RawMessage(data)
+	e.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (e *ExportJobConfig) String() string {
-	if len(e._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+	if len(e.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(e.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(e); err == nil {
+	if value, err := internal.StringifyJSON(e); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", e)
@@ -843,7 +1128,77 @@ type ExportOptions struct {
 	Ids []RecordId `json:"ids,omitempty" url:"ids,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (e *ExportOptions) GetVersionId() *VersionId {
+	if e == nil {
+		return nil
+	}
+	return e.VersionId
+}
+
+func (e *ExportOptions) GetCommitId() *CommitId {
+	if e == nil {
+		return nil
+	}
+	return e.CommitId
+}
+
+func (e *ExportOptions) GetSortField() *SortField {
+	if e == nil {
+		return nil
+	}
+	return e.SortField
+}
+
+func (e *ExportOptions) GetSortDirection() *SortDirection {
+	if e == nil {
+		return nil
+	}
+	return e.SortDirection
+}
+
+func (e *ExportOptions) GetFilter() *Filter {
+	if e == nil {
+		return nil
+	}
+	return e.Filter
+}
+
+func (e *ExportOptions) GetFilterField() *FilterField {
+	if e == nil {
+		return nil
+	}
+	return e.FilterField
+}
+
+func (e *ExportOptions) GetSearchValue() *SearchValue {
+	if e == nil {
+		return nil
+	}
+	return e.SearchValue
+}
+
+func (e *ExportOptions) GetSearchField() *SearchField {
+	if e == nil {
+		return nil
+	}
+	return e.SearchField
+}
+
+func (e *ExportOptions) GetQ() *string {
+	if e == nil {
+		return nil
+	}
+	return e.Q
+}
+
+func (e *ExportOptions) GetIds() []RecordId {
+	if e == nil {
+		return nil
+	}
+	return e.Ids
 }
 
 func (e *ExportOptions) GetExtraProperties() map[string]interface{} {
@@ -857,24 +1212,22 @@ func (e *ExportOptions) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*e = ExportOptions(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *e)
+	extraProperties, err := internal.ExtractExtraProperties(data, *e)
 	if err != nil {
 		return err
 	}
 	e.extraProperties = extraProperties
-
-	e._rawJSON = json.RawMessage(data)
+	e.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (e *ExportOptions) String() string {
-	if len(e._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(e._rawJSON); err == nil {
+	if len(e.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(e.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(e); err == nil {
+	if value, err := internal.StringifyJSON(e); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", e)
@@ -889,7 +1242,28 @@ type FileJobConfig struct {
 	DetectedHeaderRow *int `json:"detectedHeaderRow,omitempty" url:"detectedHeaderRow,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (f *FileJobConfig) GetDriver() Driver {
+	if f == nil {
+		return ""
+	}
+	return f.Driver
+}
+
+func (f *FileJobConfig) GetOptions() map[string]interface{} {
+	if f == nil {
+		return nil
+	}
+	return f.Options
+}
+
+func (f *FileJobConfig) GetDetectedHeaderRow() *int {
+	if f == nil {
+		return nil
+	}
+	return f.DetectedHeaderRow
 }
 
 func (f *FileJobConfig) GetExtraProperties() map[string]interface{} {
@@ -903,24 +1277,22 @@ func (f *FileJobConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*f = FileJobConfig(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *f)
+	extraProperties, err := internal.ExtractExtraProperties(data, *f)
 	if err != nil {
 		return err
 	}
 	f.extraProperties = extraProperties
-
-	f._rawJSON = json.RawMessage(data)
+	f.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (f *FileJobConfig) String() string {
-	if len(f._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(f._rawJSON); err == nil {
+	if len(f.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(f.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(f); err == nil {
+	if value, err := internal.StringifyJSON(f); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", f)
@@ -949,7 +1321,77 @@ type FindAndReplaceJobConfig struct {
 	SnapshotLabel *string `json:"snapshotLabel,omitempty" url:"snapshotLabel,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (f *FindAndReplaceJobConfig) GetFilter() *Filter {
+	if f == nil {
+		return nil
+	}
+	return f.Filter
+}
+
+func (f *FindAndReplaceJobConfig) GetFilterField() *FilterField {
+	if f == nil {
+		return nil
+	}
+	return f.FilterField
+}
+
+func (f *FindAndReplaceJobConfig) GetSearchValue() *SearchValue {
+	if f == nil {
+		return nil
+	}
+	return f.SearchValue
+}
+
+func (f *FindAndReplaceJobConfig) GetSearchField() *SearchField {
+	if f == nil {
+		return nil
+	}
+	return f.SearchField
+}
+
+func (f *FindAndReplaceJobConfig) GetQ() *string {
+	if f == nil {
+		return nil
+	}
+	return f.Q
+}
+
+func (f *FindAndReplaceJobConfig) GetIds() []RecordId {
+	if f == nil {
+		return nil
+	}
+	return f.Ids
+}
+
+func (f *FindAndReplaceJobConfig) GetFind() *CellValueUnion {
+	if f == nil {
+		return nil
+	}
+	return f.Find
+}
+
+func (f *FindAndReplaceJobConfig) GetReplace() *CellValueUnion {
+	if f == nil {
+		return nil
+	}
+	return f.Replace
+}
+
+func (f *FindAndReplaceJobConfig) GetFieldKey() string {
+	if f == nil {
+		return ""
+	}
+	return f.FieldKey
+}
+
+func (f *FindAndReplaceJobConfig) GetSnapshotLabel() *string {
+	if f == nil {
+		return nil
+	}
+	return f.SnapshotLabel
 }
 
 func (f *FindAndReplaceJobConfig) GetExtraProperties() map[string]interface{} {
@@ -963,24 +1405,22 @@ func (f *FindAndReplaceJobConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*f = FindAndReplaceJobConfig(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *f)
+	extraProperties, err := internal.ExtractExtraProperties(data, *f)
 	if err != nil {
 		return err
 	}
 	f.extraProperties = extraProperties
-
-	f._rawJSON = json.RawMessage(data)
+	f.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (f *FindAndReplaceJobConfig) String() string {
-	if len(f._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(f._rawJSON); err == nil {
+	if len(f.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(f.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(f); err == nil {
+	if value, err := internal.StringifyJSON(f); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", f)
@@ -1041,7 +1481,203 @@ type Job struct {
 	OutcomeAcknowledgedAt *time.Time `json:"outcomeAcknowledgedAt,omitempty" url:"outcomeAcknowledgedAt,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (j *Job) GetType() JobType {
+	if j == nil {
+		return ""
+	}
+	return j.Type
+}
+
+func (j *Job) GetOperation() string {
+	if j == nil {
+		return ""
+	}
+	return j.Operation
+}
+
+func (j *Job) GetSource() JobSource {
+	if j == nil {
+		return ""
+	}
+	return j.Source
+}
+
+func (j *Job) GetDestination() *JobDestination {
+	if j == nil {
+		return nil
+	}
+	return j.Destination
+}
+
+func (j *Job) GetConfig() *JobUpdateConfig {
+	if j == nil {
+		return nil
+	}
+	return j.Config
+}
+
+func (j *Job) GetTrigger() *Trigger {
+	if j == nil {
+		return nil
+	}
+	return j.Trigger
+}
+
+func (j *Job) GetStatus() *JobStatus {
+	if j == nil {
+		return nil
+	}
+	return j.Status
+}
+
+func (j *Job) GetProgress() *int {
+	if j == nil {
+		return nil
+	}
+	return j.Progress
+}
+
+func (j *Job) GetFileId() *FileId {
+	if j == nil {
+		return nil
+	}
+	return j.FileId
+}
+
+func (j *Job) GetMode() *JobMode {
+	if j == nil {
+		return nil
+	}
+	return j.Mode
+}
+
+func (j *Job) GetInput() map[string]interface{} {
+	if j == nil {
+		return nil
+	}
+	return j.Input
+}
+
+func (j *Job) GetSubject() *JobSubject {
+	if j == nil {
+		return nil
+	}
+	return j.Subject
+}
+
+func (j *Job) GetOutcome() map[string]interface{} {
+	if j == nil {
+		return nil
+	}
+	return j.Outcome
+}
+
+func (j *Job) GetInfo() *string {
+	if j == nil {
+		return nil
+	}
+	return j.Info
+}
+
+func (j *Job) GetManaged() *bool {
+	if j == nil {
+		return nil
+	}
+	return j.Managed
+}
+
+func (j *Job) GetEnvironmentId() *EnvironmentId {
+	if j == nil {
+		return nil
+	}
+	return j.EnvironmentId
+}
+
+func (j *Job) GetPart() *int {
+	if j == nil {
+		return nil
+	}
+	return j.Part
+}
+
+func (j *Job) GetPartData() map[string]interface{} {
+	if j == nil {
+		return nil
+	}
+	return j.PartData
+}
+
+func (j *Job) GetPartExecution() *JobPartExecution {
+	if j == nil {
+		return nil
+	}
+	return j.PartExecution
+}
+
+func (j *Job) GetParentId() *JobId {
+	if j == nil {
+		return nil
+	}
+	return j.ParentId
+}
+
+func (j *Job) GetPredecessorIds() []JobId {
+	if j == nil {
+		return nil
+	}
+	return j.PredecessorIds
+}
+
+func (j *Job) GetMetadata() map[string]interface{} {
+	if j == nil {
+		return nil
+	}
+	return j.Metadata
+}
+
+func (j *Job) GetId() JobId {
+	if j == nil {
+		return ""
+	}
+	return j.Id
+}
+
+func (j *Job) GetCreatedAt() time.Time {
+	if j == nil {
+		return time.Time{}
+	}
+	return j.CreatedAt
+}
+
+func (j *Job) GetUpdatedAt() time.Time {
+	if j == nil {
+		return time.Time{}
+	}
+	return j.UpdatedAt
+}
+
+func (j *Job) GetStartedAt() *time.Time {
+	if j == nil {
+		return nil
+	}
+	return j.StartedAt
+}
+
+func (j *Job) GetFinishedAt() *time.Time {
+	if j == nil {
+		return nil
+	}
+	return j.FinishedAt
+}
+
+func (j *Job) GetOutcomeAcknowledgedAt() *time.Time {
+	if j == nil {
+		return nil
+	}
+	return j.OutcomeAcknowledgedAt
 }
 
 func (j *Job) GetExtraProperties() map[string]interface{} {
@@ -1052,11 +1688,11 @@ func (j *Job) UnmarshalJSON(data []byte) error {
 	type embed Job
 	var unmarshaler = struct {
 		embed
-		CreatedAt             *core.DateTime `json:"createdAt"`
-		UpdatedAt             *core.DateTime `json:"updatedAt"`
-		StartedAt             *core.DateTime `json:"startedAt,omitempty"`
-		FinishedAt            *core.DateTime `json:"finishedAt,omitempty"`
-		OutcomeAcknowledgedAt *core.DateTime `json:"outcomeAcknowledgedAt,omitempty"`
+		CreatedAt             *internal.DateTime `json:"createdAt"`
+		UpdatedAt             *internal.DateTime `json:"updatedAt"`
+		StartedAt             *internal.DateTime `json:"startedAt,omitempty"`
+		FinishedAt            *internal.DateTime `json:"finishedAt,omitempty"`
+		OutcomeAcknowledgedAt *internal.DateTime `json:"outcomeAcknowledgedAt,omitempty"`
 	}{
 		embed: embed(*j),
 	}
@@ -1069,14 +1705,12 @@ func (j *Job) UnmarshalJSON(data []byte) error {
 	j.StartedAt = unmarshaler.StartedAt.TimePtr()
 	j.FinishedAt = unmarshaler.FinishedAt.TimePtr()
 	j.OutcomeAcknowledgedAt = unmarshaler.OutcomeAcknowledgedAt.TimePtr()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	extraProperties, err := internal.ExtractExtraProperties(data, *j)
 	if err != nil {
 		return err
 	}
 	j.extraProperties = extraProperties
-
-	j._rawJSON = json.RawMessage(data)
+	j.rawJSON = json.RawMessage(data)
 	return nil
 }
 
@@ -1084,29 +1718,29 @@ func (j *Job) MarshalJSON() ([]byte, error) {
 	type embed Job
 	var marshaler = struct {
 		embed
-		CreatedAt             *core.DateTime `json:"createdAt"`
-		UpdatedAt             *core.DateTime `json:"updatedAt"`
-		StartedAt             *core.DateTime `json:"startedAt,omitempty"`
-		FinishedAt            *core.DateTime `json:"finishedAt,omitempty"`
-		OutcomeAcknowledgedAt *core.DateTime `json:"outcomeAcknowledgedAt,omitempty"`
+		CreatedAt             *internal.DateTime `json:"createdAt"`
+		UpdatedAt             *internal.DateTime `json:"updatedAt"`
+		StartedAt             *internal.DateTime `json:"startedAt,omitempty"`
+		FinishedAt            *internal.DateTime `json:"finishedAt,omitempty"`
+		OutcomeAcknowledgedAt *internal.DateTime `json:"outcomeAcknowledgedAt,omitempty"`
 	}{
 		embed:                 embed(*j),
-		CreatedAt:             core.NewDateTime(j.CreatedAt),
-		UpdatedAt:             core.NewDateTime(j.UpdatedAt),
-		StartedAt:             core.NewOptionalDateTime(j.StartedAt),
-		FinishedAt:            core.NewOptionalDateTime(j.FinishedAt),
-		OutcomeAcknowledgedAt: core.NewOptionalDateTime(j.OutcomeAcknowledgedAt),
+		CreatedAt:             internal.NewDateTime(j.CreatedAt),
+		UpdatedAt:             internal.NewDateTime(j.UpdatedAt),
+		StartedAt:             internal.NewOptionalDateTime(j.StartedAt),
+		FinishedAt:            internal.NewOptionalDateTime(j.FinishedAt),
+		OutcomeAcknowledgedAt: internal.NewOptionalDateTime(j.OutcomeAcknowledgedAt),
 	}
 	return json.Marshal(marshaler)
 }
 
 func (j *Job) String() string {
-	if len(j._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
+	if len(j.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(j.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(j); err == nil {
+	if value, err := internal.StringifyJSON(j); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", j)
@@ -1120,7 +1754,28 @@ type JobAckDetails struct {
 	EstimatedCompletionAt *time.Time `json:"estimatedCompletionAt,omitempty" url:"estimatedCompletionAt,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (j *JobAckDetails) GetInfo() *string {
+	if j == nil {
+		return nil
+	}
+	return j.Info
+}
+
+func (j *JobAckDetails) GetProgress() *int {
+	if j == nil {
+		return nil
+	}
+	return j.Progress
+}
+
+func (j *JobAckDetails) GetEstimatedCompletionAt() *time.Time {
+	if j == nil {
+		return nil
+	}
+	return j.EstimatedCompletionAt
 }
 
 func (j *JobAckDetails) GetExtraProperties() map[string]interface{} {
@@ -1131,7 +1786,7 @@ func (j *JobAckDetails) UnmarshalJSON(data []byte) error {
 	type embed JobAckDetails
 	var unmarshaler = struct {
 		embed
-		EstimatedCompletionAt *core.DateTime `json:"estimatedCompletionAt,omitempty"`
+		EstimatedCompletionAt *internal.DateTime `json:"estimatedCompletionAt,omitempty"`
 	}{
 		embed: embed(*j),
 	}
@@ -1140,14 +1795,12 @@ func (j *JobAckDetails) UnmarshalJSON(data []byte) error {
 	}
 	*j = JobAckDetails(unmarshaler.embed)
 	j.EstimatedCompletionAt = unmarshaler.EstimatedCompletionAt.TimePtr()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	extraProperties, err := internal.ExtractExtraProperties(data, *j)
 	if err != nil {
 		return err
 	}
 	j.extraProperties = extraProperties
-
-	j._rawJSON = json.RawMessage(data)
+	j.rawJSON = json.RawMessage(data)
 	return nil
 }
 
@@ -1155,21 +1808,21 @@ func (j *JobAckDetails) MarshalJSON() ([]byte, error) {
 	type embed JobAckDetails
 	var marshaler = struct {
 		embed
-		EstimatedCompletionAt *core.DateTime `json:"estimatedCompletionAt,omitempty"`
+		EstimatedCompletionAt *internal.DateTime `json:"estimatedCompletionAt,omitempty"`
 	}{
 		embed:                 embed(*j),
-		EstimatedCompletionAt: core.NewOptionalDateTime(j.EstimatedCompletionAt),
+		EstimatedCompletionAt: internal.NewOptionalDateTime(j.EstimatedCompletionAt),
 	}
 	return json.Marshal(marshaler)
 }
 
 func (j *JobAckDetails) String() string {
-	if len(j._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
+	if len(j.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(j.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(j); err == nil {
+	if value, err := internal.StringifyJSON(j); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", j)
@@ -1180,7 +1833,14 @@ type JobCancelDetails struct {
 	Info *string `json:"info,omitempty" url:"info,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (j *JobCancelDetails) GetInfo() *string {
+	if j == nil {
+		return nil
+	}
+	return j.Info
 }
 
 func (j *JobCancelDetails) GetExtraProperties() map[string]interface{} {
@@ -1194,24 +1854,22 @@ func (j *JobCancelDetails) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*j = JobCancelDetails(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	extraProperties, err := internal.ExtractExtraProperties(data, *j)
 	if err != nil {
 		return err
 	}
 	j.extraProperties = extraProperties
-
-	j._rawJSON = json.RawMessage(data)
+	j.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (j *JobCancelDetails) String() string {
-	if len(j._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
+	if len(j.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(j.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(j); err == nil {
+	if value, err := internal.StringifyJSON(j); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", j)
@@ -1223,7 +1881,21 @@ type JobCompleteDetails struct {
 	Info    *string     `json:"info,omitempty" url:"info,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (j *JobCompleteDetails) GetOutcome() *JobOutcome {
+	if j == nil {
+		return nil
+	}
+	return j.Outcome
+}
+
+func (j *JobCompleteDetails) GetInfo() *string {
+	if j == nil {
+		return nil
+	}
+	return j.Info
 }
 
 func (j *JobCompleteDetails) GetExtraProperties() map[string]interface{} {
@@ -1237,24 +1909,22 @@ func (j *JobCompleteDetails) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*j = JobCompleteDetails(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	extraProperties, err := internal.ExtractExtraProperties(data, *j)
 	if err != nil {
 		return err
 	}
 	j.extraProperties = extraProperties
-
-	j._rawJSON = json.RawMessage(data)
+	j.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (j *JobCompleteDetails) String() string {
-	if len(j._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
+	if len(j.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(j.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(j); err == nil {
+	if value, err := internal.StringifyJSON(j); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", j)
@@ -1304,7 +1974,161 @@ type JobConfig struct {
 	Metadata map[string]interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (j *JobConfig) GetType() JobType {
+	if j == nil {
+		return ""
+	}
+	return j.Type
+}
+
+func (j *JobConfig) GetOperation() string {
+	if j == nil {
+		return ""
+	}
+	return j.Operation
+}
+
+func (j *JobConfig) GetSource() JobSource {
+	if j == nil {
+		return ""
+	}
+	return j.Source
+}
+
+func (j *JobConfig) GetDestination() *JobDestination {
+	if j == nil {
+		return nil
+	}
+	return j.Destination
+}
+
+func (j *JobConfig) GetConfig() *JobUpdateConfig {
+	if j == nil {
+		return nil
+	}
+	return j.Config
+}
+
+func (j *JobConfig) GetTrigger() *Trigger {
+	if j == nil {
+		return nil
+	}
+	return j.Trigger
+}
+
+func (j *JobConfig) GetStatus() *JobStatus {
+	if j == nil {
+		return nil
+	}
+	return j.Status
+}
+
+func (j *JobConfig) GetProgress() *int {
+	if j == nil {
+		return nil
+	}
+	return j.Progress
+}
+
+func (j *JobConfig) GetFileId() *FileId {
+	if j == nil {
+		return nil
+	}
+	return j.FileId
+}
+
+func (j *JobConfig) GetMode() *JobMode {
+	if j == nil {
+		return nil
+	}
+	return j.Mode
+}
+
+func (j *JobConfig) GetInput() map[string]interface{} {
+	if j == nil {
+		return nil
+	}
+	return j.Input
+}
+
+func (j *JobConfig) GetSubject() *JobSubject {
+	if j == nil {
+		return nil
+	}
+	return j.Subject
+}
+
+func (j *JobConfig) GetOutcome() map[string]interface{} {
+	if j == nil {
+		return nil
+	}
+	return j.Outcome
+}
+
+func (j *JobConfig) GetInfo() *string {
+	if j == nil {
+		return nil
+	}
+	return j.Info
+}
+
+func (j *JobConfig) GetManaged() *bool {
+	if j == nil {
+		return nil
+	}
+	return j.Managed
+}
+
+func (j *JobConfig) GetEnvironmentId() *EnvironmentId {
+	if j == nil {
+		return nil
+	}
+	return j.EnvironmentId
+}
+
+func (j *JobConfig) GetPart() *int {
+	if j == nil {
+		return nil
+	}
+	return j.Part
+}
+
+func (j *JobConfig) GetPartData() map[string]interface{} {
+	if j == nil {
+		return nil
+	}
+	return j.PartData
+}
+
+func (j *JobConfig) GetPartExecution() *JobPartExecution {
+	if j == nil {
+		return nil
+	}
+	return j.PartExecution
+}
+
+func (j *JobConfig) GetParentId() *JobId {
+	if j == nil {
+		return nil
+	}
+	return j.ParentId
+}
+
+func (j *JobConfig) GetPredecessorIds() []JobId {
+	if j == nil {
+		return nil
+	}
+	return j.PredecessorIds
+}
+
+func (j *JobConfig) GetMetadata() map[string]interface{} {
+	if j == nil {
+		return nil
+	}
+	return j.Metadata
 }
 
 func (j *JobConfig) GetExtraProperties() map[string]interface{} {
@@ -1318,24 +2142,22 @@ func (j *JobConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*j = JobConfig(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	extraProperties, err := internal.ExtractExtraProperties(data, *j)
 	if err != nil {
 		return err
 	}
 	j.extraProperties = extraProperties
-
-	j._rawJSON = json.RawMessage(data)
+	j.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (j *JobConfig) String() string {
-	if len(j._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
+	if len(j.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(j.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(j); err == nil {
+	if value, err := internal.StringifyJSON(j); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", j)
@@ -1352,7 +2174,35 @@ type JobExecutionPlan struct {
 	ProgramId                 *string             `json:"programId,omitempty" url:"programId,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (j *JobExecutionPlan) GetFieldMapping() []*Edge {
+	if j == nil {
+		return nil
+	}
+	return j.FieldMapping
+}
+
+func (j *JobExecutionPlan) GetUnmappedSourceFields() []*SourceField {
+	if j == nil {
+		return nil
+	}
+	return j.UnmappedSourceFields
+}
+
+func (j *JobExecutionPlan) GetUnmappedDestinationFields() []*DestinationField {
+	if j == nil {
+		return nil
+	}
+	return j.UnmappedDestinationFields
+}
+
+func (j *JobExecutionPlan) GetProgramId() *string {
+	if j == nil {
+		return nil
+	}
+	return j.ProgramId
 }
 
 func (j *JobExecutionPlan) GetExtraProperties() map[string]interface{} {
@@ -1366,24 +2216,22 @@ func (j *JobExecutionPlan) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*j = JobExecutionPlan(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	extraProperties, err := internal.ExtractExtraProperties(data, *j)
 	if err != nil {
 		return err
 	}
 	j.extraProperties = extraProperties
-
-	j._rawJSON = json.RawMessage(data)
+	j.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (j *JobExecutionPlan) String() string {
-	if len(j._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
+	if len(j.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(j.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(j); err == nil {
+	if value, err := internal.StringifyJSON(j); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", j)
@@ -1397,7 +2245,35 @@ type JobExecutionPlanConfig struct {
 	ProgramId                 *string             `json:"programId,omitempty" url:"programId,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (j *JobExecutionPlanConfig) GetFieldMapping() []*Edge {
+	if j == nil {
+		return nil
+	}
+	return j.FieldMapping
+}
+
+func (j *JobExecutionPlanConfig) GetUnmappedSourceFields() []*SourceField {
+	if j == nil {
+		return nil
+	}
+	return j.UnmappedSourceFields
+}
+
+func (j *JobExecutionPlanConfig) GetUnmappedDestinationFields() []*DestinationField {
+	if j == nil {
+		return nil
+	}
+	return j.UnmappedDestinationFields
+}
+
+func (j *JobExecutionPlanConfig) GetProgramId() *string {
+	if j == nil {
+		return nil
+	}
+	return j.ProgramId
 }
 
 func (j *JobExecutionPlanConfig) GetExtraProperties() map[string]interface{} {
@@ -1411,24 +2287,22 @@ func (j *JobExecutionPlanConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*j = JobExecutionPlanConfig(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	extraProperties, err := internal.ExtractExtraProperties(data, *j)
 	if err != nil {
 		return err
 	}
 	j.extraProperties = extraProperties
-
-	j._rawJSON = json.RawMessage(data)
+	j.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (j *JobExecutionPlanConfig) String() string {
-	if len(j._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
+	if len(j.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(j.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(j); err == nil {
+	if value, err := internal.StringifyJSON(j); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", j)
@@ -1443,7 +2317,49 @@ type JobExecutionPlanConfigRequest struct {
 	JobId                     JobId               `json:"jobId" url:"jobId"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (j *JobExecutionPlanConfigRequest) GetFieldMapping() []*Edge {
+	if j == nil {
+		return nil
+	}
+	return j.FieldMapping
+}
+
+func (j *JobExecutionPlanConfigRequest) GetUnmappedSourceFields() []*SourceField {
+	if j == nil {
+		return nil
+	}
+	return j.UnmappedSourceFields
+}
+
+func (j *JobExecutionPlanConfigRequest) GetUnmappedDestinationFields() []*DestinationField {
+	if j == nil {
+		return nil
+	}
+	return j.UnmappedDestinationFields
+}
+
+func (j *JobExecutionPlanConfigRequest) GetProgramId() *string {
+	if j == nil {
+		return nil
+	}
+	return j.ProgramId
+}
+
+func (j *JobExecutionPlanConfigRequest) GetFileId() FileId {
+	if j == nil {
+		return ""
+	}
+	return j.FileId
+}
+
+func (j *JobExecutionPlanConfigRequest) GetJobId() JobId {
+	if j == nil {
+		return ""
+	}
+	return j.JobId
 }
 
 func (j *JobExecutionPlanConfigRequest) GetExtraProperties() map[string]interface{} {
@@ -1457,24 +2373,22 @@ func (j *JobExecutionPlanConfigRequest) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*j = JobExecutionPlanConfigRequest(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	extraProperties, err := internal.ExtractExtraProperties(data, *j)
 	if err != nil {
 		return err
 	}
 	j.extraProperties = extraProperties
-
-	j._rawJSON = json.RawMessage(data)
+	j.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (j *JobExecutionPlanConfigRequest) String() string {
-	if len(j._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
+	if len(j.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(j.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(j); err == nil {
+	if value, err := internal.StringifyJSON(j); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", j)
@@ -1489,7 +2403,49 @@ type JobExecutionPlanRequest struct {
 	JobId                     JobId               `json:"jobId" url:"jobId"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (j *JobExecutionPlanRequest) GetFieldMapping() []*Edge {
+	if j == nil {
+		return nil
+	}
+	return j.FieldMapping
+}
+
+func (j *JobExecutionPlanRequest) GetUnmappedSourceFields() []*SourceField {
+	if j == nil {
+		return nil
+	}
+	return j.UnmappedSourceFields
+}
+
+func (j *JobExecutionPlanRequest) GetUnmappedDestinationFields() []*DestinationField {
+	if j == nil {
+		return nil
+	}
+	return j.UnmappedDestinationFields
+}
+
+func (j *JobExecutionPlanRequest) GetProgramId() *string {
+	if j == nil {
+		return nil
+	}
+	return j.ProgramId
+}
+
+func (j *JobExecutionPlanRequest) GetFileId() FileId {
+	if j == nil {
+		return ""
+	}
+	return j.FileId
+}
+
+func (j *JobExecutionPlanRequest) GetJobId() JobId {
+	if j == nil {
+		return ""
+	}
+	return j.JobId
 }
 
 func (j *JobExecutionPlanRequest) GetExtraProperties() map[string]interface{} {
@@ -1503,24 +2459,22 @@ func (j *JobExecutionPlanRequest) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*j = JobExecutionPlanRequest(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	extraProperties, err := internal.ExtractExtraProperties(data, *j)
 	if err != nil {
 		return err
 	}
 	j.extraProperties = extraProperties
-
-	j._rawJSON = json.RawMessage(data)
+	j.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (j *JobExecutionPlanRequest) String() string {
-	if len(j._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
+	if len(j.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(j.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(j); err == nil {
+	if value, err := internal.StringifyJSON(j); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", j)
@@ -1563,7 +2517,56 @@ type JobOutcome struct {
 	HideDefaultButton *bool              `json:"hideDefaultButton,omitempty" url:"hideDefaultButton,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (j *JobOutcome) GetAcknowledge() *bool {
+	if j == nil {
+		return nil
+	}
+	return j.Acknowledge
+}
+
+func (j *JobOutcome) GetTrigger() *JobOutcomeTrigger {
+	if j == nil {
+		return nil
+	}
+	return j.Trigger
+}
+
+func (j *JobOutcome) GetButtonText() *string {
+	if j == nil {
+		return nil
+	}
+	return j.ButtonText
+}
+
+func (j *JobOutcome) GetNext() *JobOutcomeNext {
+	if j == nil {
+		return nil
+	}
+	return j.Next
+}
+
+func (j *JobOutcome) GetHeading() *string {
+	if j == nil {
+		return nil
+	}
+	return j.Heading
+}
+
+func (j *JobOutcome) GetMessage() *string {
+	if j == nil {
+		return nil
+	}
+	return j.Message
+}
+
+func (j *JobOutcome) GetHideDefaultButton() *bool {
+	if j == nil {
+		return nil
+	}
+	return j.HideDefaultButton
 }
 
 func (j *JobOutcome) GetExtraProperties() map[string]interface{} {
@@ -1577,24 +2580,22 @@ func (j *JobOutcome) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*j = JobOutcome(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	extraProperties, err := internal.ExtractExtraProperties(data, *j)
 	if err != nil {
 		return err
 	}
 	j.extraProperties = extraProperties
-
-	j._rawJSON = json.RawMessage(data)
+	j.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (j *JobOutcome) String() string {
-	if len(j._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
+	if len(j.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(j.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(j); err == nil {
+	if value, err := internal.StringifyJSON(j); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", j)
@@ -1642,6 +2643,69 @@ func NewJobOutcomeNextFromRetry(value *JobOutcomeNextRetry) *JobOutcomeNext {
 
 func NewJobOutcomeNextFromView(value *JobOutcomeNextView) *JobOutcomeNext {
 	return &JobOutcomeNext{Type: "view", View: value}
+}
+
+func (j *JobOutcomeNext) GetType() string {
+	if j == nil {
+		return ""
+	}
+	return j.Type
+}
+
+func (j *JobOutcomeNext) GetId() *JobOutcomeNextId {
+	if j == nil {
+		return nil
+	}
+	return j.Id
+}
+
+func (j *JobOutcomeNext) GetUrl() *JobOutcomeNextUrl {
+	if j == nil {
+		return nil
+	}
+	return j.Url
+}
+
+func (j *JobOutcomeNext) GetDownload() *JobOutcomeNextDownload {
+	if j == nil {
+		return nil
+	}
+	return j.Download
+}
+
+func (j *JobOutcomeNext) GetFiles() *JobOutcomeNextFiles {
+	if j == nil {
+		return nil
+	}
+	return j.Files
+}
+
+func (j *JobOutcomeNext) GetWait() *JobOutcomeNextWait {
+	if j == nil {
+		return nil
+	}
+	return j.Wait
+}
+
+func (j *JobOutcomeNext) GetSnapshot() *JobOutcomeNextSnapshot {
+	if j == nil {
+		return nil
+	}
+	return j.Snapshot
+}
+
+func (j *JobOutcomeNext) GetRetry() *JobOutcomeNextRetry {
+	if j == nil {
+		return nil
+	}
+	return j.Retry
+}
+
+func (j *JobOutcomeNext) GetView() *JobOutcomeNextView {
+	if j == nil {
+		return nil
+	}
+	return j.View
 }
 
 func (j *JobOutcomeNext) UnmarshalJSON(data []byte) error {
@@ -1709,25 +2773,28 @@ func (j *JobOutcomeNext) UnmarshalJSON(data []byte) error {
 }
 
 func (j JobOutcomeNext) MarshalJSON() ([]byte, error) {
+	if err := j.validate(); err != nil {
+		return nil, err
+	}
 	switch j.Type {
 	default:
 		return nil, fmt.Errorf("invalid type %s in %T", j.Type, j)
 	case "id":
-		return core.MarshalJSONWithExtraProperty(j.Id, "type", "id")
+		return internal.MarshalJSONWithExtraProperty(j.Id, "type", "id")
 	case "url":
-		return core.MarshalJSONWithExtraProperty(j.Url, "type", "url")
+		return internal.MarshalJSONWithExtraProperty(j.Url, "type", "url")
 	case "download":
-		return core.MarshalJSONWithExtraProperty(j.Download, "type", "download")
+		return internal.MarshalJSONWithExtraProperty(j.Download, "type", "download")
 	case "files":
-		return core.MarshalJSONWithExtraProperty(j.Files, "type", "files")
+		return internal.MarshalJSONWithExtraProperty(j.Files, "type", "files")
 	case "wait":
-		return core.MarshalJSONWithExtraProperty(j.Wait, "type", "wait")
+		return internal.MarshalJSONWithExtraProperty(j.Wait, "type", "wait")
 	case "snapshot":
-		return core.MarshalJSONWithExtraProperty(j.Snapshot, "type", "snapshot")
+		return internal.MarshalJSONWithExtraProperty(j.Snapshot, "type", "snapshot")
 	case "retry":
-		return core.MarshalJSONWithExtraProperty(j.Retry, "type", "retry")
+		return internal.MarshalJSONWithExtraProperty(j.Retry, "type", "retry")
 	case "view":
-		return core.MarshalJSONWithExtraProperty(j.View, "type", "view")
+		return internal.MarshalJSONWithExtraProperty(j.View, "type", "view")
 	}
 }
 
@@ -1765,13 +2832,86 @@ func (j *JobOutcomeNext) Accept(visitor JobOutcomeNextVisitor) error {
 	}
 }
 
+func (j *JobOutcomeNext) validate() error {
+	if j == nil {
+		return fmt.Errorf("type %T is nil", j)
+	}
+	var fields []string
+	if j.Id != nil {
+		fields = append(fields, "id")
+	}
+	if j.Url != nil {
+		fields = append(fields, "url")
+	}
+	if j.Download != nil {
+		fields = append(fields, "download")
+	}
+	if j.Files != nil {
+		fields = append(fields, "files")
+	}
+	if j.Wait != nil {
+		fields = append(fields, "wait")
+	}
+	if j.Snapshot != nil {
+		fields = append(fields, "snapshot")
+	}
+	if j.Retry != nil {
+		fields = append(fields, "retry")
+	}
+	if j.View != nil {
+		fields = append(fields, "view")
+	}
+	if len(fields) == 0 {
+		if j.Type != "" {
+			return fmt.Errorf("type %T defines a discriminant set to %q but the field is not set", j, j.Type)
+		}
+		return fmt.Errorf("type %T is empty", j)
+	}
+	if len(fields) > 1 {
+		return fmt.Errorf("type %T defines values for %s, but only one value is allowed", j, fields)
+	}
+	if j.Type != "" {
+		field := fields[0]
+		if j.Type != field {
+			return fmt.Errorf(
+				"type %T defines a discriminant set to %q, but it does not match the %T field; either remove or update the discriminant to match",
+				j,
+				j.Type,
+				j,
+			)
+		}
+	}
+	return nil
+}
+
 type JobOutcomeNextDownload struct {
 	Url      string  `json:"url" url:"url"`
 	Label    *string `json:"label,omitempty" url:"label,omitempty"`
 	FileName *string `json:"fileName,omitempty" url:"fileName,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (j *JobOutcomeNextDownload) GetUrl() string {
+	if j == nil {
+		return ""
+	}
+	return j.Url
+}
+
+func (j *JobOutcomeNextDownload) GetLabel() *string {
+	if j == nil {
+		return nil
+	}
+	return j.Label
+}
+
+func (j *JobOutcomeNextDownload) GetFileName() *string {
+	if j == nil {
+		return nil
+	}
+	return j.FileName
 }
 
 func (j *JobOutcomeNextDownload) GetExtraProperties() map[string]interface{} {
@@ -1785,24 +2925,22 @@ func (j *JobOutcomeNextDownload) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*j = JobOutcomeNextDownload(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	extraProperties, err := internal.ExtractExtraProperties(data, *j)
 	if err != nil {
 		return err
 	}
 	j.extraProperties = extraProperties
-
-	j._rawJSON = json.RawMessage(data)
+	j.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (j *JobOutcomeNextDownload) String() string {
-	if len(j._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
+	if len(j.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(j.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(j); err == nil {
+	if value, err := internal.StringifyJSON(j); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", j)
@@ -1813,7 +2951,21 @@ type JobOutcomeNextFileObject struct {
 	Label  *string `json:"label,omitempty" url:"label,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (j *JobOutcomeNextFileObject) GetFileId() string {
+	if j == nil {
+		return ""
+	}
+	return j.FileId
+}
+
+func (j *JobOutcomeNextFileObject) GetLabel() *string {
+	if j == nil {
+		return nil
+	}
+	return j.Label
 }
 
 func (j *JobOutcomeNextFileObject) GetExtraProperties() map[string]interface{} {
@@ -1827,24 +2979,22 @@ func (j *JobOutcomeNextFileObject) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*j = JobOutcomeNextFileObject(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	extraProperties, err := internal.ExtractExtraProperties(data, *j)
 	if err != nil {
 		return err
 	}
 	j.extraProperties = extraProperties
-
-	j._rawJSON = json.RawMessage(data)
+	j.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (j *JobOutcomeNextFileObject) String() string {
-	if len(j._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
+	if len(j.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(j.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(j); err == nil {
+	if value, err := internal.StringifyJSON(j); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", j)
@@ -1855,7 +3005,21 @@ type JobOutcomeNextFiles struct {
 	Label *string                     `json:"label,omitempty" url:"label,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (j *JobOutcomeNextFiles) GetFiles() []*JobOutcomeNextFileObject {
+	if j == nil {
+		return nil
+	}
+	return j.Files
+}
+
+func (j *JobOutcomeNextFiles) GetLabel() *string {
+	if j == nil {
+		return nil
+	}
+	return j.Label
 }
 
 func (j *JobOutcomeNextFiles) GetExtraProperties() map[string]interface{} {
@@ -1869,24 +3033,22 @@ func (j *JobOutcomeNextFiles) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*j = JobOutcomeNextFiles(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	extraProperties, err := internal.ExtractExtraProperties(data, *j)
 	if err != nil {
 		return err
 	}
 	j.extraProperties = extraProperties
-
-	j._rawJSON = json.RawMessage(data)
+	j.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (j *JobOutcomeNextFiles) String() string {
-	if len(j._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
+	if len(j.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(j.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(j); err == nil {
+	if value, err := internal.StringifyJSON(j); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", j)
@@ -1899,7 +3061,35 @@ type JobOutcomeNextId struct {
 	Query *string `json:"query,omitempty" url:"query,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (j *JobOutcomeNextId) GetId() string {
+	if j == nil {
+		return ""
+	}
+	return j.Id
+}
+
+func (j *JobOutcomeNextId) GetLabel() *string {
+	if j == nil {
+		return nil
+	}
+	return j.Label
+}
+
+func (j *JobOutcomeNextId) GetPath() *string {
+	if j == nil {
+		return nil
+	}
+	return j.Path
+}
+
+func (j *JobOutcomeNextId) GetQuery() *string {
+	if j == nil {
+		return nil
+	}
+	return j.Query
 }
 
 func (j *JobOutcomeNextId) GetExtraProperties() map[string]interface{} {
@@ -1913,24 +3103,22 @@ func (j *JobOutcomeNextId) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*j = JobOutcomeNextId(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	extraProperties, err := internal.ExtractExtraProperties(data, *j)
 	if err != nil {
 		return err
 	}
 	j.extraProperties = extraProperties
-
-	j._rawJSON = json.RawMessage(data)
+	j.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (j *JobOutcomeNextId) String() string {
-	if len(j._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
+	if len(j.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(j.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(j); err == nil {
+	if value, err := internal.StringifyJSON(j); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", j)
@@ -1940,7 +3128,14 @@ type JobOutcomeNextRetry struct {
 	Label *string `json:"label,omitempty" url:"label,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (j *JobOutcomeNextRetry) GetLabel() *string {
+	if j == nil {
+		return nil
+	}
+	return j.Label
 }
 
 func (j *JobOutcomeNextRetry) GetExtraProperties() map[string]interface{} {
@@ -1954,24 +3149,22 @@ func (j *JobOutcomeNextRetry) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*j = JobOutcomeNextRetry(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	extraProperties, err := internal.ExtractExtraProperties(data, *j)
 	if err != nil {
 		return err
 	}
 	j.extraProperties = extraProperties
-
-	j._rawJSON = json.RawMessage(data)
+	j.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (j *JobOutcomeNextRetry) String() string {
-	if len(j._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
+	if len(j.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(j.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(j); err == nil {
+	if value, err := internal.StringifyJSON(j); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", j)
@@ -1982,7 +3175,21 @@ type JobOutcomeNextSnapshot struct {
 	SheetId    string `json:"sheetId" url:"sheetId"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (j *JobOutcomeNextSnapshot) GetSnapshotId() string {
+	if j == nil {
+		return ""
+	}
+	return j.SnapshotId
+}
+
+func (j *JobOutcomeNextSnapshot) GetSheetId() string {
+	if j == nil {
+		return ""
+	}
+	return j.SheetId
 }
 
 func (j *JobOutcomeNextSnapshot) GetExtraProperties() map[string]interface{} {
@@ -1996,24 +3203,22 @@ func (j *JobOutcomeNextSnapshot) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*j = JobOutcomeNextSnapshot(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	extraProperties, err := internal.ExtractExtraProperties(data, *j)
 	if err != nil {
 		return err
 	}
 	j.extraProperties = extraProperties
-
-	j._rawJSON = json.RawMessage(data)
+	j.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (j *JobOutcomeNextSnapshot) String() string {
-	if len(j._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
+	if len(j.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(j.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(j); err == nil {
+	if value, err := internal.StringifyJSON(j); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", j)
@@ -2024,7 +3229,21 @@ type JobOutcomeNextUrl struct {
 	Label *string `json:"label,omitempty" url:"label,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (j *JobOutcomeNextUrl) GetUrl() string {
+	if j == nil {
+		return ""
+	}
+	return j.Url
+}
+
+func (j *JobOutcomeNextUrl) GetLabel() *string {
+	if j == nil {
+		return nil
+	}
+	return j.Label
 }
 
 func (j *JobOutcomeNextUrl) GetExtraProperties() map[string]interface{} {
@@ -2038,24 +3257,22 @@ func (j *JobOutcomeNextUrl) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*j = JobOutcomeNextUrl(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	extraProperties, err := internal.ExtractExtraProperties(data, *j)
 	if err != nil {
 		return err
 	}
 	j.extraProperties = extraProperties
-
-	j._rawJSON = json.RawMessage(data)
+	j.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (j *JobOutcomeNextUrl) String() string {
-	if len(j._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
+	if len(j.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(j.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(j); err == nil {
+	if value, err := internal.StringifyJSON(j); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", j)
@@ -2068,7 +3285,28 @@ type JobOutcomeNextView struct {
 	Label         *string  `json:"label,omitempty" url:"label,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (j *JobOutcomeNextView) GetSheetId() string {
+	if j == nil {
+		return ""
+	}
+	return j.SheetId
+}
+
+func (j *JobOutcomeNextView) GetHiddenColumns() []string {
+	if j == nil {
+		return nil
+	}
+	return j.HiddenColumns
+}
+
+func (j *JobOutcomeNextView) GetLabel() *string {
+	if j == nil {
+		return nil
+	}
+	return j.Label
 }
 
 func (j *JobOutcomeNextView) GetExtraProperties() map[string]interface{} {
@@ -2082,24 +3320,22 @@ func (j *JobOutcomeNextView) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*j = JobOutcomeNextView(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	extraProperties, err := internal.ExtractExtraProperties(data, *j)
 	if err != nil {
 		return err
 	}
 	j.extraProperties = extraProperties
-
-	j._rawJSON = json.RawMessage(data)
+	j.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (j *JobOutcomeNextView) String() string {
-	if len(j._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
+	if len(j.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(j.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(j); err == nil {
+	if value, err := internal.StringifyJSON(j); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", j)
@@ -2110,7 +3346,21 @@ type JobOutcomeNextWait struct {
 	Confetti *bool `json:"confetti,omitempty" url:"confetti,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (j *JobOutcomeNextWait) GetFade() *bool {
+	if j == nil {
+		return nil
+	}
+	return j.Fade
+}
+
+func (j *JobOutcomeNextWait) GetConfetti() *bool {
+	if j == nil {
+		return nil
+	}
+	return j.Confetti
 }
 
 func (j *JobOutcomeNextWait) GetExtraProperties() map[string]interface{} {
@@ -2124,24 +3374,22 @@ func (j *JobOutcomeNextWait) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*j = JobOutcomeNextWait(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	extraProperties, err := internal.ExtractExtraProperties(data, *j)
 	if err != nil {
 		return err
 	}
 	j.extraProperties = extraProperties
-
-	j._rawJSON = json.RawMessage(data)
+	j.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (j *JobOutcomeNextWait) String() string {
-	if len(j._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
+	if len(j.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(j.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(j); err == nil {
+	if value, err := internal.StringifyJSON(j); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", j)
@@ -2160,6 +3408,20 @@ func NewJobOutcomeTriggerFromJobOutcomeTriggerType(value JobOutcomeTriggerType) 
 
 func NewJobOutcomeTriggerFromJobOutcomeTriggerDetails(value *JobOutcomeTriggerDetails) *JobOutcomeTrigger {
 	return &JobOutcomeTrigger{typ: "JobOutcomeTriggerDetails", JobOutcomeTriggerDetails: value}
+}
+
+func (j *JobOutcomeTrigger) GetJobOutcomeTriggerType() JobOutcomeTriggerType {
+	if j == nil {
+		return ""
+	}
+	return j.JobOutcomeTriggerType
+}
+
+func (j *JobOutcomeTrigger) GetJobOutcomeTriggerDetails() *JobOutcomeTriggerDetails {
+	if j == nil {
+		return nil
+	}
+	return j.JobOutcomeTriggerDetails
 }
 
 func (j *JobOutcomeTrigger) UnmarshalJSON(data []byte) error {
@@ -2232,7 +3494,21 @@ type JobOutcomeTriggerDetails struct {
 	Audience *JobOutcomeTriggerAudience `json:"audience,omitempty" url:"audience,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (j *JobOutcomeTriggerDetails) GetType() JobOutcomeTriggerType {
+	if j == nil {
+		return ""
+	}
+	return j.Type
+}
+
+func (j *JobOutcomeTriggerDetails) GetAudience() *JobOutcomeTriggerAudience {
+	if j == nil {
+		return nil
+	}
+	return j.Audience
 }
 
 func (j *JobOutcomeTriggerDetails) GetExtraProperties() map[string]interface{} {
@@ -2246,24 +3522,22 @@ func (j *JobOutcomeTriggerDetails) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*j = JobOutcomeTriggerDetails(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	extraProperties, err := internal.ExtractExtraProperties(data, *j)
 	if err != nil {
 		return err
 	}
 	j.extraProperties = extraProperties
-
-	j._rawJSON = json.RawMessage(data)
+	j.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (j *JobOutcomeTriggerDetails) String() string {
-	if len(j._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
+	if len(j.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(j.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(j); err == nil {
+	if value, err := internal.StringifyJSON(j); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", j)
@@ -2333,6 +3607,20 @@ func NewJobPartsFromJobPartsArray(value JobPartsArray) *JobParts {
 	return &JobParts{typ: "JobPartsArray", JobPartsArray: value}
 }
 
+func (j *JobParts) GetInteger() int {
+	if j == nil {
+		return 0
+	}
+	return j.Integer
+}
+
+func (j *JobParts) GetJobPartsArray() JobPartsArray {
+	if j == nil {
+		return nil
+	}
+	return j.JobPartsArray
+}
+
 func (j *JobParts) UnmarshalJSON(data []byte) error {
 	var valueInteger int
 	if err := json.Unmarshal(data, &valueInteger); err == nil {
@@ -2383,7 +3671,21 @@ type JobPlan struct {
 	Plan *JobExecutionPlan `json:"plan,omitempty" url:"plan,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (j *JobPlan) GetJob() *Job {
+	if j == nil {
+		return nil
+	}
+	return j.Job
+}
+
+func (j *JobPlan) GetPlan() *JobExecutionPlan {
+	if j == nil {
+		return nil
+	}
+	return j.Plan
 }
 
 func (j *JobPlan) GetExtraProperties() map[string]interface{} {
@@ -2397,24 +3699,22 @@ func (j *JobPlan) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*j = JobPlan(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	extraProperties, err := internal.ExtractExtraProperties(data, *j)
 	if err != nil {
 		return err
 	}
 	j.extraProperties = extraProperties
-
-	j._rawJSON = json.RawMessage(data)
+	j.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (j *JobPlan) String() string {
-	if len(j._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
+	if len(j.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(j.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(j); err == nil {
+	if value, err := internal.StringifyJSON(j); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", j)
@@ -2424,7 +3724,14 @@ type JobPlanResponse struct {
 	Data *JobPlan `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (j *JobPlanResponse) GetData() *JobPlan {
+	if j == nil {
+		return nil
+	}
+	return j.Data
 }
 
 func (j *JobPlanResponse) GetExtraProperties() map[string]interface{} {
@@ -2438,24 +3745,22 @@ func (j *JobPlanResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*j = JobPlanResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	extraProperties, err := internal.ExtractExtraProperties(data, *j)
 	if err != nil {
 		return err
 	}
 	j.extraProperties = extraProperties
-
-	j._rawJSON = json.RawMessage(data)
+	j.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (j *JobPlanResponse) String() string {
-	if len(j._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
+	if len(j.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(j.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(j); err == nil {
+	if value, err := internal.StringifyJSON(j); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", j)
@@ -2465,7 +3770,14 @@ type JobResponse struct {
 	Data *Job `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (j *JobResponse) GetData() *Job {
+	if j == nil {
+		return nil
+	}
+	return j.Data
 }
 
 func (j *JobResponse) GetExtraProperties() map[string]interface{} {
@@ -2479,24 +3791,22 @@ func (j *JobResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*j = JobResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	extraProperties, err := internal.ExtractExtraProperties(data, *j)
 	if err != nil {
 		return err
 	}
 	j.extraProperties = extraProperties
-
-	j._rawJSON = json.RawMessage(data)
+	j.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (j *JobResponse) String() string {
-	if len(j._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
+	if len(j.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(j.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(j); err == nil {
+	if value, err := internal.StringifyJSON(j); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", j)
@@ -2511,7 +3821,21 @@ type JobSplitDetails struct {
 	RunInParallel *bool     `json:"runInParallel,omitempty" url:"runInParallel,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (j *JobSplitDetails) GetParts() *JobParts {
+	if j == nil {
+		return nil
+	}
+	return j.Parts
+}
+
+func (j *JobSplitDetails) GetRunInParallel() *bool {
+	if j == nil {
+		return nil
+	}
+	return j.RunInParallel
 }
 
 func (j *JobSplitDetails) GetExtraProperties() map[string]interface{} {
@@ -2525,24 +3849,22 @@ func (j *JobSplitDetails) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*j = JobSplitDetails(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	extraProperties, err := internal.ExtractExtraProperties(data, *j)
 	if err != nil {
 		return err
 	}
 	j.extraProperties = extraProperties
-
-	j._rawJSON = json.RawMessage(data)
+	j.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (j *JobSplitDetails) String() string {
-	if len(j._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
+	if len(j.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(j.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(j); err == nil {
+	if value, err := internal.StringifyJSON(j); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", j)
@@ -2607,6 +3929,27 @@ func NewJobSubjectFromCollection(value *CollectionJobSubject) *JobSubject {
 	return &JobSubject{Type: "collection", Collection: value}
 }
 
+func (j *JobSubject) GetType() string {
+	if j == nil {
+		return ""
+	}
+	return j.Type
+}
+
+func (j *JobSubject) GetResource() *ResourceJobSubject {
+	if j == nil {
+		return nil
+	}
+	return j.Resource
+}
+
+func (j *JobSubject) GetCollection() *CollectionJobSubject {
+	if j == nil {
+		return nil
+	}
+	return j.Collection
+}
+
 func (j *JobSubject) UnmarshalJSON(data []byte) error {
 	var unmarshaler struct {
 		Type string `json:"type"`
@@ -2636,13 +3979,16 @@ func (j *JobSubject) UnmarshalJSON(data []byte) error {
 }
 
 func (j JobSubject) MarshalJSON() ([]byte, error) {
+	if err := j.validate(); err != nil {
+		return nil, err
+	}
 	switch j.Type {
 	default:
 		return nil, fmt.Errorf("invalid type %s in %T", j.Type, j)
 	case "resource":
-		return core.MarshalJSONWithExtraProperty(j.Resource, "type", "resource")
+		return internal.MarshalJSONWithExtraProperty(j.Resource, "type", "resource")
 	case "collection":
-		return core.MarshalJSONWithExtraProperty(j.Collection, "type", "collection")
+		return internal.MarshalJSONWithExtraProperty(j.Collection, "type", "collection")
 	}
 }
 
@@ -2660,6 +4006,40 @@ func (j *JobSubject) Accept(visitor JobSubjectVisitor) error {
 	case "collection":
 		return visitor.VisitCollection(j.Collection)
 	}
+}
+
+func (j *JobSubject) validate() error {
+	if j == nil {
+		return fmt.Errorf("type %T is nil", j)
+	}
+	var fields []string
+	if j.Resource != nil {
+		fields = append(fields, "resource")
+	}
+	if j.Collection != nil {
+		fields = append(fields, "collection")
+	}
+	if len(fields) == 0 {
+		if j.Type != "" {
+			return fmt.Errorf("type %T defines a discriminant set to %q but the field is not set", j, j.Type)
+		}
+		return fmt.Errorf("type %T is empty", j)
+	}
+	if len(fields) > 1 {
+		return fmt.Errorf("type %T defines values for %s, but only one value is allowed", j, fields)
+	}
+	if j.Type != "" {
+		field := fields[0]
+		if j.Type != field {
+			return fmt.Errorf(
+				"type %T defines a discriminant set to %q, but it does not match the %T field; either remove or update the discriminant to match",
+				j,
+				j.Type,
+				j,
+			)
+		}
+	}
+	return nil
 }
 
 // The type of job
@@ -2712,7 +4092,49 @@ type JobUpdate struct {
 	Metadata map[string]interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (j *JobUpdate) GetConfig() *JobUpdateConfig {
+	if j == nil {
+		return nil
+	}
+	return j.Config
+}
+
+func (j *JobUpdate) GetStatus() *JobStatus {
+	if j == nil {
+		return nil
+	}
+	return j.Status
+}
+
+func (j *JobUpdate) GetProgress() *int {
+	if j == nil {
+		return nil
+	}
+	return j.Progress
+}
+
+func (j *JobUpdate) GetOutcomeAcknowledgedAt() *time.Time {
+	if j == nil {
+		return nil
+	}
+	return j.OutcomeAcknowledgedAt
+}
+
+func (j *JobUpdate) GetInfo() *string {
+	if j == nil {
+		return nil
+	}
+	return j.Info
+}
+
+func (j *JobUpdate) GetMetadata() map[string]interface{} {
+	if j == nil {
+		return nil
+	}
+	return j.Metadata
 }
 
 func (j *JobUpdate) GetExtraProperties() map[string]interface{} {
@@ -2723,7 +4145,7 @@ func (j *JobUpdate) UnmarshalJSON(data []byte) error {
 	type embed JobUpdate
 	var unmarshaler = struct {
 		embed
-		OutcomeAcknowledgedAt *core.DateTime `json:"outcomeAcknowledgedAt,omitempty"`
+		OutcomeAcknowledgedAt *internal.DateTime `json:"outcomeAcknowledgedAt,omitempty"`
 	}{
 		embed: embed(*j),
 	}
@@ -2732,14 +4154,12 @@ func (j *JobUpdate) UnmarshalJSON(data []byte) error {
 	}
 	*j = JobUpdate(unmarshaler.embed)
 	j.OutcomeAcknowledgedAt = unmarshaler.OutcomeAcknowledgedAt.TimePtr()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *j)
+	extraProperties, err := internal.ExtractExtraProperties(data, *j)
 	if err != nil {
 		return err
 	}
 	j.extraProperties = extraProperties
-
-	j._rawJSON = json.RawMessage(data)
+	j.rawJSON = json.RawMessage(data)
 	return nil
 }
 
@@ -2747,21 +4167,21 @@ func (j *JobUpdate) MarshalJSON() ([]byte, error) {
 	type embed JobUpdate
 	var marshaler = struct {
 		embed
-		OutcomeAcknowledgedAt *core.DateTime `json:"outcomeAcknowledgedAt,omitempty"`
+		OutcomeAcknowledgedAt *internal.DateTime `json:"outcomeAcknowledgedAt,omitempty"`
 	}{
 		embed:                 embed(*j),
-		OutcomeAcknowledgedAt: core.NewOptionalDateTime(j.OutcomeAcknowledgedAt),
+		OutcomeAcknowledgedAt: internal.NewOptionalDateTime(j.OutcomeAcknowledgedAt),
 	}
 	return json.Marshal(marshaler)
 }
 
 func (j *JobUpdate) String() string {
-	if len(j._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(j._rawJSON); err == nil {
+	if len(j.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(j.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(j); err == nil {
+	if value, err := internal.StringifyJSON(j); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", j)
@@ -2850,6 +4270,118 @@ func NewJobUpdateConfigFromAddRecordsToDataClipJobConfig(value *AddRecordsToData
 
 func NewJobUpdateConfigFromUpdateDataClipResolutionsJobConfig(value *UpdateDataClipResolutionsJobConfig) *JobUpdateConfig {
 	return &JobUpdateConfig{typ: "UpdateDataClipResolutionsJobConfig", UpdateDataClipResolutionsJobConfig: value}
+}
+
+func (j *JobUpdateConfig) GetDeleteRecordsJobConfig() *DeleteRecordsJobConfig {
+	if j == nil {
+		return nil
+	}
+	return j.DeleteRecordsJobConfig
+}
+
+func (j *JobUpdateConfig) GetFileJobConfig() *FileJobConfig {
+	if j == nil {
+		return nil
+	}
+	return j.FileJobConfig
+}
+
+func (j *JobUpdateConfig) GetPipelineJobConfig() *PipelineJobConfig {
+	if j == nil {
+		return nil
+	}
+	return j.PipelineJobConfig
+}
+
+func (j *JobUpdateConfig) GetExportJobConfig() *ExportJobConfig {
+	if j == nil {
+		return nil
+	}
+	return j.ExportJobConfig
+}
+
+func (j *JobUpdateConfig) GetMutateJobConfig() *MutateJobConfig {
+	if j == nil {
+		return nil
+	}
+	return j.MutateJobConfig
+}
+
+func (j *JobUpdateConfig) GetFindAndReplaceJobConfig() *FindAndReplaceJobConfig {
+	if j == nil {
+		return nil
+	}
+	return j.FindAndReplaceJobConfig
+}
+
+func (j *JobUpdateConfig) GetMappingProgramJobConfig() *MappingProgramJobConfig {
+	if j == nil {
+		return nil
+	}
+	return j.MappingProgramJobConfig
+}
+
+func (j *JobUpdateConfig) GetAiGenerateBlueprintJobConfig() *AiGenerateBlueprintJobConfig {
+	if j == nil {
+		return nil
+	}
+	return j.AiGenerateBlueprintJobConfig
+}
+
+func (j *JobUpdateConfig) GetAppAutobuildDeployJobConfig() *AppAutobuildDeployJobConfig {
+	if j == nil {
+		return nil
+	}
+	return j.AppAutobuildDeployJobConfig
+}
+
+func (j *JobUpdateConfig) GetAiGenerateSampleDataJobConfig() *AiGenerateSampleDataJobConfig {
+	if j == nil {
+		return nil
+	}
+	return j.AiGenerateSampleDataJobConfig
+}
+
+func (j *JobUpdateConfig) GetAiGenerateBlueprintConstraintsJobConfig() *AiGenerateBlueprintConstraintsJobConfig {
+	if j == nil {
+		return nil
+	}
+	return j.AiGenerateBlueprintConstraintsJobConfig
+}
+
+func (j *JobUpdateConfig) GetAiGenerateConstraintJobConfig() *AiGenerateConstraintJobConfig {
+	if j == nil {
+		return nil
+	}
+	return j.AiGenerateConstraintJobConfig
+}
+
+func (j *JobUpdateConfig) GetAiRuleCreationJobConfig() *AiRuleCreationJobConfig {
+	if j == nil {
+		return nil
+	}
+	return j.AiRuleCreationJobConfig
+}
+
+func (j *JobUpdateConfig) GetEmptyObject() *EmptyObject {
+	if j == nil {
+		return nil
+	}
+	return j.EmptyObject
+}
+
+func (j *JobUpdateConfig) GetAddRecordsToDataClipJobConfig() *AddRecordsToDataClipJobConfig {
+	if j == nil {
+		return nil
+	}
+	return j.AddRecordsToDataClipJobConfig
+}
+
+func (j *JobUpdateConfig) GetUpdateDataClipResolutionsJobConfig() *UpdateDataClipResolutionsJobConfig {
+	if j == nil {
+		return nil
+	}
+	return j.UpdateDataClipResolutionsJobConfig
 }
 
 func (j *JobUpdateConfig) UnmarshalJSON(data []byte) error {
@@ -3080,7 +4612,21 @@ type ListJobsResponse struct {
 	Data       []*Job      `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (l *ListJobsResponse) GetPagination() *Pagination {
+	if l == nil {
+		return nil
+	}
+	return l.Pagination
+}
+
+func (l *ListJobsResponse) GetData() []*Job {
+	if l == nil {
+		return nil
+	}
+	return l.Data
 }
 
 func (l *ListJobsResponse) GetExtraProperties() map[string]interface{} {
@@ -3094,24 +4640,22 @@ func (l *ListJobsResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*l = ListJobsResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	extraProperties, err := internal.ExtractExtraProperties(data, *l)
 	if err != nil {
 		return err
 	}
 	l.extraProperties = extraProperties
-
-	l._rawJSON = json.RawMessage(data)
+	l.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (l *ListJobsResponse) String() string {
-	if len(l._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(l._rawJSON); err == nil {
+	if len(l.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(l.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(l); err == nil {
+	if value, err := internal.StringifyJSON(l); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", l)
@@ -3123,7 +4667,28 @@ type MappingProgramJobConfig struct {
 	MappingRules       []map[string]interface{} `json:"mappingRules,omitempty" url:"mappingRules,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (m *MappingProgramJobConfig) GetSourceSheetId() SheetId {
+	if m == nil {
+		return ""
+	}
+	return m.SourceSheetId
+}
+
+func (m *MappingProgramJobConfig) GetDestinationSheetId() SheetId {
+	if m == nil {
+		return ""
+	}
+	return m.DestinationSheetId
+}
+
+func (m *MappingProgramJobConfig) GetMappingRules() []map[string]interface{} {
+	if m == nil {
+		return nil
+	}
+	return m.MappingRules
 }
 
 func (m *MappingProgramJobConfig) GetExtraProperties() map[string]interface{} {
@@ -3137,24 +4702,22 @@ func (m *MappingProgramJobConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*m = MappingProgramJobConfig(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *m)
+	extraProperties, err := internal.ExtractExtraProperties(data, *m)
 	if err != nil {
 		return err
 	}
 	m.extraProperties = extraProperties
-
-	m._rawJSON = json.RawMessage(data)
+	m.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (m *MappingProgramJobConfig) String() string {
-	if len(m._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(m._rawJSON); err == nil {
+	if len(m.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(m.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(m); err == nil {
+	if value, err := internal.StringifyJSON(m); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", m)
@@ -3167,7 +4730,35 @@ type Metadata struct {
 	DetectedDelimiter *string    `json:"detectedDelimiter,omitempty" url:"detectedDelimiter,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (m *Metadata) GetCertainty() *Certainty {
+	if m == nil {
+		return nil
+	}
+	return m.Certainty
+}
+
+func (m *Metadata) GetConfidence() *float64 {
+	if m == nil {
+		return nil
+	}
+	return m.Confidence
+}
+
+func (m *Metadata) GetSource() *string {
+	if m == nil {
+		return nil
+	}
+	return m.Source
+}
+
+func (m *Metadata) GetDetectedDelimiter() *string {
+	if m == nil {
+		return nil
+	}
+	return m.DetectedDelimiter
 }
 
 func (m *Metadata) GetExtraProperties() map[string]interface{} {
@@ -3181,24 +4772,22 @@ func (m *Metadata) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*m = Metadata(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *m)
+	extraProperties, err := internal.ExtractExtraProperties(data, *m)
 	if err != nil {
 		return err
 	}
 	m.extraProperties = extraProperties
-
-	m._rawJSON = json.RawMessage(data)
+	m.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (m *Metadata) String() string {
-	if len(m._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(m._rawJSON); err == nil {
+	if len(m.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(m.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(m); err == nil {
+	if value, err := internal.StringifyJSON(m); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", m)
@@ -3223,7 +4812,84 @@ type MutateJobConfig struct {
 	Ids []RecordId `json:"ids,omitempty" url:"ids,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (m *MutateJobConfig) GetSheetId() SheetId {
+	if m == nil {
+		return ""
+	}
+	return m.SheetId
+}
+
+func (m *MutateJobConfig) GetMutateRecord() string {
+	if m == nil {
+		return ""
+	}
+	return m.MutateRecord
+}
+
+func (m *MutateJobConfig) GetMutationId() *string {
+	if m == nil {
+		return nil
+	}
+	return m.MutationId
+}
+
+func (m *MutateJobConfig) GetSnapshotLabel() *string {
+	if m == nil {
+		return nil
+	}
+	return m.SnapshotLabel
+}
+
+func (m *MutateJobConfig) GetSnapshotId() *string {
+	if m == nil {
+		return nil
+	}
+	return m.SnapshotId
+}
+
+func (m *MutateJobConfig) GetFilter() *Filter {
+	if m == nil {
+		return nil
+	}
+	return m.Filter
+}
+
+func (m *MutateJobConfig) GetFilterField() *FilterField {
+	if m == nil {
+		return nil
+	}
+	return m.FilterField
+}
+
+func (m *MutateJobConfig) GetSearchValue() *SearchValue {
+	if m == nil {
+		return nil
+	}
+	return m.SearchValue
+}
+
+func (m *MutateJobConfig) GetSearchField() *SearchField {
+	if m == nil {
+		return nil
+	}
+	return m.SearchField
+}
+
+func (m *MutateJobConfig) GetQ() *string {
+	if m == nil {
+		return nil
+	}
+	return m.Q
+}
+
+func (m *MutateJobConfig) GetIds() []RecordId {
+	if m == nil {
+		return nil
+	}
+	return m.Ids
 }
 
 func (m *MutateJobConfig) GetExtraProperties() map[string]interface{} {
@@ -3237,24 +4903,22 @@ func (m *MutateJobConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*m = MutateJobConfig(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *m)
+	extraProperties, err := internal.ExtractExtraProperties(data, *m)
 	if err != nil {
 		return err
 	}
 	m.extraProperties = extraProperties
-
-	m._rawJSON = json.RawMessage(data)
+	m.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (m *MutateJobConfig) String() string {
-	if len(m._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(m._rawJSON); err == nil {
+	if len(m.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(m.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(m); err == nil {
+	if value, err := internal.StringifyJSON(m); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", m)
@@ -3265,7 +4929,21 @@ type PipelineJobConfig struct {
 	DestinationSheetId SheetId `json:"destinationSheetId" url:"destinationSheetId"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (p *PipelineJobConfig) GetSourceSheetId() SheetId {
+	if p == nil {
+		return ""
+	}
+	return p.SourceSheetId
+}
+
+func (p *PipelineJobConfig) GetDestinationSheetId() SheetId {
+	if p == nil {
+		return ""
+	}
+	return p.DestinationSheetId
 }
 
 func (p *PipelineJobConfig) GetExtraProperties() map[string]interface{} {
@@ -3279,24 +4957,22 @@ func (p *PipelineJobConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*p = PipelineJobConfig(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	extraProperties, err := internal.ExtractExtraProperties(data, *p)
 	if err != nil {
 		return err
 	}
 	p.extraProperties = extraProperties
-
-	p._rawJSON = json.RawMessage(data)
+	p.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (p *PipelineJobConfig) String() string {
-	if len(p._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+	if len(p.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(p.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(p); err == nil {
+	if value, err := internal.StringifyJSON(p); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", p)
@@ -3306,7 +4982,14 @@ type ResourceJobSubject struct {
 	Id string `json:"id" url:"id"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (r *ResourceJobSubject) GetId() string {
+	if r == nil {
+		return ""
+	}
+	return r.Id
 }
 
 func (r *ResourceJobSubject) GetExtraProperties() map[string]interface{} {
@@ -3320,24 +5003,22 @@ func (r *ResourceJobSubject) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*r = ResourceJobSubject(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	extraProperties, err := internal.ExtractExtraProperties(data, *r)
 	if err != nil {
 		return err
 	}
 	r.extraProperties = extraProperties
-
-	r._rawJSON = json.RawMessage(data)
+	r.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (r *ResourceJobSubject) String() string {
-	if len(r._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(r._rawJSON); err == nil {
+	if len(r.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(r.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(r); err == nil {
+	if value, err := internal.StringifyJSON(r); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", r)
@@ -3350,7 +5031,21 @@ type SourceField struct {
 	Preview []string `json:"preview,omitempty" url:"preview,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (s *SourceField) GetSourceField() *Property {
+	if s == nil {
+		return nil
+	}
+	return s.SourceField
+}
+
+func (s *SourceField) GetPreview() []string {
+	if s == nil {
+		return nil
+	}
+	return s.Preview
 }
 
 func (s *SourceField) GetExtraProperties() map[string]interface{} {
@@ -3364,24 +5059,22 @@ func (s *SourceField) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*s = SourceField(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	extraProperties, err := internal.ExtractExtraProperties(data, *s)
 	if err != nil {
 		return err
 	}
 	s.extraProperties = extraProperties
-
-	s._rawJSON = json.RawMessage(data)
+	s.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (s *SourceField) String() string {
-	if len(s._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+	if len(s.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(s.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(s); err == nil {
+	if value, err := internal.StringifyJSON(s); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", s)
@@ -3423,7 +5116,42 @@ type UpdateDataClipResolutionsJobConfig struct {
 	ColumnValue string `json:"columnValue" url:"columnValue"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (u *UpdateDataClipResolutionsJobConfig) GetClipId() DataClipId {
+	if u == nil {
+		return ""
+	}
+	return u.ClipId
+}
+
+func (u *UpdateDataClipResolutionsJobConfig) GetClippedSheetId() SheetId {
+	if u == nil {
+		return ""
+	}
+	return u.ClippedSheetId
+}
+
+func (u *UpdateDataClipResolutionsJobConfig) GetResolveTo() ResolveTo {
+	if u == nil {
+		return ""
+	}
+	return u.ResolveTo
+}
+
+func (u *UpdateDataClipResolutionsJobConfig) GetColumnField() string {
+	if u == nil {
+		return ""
+	}
+	return u.ColumnField
+}
+
+func (u *UpdateDataClipResolutionsJobConfig) GetColumnValue() string {
+	if u == nil {
+		return ""
+	}
+	return u.ColumnValue
 }
 
 func (u *UpdateDataClipResolutionsJobConfig) GetExtraProperties() map[string]interface{} {
@@ -3437,24 +5165,22 @@ func (u *UpdateDataClipResolutionsJobConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*u = UpdateDataClipResolutionsJobConfig(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *u)
+	extraProperties, err := internal.ExtractExtraProperties(data, *u)
 	if err != nil {
 		return err
 	}
 	u.extraProperties = extraProperties
-
-	u._rawJSON = json.RawMessage(data)
+	u.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (u *UpdateDataClipResolutionsJobConfig) String() string {
-	if len(u._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(u._rawJSON); err == nil {
+	if len(u.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(u.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(u); err == nil {
+	if value, err := internal.StringifyJSON(u); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", u)

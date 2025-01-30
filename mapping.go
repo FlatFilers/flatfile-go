@@ -5,7 +5,7 @@ package api
 import (
 	json "encoding/json"
 	fmt "fmt"
-	core "github.com/FlatFilers/flatfile-go/core"
+	internal "github.com/FlatFilers/flatfile-go/internal"
 	time "time"
 )
 
@@ -41,12 +41,6 @@ type ListProgramsRequest struct {
 	DestinationKeys *string `json:"-" url:"destinationKeys,omitempty"`
 }
 
-// Mapping Family ID
-type FamilyId = string
-
-// Mapping Rule ID
-type MappingId = string
-
 type CreateMappingRulesRequest = []*MappingRuleConfig
 
 type MappingRule struct {
@@ -74,7 +68,91 @@ type MappingRule struct {
 	DeletedAt *time.Time `json:"deletedAt,omitempty" url:"deletedAt,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (m *MappingRule) GetName() string {
+	if m == nil {
+		return ""
+	}
+	return m.Name
+}
+
+func (m *MappingRule) GetType() string {
+	if m == nil {
+		return ""
+	}
+	return m.Type
+}
+
+func (m *MappingRule) GetConfig() interface{} {
+	if m == nil {
+		return nil
+	}
+	return m.Config
+}
+
+func (m *MappingRule) GetAcceptedAt() *time.Time {
+	if m == nil {
+		return nil
+	}
+	return m.AcceptedAt
+}
+
+func (m *MappingRule) GetAcceptedBy() *UserId {
+	if m == nil {
+		return nil
+	}
+	return m.AcceptedBy
+}
+
+func (m *MappingRule) GetMetadata() interface{} {
+	if m == nil {
+		return nil
+	}
+	return m.Metadata
+}
+
+func (m *MappingRule) GetId() MappingId {
+	if m == nil {
+		return ""
+	}
+	return m.Id
+}
+
+func (m *MappingRule) GetConfidence() *int {
+	if m == nil {
+		return nil
+	}
+	return m.Confidence
+}
+
+func (m *MappingRule) GetCreatedBy() *UserId {
+	if m == nil {
+		return nil
+	}
+	return m.CreatedBy
+}
+
+func (m *MappingRule) GetCreatedAt() time.Time {
+	if m == nil {
+		return time.Time{}
+	}
+	return m.CreatedAt
+}
+
+func (m *MappingRule) GetUpdatedAt() time.Time {
+	if m == nil {
+		return time.Time{}
+	}
+	return m.UpdatedAt
+}
+
+func (m *MappingRule) GetDeletedAt() *time.Time {
+	if m == nil {
+		return nil
+	}
+	return m.DeletedAt
 }
 
 func (m *MappingRule) GetExtraProperties() map[string]interface{} {
@@ -85,10 +163,10 @@ func (m *MappingRule) UnmarshalJSON(data []byte) error {
 	type embed MappingRule
 	var unmarshaler = struct {
 		embed
-		AcceptedAt *core.DateTime `json:"acceptedAt,omitempty"`
-		CreatedAt  *core.DateTime `json:"createdAt"`
-		UpdatedAt  *core.DateTime `json:"updatedAt"`
-		DeletedAt  *core.DateTime `json:"deletedAt,omitempty"`
+		AcceptedAt *internal.DateTime `json:"acceptedAt,omitempty"`
+		CreatedAt  *internal.DateTime `json:"createdAt"`
+		UpdatedAt  *internal.DateTime `json:"updatedAt"`
+		DeletedAt  *internal.DateTime `json:"deletedAt,omitempty"`
 	}{
 		embed: embed(*m),
 	}
@@ -100,14 +178,12 @@ func (m *MappingRule) UnmarshalJSON(data []byte) error {
 	m.CreatedAt = unmarshaler.CreatedAt.Time()
 	m.UpdatedAt = unmarshaler.UpdatedAt.Time()
 	m.DeletedAt = unmarshaler.DeletedAt.TimePtr()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *m)
+	extraProperties, err := internal.ExtractExtraProperties(data, *m)
 	if err != nil {
 		return err
 	}
 	m.extraProperties = extraProperties
-
-	m._rawJSON = json.RawMessage(data)
+	m.rawJSON = json.RawMessage(data)
 	return nil
 }
 
@@ -115,27 +191,27 @@ func (m *MappingRule) MarshalJSON() ([]byte, error) {
 	type embed MappingRule
 	var marshaler = struct {
 		embed
-		AcceptedAt *core.DateTime `json:"acceptedAt,omitempty"`
-		CreatedAt  *core.DateTime `json:"createdAt"`
-		UpdatedAt  *core.DateTime `json:"updatedAt"`
-		DeletedAt  *core.DateTime `json:"deletedAt,omitempty"`
+		AcceptedAt *internal.DateTime `json:"acceptedAt,omitempty"`
+		CreatedAt  *internal.DateTime `json:"createdAt"`
+		UpdatedAt  *internal.DateTime `json:"updatedAt"`
+		DeletedAt  *internal.DateTime `json:"deletedAt,omitempty"`
 	}{
 		embed:      embed(*m),
-		AcceptedAt: core.NewOptionalDateTime(m.AcceptedAt),
-		CreatedAt:  core.NewDateTime(m.CreatedAt),
-		UpdatedAt:  core.NewDateTime(m.UpdatedAt),
-		DeletedAt:  core.NewOptionalDateTime(m.DeletedAt),
+		AcceptedAt: internal.NewOptionalDateTime(m.AcceptedAt),
+		CreatedAt:  internal.NewDateTime(m.CreatedAt),
+		UpdatedAt:  internal.NewDateTime(m.UpdatedAt),
+		DeletedAt:  internal.NewOptionalDateTime(m.DeletedAt),
 	}
 	return json.Marshal(marshaler)
 }
 
 func (m *MappingRule) String() string {
-	if len(m._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(m._rawJSON); err == nil {
+	if len(m.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(m.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(m); err == nil {
+	if value, err := internal.StringifyJSON(m); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", m)
@@ -154,7 +230,49 @@ type MappingRuleConfig struct {
 	Metadata interface{} `json:"metadata,omitempty" url:"metadata,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (m *MappingRuleConfig) GetName() string {
+	if m == nil {
+		return ""
+	}
+	return m.Name
+}
+
+func (m *MappingRuleConfig) GetType() string {
+	if m == nil {
+		return ""
+	}
+	return m.Type
+}
+
+func (m *MappingRuleConfig) GetConfig() interface{} {
+	if m == nil {
+		return nil
+	}
+	return m.Config
+}
+
+func (m *MappingRuleConfig) GetAcceptedAt() *time.Time {
+	if m == nil {
+		return nil
+	}
+	return m.AcceptedAt
+}
+
+func (m *MappingRuleConfig) GetAcceptedBy() *UserId {
+	if m == nil {
+		return nil
+	}
+	return m.AcceptedBy
+}
+
+func (m *MappingRuleConfig) GetMetadata() interface{} {
+	if m == nil {
+		return nil
+	}
+	return m.Metadata
 }
 
 func (m *MappingRuleConfig) GetExtraProperties() map[string]interface{} {
@@ -165,7 +283,7 @@ func (m *MappingRuleConfig) UnmarshalJSON(data []byte) error {
 	type embed MappingRuleConfig
 	var unmarshaler = struct {
 		embed
-		AcceptedAt *core.DateTime `json:"acceptedAt,omitempty"`
+		AcceptedAt *internal.DateTime `json:"acceptedAt,omitempty"`
 	}{
 		embed: embed(*m),
 	}
@@ -174,14 +292,12 @@ func (m *MappingRuleConfig) UnmarshalJSON(data []byte) error {
 	}
 	*m = MappingRuleConfig(unmarshaler.embed)
 	m.AcceptedAt = unmarshaler.AcceptedAt.TimePtr()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *m)
+	extraProperties, err := internal.ExtractExtraProperties(data, *m)
 	if err != nil {
 		return err
 	}
 	m.extraProperties = extraProperties
-
-	m._rawJSON = json.RawMessage(data)
+	m.rawJSON = json.RawMessage(data)
 	return nil
 }
 
@@ -189,21 +305,21 @@ func (m *MappingRuleConfig) MarshalJSON() ([]byte, error) {
 	type embed MappingRuleConfig
 	var marshaler = struct {
 		embed
-		AcceptedAt *core.DateTime `json:"acceptedAt,omitempty"`
+		AcceptedAt *internal.DateTime `json:"acceptedAt,omitempty"`
 	}{
 		embed:      embed(*m),
-		AcceptedAt: core.NewOptionalDateTime(m.AcceptedAt),
+		AcceptedAt: internal.NewOptionalDateTime(m.AcceptedAt),
 	}
 	return json.Marshal(marshaler)
 }
 
 func (m *MappingRuleConfig) String() string {
-	if len(m._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(m._rawJSON); err == nil {
+	if len(m.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(m.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(m); err == nil {
+	if value, err := internal.StringifyJSON(m); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", m)
@@ -234,7 +350,91 @@ type MappingRuleOrConfig struct {
 	DeletedAt *time.Time `json:"deletedAt,omitempty" url:"deletedAt,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (m *MappingRuleOrConfig) GetName() string {
+	if m == nil {
+		return ""
+	}
+	return m.Name
+}
+
+func (m *MappingRuleOrConfig) GetType() string {
+	if m == nil {
+		return ""
+	}
+	return m.Type
+}
+
+func (m *MappingRuleOrConfig) GetConfig() interface{} {
+	if m == nil {
+		return nil
+	}
+	return m.Config
+}
+
+func (m *MappingRuleOrConfig) GetAcceptedAt() *time.Time {
+	if m == nil {
+		return nil
+	}
+	return m.AcceptedAt
+}
+
+func (m *MappingRuleOrConfig) GetAcceptedBy() *UserId {
+	if m == nil {
+		return nil
+	}
+	return m.AcceptedBy
+}
+
+func (m *MappingRuleOrConfig) GetMetadata() interface{} {
+	if m == nil {
+		return nil
+	}
+	return m.Metadata
+}
+
+func (m *MappingRuleOrConfig) GetId() *MappingId {
+	if m == nil {
+		return nil
+	}
+	return m.Id
+}
+
+func (m *MappingRuleOrConfig) GetConfidence() *int {
+	if m == nil {
+		return nil
+	}
+	return m.Confidence
+}
+
+func (m *MappingRuleOrConfig) GetCreatedBy() *UserId {
+	if m == nil {
+		return nil
+	}
+	return m.CreatedBy
+}
+
+func (m *MappingRuleOrConfig) GetCreatedAt() *time.Time {
+	if m == nil {
+		return nil
+	}
+	return m.CreatedAt
+}
+
+func (m *MappingRuleOrConfig) GetUpdatedAt() *time.Time {
+	if m == nil {
+		return nil
+	}
+	return m.UpdatedAt
+}
+
+func (m *MappingRuleOrConfig) GetDeletedAt() *time.Time {
+	if m == nil {
+		return nil
+	}
+	return m.DeletedAt
 }
 
 func (m *MappingRuleOrConfig) GetExtraProperties() map[string]interface{} {
@@ -245,10 +445,10 @@ func (m *MappingRuleOrConfig) UnmarshalJSON(data []byte) error {
 	type embed MappingRuleOrConfig
 	var unmarshaler = struct {
 		embed
-		AcceptedAt *core.DateTime `json:"acceptedAt,omitempty"`
-		CreatedAt  *core.DateTime `json:"createdAt,omitempty"`
-		UpdatedAt  *core.DateTime `json:"updatedAt,omitempty"`
-		DeletedAt  *core.DateTime `json:"deletedAt,omitempty"`
+		AcceptedAt *internal.DateTime `json:"acceptedAt,omitempty"`
+		CreatedAt  *internal.DateTime `json:"createdAt,omitempty"`
+		UpdatedAt  *internal.DateTime `json:"updatedAt,omitempty"`
+		DeletedAt  *internal.DateTime `json:"deletedAt,omitempty"`
 	}{
 		embed: embed(*m),
 	}
@@ -260,14 +460,12 @@ func (m *MappingRuleOrConfig) UnmarshalJSON(data []byte) error {
 	m.CreatedAt = unmarshaler.CreatedAt.TimePtr()
 	m.UpdatedAt = unmarshaler.UpdatedAt.TimePtr()
 	m.DeletedAt = unmarshaler.DeletedAt.TimePtr()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *m)
+	extraProperties, err := internal.ExtractExtraProperties(data, *m)
 	if err != nil {
 		return err
 	}
 	m.extraProperties = extraProperties
-
-	m._rawJSON = json.RawMessage(data)
+	m.rawJSON = json.RawMessage(data)
 	return nil
 }
 
@@ -275,27 +473,27 @@ func (m *MappingRuleOrConfig) MarshalJSON() ([]byte, error) {
 	type embed MappingRuleOrConfig
 	var marshaler = struct {
 		embed
-		AcceptedAt *core.DateTime `json:"acceptedAt,omitempty"`
-		CreatedAt  *core.DateTime `json:"createdAt,omitempty"`
-		UpdatedAt  *core.DateTime `json:"updatedAt,omitempty"`
-		DeletedAt  *core.DateTime `json:"deletedAt,omitempty"`
+		AcceptedAt *internal.DateTime `json:"acceptedAt,omitempty"`
+		CreatedAt  *internal.DateTime `json:"createdAt,omitempty"`
+		UpdatedAt  *internal.DateTime `json:"updatedAt,omitempty"`
+		DeletedAt  *internal.DateTime `json:"deletedAt,omitempty"`
 	}{
 		embed:      embed(*m),
-		AcceptedAt: core.NewOptionalDateTime(m.AcceptedAt),
-		CreatedAt:  core.NewOptionalDateTime(m.CreatedAt),
-		UpdatedAt:  core.NewOptionalDateTime(m.UpdatedAt),
-		DeletedAt:  core.NewOptionalDateTime(m.DeletedAt),
+		AcceptedAt: internal.NewOptionalDateTime(m.AcceptedAt),
+		CreatedAt:  internal.NewOptionalDateTime(m.CreatedAt),
+		UpdatedAt:  internal.NewOptionalDateTime(m.UpdatedAt),
+		DeletedAt:  internal.NewOptionalDateTime(m.DeletedAt),
 	}
 	return json.Marshal(marshaler)
 }
 
 func (m *MappingRuleOrConfig) String() string {
-	if len(m._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(m._rawJSON); err == nil {
+	if len(m.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(m.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(m); err == nil {
+	if value, err := internal.StringifyJSON(m); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", m)
@@ -305,7 +503,14 @@ type MappingRuleResponse struct {
 	Data *MappingRule `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (m *MappingRuleResponse) GetData() *MappingRule {
+	if m == nil {
+		return nil
+	}
+	return m.Data
 }
 
 func (m *MappingRuleResponse) GetExtraProperties() map[string]interface{} {
@@ -319,24 +524,22 @@ func (m *MappingRuleResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*m = MappingRuleResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *m)
+	extraProperties, err := internal.ExtractExtraProperties(data, *m)
 	if err != nil {
 		return err
 	}
 	m.extraProperties = extraProperties
-
-	m._rawJSON = json.RawMessage(data)
+	m.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (m *MappingRuleResponse) String() string {
-	if len(m._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(m._rawJSON); err == nil {
+	if len(m.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(m.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(m); err == nil {
+	if value, err := internal.StringifyJSON(m); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", m)
@@ -346,7 +549,14 @@ type MappingRulesResponse struct {
 	Data []*MappingRule `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (m *MappingRulesResponse) GetData() []*MappingRule {
+	if m == nil {
+		return nil
+	}
+	return m.Data
 }
 
 func (m *MappingRulesResponse) GetExtraProperties() map[string]interface{} {
@@ -360,24 +570,22 @@ func (m *MappingRulesResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*m = MappingRulesResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *m)
+	extraProperties, err := internal.ExtractExtraProperties(data, *m)
 	if err != nil {
 		return err
 	}
 	m.extraProperties = extraProperties
-
-	m._rawJSON = json.RawMessage(data)
+	m.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (m *MappingRulesResponse) String() string {
-	if len(m._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(m._rawJSON); err == nil {
+	if len(m.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(m.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(m); err == nil {
+	if value, err := internal.StringifyJSON(m); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", m)
@@ -406,7 +614,77 @@ type Program struct {
 	AccessToken *string `json:"accessToken,omitempty" url:"accessToken,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (p *Program) GetRules() []*MappingRuleOrConfig {
+	if p == nil {
+		return nil
+	}
+	return p.Rules
+}
+
+func (p *Program) GetId() *string {
+	if p == nil {
+		return nil
+	}
+	return p.Id
+}
+
+func (p *Program) GetNamespace() *string {
+	if p == nil {
+		return nil
+	}
+	return p.Namespace
+}
+
+func (p *Program) GetFamilyId() *FamilyId {
+	if p == nil {
+		return nil
+	}
+	return p.FamilyId
+}
+
+func (p *Program) GetCreatedAt() *time.Time {
+	if p == nil {
+		return nil
+	}
+	return p.CreatedAt
+}
+
+func (p *Program) GetCreatedBy() *UserId {
+	if p == nil {
+		return nil
+	}
+	return p.CreatedBy
+}
+
+func (p *Program) GetSourceKeys() []string {
+	if p == nil {
+		return nil
+	}
+	return p.SourceKeys
+}
+
+func (p *Program) GetDestinationKeys() []string {
+	if p == nil {
+		return nil
+	}
+	return p.DestinationKeys
+}
+
+func (p *Program) GetSummary() *ProgramSummary {
+	if p == nil {
+		return nil
+	}
+	return p.Summary
+}
+
+func (p *Program) GetAccessToken() *string {
+	if p == nil {
+		return nil
+	}
+	return p.AccessToken
 }
 
 func (p *Program) GetExtraProperties() map[string]interface{} {
@@ -417,7 +695,7 @@ func (p *Program) UnmarshalJSON(data []byte) error {
 	type embed Program
 	var unmarshaler = struct {
 		embed
-		CreatedAt *core.DateTime `json:"createdAt,omitempty"`
+		CreatedAt *internal.DateTime `json:"createdAt,omitempty"`
 	}{
 		embed: embed(*p),
 	}
@@ -426,14 +704,12 @@ func (p *Program) UnmarshalJSON(data []byte) error {
 	}
 	*p = Program(unmarshaler.embed)
 	p.CreatedAt = unmarshaler.CreatedAt.TimePtr()
-
-	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	extraProperties, err := internal.ExtractExtraProperties(data, *p)
 	if err != nil {
 		return err
 	}
 	p.extraProperties = extraProperties
-
-	p._rawJSON = json.RawMessage(data)
+	p.rawJSON = json.RawMessage(data)
 	return nil
 }
 
@@ -441,21 +717,21 @@ func (p *Program) MarshalJSON() ([]byte, error) {
 	type embed Program
 	var marshaler = struct {
 		embed
-		CreatedAt *core.DateTime `json:"createdAt,omitempty"`
+		CreatedAt *internal.DateTime `json:"createdAt,omitempty"`
 	}{
 		embed:     embed(*p),
-		CreatedAt: core.NewOptionalDateTime(p.CreatedAt),
+		CreatedAt: internal.NewOptionalDateTime(p.CreatedAt),
 	}
 	return json.Marshal(marshaler)
 }
 
 func (p *Program) String() string {
-	if len(p._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+	if len(p.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(p.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(p); err == nil {
+	if value, err := internal.StringifyJSON(p); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", p)
@@ -474,7 +750,42 @@ type ProgramConfig struct {
 	Save *bool `json:"save,omitempty" url:"save,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (p *ProgramConfig) GetSource() *SheetConfig {
+	if p == nil {
+		return nil
+	}
+	return p.Source
+}
+
+func (p *ProgramConfig) GetDestination() *SheetConfig {
+	if p == nil {
+		return nil
+	}
+	return p.Destination
+}
+
+func (p *ProgramConfig) GetFamilyId() *FamilyId {
+	if p == nil {
+		return nil
+	}
+	return p.FamilyId
+}
+
+func (p *ProgramConfig) GetNamespace() *string {
+	if p == nil {
+		return nil
+	}
+	return p.Namespace
+}
+
+func (p *ProgramConfig) GetSave() *bool {
+	if p == nil {
+		return nil
+	}
+	return p.Save
 }
 
 func (p *ProgramConfig) GetExtraProperties() map[string]interface{} {
@@ -488,24 +799,22 @@ func (p *ProgramConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*p = ProgramConfig(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	extraProperties, err := internal.ExtractExtraProperties(data, *p)
 	if err != nil {
 		return err
 	}
 	p.extraProperties = extraProperties
-
-	p._rawJSON = json.RawMessage(data)
+	p.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (p *ProgramConfig) String() string {
-	if len(p._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+	if len(p.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(p.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(p); err == nil {
+	if value, err := internal.StringifyJSON(p); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", p)
@@ -515,7 +824,14 @@ type ProgramResponse struct {
 	Data *Program `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (p *ProgramResponse) GetData() *Program {
+	if p == nil {
+		return nil
+	}
+	return p.Data
 }
 
 func (p *ProgramResponse) GetExtraProperties() map[string]interface{} {
@@ -529,24 +845,22 @@ func (p *ProgramResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*p = ProgramResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	extraProperties, err := internal.ExtractExtraProperties(data, *p)
 	if err != nil {
 		return err
 	}
 	p.extraProperties = extraProperties
-
-	p._rawJSON = json.RawMessage(data)
+	p.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (p *ProgramResponse) String() string {
-	if len(p._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+	if len(p.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(p.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(p); err == nil {
+	if value, err := internal.StringifyJSON(p); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", p)
@@ -561,7 +875,28 @@ type ProgramSummary struct {
 	DeletedRuleCount int `json:"deletedRuleCount" url:"deletedRuleCount"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (p *ProgramSummary) GetTotalRuleCount() int {
+	if p == nil {
+		return 0
+	}
+	return p.TotalRuleCount
+}
+
+func (p *ProgramSummary) GetAddedRuleCount() int {
+	if p == nil {
+		return 0
+	}
+	return p.AddedRuleCount
+}
+
+func (p *ProgramSummary) GetDeletedRuleCount() int {
+	if p == nil {
+		return 0
+	}
+	return p.DeletedRuleCount
 }
 
 func (p *ProgramSummary) GetExtraProperties() map[string]interface{} {
@@ -575,24 +910,22 @@ func (p *ProgramSummary) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*p = ProgramSummary(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	extraProperties, err := internal.ExtractExtraProperties(data, *p)
 	if err != nil {
 		return err
 	}
 	p.extraProperties = extraProperties
-
-	p._rawJSON = json.RawMessage(data)
+	p.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (p *ProgramSummary) String() string {
-	if len(p._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+	if len(p.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(p.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(p); err == nil {
+	if value, err := internal.StringifyJSON(p); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", p)
@@ -602,7 +935,14 @@ type ProgramsResponse struct {
 	Data []*Program `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (p *ProgramsResponse) GetData() []*Program {
+	if p == nil {
+		return nil
+	}
+	return p.Data
 }
 
 func (p *ProgramsResponse) GetExtraProperties() map[string]interface{} {
@@ -616,24 +956,22 @@ func (p *ProgramsResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*p = ProgramsResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	extraProperties, err := internal.ExtractExtraProperties(data, *p)
 	if err != nil {
 		return err
 	}
 	p.extraProperties = extraProperties
-
-	p._rawJSON = json.RawMessage(data)
+	p.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (p *ProgramsResponse) String() string {
-	if len(p._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+	if len(p.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(p.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(p); err == nil {
+	if value, err := internal.StringifyJSON(p); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", p)

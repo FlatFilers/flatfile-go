@@ -5,7 +5,7 @@ package api
 import (
 	json "encoding/json"
 	fmt "fmt"
-	core "github.com/FlatFilers/flatfile-go/core"
+	internal "github.com/FlatFilers/flatfile-go/internal"
 )
 
 type ListViewsRequest struct {
@@ -17,15 +17,26 @@ type ListViewsRequest struct {
 	PageNumber *int `json:"-" url:"pageNumber,omitempty"`
 }
 
-// View ID
-type ViewId = string
-
 type ListViewsResponse struct {
 	Pagination *Pagination `json:"pagination,omitempty" url:"pagination,omitempty"`
 	Data       []*View     `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (l *ListViewsResponse) GetPagination() *Pagination {
+	if l == nil {
+		return nil
+	}
+	return l.Pagination
+}
+
+func (l *ListViewsResponse) GetData() []*View {
+	if l == nil {
+		return nil
+	}
+	return l.Data
 }
 
 func (l *ListViewsResponse) GetExtraProperties() map[string]interface{} {
@@ -39,24 +50,22 @@ func (l *ListViewsResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*l = ListViewsResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *l)
+	extraProperties, err := internal.ExtractExtraProperties(data, *l)
 	if err != nil {
 		return err
 	}
 	l.extraProperties = extraProperties
-
-	l._rawJSON = json.RawMessage(data)
+	l.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (l *ListViewsResponse) String() string {
-	if len(l._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(l._rawJSON); err == nil {
+	if len(l.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(l.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(l); err == nil {
+	if value, err := internal.StringifyJSON(l); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", l)
@@ -76,7 +85,42 @@ type View struct {
 	CreatedBy string `json:"createdBy" url:"createdBy"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (v *View) GetId() ViewId {
+	if v == nil {
+		return ""
+	}
+	return v.Id
+}
+
+func (v *View) GetSheetId() SheetId {
+	if v == nil {
+		return ""
+	}
+	return v.SheetId
+}
+
+func (v *View) GetName() string {
+	if v == nil {
+		return ""
+	}
+	return v.Name
+}
+
+func (v *View) GetConfig() *ViewConfig {
+	if v == nil {
+		return nil
+	}
+	return v.Config
+}
+
+func (v *View) GetCreatedBy() string {
+	if v == nil {
+		return ""
+	}
+	return v.CreatedBy
 }
 
 func (v *View) GetExtraProperties() map[string]interface{} {
@@ -90,24 +134,22 @@ func (v *View) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*v = View(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *v)
+	extraProperties, err := internal.ExtractExtraProperties(data, *v)
 	if err != nil {
 		return err
 	}
 	v.extraProperties = extraProperties
-
-	v._rawJSON = json.RawMessage(data)
+	v.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (v *View) String() string {
-	if len(v._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(v._rawJSON); err == nil {
+	if len(v.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(v.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(v); err == nil {
+	if value, err := internal.StringifyJSON(v); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", v)
@@ -148,7 +190,140 @@ type ViewConfig struct {
 	Q *string `json:"q,omitempty" url:"q,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (v *ViewConfig) GetVersionId() *VersionId {
+	if v == nil {
+		return nil
+	}
+	return v.VersionId
+}
+
+func (v *ViewConfig) GetCommitId() *CommitId {
+	if v == nil {
+		return nil
+	}
+	return v.CommitId
+}
+
+func (v *ViewConfig) GetSinceVersionId() *VersionId {
+	if v == nil {
+		return nil
+	}
+	return v.SinceVersionId
+}
+
+func (v *ViewConfig) GetSinceCommitId() *CommitId {
+	if v == nil {
+		return nil
+	}
+	return v.SinceCommitId
+}
+
+func (v *ViewConfig) GetSortField() *SortField {
+	if v == nil {
+		return nil
+	}
+	return v.SortField
+}
+
+func (v *ViewConfig) GetSortDirection() *SortDirection {
+	if v == nil {
+		return nil
+	}
+	return v.SortDirection
+}
+
+func (v *ViewConfig) GetFilter() *Filter {
+	if v == nil {
+		return nil
+	}
+	return v.Filter
+}
+
+func (v *ViewConfig) GetFilterField() *FilterField {
+	if v == nil {
+		return nil
+	}
+	return v.FilterField
+}
+
+func (v *ViewConfig) GetSearchValue() *SearchValue {
+	if v == nil {
+		return nil
+	}
+	return v.SearchValue
+}
+
+func (v *ViewConfig) GetSearchField() *SearchField {
+	if v == nil {
+		return nil
+	}
+	return v.SearchField
+}
+
+func (v *ViewConfig) GetIds() []RecordId {
+	if v == nil {
+		return nil
+	}
+	return v.Ids
+}
+
+func (v *ViewConfig) GetPageSize() *int {
+	if v == nil {
+		return nil
+	}
+	return v.PageSize
+}
+
+func (v *ViewConfig) GetPageNumber() *int {
+	if v == nil {
+		return nil
+	}
+	return v.PageNumber
+}
+
+func (v *ViewConfig) GetIncludeCounts() *bool {
+	if v == nil {
+		return nil
+	}
+	return v.IncludeCounts
+}
+
+func (v *ViewConfig) GetIncludeLength() *bool {
+	if v == nil {
+		return nil
+	}
+	return v.IncludeLength
+}
+
+func (v *ViewConfig) GetIncludeLinks() *bool {
+	if v == nil {
+		return nil
+	}
+	return v.IncludeLinks
+}
+
+func (v *ViewConfig) GetIncludeMessages() *bool {
+	if v == nil {
+		return nil
+	}
+	return v.IncludeMessages
+}
+
+func (v *ViewConfig) GetFor() *EventId {
+	if v == nil {
+		return nil
+	}
+	return v.For
+}
+
+func (v *ViewConfig) GetQ() *string {
+	if v == nil {
+		return nil
+	}
+	return v.Q
 }
 
 func (v *ViewConfig) GetExtraProperties() map[string]interface{} {
@@ -162,24 +337,22 @@ func (v *ViewConfig) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*v = ViewConfig(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *v)
+	extraProperties, err := internal.ExtractExtraProperties(data, *v)
 	if err != nil {
 		return err
 	}
 	v.extraProperties = extraProperties
-
-	v._rawJSON = json.RawMessage(data)
+	v.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (v *ViewConfig) String() string {
-	if len(v._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(v._rawJSON); err == nil {
+	if len(v.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(v.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(v); err == nil {
+	if value, err := internal.StringifyJSON(v); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", v)
@@ -191,7 +364,28 @@ type ViewCreate struct {
 	Config  *ViewConfig `json:"config,omitempty" url:"config,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (v *ViewCreate) GetSheetId() SheetId {
+	if v == nil {
+		return ""
+	}
+	return v.SheetId
+}
+
+func (v *ViewCreate) GetName() string {
+	if v == nil {
+		return ""
+	}
+	return v.Name
+}
+
+func (v *ViewCreate) GetConfig() *ViewConfig {
+	if v == nil {
+		return nil
+	}
+	return v.Config
 }
 
 func (v *ViewCreate) GetExtraProperties() map[string]interface{} {
@@ -205,24 +399,22 @@ func (v *ViewCreate) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*v = ViewCreate(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *v)
+	extraProperties, err := internal.ExtractExtraProperties(data, *v)
 	if err != nil {
 		return err
 	}
 	v.extraProperties = extraProperties
-
-	v._rawJSON = json.RawMessage(data)
+	v.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (v *ViewCreate) String() string {
-	if len(v._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(v._rawJSON); err == nil {
+	if len(v.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(v.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(v); err == nil {
+	if value, err := internal.StringifyJSON(v); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", v)
@@ -232,7 +424,14 @@ type ViewResponse struct {
 	Data *View `json:"data,omitempty" url:"data,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (v *ViewResponse) GetData() *View {
+	if v == nil {
+		return nil
+	}
+	return v.Data
 }
 
 func (v *ViewResponse) GetExtraProperties() map[string]interface{} {
@@ -246,24 +445,22 @@ func (v *ViewResponse) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*v = ViewResponse(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *v)
+	extraProperties, err := internal.ExtractExtraProperties(data, *v)
 	if err != nil {
 		return err
 	}
 	v.extraProperties = extraProperties
-
-	v._rawJSON = json.RawMessage(data)
+	v.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (v *ViewResponse) String() string {
-	if len(v._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(v._rawJSON); err == nil {
+	if len(v.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(v.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(v); err == nil {
+	if value, err := internal.StringifyJSON(v); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", v)
@@ -274,7 +471,21 @@ type ViewUpdate struct {
 	Config *ViewConfig `json:"config,omitempty" url:"config,omitempty"`
 
 	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
+	rawJSON         json.RawMessage
+}
+
+func (v *ViewUpdate) GetName() *string {
+	if v == nil {
+		return nil
+	}
+	return v.Name
+}
+
+func (v *ViewUpdate) GetConfig() *ViewConfig {
+	if v == nil {
+		return nil
+	}
+	return v.Config
 }
 
 func (v *ViewUpdate) GetExtraProperties() map[string]interface{} {
@@ -288,24 +499,22 @@ func (v *ViewUpdate) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*v = ViewUpdate(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *v)
+	extraProperties, err := internal.ExtractExtraProperties(data, *v)
 	if err != nil {
 		return err
 	}
 	v.extraProperties = extraProperties
-
-	v._rawJSON = json.RawMessage(data)
+	v.rawJSON = json.RawMessage(data)
 	return nil
 }
 
 func (v *ViewUpdate) String() string {
-	if len(v._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(v._rawJSON); err == nil {
+	if len(v.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(v.rawJSON); err == nil {
 			return value
 		}
 	}
-	if value, err := core.StringifyJSON(v); err == nil {
+	if value, err := internal.StringifyJSON(v); err == nil {
 		return value
 	}
 	return fmt.Sprintf("%#v", v)
