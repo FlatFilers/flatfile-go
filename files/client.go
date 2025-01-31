@@ -5,13 +5,12 @@ package files
 import (
 	bytes "bytes"
 	context "context"
-	io "io"
-	http "net/http"
-
 	flatfilego "github.com/FlatFilers/flatfile-go"
 	core "github.com/FlatFilers/flatfile-go/core"
 	internal "github.com/FlatFilers/flatfile-go/internal"
 	option "github.com/FlatFilers/flatfile-go/option"
+	io "io"
+	http "net/http"
 )
 
 type Client struct {
@@ -105,14 +104,14 @@ func (c *Client) Upload(
 	if err := writer.WriteFile("file", file); err != nil {
 		return nil, err
 	}
-	if err := writer.WriteField("spaceId", request.SpaceId); err != nil {
+	if err := writer.WriteJSON("spaceId", request.SpaceId); err != nil {
 		return nil, err
 	}
-	if err := writer.WriteField("environmentId", request.EnvironmentId); err != nil {
+	if err := writer.WriteJSON("environmentId", request.EnvironmentId); err != nil {
 		return nil, err
 	}
 	if request.Mode != nil {
-		if err := writer.WriteField("mode", string(*request.Mode)); err != nil {
+		if err := writer.WriteJSON("mode", *request.Mode); err != nil {
 			return nil, err
 		}
 	}
@@ -122,7 +121,7 @@ func (c *Client) Upload(
 		}
 	}
 	if request.Origin != nil {
-		if err := writer.WriteField("origin", string(*request.Origin)); err != nil {
+		if err := writer.WriteJSON("origin", *request.Origin); err != nil {
 			return nil, err
 		}
 	}
