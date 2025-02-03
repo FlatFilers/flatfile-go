@@ -268,6 +268,219 @@ func (a *ApiAction) String() string {
 	return fmt.Sprintf("%#v", a)
 }
 
+type ApiActionConfig struct {
+	// **This is deprecated. Use `operation` instead.**
+	Slug *string `json:"slug,omitempty" url:"slug,omitempty"`
+	// This will become the job operation that is triggered
+	Operation *string `json:"operation,omitempty" url:"operation,omitempty"`
+	// Foreground and toolbarBlocking action mode will prevent interacting with the resource until complete
+	Mode *ActionMode `json:"mode,omitempty" url:"mode,omitempty"`
+	// A tooltip that appears when hovering the action button
+	Tooltip  *string          `json:"tooltip,omitempty" url:"tooltip,omitempty"`
+	Messages []*ActionMessage `json:"messages,omitempty" url:"messages,omitempty"`
+	// **This is deprecated.**
+	Type *string `json:"type,omitempty" url:"type,omitempty"`
+	// The text that appears in the dialog after the action is clicked.
+	Description *string `json:"description,omitempty" url:"description,omitempty"`
+	// Determines if the action should happen on a regular cadence.
+	Schedule *ActionSchedule `json:"schedule,omitempty" url:"schedule,omitempty"`
+	// A primary action will be more visibly present, whether in Sheet or Workbook.
+	Primary *bool `json:"primary,omitempty" url:"primary,omitempty"`
+	// Whether to show a modal to confirm the action
+	Confirm *bool `json:"confirm,omitempty" url:"confirm,omitempty"`
+	// Icon will work on primary actions. It will only accept an already existing Flatfile design system icon.
+	Icon *string `json:"icon,omitempty" url:"icon,omitempty"`
+	// **This is deprecated. Use `constraints` instead.**
+	RequireAllValid *bool `json:"requireAllValid,omitempty" url:"requireAllValid,omitempty"`
+	// **This is deprecated. Use `constraints` instead.**
+	RequireSelection *bool `json:"requireSelection,omitempty" url:"requireSelection,omitempty"`
+	// Adds an input form for this action after it is clicked.
+	InputForm *InputForm `json:"inputForm,omitempty" url:"inputForm,omitempty"`
+	// A limitation or restriction on the action.
+	Constraints []*ActionConstraint `json:"constraints,omitempty" url:"constraints,omitempty"`
+	Mount       *ActionMount        `json:"mount,omitempty" url:"mount,omitempty"`
+	Guide       *Guide              `json:"guide,omitempty" url:"guide,omitempty"`
+	Guardrail   *Guardrail          `json:"guardrail,omitempty" url:"guardrail,omitempty"`
+	// The text on the Button itself
+	Label    string `json:"label" url:"label"`
+	TargetId string `json:"targetId" url:"targetId"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (a *ApiActionConfig) GetSlug() *string {
+	if a == nil {
+		return nil
+	}
+	return a.Slug
+}
+
+func (a *ApiActionConfig) GetOperation() *string {
+	if a == nil {
+		return nil
+	}
+	return a.Operation
+}
+
+func (a *ApiActionConfig) GetMode() *ActionMode {
+	if a == nil {
+		return nil
+	}
+	return a.Mode
+}
+
+func (a *ApiActionConfig) GetTooltip() *string {
+	if a == nil {
+		return nil
+	}
+	return a.Tooltip
+}
+
+func (a *ApiActionConfig) GetMessages() []*ActionMessage {
+	if a == nil {
+		return nil
+	}
+	return a.Messages
+}
+
+func (a *ApiActionConfig) GetType() *string {
+	if a == nil {
+		return nil
+	}
+	return a.Type
+}
+
+func (a *ApiActionConfig) GetDescription() *string {
+	if a == nil {
+		return nil
+	}
+	return a.Description
+}
+
+func (a *ApiActionConfig) GetSchedule() *ActionSchedule {
+	if a == nil {
+		return nil
+	}
+	return a.Schedule
+}
+
+func (a *ApiActionConfig) GetPrimary() *bool {
+	if a == nil {
+		return nil
+	}
+	return a.Primary
+}
+
+func (a *ApiActionConfig) GetConfirm() *bool {
+	if a == nil {
+		return nil
+	}
+	return a.Confirm
+}
+
+func (a *ApiActionConfig) GetIcon() *string {
+	if a == nil {
+		return nil
+	}
+	return a.Icon
+}
+
+func (a *ApiActionConfig) GetRequireAllValid() *bool {
+	if a == nil {
+		return nil
+	}
+	return a.RequireAllValid
+}
+
+func (a *ApiActionConfig) GetRequireSelection() *bool {
+	if a == nil {
+		return nil
+	}
+	return a.RequireSelection
+}
+
+func (a *ApiActionConfig) GetInputForm() *InputForm {
+	if a == nil {
+		return nil
+	}
+	return a.InputForm
+}
+
+func (a *ApiActionConfig) GetConstraints() []*ActionConstraint {
+	if a == nil {
+		return nil
+	}
+	return a.Constraints
+}
+
+func (a *ApiActionConfig) GetMount() *ActionMount {
+	if a == nil {
+		return nil
+	}
+	return a.Mount
+}
+
+func (a *ApiActionConfig) GetGuide() *Guide {
+	if a == nil {
+		return nil
+	}
+	return a.Guide
+}
+
+func (a *ApiActionConfig) GetGuardrail() *Guardrail {
+	if a == nil {
+		return nil
+	}
+	return a.Guardrail
+}
+
+func (a *ApiActionConfig) GetLabel() string {
+	if a == nil {
+		return ""
+	}
+	return a.Label
+}
+
+func (a *ApiActionConfig) GetTargetId() string {
+	if a == nil {
+		return ""
+	}
+	return a.TargetId
+}
+
+func (a *ApiActionConfig) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *ApiActionConfig) UnmarshalJSON(data []byte) error {
+	type unmarshaler ApiActionConfig
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*a = ApiActionConfig(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+	a.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (a *ApiActionConfig) String() string {
+	if len(a.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(a.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
 // Account ID
 type AccountId = string
 

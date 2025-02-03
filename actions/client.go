@@ -33,9 +33,9 @@ func NewClient(opts ...option.RequestOption) *Client {
 
 func (c *Client) Create(
 	ctx context.Context,
-	request *flatfilego.Action,
+	request *flatfilego.ActionCreateRequest,
 	opts ...option.RequestOption,
-) (flatfilego.ActionResponse, error) {
+) (flatfilego.ApiActionResponse, error) {
 	options := core.NewRequestOptions(opts...)
 	baseURL := internal.ResolveBaseURL(
 		options.BaseURL,
@@ -43,12 +43,19 @@ func (c *Client) Create(
 		"https://api.x.flatfile.com/v1",
 	)
 	endpointURL := baseURL + "/actions"
+	queryParams, err := internal.QueryValues(request)
+	if err != nil {
+		return nil, err
+	}
+	if len(queryParams) > 0 {
+		endpointURL += "?" + queryParams.Encode()
+	}
 	headers := internal.MergeHeaders(
 		c.header.Clone(),
 		options.ToHeader(),
 	)
 
-	var response flatfilego.ActionResponse
+	var response flatfilego.ApiActionResponse
 	if err := c.caller.Call(
 		ctx,
 		&internal.CallParams{
@@ -70,9 +77,9 @@ func (c *Client) Create(
 
 func (c *Client) BulkCreate(
 	ctx context.Context,
-	request flatfilego.Actions,
+	request *flatfilego.ActionsBulkCreateRequest,
 	opts ...option.RequestOption,
-) (flatfilego.ActionsResponse, error) {
+) (flatfilego.ApiActionsResponse, error) {
 	options := core.NewRequestOptions(opts...)
 	baseURL := internal.ResolveBaseURL(
 		options.BaseURL,
@@ -80,12 +87,19 @@ func (c *Client) BulkCreate(
 		"https://api.x.flatfile.com/v1",
 	)
 	endpointURL := baseURL + "/actions/bulk"
+	queryParams, err := internal.QueryValues(request)
+	if err != nil {
+		return nil, err
+	}
+	if len(queryParams) > 0 {
+		endpointURL += "?" + queryParams.Encode()
+	}
 	headers := internal.MergeHeaders(
 		c.header.Clone(),
 		options.ToHeader(),
 	)
 
-	var response flatfilego.ActionsResponse
+	var response flatfilego.ApiActionsResponse
 	if err := c.caller.Call(
 		ctx,
 		&internal.CallParams{
@@ -105,12 +119,55 @@ func (c *Client) BulkCreate(
 	return response, nil
 }
 
+func (c *Client) GetAll(
+	ctx context.Context,
+	request *flatfilego.GetActionsRequest,
+	opts ...option.RequestOption,
+) (flatfilego.ApiActionsResponse, error) {
+	options := core.NewRequestOptions(opts...)
+	baseURL := internal.ResolveBaseURL(
+		options.BaseURL,
+		c.baseURL,
+		"https://api.x.flatfile.com/v1",
+	)
+	endpointURL := baseURL + "/actions"
+	queryParams, err := internal.QueryValues(request)
+	if err != nil {
+		return nil, err
+	}
+	if len(queryParams) > 0 {
+		endpointURL += "?" + queryParams.Encode()
+	}
+	headers := internal.MergeHeaders(
+		c.header.Clone(),
+		options.ToHeader(),
+	)
+
+	var response flatfilego.ApiActionsResponse
+	if err := c.caller.Call(
+		ctx,
+		&internal.CallParams{
+			URL:             endpointURL,
+			Method:          http.MethodGet,
+			Headers:         headers,
+			MaxAttempts:     options.MaxAttempts,
+			BodyProperties:  options.BodyProperties,
+			QueryParameters: options.QueryParameters,
+			Client:          options.HTTPClient,
+			Response:        &response,
+		},
+	); err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
 func (c *Client) Get(
 	ctx context.Context,
 	// The id of the action to return
 	actionId flatfilego.ActionId,
 	opts ...option.RequestOption,
-) (flatfilego.ActionResponse, error) {
+) (flatfilego.ApiActionResponse, error) {
 	options := core.NewRequestOptions(opts...)
 	baseURL := internal.ResolveBaseURL(
 		options.BaseURL,
@@ -126,7 +183,7 @@ func (c *Client) Get(
 		options.ToHeader(),
 	)
 
-	var response flatfilego.ActionResponse
+	var response flatfilego.ApiActionResponse
 	if err := c.caller.Call(
 		ctx,
 		&internal.CallParams{
@@ -151,7 +208,7 @@ func (c *Client) Update(
 	actionId flatfilego.ActionId,
 	request *flatfilego.ActionUpdate,
 	opts ...option.RequestOption,
-) (flatfilego.ActionResponse, error) {
+) (flatfilego.ApiActionResponse, error) {
 	options := core.NewRequestOptions(opts...)
 	baseURL := internal.ResolveBaseURL(
 		options.BaseURL,
@@ -167,7 +224,7 @@ func (c *Client) Update(
 		options.ToHeader(),
 	)
 
-	var response flatfilego.ActionResponse
+	var response flatfilego.ApiActionResponse
 	if err := c.caller.Call(
 		ctx,
 		&internal.CallParams{

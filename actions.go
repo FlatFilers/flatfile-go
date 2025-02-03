@@ -2,8 +2,55 @@
 
 package api
 
-type ActionResponse = *ApiAction
+import (
+	json "encoding/json"
+)
 
-type Actions = []*Action
+type ActionsBulkCreateRequest struct {
+	// The Space ID for which to create the Actions.
+	SpaceId SpaceId          `json:"-" url:"spaceId"`
+	Body    ApiActionConfigs `json:"-" url:"-"`
+}
 
-type ActionsResponse = []*ApiAction
+func (a *ActionsBulkCreateRequest) UnmarshalJSON(data []byte) error {
+	var body ApiActionConfigs
+	if err := json.Unmarshal(data, &body); err != nil {
+		return err
+	}
+	a.Body = body
+	return nil
+}
+
+func (a *ActionsBulkCreateRequest) MarshalJSON() ([]byte, error) {
+	return json.Marshal(a.Body)
+}
+
+type ActionCreateRequest struct {
+	// The Space ID for which to create the Action.
+	SpaceId SpaceId          `json:"-" url:"spaceId"`
+	Body    *ApiActionConfig `json:"-" url:"-"`
+}
+
+func (a *ActionCreateRequest) UnmarshalJSON(data []byte) error {
+	body := new(ApiActionConfig)
+	if err := json.Unmarshal(data, &body); err != nil {
+		return err
+	}
+	a.Body = body
+	return nil
+}
+
+func (a *ActionCreateRequest) MarshalJSON() ([]byte, error) {
+	return json.Marshal(a.Body)
+}
+
+type GetActionsRequest struct {
+	// The Space ID for which to get the Actions.
+	SpaceId SpaceId `json:"-" url:"spaceId"`
+}
+
+type ApiActionConfigs = []*ApiActionConfig
+
+type ApiActionResponse = *ApiAction
+
+type ApiActionsResponse = []*ApiAction
