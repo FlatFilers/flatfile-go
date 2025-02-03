@@ -5,3 +5,5 @@ tests
 
 # Temporary workaround due to audience filtering.
 data_clip_id.go
+
+files/client.go
